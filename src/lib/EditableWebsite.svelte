@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { client, login } from '$lib/oauth/auth.svelte.js';
 
-	import { Navbar, Button, toast, Toaster } from '@foxui/core';
+	import { Navbar, Button, toast, Toaster, Toggle } from '@foxui/core';
 	import { BlueskyLogin } from '@foxui/social';
 
 	import { margin } from '$lib';
-	import { cardsEqual, clamp, fixCollisions, overlaps, setPositionOfNewItem } from './helper';
+	import { cardsEqual, clamp, fixCollisions, setIsMobile, setPositionOfNewItem } from './helper';
 	import Profile from './Profile.svelte';
 	import type { Item } from './types';
 	import { deleteRecord, putRecord } from './oauth/atproto';
@@ -46,7 +46,10 @@
 		mouseDeltaY: 0
 	});
 
-	let isMobile = $derived((innerWidth.current ?? 1000) < 1024);
+	let showingMobileView = $state(false);
+	let isMobile = $derived(showingMobileView || (innerWidth.current ?? 1000) < 1024);
+
+	setIsMobile(() => isMobile);
 
 	const getX = (item: Item) => (isMobile ? (item.mobileX ?? item.x) : item.x);
 	const getY = (item: Item) => (isMobile ? (item.mobileY ?? item.y) : item.y);
@@ -80,126 +83,141 @@
 	let isSaving = $state(false);
 </script>
 
-<Profile {handle} {did} {data} />
+<div class="fixed inset-0 h-full w-full lg:hidden bg-base-800 z-50 inline-flex items-center justify-center p-4 text-center">
+	Editing on mobile is not supported yet. Please use a desktop browser.
+</div>
 
-<div class="mx-auto max-w-2xl lg:grid lg:max-w-none lg:grid-cols-4 xl:grid-cols-3">
-	<div></div>
-	<!-- svelte-ignore a11y_no_static_element_interactions -->
+{#if showingMobileView}
+<div class="pointer-events-none fixed inset-0 h-full w-full bg-base-900 -z-10"></div>
+{/if}
+<div
+	class={[
+		'@container/wrapper relative w-screen',
+		showingMobileView ? 'lg:mx-auto lg:w-[500px] bg-base-950 my-4 rounded-2xl h-[calc(100dhv-2em)]' : ''
+	]}
+>
+	<Profile {handle} {did} {data} />
+
 	<div
-		bind:this={container}
-		ondragover={(e) => {
-			e.preventDefault();
-			if (!container) return;
+		class="mx-auto max-w-2xl @5xl/wrapper:grid @5xl/wrapper:max-w-none @5xl/wrapper:grid-cols-4 @7xl/wrapper:grid-cols-3"
+	>
+		<div></div>
+		<!-- svelte-ignore a11y_no_static_element_interactions -->
+		<div
+			bind:this={container}
+			ondragover={(e) => {
+				e.preventDefault();
+				if (!container) return;
 
-			const x = e.clientX + activeDragElement.mouseDeltaX;
-			const y = e.clientY + activeDragElement.mouseDeltaY;
-			const rect = container.getBoundingClientRect();
+				const x = e.clientX + activeDragElement.mouseDeltaX;
+				const y = e.clientY + activeDragElement.mouseDeltaY;
+				const rect = container.getBoundingClientRect();
 
-			let gridX = clamp(
-				Math.floor(((x - rect.left) / rect.width) * 4),
-				0,
-				4 - (activeDragElement.w ?? 0)
-			);
-			let gridY = Math.max(Math.floor(((y - rect.top) / rect.width) * 4), 0);
-			if (isMobile) {
-				gridX = Math.floor(gridX / 2) * 2;
-				gridY = Math.floor(gridY / 2) * 2;
-			}
-
-			activeDragElement.x = gridX;
-			activeDragElement.y = gridY;
-		}}
-		ondragend={async (e) => {
-			e.preventDefault();
-			if (!container) return;
-
-			const x = e.clientX + activeDragElement.mouseDeltaX;
-			const y = e.clientY + activeDragElement.mouseDeltaY;
-			const rect = container.getBoundingClientRect();
-
-			let gridX = clamp(
-				Math.floor(((x - rect.left) / rect.width) * 4),
-				0,
-				4 - (activeDragElement.w ?? 0)
-			);
-			let gridY = Math.max(Math.floor(((y - rect.top) / rect.width) * 4), 0);
-			if (isMobile) {
-				gridX = Math.floor(gridX / 2) * 2;
-				gridY = Math.floor(gridY / 2) * 2;
-			}
-
-			if (activeDragElement.item) {
+				let gridX = clamp(
+					Math.floor(((x - rect.left) / rect.width) * 4),
+					0,
+					4 - (activeDragElement.w ?? 0)
+				);
+				let gridY = Math.max(Math.floor(((y - rect.top) / rect.width) * 4), 0);
 				if (isMobile) {
-					activeDragElement.item.mobileX = gridX;
-					activeDragElement.item.mobileY = gridY;
-				} else {
-					activeDragElement.item.x = gridX;
-					activeDragElement.item.y = gridY;
+					gridX = Math.floor(gridX / 2) * 2;
+					gridY = Math.floor(gridY / 2) * 2;
 				}
 
-				fixCollisions(items, activeDragElement.item, isMobile);
-			}
-			activeDragElement.x = -1;
-			activeDragElement.y = -1;
-			activeDragElement.element = null;
-			return true;
-		}}
-		class="relative col-span-3 px-2 py-8 lg:px-8 xl:col-span-2"
-		style="container-type: inline-size;"
-	>
-		{#each items as item, i}
-			<EditingCard
-				ondragstart={(e) => {
-					const target = e.target as HTMLDivElement;
-					activeDragElement.element = target;
-					activeDragElement.w = item.w;
-					activeDragElement.h = item.h;
-					activeDragElement.item = item;
+				activeDragElement.x = gridX;
+				activeDragElement.y = gridY;
+			}}
+			ondragend={async (e) => {
+				e.preventDefault();
+				if (!container) return;
 
-					const rect = target.getBoundingClientRect();
-					activeDragElement.mouseDeltaX = rect.left + margin - e.clientX;
-					activeDragElement.mouseDeltaY = rect.top - e.clientY;
-				}}
-				bind:item={items[i]}
-				ondelete={() => {
-					items = items.filter((it) => it !== item);
-				}}
-				onsetsize={(newW: number, newH: number) => {
+				const x = e.clientX + activeDragElement.mouseDeltaX;
+				const y = e.clientY + activeDragElement.mouseDeltaY;
+				const rect = container.getBoundingClientRect();
+
+				let gridX = clamp(
+					Math.floor(((x - rect.left) / rect.width) * 4),
+					0,
+					4 - (activeDragElement.w ?? 0)
+				);
+				let gridY = Math.max(Math.floor(((y - rect.top) / rect.width) * 4), 0);
+				if (isMobile) {
+					gridX = Math.floor(gridX / 2) * 2;
+					gridY = Math.floor(gridY / 2) * 2;
+				}
+
+				if (activeDragElement.item) {
 					if (isMobile) {
-						item.mobileW = newW * 2;
-						item.mobileH = newH * 2;
+						activeDragElement.item.mobileX = gridX;
+						activeDragElement.item.mobileY = gridY;
 					} else {
-						item.w = newW;
-						item.h = newH;
+						activeDragElement.item.x = gridX;
+						activeDragElement.item.y = gridY;
 					}
 
-					fixCollisions(items, item, isMobile);
-				}}
-				onshowsettings={() => {
-					toast('No settings available for this card yet.', {
-						description: 'More settings will be added in the future.'
-					});
-				}}
-			/>
-		{/each}
+					fixCollisions(items, activeDragElement.item, isMobile);
+				}
+				activeDragElement.x = -1;
+				activeDragElement.y = -1;
+				activeDragElement.element = null;
+				return true;
+			}}
+			class="@container/grid relative col-span-3 px-2 py-8 @5xl/wrapper:px-8 @7xl/wrapper:col-span-2"
+		>
+			{#each items as item, i}
+				<EditingCard
+					ondragstart={(e) => {
+						const target = e.target as HTMLDivElement;
+						activeDragElement.element = target;
+						activeDragElement.w = item.w;
+						activeDragElement.h = item.h;
+						activeDragElement.item = item;
 
-		{#if activeDragElement.element && activeDragElement.x >= 0 && activeDragElement.item}
-			{@const item = activeDragElement}
-			<div
-				class={['bg-base-500/10 absolute aspect-square rounded-2xl']}
-				style={`translate: calc(${(item.x / 4) * 100}cqw + ${margin / 2}px) calc(${(item.y / 4) * 100}cqw + ${margin / 2}px); 
+						const rect = target.getBoundingClientRect();
+						activeDragElement.mouseDeltaX = rect.left + margin - e.clientX;
+						activeDragElement.mouseDeltaY = rect.top - e.clientY;
+					}}
+					bind:item={items[i]}
+					ondelete={() => {
+						items = items.filter((it) => it !== item);
+					}}
+					onsetsize={(newW: number, newH: number) => {
+						if (isMobile) {
+							item.mobileW = newW * 2;
+							item.mobileH = newH * 2;
+						} else {
+							item.w = newW;
+							item.h = newH;
+						}
+
+						fixCollisions(items, item, isMobile);
+					}}
+					onshowsettings={() => {
+						toast('No settings available for this card yet.', {
+							description: 'More settings will be added in the future.'
+						});
+					}}
+				/>
+			{/each}
+
+			{#if activeDragElement.element && activeDragElement.x >= 0 && activeDragElement.item}
+				{@const item = activeDragElement}
+				<div
+					class={['bg-base-500/10 absolute aspect-square rounded-2xl']}
+					style={`translate: calc(${(item.x / 4) * 100}cqw + ${margin / 2}px) calc(${(item.y / 4) * 100}cqw + ${margin / 2}px); 
                 
                 width: calc(${(getW(activeDragElement.item) / 4) * 100}cqw - ${margin}px);
                 height: calc(${(getH(activeDragElement.item) / 4) * 100}cqw - ${margin}px);`}
-			></div>
-		{/if}
-		<div style="height: {((maxHeight + 1) / 4) * 100}cqw;"></div>
+				></div>
+			{/if}
+			<div style="height: {((maxHeight + 1) / 4) * 100}cqw;"></div>
+		</div>
 	</div>
 </div>
 
 {#if (!client.isLoggedIn && !client.isInitializing) || client.profile?.did === did}
 	<Navbar
-		class="dark:bg-base-900 bg-base-100 top-auto bottom-2 mx-4 mt-3 max-w-3xl rounded-full px-4 lg:mx-auto"
+		class="hidden lg:inline-flex dark:bg-base-900 bg-base-100 top-auto bottom-2 mx-4 mt-3 max-w-3xl rounded-full px-4 md:mx-auto"
 	>
 		<div class="flex items-center gap-2">
 			<Button
@@ -268,6 +286,25 @@
 			</Button>
 		</div>
 		<div class="flex items-center gap-2">
+			<Toggle
+				class="hidden bg-transparent backdrop-blur-none lg:block dark:bg-transparent"
+				bind:pressed={showingMobileView}
+			>
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					fill="none"
+					viewBox="0 0 24 24"
+					stroke-width="1.5"
+					stroke="currentColor"
+					class="size-6"
+				>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						d="M10.5 1.5H8.25A2.25 2.25 0 0 0 6 3.75v16.5a2.25 2.25 0 0 0 2.25 2.25h7.5A2.25 2.25 0 0 0 18 20.25V3.75a2.25 2.25 0 0 0-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3"
+					/>
+				</svg>
+			</Toggle>
 			{#if client.isLoggedIn}
 				<Button
 					disabled={isSaving}

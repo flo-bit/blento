@@ -1,9 +1,10 @@
 <script lang="ts">
+	import { getIsMobile } from '$lib/helper';
 	import BaseCard, { type BaseCardProps } from '../BaseCard/BaseCard.svelte';
 	import { innerWidth } from 'svelte/reactivity/window';
 	let { item, ...rest }: BaseCardProps = $props();
 
-	let isMobile = $derived((innerWidth.current ?? 1000) < 1024);
+	let isMobile = getIsMobile();
 </script>
 
 <BaseCard {item} {...rest}>
@@ -17,7 +18,7 @@
 			</div>
 		</div>
 
-		{#if ((isMobile && item.mobileH >= 4) || (!isMobile && item.h >= 2)) && item.cardData.image}
+		{#if ((isMobile() && item.mobileH >= 4) || (!isMobile() && item.h >= 2)) && item.cardData.image}
 			<img class=" mb-2 max-h-32 w-full rounded-xl object-cover" src={item.cardData.image} alt="" />
 		{/if}
 		{#if item.cardData.href}

@@ -20,13 +20,6 @@
 		controls,
 		...rest
 	}: BaseCardProps = $props();
-
-	let isMobile = $derived((innerWidth.current ?? 1000) < 1024);
-
-	const getX = () => (isMobile ? (item.mobileX ?? item.x) : item.x);
-	const getY = () => (isMobile ? (item.mobileY ?? item.y) : item.y);
-	const getW = () => (isMobile ? (item.mobileW ?? item.w) : item.w);
-	const getH = () => (isMobile ? (item.mobileH ?? item.h) : item.h);
 </script>
 
 <div
@@ -35,7 +28,7 @@
 	bind:this={ref}
 	draggable={isEditing}
 	class={[
-		'card border-base-200 bg-base-50 group dark:border-base-800 dark:bg-base-900 focus-within:outline-accent-500 absolute z-0 rounded-2xl border outline-offset-2 focus-within:outline-2 lg:hidden'
+		'card border-base-200 bg-base-50 group dark:border-base-800 dark:bg-base-900 focus-within:outline-accent-500 absolute z-0 rounded-2xl border outline-offset-2 focus-within:outline-2 @5xl/wrapper:hidden'
 	]}
 	style={`translate: calc(${(item.mobileX / 4) * 100}cqw + ${mobileMargin}px) calc(${(item.mobileY / 4) * 100}cqw + ${mobileMargin}px); 
                 width: calc(${(item.mobileW / 4) * 100}cqw - ${mobileMargin * 2}px);
@@ -54,7 +47,7 @@
 	bind:this={ref}
 	draggable={isEditing}
 	class={[
-		'card border-base-200 bg-base-50 group dark:border-base-800 dark:bg-base-900 focus-within:outline-accent-500 absolute z-0 hidden rounded-2xl border outline-offset-2 focus-within:outline-2 lg:block'
+		'card border-base-200 bg-base-50 group dark:border-base-800 dark:bg-base-900 focus-within:outline-accent-500 absolute z-0 hidden rounded-2xl border outline-offset-2 focus-within:outline-2 @5xl/wrapper:block'
 	]}
 	style={`translate: calc(${(item.x / 4) * 100}cqw + ${margin}px) calc(${(item.y / 4) * 100}cqw + ${margin}px); 
                 width: calc(${(item.w / 4) * 100}cqw - ${margin * 2}px);

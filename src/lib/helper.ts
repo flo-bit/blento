@@ -1,3 +1,4 @@
+import { createContext } from 'svelte';
 import type { Item } from './types';
 
 export function clamp(value: number, min: number, max: number): number {
@@ -141,3 +142,5 @@ export function setPositionOfNewItem(newItem: Item, items: Item[]) {
 		if (!foundMobilePosition) newItem.mobileY! += 2;
 	}
 }
+
+export const [getIsMobile, setIsMobile] = createContext<() => boolean>();

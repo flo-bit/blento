@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { getIsMobile } from '$lib/helper';
 	import BaseEditingCard, { type BaseEditingCardProps } from '../BaseCard/BaseEditingCard.svelte';
 	import { innerWidth } from 'svelte/reactivity/window';
 
@@ -6,7 +7,7 @@
 
 	let isFetchingMetadata = $state(false);
 
-	let isMobile = $derived((innerWidth.current ?? 1000) < 1024);
+	let isMobile = getIsMobile();
 
 	$effect(() => {
 		const fetchMetadata = async () => {
@@ -48,7 +49,7 @@
 			</div>
 		</div>
 
-		{#if ((isMobile && item.mobileH >= 4) || (!isMobile && item.h >= 2)) && item.cardData.image}
+		{#if ((isMobile() && item.mobileH >= 4) || (!isMobile() && item.h >= 2)) && item.cardData.image}
 			<img class=" mb-2 max-h-32 w-full rounded-xl object-cover" src={item.cardData.image} alt="" />
 		{/if}
 		<!-- {#key item.cardData.image}
