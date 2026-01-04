@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Favicon from './Favicon.svelte';
+	import Head from './Head.svelte';
 
 	import { marked } from 'marked';
 	import { client } from './oauth';
@@ -25,15 +25,16 @@
 	class="mx-auto flex max-w-2xl px-10 pt-16 pb-8 @5xl/wrapper:fixed @5xl/wrapper:h-screen @5xl/wrapper:w-1/4 @5xl/wrapper:max-w-none @5xl/wrapper:px-12 @5xl/wrapper:pt-24 @7xl/wrapper:w-1/3"
 >
 	<div class="flex flex-col gap-4">
-		<Favicon
+		<Head
 			favicon={'https://cdn.bsky.app/img/avatar/plain/' + did + '/' + profileData?.avatar.ref.$link}
+			title={(profileData?.displayName ?? handle) + "'s blento"}
 		/>
 		<img
 			class="rounded-fulll size-32 rounded-full @5xl/wrapper:size-44"
 			src={'https://cdn.bsky.app/img/avatar/plain/' + did + '/' + profileData?.avatar.ref.$link}
 			alt=""
 		/>
-		<div class="line-clamp-2 text-4xl font-bold wrap-anywhere">{handle}</div>
+		<div class="line-clamp-2 text-4xl font-bold wrap-anywhere">{(profileData?.displayName ?? handle)}</div>
 
 		<div
 			class="text-base-600 dark:text-base-400 prose dark:prose-invert prose-a:text-accent-500 prose-a:no-underline line-clamp-3"

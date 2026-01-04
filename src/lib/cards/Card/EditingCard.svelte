@@ -8,7 +8,7 @@
 
 {#if CardDefinitionsByType[item.cardType]}
 	{@const cardDef = CardDefinitionsByType[item.cardType]}
-	<cardDef.editingCardComponent bind:item {ref} {...rest} />
+	<cardDef.editingCardComponent bind:item bind:ref {...rest} />
 {:else}
 	<BaseCard {item} {...rest}>
 		<div>Unsupported card type: {item.cardType}</div>

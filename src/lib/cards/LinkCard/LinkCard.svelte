@@ -10,7 +10,9 @@
 <BaseCard {item} {...rest}>
 	<div class="flex h-full flex-col justify-between p-4">
 		<div>
-			<img class="mb-2 size-8 rounded-lg object-cover" src={item.cardData.favicon} alt="" />
+			{#if item.cardData.favicon}
+				<img class="mb-2 size-8 rounded-lg object-cover" src={item.cardData.favicon} alt="" />
+			{/if}
 			<div class="text-base-900 dark:text-base-50 text-lg font-semibold">{item.cardData.title}</div>
 			<!-- <div class="text-base-800 dark:text-base-100 mt-2 text-xs">{item.cardData.description}</div> -->
 			<div class="text-accent-600 dark:text-accent-400 mt-2 text-xs font-light">

@@ -4,7 +4,7 @@
 	import { Navbar, Button, toast, Toaster, Toggle } from '@foxui/core';
 	import { BlueskyLogin } from '@foxui/social';
 
-	import { margin } from '$lib';
+	import { margin, mobileMargin } from '$lib';
 	import { cardsEqual, clamp, fixCollisions, setIsMobile, setPositionOfNewItem } from './helper';
 	import Profile from './Profile.svelte';
 	import type { Item } from './types';
@@ -13,6 +13,9 @@
 	import { TID } from '@atproto/common-web';
 	import EditingCard from './cards/Card/EditingCard.svelte';
 	import { CardDefinitionsByType } from './cards';
+	import { tick, type Component } from 'svelte';
+	import type { CreationModalComponentProps } from './cards/types';
+	import { dev } from '$app/environment';
 
 	let {
 		handle,
@@ -59,7 +62,7 @@
 	let maxHeight = $derived(items.reduce((max, item) => Math.max(max, getY(item) + getH(item)), 0));
 
 	function newCard(type: 'text' | 'image' | 'link' = 'link') {
-		let newItem: Item = {
+		let item: Item = {
 			id: TID.nextStr(),
 			x: 0,
 			y: 0,
@@ -73,27 +76,76 @@
 			cardData: {}
 		};
 		const cardDef = CardDefinitionsByType[type];
-		cardDef?.createNew?.(newItem);
+		cardDef?.createNew?.(item);
 
-		setPositionOfNewItem(newItem, items);
+		newItem.item = item;
 
-		items = [...items, newItem];
+		if (cardDef?.creationModalComponent) {
+			newItem.modal = cardDef.creationModalComponent;
+		} else {
+			saveNewItem();
+		}
+	}
+
+	async function saveNewItem() {
+		if (!newItem.item) return;
+		const item = newItem.item;
+
+		setPositionOfNewItem(item, items);
+
+		items = [...items, item];
+
+		const containerRect = container?.getBoundingClientRect();
+
+		newItem = {};
+
+		await tick();
+
+		// scroll to newly created card
+		if (!containerRect) return;
+		const currentMargin = isMobile ? mobileMargin : margin;
+		const currentY = isMobile ? item.mobileY : item.y;
+		const bodyRect = document.body.getBoundingClientRect();
+		const offset = containerRect.top - bodyRect.top;
+		const cellSize = (containerRect.width - currentMargin * 2) / 4;
+		window.scrollTo({ top: offset + cellSize * (currentY - 1), behavior: 'smooth' });
 	}
 
 	let isSaving = $state(false);
+
+	let newItem: { modal?: Component<CreationModalComponentProps>; item?: Item } = $state({});
 </script>
 
-<div class="fixed inset-0 h-full w-full lg:hidden bg-base-800 z-50 inline-flex items-center justify-center p-4 text-center">
-	Editing on mobile is not supported yet. Please use a desktop browser.
-</div>
+{#if !dev}
+	<div
+		class="bg-base-800 fixed inset-0 z-50 inline-flex h-full w-full items-center justify-center p-4 text-center lg:hidden"
+	>
+		Editing on mobile is not supported yet. Please use a desktop browser.
+	</div>
+{/if}
 
 {#if showingMobileView}
-<div class="pointer-events-none fixed inset-0 h-full w-full bg-base-900 -z-10"></div>
+	<div class="bg-base-900 pointer-events-none fixed inset-0 -z-10 h-full w-full"></div>
 {/if}
+
+{#if newItem.modal && newItem.item}
+	<newItem.modal
+		oncreate={() => {
+			saveNewItem();
+		}}
+		bind:item={newItem.item}
+		oncancel={() => {
+			newItem = {};
+		}}
+	/>
+{/if}
+
 <div
 	class={[
 		'@container/wrapper relative w-screen',
-		showingMobileView ? 'lg:mx-auto lg:w-[500px] bg-base-950 my-4 rounded-2xl h-[calc(100dhv-2em)]' : ''
+		showingMobileView
+			? 'bg-base-950 my-4 min-h-[calc(100dhv-2em)] rounded-2xl lg:mx-auto lg:w-[400px]'
+			: ''
 	]}
 >
 	<Profile {handle} {did} {data} />
@@ -192,11 +244,6 @@
 
 						fixCollisions(items, item, isMobile);
 					}}
-					onshowsettings={() => {
-						toast('No settings available for this card yet.', {
-							description: 'More settings will be added in the future.'
-						});
-					}}
 				/>
 			{/each}
 
@@ -217,7 +264,10 @@
 
 {#if (!client.isLoggedIn && !client.isInitializing) || client.profile?.did === did}
 	<Navbar
-		class="hidden lg:inline-flex dark:bg-base-900 bg-base-100 top-auto bottom-2 mx-4 mt-3 max-w-3xl rounded-full px-4 md:mx-auto"
+		class={[
+			'dark:bg-base-900 bg-base-100 top-auto bottom-2 mx-4 mt-3 max-w-3xl rounded-full px-4 md:mx-auto lg:inline-flex',
+			!dev ? 'hidden' : ''
+		]}
 	>
 		<div class="flex items-center gap-2">
 			<Button
