@@ -9,9 +9,17 @@
     - bluesky account
     - bluesky post (fixed or latest)
     - social accounts card (multiple)
+    - cartoons: aka https://www.opendoodles.com/
+    - map
+    - youtube video
+    - youtube channel
+    - guestbook
 - other atproto apps
     - leaflet
     - skywatched
+
+- image cards: different images for dark and light mode
+
 
 - allow setting custom base and accent color
 - allow changing avatar and description to be different than bluesky

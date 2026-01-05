@@ -166,14 +166,14 @@
 
 {#if !dev}
 	<div
-		class="bg-base-800 fixed inset-0 z-50 inline-flex h-full w-full items-center justify-center p-4 text-center lg:hidden"
+		class="bg-base-200 dark:bg-base-800 fixed inset-0 z-50 inline-flex h-full w-full items-center justify-center p-4 text-center lg:hidden"
 	>
 		Editing on mobile is not supported yet. Please use a desktop browser.
 	</div>
 {/if}
 
 {#if showingMobileView}
-	<div class="bg-base-900 pointer-events-none fixed inset-0 -z-10 h-full w-full"></div>
+	<div class="bg-base-200 dark:bg-base-900 pointer-events-none fixed inset-0 -z-10 h-full w-full"></div>
 {/if}
 
 {#if newItem.modal && newItem.item}
@@ -192,7 +192,7 @@
 	class={[
 		'@container/wrapper relative w-screen',
 		showingMobileView
-			? 'bg-base-950 my-4 min-h-[calc(100dhv-2em)] rounded-2xl lg:mx-auto lg:w-[400px]'
+			? 'bg-base-50 dark:bg-base-950 my-4 min-h-[calc(100dhv-2em)] rounded-2xl lg:mx-auto lg:w-[400px]'
 			: ''
 	]}
 >
