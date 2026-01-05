@@ -1,11 +1,11 @@
 import { base } from '$app/paths';
 
-import { PUBLIC_DOMAIN } from '$env/static/public';
+import { env } from '$env/dynamic/public';
 
 export const metadata = {
-	client_id: `${PUBLIC_DOMAIN}${base}/client-metadata.json`,
+	client_id: `${env.PUBLIC_DOMAIN}${base}/client-metadata.json`,
 
-	redirect_uris: [PUBLIC_DOMAIN + base],
+	redirect_uris: [env.PUBLIC_DOMAIN + base],
 
 	scope: 'atproto transition:generic',
 	grant_types: ['authorization_code', 'refresh_token'],
