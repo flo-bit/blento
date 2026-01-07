@@ -3,6 +3,7 @@
 
 	import { Navbar, Button, toast, Toaster, Toggle, Sidebar } from '@foxui/core';
 	import { BlueskyLogin } from '@foxui/social';
+	import Grid, { GridItem } from './grid';
 
 	import { margin, mobileMargin } from '$lib';
 	import {
@@ -220,96 +221,15 @@
 		<!-- svelte-ignore a11y_no_static_element_interactions -->
 		<div
 			bind:this={container}
-			ondragover={(e) => {
-				e.preventDefault();
-				if (!container) return;
-
-				const x = e.clientX + activeDragElement.mouseDeltaX;
-				const y = e.clientY + activeDragElement.mouseDeltaY;
-				const rect = container.getBoundingClientRect();
-
-				let gridX = clamp(
-					Math.floor(((x - rect.left) / rect.width) * 4),
-					0,
-					4 - (activeDragElement.w ?? 0)
-				);
-				let gridY = Math.max(Math.floor(((y - rect.top) / rect.width) * 4), 0);
-				if (isMobile) {
-					gridX = Math.floor(gridX / 2) * 2;
-					gridY = Math.floor(gridY / 2) * 2;
-				}
-
-				activeDragElement.x = gridX;
-				activeDragElement.y = gridY;
-			}}
-			ondragend={async (e) => {
-				e.preventDefault();
-				if (!container) return;
-
-				const x = e.clientX + activeDragElement.mouseDeltaX;
-				const y = e.clientY + activeDragElement.mouseDeltaY;
-				const rect = container.getBoundingClientRect();
-
-				let gridX = clamp(
-					Math.floor(((x - rect.left) / rect.width) * 4),
-					0,
-					4 - (activeDragElement.w ?? 0)
-				);
-				let gridY = Math.max(Math.floor(((y - rect.top) / rect.width) * 4), 0);
-				if (isMobile) {
-					gridX = Math.floor(gridX / 2) * 2;
-					gridY = Math.floor(gridY / 2) * 2;
-				}
-
-				if (activeDragElement.item) {
-					if (isMobile) {
-						activeDragElement.item.mobileX = gridX;
-						activeDragElement.item.mobileY = gridY;
-					} else {
-						activeDragElement.item.x = gridX;
-						activeDragElement.item.y = gridY;
-					}
-
-					fixCollisions(items, activeDragElement.item, isMobile);
-				}
-				activeDragElement.x = -1;
-				activeDragElement.y = -1;
-				activeDragElement.element = null;
-				return true;
-			}}
 			class="@container/grid relative col-span-3 px-2 py-8 @5xl/wrapper:px-8 @7xl/wrapper:col-span-2"
 		>
-			{#each items as item, i (item.id)}
-				<EditingCard
-					ondragstart={(e) => {
-						const target = e.target as HTMLDivElement;
-						activeDragElement.element = target;
-						activeDragElement.w = item.w;
-						activeDragElement.h = item.h;
-						activeDragElement.item = item;
-
-						const rect = target.getBoundingClientRect();
-						activeDragElement.mouseDeltaX = rect.left + margin - e.clientX;
-						activeDragElement.mouseDeltaY = rect.top - e.clientY;
-					}}
-					bind:item={items[i]}
-					ondelete={() => {
-						items = items.filter((it) => it !== item);
-					}}
-					onsetsize={(newW: number, newH: number) => {
-						if (isMobile) {
-							item.mobileW = newW * 2;
-							item.mobileH = newH * 2;
-						} else {
-							item.w = newW;
-							item.h = newH;
-						}
-
-						fixCollisions(items, item, isMobile);
-					}}
-				/>
-			{/each}
-
+			<Grid options={{ column: 4 * 2 }}>
+				{#each items as item, i (item.id)}
+					<GridItem x={item.x * 2} y={item.y * 2} w={item.w * 2} h={item.h *2}>
+						<EditingCard bind:item={items[i]} ondelete={() => {}} onsetsize={() => {}} />
+					</GridItem>
+				{/each}
+			</Grid>
 			{#if activeDragElement.element && activeDragElement.x >= 0 && activeDragElement.item}
 				{@const item = activeDragElement}
 				<div

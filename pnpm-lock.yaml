@@ -59,6 +59,9 @@ importers:
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
+      gridstack:
+        specifier: ^12.4.2
+        version: 12.4.2
       gsap:
         specifier: ^3.14.2
         version: 3.14.2
@@ -71,6 +74,9 @@ importers:
       plyr:
         specifier: ^3.8.4
         version: 3.8.4
+      svelte-dashboard:
+        specifier: ^0.1.0
+        version: 0.1.0(svelte@5.45.8)
       svelte-sonner:
         specifier: ^1.0.7
         version: 1.0.7(svelte@5.45.8)
@@ -1762,6 +1768,12 @@ packages:
   graphemer@1.4.0:
     resolution: {integrity: sha512-EtKwoO6kxCL9WO5xipiHTZlSzBm7WLT627TqC/uVRd0HKmq8NXyebnNYxDoBi7wt8eTWrUrKXCOVaFq9x1kgag==, tarball: https://registry.npmjs.org/graphemer/-/graphemer-1.4.0.tgz}
 
+  gridstack@11.5.1:
+    resolution: {integrity: sha512-qgbH65F6TtyKyi9t6fCkrxLhiobgYR3RBjnK0AzZl+YO7hreMVlsZ1MFbkPV0+7ZhjXdvcaRSZp3UA1yAJqYBQ==, tarball: https://registry.npmjs.org/gridstack/-/gridstack-11.5.1.tgz}
+
+  gridstack@12.4.2:
+    resolution: {integrity: sha512-aXbJrQpi3LwpYXYOr4UriPM5uc/dPcjK01SdOE5PDpx2vi8tnLhU7yBg/1i4T59UhNkG/RBfabdFUObuN+gMnw==, tarball: https://registry.npmjs.org/gridstack/-/gridstack-12.4.2.tgz}
+
   gsap@3.14.2:
     resolution: {integrity: sha512-P8/mMxVLU7o4+55+1TCnQrPmgjPKnwkzkXOK1asnR9Jg2lna4tEY5qBJjMmAaOBDDZWtlRjBXjLa0w53G/uBLA==, tarball: https://registry.npmjs.org/gsap/-/gsap-3.14.2.tgz}
 
@@ -2506,6 +2518,11 @@ packages:
     peerDependencies:
       svelte: ^4.0.0 || ^5.0.0-next.0
       typescript: '>=5.0.0'
+
+  svelte-dashboard@0.1.0:
+    resolution: {integrity: sha512-WUzq6SHjVOl44U65I1URo95azc4MXJUum7l65XpI0iChEaOScVF2n8X7S7eHjUsN+FCMolH490Cuqdq+7WYMMA==, tarball: https://registry.npmjs.org/svelte-dashboard/-/svelte-dashboard-0.1.0.tgz}
+    peerDependencies:
+      svelte: ^5.0.0
 
   svelte-eslint-parser@0.43.0:
     resolution: {integrity: sha512-GpU52uPKKcVnh8tKN5P4UZpJ/fUDndmq7wfsvoVXsyP+aY0anol7Yqo01fyrlaWGMFfm4av5DyrjlaXdLRJvGA==, tarball: https://registry.npmjs.org/svelte-eslint-parser/-/svelte-eslint-parser-0.43.0.tgz}
@@ -4321,6 +4338,10 @@ snapshots:
 
   graphemer@1.4.0: {}
 
+  gridstack@11.5.1: {}
+
+  gridstack@12.4.2: {}
+
   gsap@3.14.2: {}
 
   has-flag@4.0.0: {}
@@ -5042,6 +5063,11 @@ snapshots:
       typescript: 5.8.3
     transitivePeerDependencies:
       - picomatch
+
+  svelte-dashboard@0.1.0(svelte@5.45.8):
+    dependencies:
+      gridstack: 11.5.1
+      svelte: 5.45.8
 
   svelte-eslint-parser@0.43.0(svelte@5.45.8):
     dependencies:
