@@ -85,7 +85,7 @@ export async function loadData(handle: string) {
 	return { did, data: JSON.parse(JSON.stringify(downloadedData)) as DownloadedData, recentRecords };
 }
 
-export async function uploadImage(image: Blob) {
+export async function uploadBlob(blob: Blob) {
 	if (!client.profile) throw new Error('No profile');
 
 	// atcute version
@@ -95,7 +95,7 @@ export async function uploadImage(image: Blob) {
 		params: {
 			repo: client.profile.did
 		},
-		data: image
+		data: blob
 	});
 
 	return blobResponse?.data.blob as {

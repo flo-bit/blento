@@ -1,4 +1,4 @@
-import { uploadImage } from '$lib/website/utils';
+import { uploadBlob } from '$lib/website/utils';
 import type { CardDefinition } from '../types';
 import CreateImageCardModal from './CreateImageCardModal.svelte';
 import EditingImageCard from './EditingImageCard.svelte';
@@ -20,7 +20,7 @@ export const ImageCardDefinition = {
 	creationModalComponent: CreateImageCardModal,
 	upload: async (item) => {
 		if (item.cardData.blob) {
-			item.cardData.image = await uploadImage(item.cardData.blob);
+			item.cardData.image = await uploadBlob(item.cardData.blob);
 
 			delete item.cardData.blob;
 		}

@@ -15,7 +15,7 @@
     - cartoons: aka https://www.opendoodles.com/
     - excalidraw
     - map
-    - youtube video
+    - [x] youtube video
     - youtube channel
     - guestbook
 
