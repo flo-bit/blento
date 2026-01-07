@@ -24,6 +24,7 @@
 	import type { CreationModalComponentProps } from './cards/types';
 	import { dev } from '$app/environment';
 	import { setDidContext } from './website/context';
+	import BaseEditingCard from './cards/BaseCard/BaseEditingCard.svelte';
 
 	let {
 		handle,
@@ -280,18 +281,7 @@
 			class="@container/grid relative col-span-3 px-2 py-8 @5xl/wrapper:px-8 @7xl/wrapper:col-span-2"
 		>
 			{#each items as item, i (item.id)}
-				<EditingCard
-					ondragstart={(e) => {
-						const target = e.target as HTMLDivElement;
-						activeDragElement.element = target;
-						activeDragElement.w = item.w;
-						activeDragElement.h = item.h;
-						activeDragElement.item = item;
-
-						const rect = target.getBoundingClientRect();
-						activeDragElement.mouseDeltaX = rect.left + margin - e.clientX;
-						activeDragElement.mouseDeltaY = rect.top - e.clientY;
-					}}
+				<BaseEditingCard
 					bind:item={items[i]}
 					ondelete={() => {
 						items = items.filter((it) => it !== item);
@@ -307,7 +297,20 @@
 
 						fixCollisions(items, item, isMobile);
 					}}
-				/>
+					ondragstart={(e) => {
+						const target = e.target as HTMLDivElement;
+						activeDragElement.element = target;
+						activeDragElement.w = item.w;
+						activeDragElement.h = item.h;
+						activeDragElement.item = item;
+
+						const rect = target.getBoundingClientRect();
+						activeDragElement.mouseDeltaX = rect.left + margin - e.clientX;
+						activeDragElement.mouseDeltaY = rect.top - e.clientY;
+					}}
+				>
+					<EditingCard bind:item={items[i]} />
+				</BaseEditingCard>
 			{/each}
 
 			{#if activeDragElement.element && activeDragElement.x >= 0 && activeDragElement.item}

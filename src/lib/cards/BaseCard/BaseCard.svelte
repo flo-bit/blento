@@ -4,7 +4,6 @@
 	import type { WithElementRef } from 'bits-ui';
 	import type { Snippet } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
-	import { innerWidth } from 'svelte/reactivity/window';
 
 	export type BaseCardProps = {
 		item: Item;

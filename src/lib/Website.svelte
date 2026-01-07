@@ -5,6 +5,7 @@
 	import type { Item } from './types';
 	import { innerWidth } from 'svelte/reactivity/window';
 	import { setDidContext } from './website/context';
+	import BaseCard from './cards/BaseCard/BaseCard.svelte';
 
 	let { handle, did, items, data }: { handle: string; did: string; items: Item[]; data: any } =
 		$props();
@@ -36,13 +37,15 @@
 			class="@container/grid relative col-span-3 px-2 py-8 lg:px-8 xl:col-span-2"
 		>
 			{#each items.toSorted(sortItems) as item}
-				<Card {item} />
+				<BaseCard {item}>
+					<Card {item} />
+				</BaseCard>
 			{/each}
 			<div style="height: {(maxHeight / 4) * 100}cqw;"></div>
 		</div>
 	</div>
 
-	<div class="block text-xs font-light @5xl/wrapper:hidden mx-auto text-center pb-8">
+	<div class="mx-auto block pb-8 text-center text-xs font-light @5xl/wrapper:hidden">
 		made with <a
 			href="https://blento.app"
 			target="_blank"

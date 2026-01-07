@@ -1,13 +1,11 @@
 import type { CardDefinition } from '../types';
 import CreateYoutubeCardModal from './CreateYoutubeCardModal.svelte';
-import EditingYoutubeCard from './EditingYoutubeCard.svelte';
 import SidebarItemYoutubeCard from './SidebarItemYoutubeCard.svelte';
 import YoutubeCard from './YoutubeCard.svelte';
 
 export const YoutubeCardDefinition = {
 	type: 'youtubeVideo',
-	cardComponent: YoutubeCard,
-	editingCardComponent: EditingYoutubeCard,
+	contentComponent: YoutubeCard,
 	creationModalComponent: CreateYoutubeCardModal,
 	createNew: (card) => {
 		card.cardType = 'youtubeVideo';

@@ -1,13 +1,11 @@
 import { uploadBlob } from '$lib/website/utils';
 import type { CardDefinition } from '../types';
 import CreateImageCardModal from './CreateImageCardModal.svelte';
-import EditingImageCard from './EditingImageCard.svelte';
 import ImageCard from './ImageCard.svelte';
 
 export const ImageCardDefinition = {
 	type: 'image',
-	cardComponent: ImageCard,
-	editingCardComponent: EditingImageCard,
+	contentComponent: ImageCard,
 	createNew: (card) => {
 		card.cardType = 'image';
 		card.cardData = {

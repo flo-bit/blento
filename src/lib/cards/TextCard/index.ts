@@ -4,8 +4,8 @@ import TextCard from './TextCard.svelte';
 
 export const TextCardDefinition = {
 	type: 'text',
-	cardComponent: TextCard,
-	editingCardComponent: EditingTextCard,
+	contentComponent: TextCard,
+	editingContentComponent: EditingTextCard,
 	createNew: (card) => {
 		card.cardType = 'text';
 		card.cardData = {

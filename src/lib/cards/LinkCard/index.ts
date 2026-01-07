@@ -5,8 +5,8 @@ import LinkCard from './LinkCard.svelte';
 
 export const LinkCardDefinition = {
 	type: 'link',
-	cardComponent: LinkCard,
-	editingCardComponent: EditingLinkCard,
+	contentComponent: LinkCard,
+	editingContentComponent: EditingLinkCard,
 	createNew: (card) => {
 		card.cardType = 'link';
 		card.cardData = {

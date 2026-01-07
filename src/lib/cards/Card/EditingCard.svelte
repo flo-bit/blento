@@ -1,16 +1,17 @@
 <script lang="ts">
-	import type { BaseEditingCardProps } from '../BaseCard/BaseEditingCard.svelte';
 	import { CardDefinitionsByType } from '..';
-	import BaseCard from '../BaseCard/BaseCard.svelte';
+	import type { ContentComponentProps } from '../types';
 
-	let { item = $bindable(), ref = $bindable(), ...rest }: BaseEditingCardProps = $props();
+	let { item = $bindable() }: ContentComponentProps = $props();
 </script>
 
 {#if CardDefinitionsByType[item.cardType]}
 	{@const cardDef = CardDefinitionsByType[item.cardType]}
-	<cardDef.editingCardComponent bind:item bind:ref {...rest} />
+	{#if cardDef.editingContentComponent}
+		<cardDef.editingContentComponent bind:item />
+	{:else}
+		<cardDef.contentComponent bind:item />
+	{/if}
 {:else}
-	<BaseCard {item} {...rest}>
-		<div>Unsupported card type: {item.cardType}</div>
-	</BaseCard>
+	<div class="m-4">Unsupported card type: {item.cardType}</div>
 {/if}

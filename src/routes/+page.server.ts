@@ -1,4 +1,4 @@
-import { loadData } from '$lib/website/utils';
+import { loadData } from '$lib/website/load';
 import { env } from '$env/dynamic/public';
 
 export async function load() {
