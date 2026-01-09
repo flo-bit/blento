@@ -12,6 +12,7 @@ export async function GET({ url }) {
 
 	try {
 		const data = await fetch(nomUrl);
+		console.error(data.status, data.statusText);
 		const location = await data.json();
 
 		return json(location[0]);
