@@ -8,7 +8,6 @@ export const ATProtoCollectionsCardDefinition = {
 	contentComponent: ATProtoCollectionsCard,
 	loadData: async (items, { did }) => {
 		const data = (await describeRepo({ did })).data;
-		console.log(data);
 		const collections = new Set<string>();
 		for (const collection of data.collections) {
 			const split = collection.split('.');
