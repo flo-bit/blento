@@ -19,7 +19,7 @@
 		</div>
 	</div>
 
-	{#if ((isMobile() && item.mobileH >= 4) || (!isMobile() && item.h >= 2)) && item.cardData.image}
+	{#if ((isMobile() && item.mobileH >= 8) || (!isMobile() && item.h >= 4)) && item.cardData.image}
 		<img class=" mb-2 max-h-32 w-full rounded-xl object-cover" src={item.cardData.image} alt="" />
 	{/if}
 	{#if item.cardData.href}
