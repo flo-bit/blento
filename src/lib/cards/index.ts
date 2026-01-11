@@ -1,7 +1,9 @@
 import { ATProtoCollectionsCardDefinition } from './ATProtoCollectionsCard';
 import { BlueskyPostCardDefinition } from './BlueskyPostCard';
 import { EmbedCardDefinition } from './EmbedCard';
+import { GithubCardDefinition } from './GithubCard';
 import { ImageCardDefinition } from './ImageCard';
+import { InstagramCardDefinition } from './InstagramCard';
 import { LinkCardDefinition } from './LinkCard';
 import { LivestreamCardDefitition, LivestreamEmbedCardDefitition } from './LivestreamCard';
 import { MapCardDefinition } from './MapCard';
@@ -21,7 +23,9 @@ export const AllCardDefinitions = [
 	LivestreamEmbedCardDefitition,
 	EmbedCardDefinition,
 	MapCardDefinition,
-	ATProtoCollectionsCardDefinition
+	ATProtoCollectionsCardDefinition,
+	InstagramCardDefinition,
+	GithubCardDefinition
 ] as const;
 
 export const CardDefinitionsByType = AllCardDefinitions.reduce(
