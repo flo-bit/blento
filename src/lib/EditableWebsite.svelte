@@ -4,7 +4,7 @@
 	import { Navbar, Button, toast, Toaster, Toggle, Sidebar } from '@foxui/core';
 	import { BlueskyLogin } from '@foxui/social';
 
-	import { margin, mobileMargin } from '$lib';
+	import { COLUMNS, margin, mobileMargin } from '$lib';
 	import {
 		cardsEqual,
 		clamp,
@@ -92,10 +92,10 @@
 			id: TID.nextStr(),
 			x: 0,
 			y: 0,
-			w: 1,
-			h: 1,
-			mobileH: 2,
-			mobileW: 2,
+			w: 2,
+			h: 2,
+			mobileH: 4,
+			mobileW: 4,
 			mobileX: 0,
 			mobileY: 0,
 			cardType: type,
@@ -133,7 +133,7 @@
 		const currentY = isMobile ? item.mobileY : item.y;
 		const bodyRect = document.body.getBoundingClientRect();
 		const offset = containerRect.top - bodyRect.top;
-		const cellSize = (containerRect.width - currentMargin * 2) / 4;
+		const cellSize = (containerRect.width - currentMargin * 2) / COLUMNS;
 		window.scrollTo({ top: offset + cellSize * (currentY - 1), behavior: 'smooth' });
 	}
 
@@ -209,11 +209,15 @@
 		console.log(rect.top);
 
 		let gridX = clamp(
-			Math.floor(((x - rect.left) / rect.width) * 4),
+			Math.floor(((x - rect.left) / rect.width) * 8),
 			0,
-			4 - (activeDragElement.w ?? 0)
+			COLUMNS - (activeDragElement.w ?? 0)
 		);
-		let gridY = Math.max(Math.round(((y - rect.top + margin) / (rect.width - margin)) * 4), 0);
+		gridX = Math.floor(gridX / 2) * 2;
+		let gridY = Math.max(
+			Math.round(((y - rect.top + margin) / (rect.width - margin)) * COLUMNS),
+			0
+		);
 		if (isMobile) {
 			gridX = Math.floor(gridX / 2) * 2;
 			gridY = Math.floor(gridY / 2) * 2;
@@ -274,6 +278,18 @@
 				activeDragElement.x = cell.x;
 				activeDragElement.y = cell.y;
 
+				if (activeDragElement.item) {
+					if (isMobile) {
+						activeDragElement.item.mobileX = cell.x;
+						activeDragElement.item.mobileY = cell.y;
+					} else {
+						activeDragElement.item.x = cell.x;
+						activeDragElement.item.y = cell.y;
+					}
+
+					fixCollisions(items, activeDragElement.item, isMobile);
+				}
+
 				// Auto-scroll when dragging near top or bottom of viewport
 				const scrollZone = 150;
 				const scrollSpeed = 15;
@@ -313,6 +329,7 @@
 			class="@container/grid relative col-span-3 px-2 py-8 @5xl/wrapper:px-8 @7xl/wrapper:col-span-2"
 		>
 			{#each items as item, i (item.id)}
+				<!-- {#if item !== activeDragElement.item} -->
 				<BaseEditingCard
 					bind:item={items[i]}
 					ondelete={() => {
@@ -346,18 +363,25 @@
 				>
 					<EditingCard bind:item={items[i]} />
 				</BaseEditingCard>
+				<!-- {/if} -->
 			{/each}
 
 			{#if activeDragElement.element && activeDragElement.x >= 0 && activeDragElement.item}
-				{@const finalPos = simulateFinalPosition(items, activeDragElement.item, activeDragElement.x, activeDragElement.y, isMobile)}
+				{@const finalPos = simulateFinalPosition(
+					items,
+					activeDragElement.item,
+					activeDragElement.x,
+					activeDragElement.y,
+					isMobile
+				)}
 				<div
 					class={[
 						'bg-base-500/10 absolute aspect-square rounded-2xl transition-transform duration-100'
 					]}
-					style={`translate: calc(${(finalPos.x / 4) * 100}cqw + ${margin}px) calc(${(finalPos.y / 4) * 100}cqw + ${margin}px);
+					style={`translate: calc(${(finalPos.x / COLUMNS) * 100}cqw + ${margin}px) calc(${(finalPos.y / COLUMNS) * 100}cqw + ${margin}px);
 
-                width: calc(${(getW(activeDragElement.item) / 4) * 100}cqw - ${margin * 2}px);
-                height: calc(${(getH(activeDragElement.item) / 4) * 100}cqw - ${margin * 2}px);`}
+                width: calc(${(getW(activeDragElement.item) / COLUMNS) * 100}cqw - ${margin * 2}px);
+                height: calc(${(getH(activeDragElement.item) / COLUMNS) * 100}cqw - ${margin * 2}px);`}
 				></div>
 			{/if}
 
@@ -367,7 +391,7 @@
 					style={`translate: ${debugPoint.x}px ${debugPoint.y}px;`}
 				></div>
 			{/if}
-			<div style="height: {((maxHeight + 1) / 4) * 100}cqw;"></div>
+			<div style="height: {((maxHeight + 2) / 8) * 100}cqw;"></div>
 		</div>
 	</div>
 </div>

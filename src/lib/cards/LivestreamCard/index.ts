@@ -13,10 +13,10 @@ export const LivestreamCardDefitition = {
 	contentComponent: LivestreamCard,
 	sidebarComponent: SidebarItemLivestreamCard,
 	createNew: (card) => {
-		card.w = 2;
-		card.h = 1;
-		card.mobileH = 2;
-		card.mobileW = 4;
+		card.w = 4;
+		card.h = 4;
+		card.mobileH = 8;
+		card.mobileW = 8;
 	},
 	loadData: async (items, { did }) => {
 		const records = await listRecords({ did, collection: 'place.stream.livestream', limit: 3 });
@@ -72,10 +72,10 @@ export const LivestreamEmbedCardDefitition = {
 	contentComponent: LivestreamEmbedCard,
 	sidebarComponent: SidebarItemEmbedLivestreamCard,
 	createNew: (card) => {
-		card.w = 2;
-		card.h = 1;
-		card.mobileH = 2;
-		card.mobileW = 4;
+		card.w = 4;
+		card.h = 2;
+		card.mobileW = 8;
+		card.mobileH = 4;
 
 		card.cardData = {
 			href: 'https://stream.place/embed/' + client.profile?.handle

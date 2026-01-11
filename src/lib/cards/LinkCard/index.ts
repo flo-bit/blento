@@ -10,7 +10,7 @@ export const LinkCardDefinition = {
 	createNew: (card) => {
 		card.cardType = 'link';
 		card.cardData = {
-			href: 'https://flo-bit.dev'
+			href: 'https://'
 		};
 	},
 	creationModalComponent: CreateLinkCardModal

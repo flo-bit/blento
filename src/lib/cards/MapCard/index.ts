@@ -8,10 +8,10 @@ export const MapCardDefinition = {
 	contentComponent: MapCard,
 	sidebarButtonText: 'map',
 	createNew: (item) => {
-		item.w = 2;
-		item.h = 2;
-		item.mobileH = 4;
-		item.mobileW = 4;
+		item.w = 4;
+		item.h = 4;
+		item.mobileH = 8;
+		item.mobileW = 8;
 	},
 
 	sidebarComponent: SidebarItemMapCard,

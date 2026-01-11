@@ -50,7 +50,7 @@
 					<Card {item} />
 				</BaseCard>
 			{/each}
-			<div style="height: {(maxHeight / 4) * 100}cqw;"></div>
+			<div style="height: {(maxHeight / 8) * 100}cqw;"></div>
 		</div>
 	</div>
 

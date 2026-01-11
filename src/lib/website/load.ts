@@ -10,16 +10,18 @@ import { data } from './data';
 import { CardDefinitionsByType } from '$lib/cards';
 import type { Item } from '$lib/types';
 
-export async function loadData(
-	handle: string,
-	platform?: App.Platform,
-	forceUpdate: boolean = false
-): Promise<{
+type LoadedData = {
 	did: string;
 	data: DownloadedData;
 	additionalData: Record<string, unknown>;
 	updatedAt: number;
-}> {
+};
+
+export async function loadData(
+	handle: string,
+	platform?: App.Platform,
+	forceUpdate: boolean = false
+): Promise<LoadedData> {
 	console.log(handle);
 	if (!forceUpdate) {
 		try {
@@ -36,7 +38,7 @@ export async function loadData(
 					timePassed,
 					'seconds ago'
 				);
-				return JSON.parse(cachedResult);
+				return migrateData(JSON.parse(cachedResult));
 			}
 		} catch (error) {
 			console.log('getting cached result failed', error);
@@ -144,5 +146,26 @@ export async function loadData(
 
 	await platform?.env?.USER_DATA_CACHE?.put(handle, JSON.stringify(result));
 
-	return result;
+	return migrateData(result);
+}
+
+function migrateFromV0ToV1(data: LoadedData): LoadedData {
+	for (const card of Object.values(data.data['app.blento.card']).map((i) => i.value) as Item[]) {
+		if (card.version) continue;
+		card.x *= 2;
+		card.y *= 2;
+		card.h *= 2;
+		card.w *= 2;
+		card.mobileX *= 2;
+		card.mobileY *= 2;
+		card.mobileH *= 2;
+		card.mobileW *= 2;
+		card.version = 1;
+	}
+
+	return data;
+}
+
+function migrateData(data: LoadedData): LoadedData {
+	return migrateFromV0ToV1(data);
 }

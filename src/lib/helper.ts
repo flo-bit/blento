@@ -1,5 +1,6 @@
 import { createContext } from 'svelte';
 import type { Item } from './types';
+import { COLUMNS } from '$lib';
 
 export function clamp(value: number, min: number, max: number): number {
 	return Math.min(Math.max(value, min), max);
@@ -39,11 +40,9 @@ export const overlaps = (a: Item, b: Item, mobile: boolean = false) => {
 };
 
 export function fixCollisions(items: Item[], movedItem: Item, mobile: boolean = false) {
-	const COLS = 4;
-
 	const clampX = (item: Item) => {
-		if (mobile) item.mobileX = clamp(item.mobileX, 0, COLS - item.mobileW);
-		else item.x = clamp(item.x, 0, COLS - item.w);
+		if (mobile) item.mobileX = clamp(item.mobileX, 0, COLUMNS - item.mobileW);
+		else item.x = clamp(item.x, 0, COLUMNS - item.w);
 	};
 
 	// Push `target` down until it no longer overlaps with any item (including movedItem),
@@ -91,8 +90,8 @@ export function fixCollisions(items: Item[], movedItem: Item, mobile: boolean = 
 		pushDownCascade(it, movedItem);
 
 		// enforce "x stays the same" during pushing (clamp already applied)
-		if (mobile) it.mobileX = clamp(it.mobileX, 0, COLS - it.mobileW);
-		else it.x = clamp(it.x, 0, COLS - it.w);
+		if (mobile) it.mobileX = clamp(it.mobileX, 0, COLUMNS - it.mobileW);
+		else it.x = clamp(it.x, 0, COLUMNS - it.w);
 	}
 
 	compactItems(items, mobile);
@@ -168,7 +167,7 @@ export function simulateFinalPosition(
 }
 
 export function sortItems(a: Item, b: Item) {
-	return a.y * 4 + a.x - b.y * 4 - b.x;
+	return a.y * COLUMNS + a.x - b.y * COLUMNS - b.x;
 }
 
 export function cardsEqual(a: Item, b: Item) {
@@ -191,7 +190,7 @@ export function cardsEqual(a: Item, b: Item) {
 export function setPositionOfNewItem(newItem: Item, items: Item[]) {
 	let foundPosition = false;
 	while (!foundPosition) {
-		for (newItem.x = 0; newItem.x <= 4 - newItem.w; newItem.x++) {
+		for (newItem.x = 0; newItem.x <= COLUMNS - newItem.w; newItem.x++) {
 			const collision = items.find((item) => overlaps(newItem, item));
 			if (!collision) {
 				foundPosition = true;
@@ -203,7 +202,7 @@ export function setPositionOfNewItem(newItem: Item, items: Item[]) {
 
 	let foundMobilePosition = false;
 	while (!foundMobilePosition) {
-		for (newItem.mobileX = 0; newItem.mobileX <= 4 - newItem.mobileW; newItem.mobileX += 1) {
+		for (newItem.mobileX = 0; newItem.mobileX <= COLUMNS - newItem.mobileW; newItem.mobileX += 1) {
 			const collision = items.find((item) => overlaps(newItem, item, true));
 
 			if (!collision) {
@@ -211,7 +210,7 @@ export function setPositionOfNewItem(newItem: Item, items: Item[]) {
 				break;
 			}
 		}
-		if (!foundMobilePosition) newItem.mobileY! += 2;
+		if (!foundMobilePosition) newItem.mobileY! += 1;
 	}
 }
 

@@ -9,9 +9,9 @@ export const EmbedCardDefinition = {
 	creationModalComponent: CreateEmbedCardModal,
 	sidebarComponent: SidebarItemEmbedCard,
 	createNew: (card) => {
-		card.w = 2;
-		card.h = 2;
-		card.mobileH = 4;
-		card.mobileW = 4;
+		card.w = 4;
+		card.h = 4;
+		card.mobileH = 8;
+		card.mobileW = 8;
 	}
 } as CardDefinition & { type: 'embed' };

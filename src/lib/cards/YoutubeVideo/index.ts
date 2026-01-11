@@ -10,8 +10,8 @@ export const YoutubeCardDefinition = {
 	createNew: (card) => {
 		card.cardType = 'youtubeVideo';
 		card.cardData = {};
-		card.w = 2;
-		card.mobileW = 4;
+		card.w = 4;
+		card.mobileW = 8;
 	},
 	sidebarComponent: SidebarItemYoutubeCard
 } as CardDefinition & { type: 'youtubeVideo' };

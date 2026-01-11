@@ -8,10 +8,10 @@ export const BlueskyPostCardDefinition = {
 	contentComponent: BlueskyPostCard,
 	createNew: (card) => {
 		card.cardType = 'latestPost';
-		card.w = 2;
-		card.mobileW = 4;
-		card.h = 2;
-		card.mobileH = 4;
+		card.w = 4;
+		card.mobileW = 8;
+		card.h = 4;
+		card.mobileH = 8;
 	},
 	sidebarComponent: SidebarItemBlueskyPostCard,
 	loadData: async (items, { did }) => {
@@ -22,5 +22,6 @@ export const BlueskyPostCardDefinition = {
 			limit: 2
 		});
 		return JSON.parse(JSON.stringify(authorFeed.data));
-	}
+	},
+	minW: 4
 } as CardDefinition & { type: 'latestPost' };

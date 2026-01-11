@@ -19,4 +19,6 @@ export type Item = {
 	cardData: any;
 
 	updatedAt?: string;
+
+	version?: number;
 };

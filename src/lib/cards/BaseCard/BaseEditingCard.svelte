@@ -4,8 +4,10 @@
 	import BaseCard from './BaseCard.svelte';
 	import type { Item } from '$lib/types';
 	import { Button, Popover } from '@foxui/core';
-	import { getCanEdit } from '$lib/helper';
+	import { getCanEdit, getIsMobile } from '$lib/helper';
 	import { ColorSelect } from '@foxui/colors';
+	import { CardDefinitionsByType, getColor } from '..';
+	import { COLUMNS } from '$lib';
 
 	let colorsChoices = [
 		{ class: 'text-base-500', label: 'base' },
@@ -47,13 +49,25 @@
 		...rest
 	}: BaseEditingCardProps = $props();
 
-	let selectedColor = $derived(
-		!item.color ? colorsChoices[0] : colorsChoices.find((c) => item.color === c.label)
-	);
+	let selectedColor = $derived(colorsChoices.find((c) => getColor(item) === c.label));
 
 	let canEdit = getCanEdit();
 
 	let colorPopoverOpen = $state(false);
+
+	const cardDef = $derived(CardDefinitionsByType[item.cardType]);
+
+	const minW = $derived(cardDef.minW ?? 0);
+	const minH = $derived(cardDef.minH ?? 0);
+
+	const maxW = $derived(cardDef.maxW ?? COLUMNS);
+	const maxH = $derived(cardDef.maxH ?? COLUMNS);
+
+	function canSetSize(w: number, h: number) {
+		if (!cardDef) return false;
+
+		return w >= minW && w <= maxW && h >= minH && h <= maxH;
+	}
 </script>
 
 <BaseCard {item} {...rest} isEditing={true} bind:ref>
@@ -135,46 +149,54 @@
 						/>
 					</Popover>
 
-					<button
-						onclick={() => {
-							onsetsize?.(1, 1);
-						}}
-						class="hover:bg-accent-500/10 cursor-pointer rounded-xl p-2"
-					>
-						<div class="border-base-900 dark:border-base-50 size-3 rounded-sm border-2"></div>
+					{#if canSetSize(2, 2)}
+						<button
+							onclick={() => {
+								onsetsize?.(2, 2);
+							}}
+							class="hover:bg-accent-500/10 cursor-pointer rounded-xl p-2"
+						>
+							<div class="border-base-900 dark:border-base-50 size-3 rounded-sm border-2"></div>
 
-						<span class="sr-only">set size to 1x1</span>
-					</button>
+							<span class="sr-only">set size to 1x1</span>
+						</button>
+					{/if}
 
-					<button
-						onclick={() => {
-							onsetsize?.(2, 1);
-						}}
-						class="hover:bg-accent-500/10 cursor-pointer rounded-xl p-2"
-					>
-						<div class="border-base-900 dark:border-base-50 h-3 w-5 rounded-sm border-2"></div>
-						<span class="sr-only">set size to 2x1</span>
-					</button>
-					<button
-						onclick={() => {
-							onsetsize?.(1, 2);
-						}}
-						class="hover:bg-accent-500/10 cursor-pointer rounded-xl p-2"
-					>
-						<div class="border-base-900 dark:border-base-50 h-5 w-3 rounded-sm border-2"></div>
+					{#if canSetSize(4, 2)}
+						<button
+							onclick={() => {
+								onsetsize?.(4, 2);
+							}}
+							class="hover:bg-accent-500/10 cursor-pointer rounded-xl p-2"
+						>
+							<div class="border-base-900 dark:border-base-50 h-3 w-5 rounded-sm border-2"></div>
+							<span class="sr-only">set size to 2x1</span>
+						</button>
+					{/if}
+					{#if canSetSize(2, 4)}
+						<button
+							onclick={() => {
+								onsetsize?.(2, 4);
+							}}
+							class="hover:bg-accent-500/10 cursor-pointer rounded-xl p-2"
+						>
+							<div class="border-base-900 dark:border-base-50 h-5 w-3 rounded-sm border-2"></div>
 
-						<span class="sr-only">set size to 1x2</span>
-					</button>
-					<button
-						onclick={() => {
-							onsetsize?.(2, 2);
-						}}
-						class="hover:bg-accent-500/10 cursor-pointer rounded-xl p-2"
-					>
-						<div class="border-base-900 dark:border-base-50 h-5 w-5 rounded-sm border-2"></div>
+							<span class="sr-only">set size to 1x2</span>
+						</button>
+					{/if}
+					{#if canSetSize(4, 4)}
+						<button
+							onclick={() => {
+								onsetsize?.(4, 4);
+							}}
+							class="hover:bg-accent-500/10 cursor-pointer rounded-xl p-2"
+						>
+							<div class="border-base-900 dark:border-base-50 h-5 w-5 rounded-sm border-2"></div>
 
-						<span class="sr-only">set size to 2x2</span>
-					</button>
+							<span class="sr-only">set size to 2x2</span>
+						</button>
+					{/if}
 
 					{#if onshowsettings}
 						<button

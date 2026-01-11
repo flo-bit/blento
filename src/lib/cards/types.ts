@@ -42,4 +42,14 @@ export type CardDefinition = {
 		{ did, handle, platform }: { did: string; handle: string; platform?: App.Platform }
 	) => Promise<unknown>;
 	dataKey?: string;
+
+	allowSetColor?: boolean;
+
+	defaultColor?: string;
+
+	minW?: number;
+	maxW?: number;
+
+	minH?: number;
+	maxH?: number;
 };

@@ -17,8 +17,8 @@ export const ATProtoCollectionsCardDefinition = {
 		return Array.from(collections);
 	},
 	createNew: (item) => {
-		item.w = 2;
-		item.mobileW = 4;
+		item.w = 4;
+		item.mobileW = 8;
 	},
 	sidebarComponent: SidebarItemATProtoCollectionsCard
 } as CardDefinition & { type: 'atprotocollections' };
