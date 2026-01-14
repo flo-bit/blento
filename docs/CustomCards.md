@@ -2,20 +2,8 @@
 
 WORK IN PROGRESS, EARLY STATE, MIGHT CHANGE.
 
-see `src/lib/cards` for how cards are made.
+see `src/lib/cards` for how cards are made (and e.g. `src/lib/cards/EmbedCard/` and `src/lib/cards/LivestreamCard/` for examples of implementation).
 
-Current card definition:
+Notes:
 
-```ts
-export type CardDefinition = {
-	type: string;
-	contentComponent: Component<ContentComponentProps>; // this is what your card shows
-
-	editingContentComponent?: Component<ContentComponentProps>; // if this is not given, defaults to showing contentComponent in edit mode too
-	creationModalComponent?: Component<CreationModalComponentProps>; // if this is not given will just add a card
-
-	createNew?: (item: Item) => void; // this is run before the card is added, set some settings here
-
-	sidebarComponent?: Component<SidebarComponentProps>; // this is the button that will be shown in the sidebar to add your card
-};
-```
+Cards should be styled to work in light and dark mode (with dark: class modifier) as well as when cards are colorful (= bg-color-500 for the card) (with accent: modifier).

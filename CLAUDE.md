@@ -19,13 +19,16 @@ Blento is a Bluesky-powered customizable bento grid website builder. Users authe
 ## Architecture
 
 ### Tech Stack
+
 - **Framework**: SvelteKit 2 with Svelte 5 (using runes: `$state`, `$derived`, `$props`)
 - **Styling**: Tailwind CSS 4 with container queries (`@container`)
 - **Deployment**: Cloudflare Workers via `@sveltejs/adapter-cloudflare`
 - **UI Components**: `@foxui/core`, `@foxui/social` (custom component libraries)
 
 ### Grid System
+
 The site uses an 8-column grid layout (`COLUMNS = 8` in `src/lib/index.ts`). Each card has:
+
 - Desktop position/size: `x`, `y`, `w`, `h`
 - Mobile position/size: `mobileX`, `mobileY`, `mobileW`, `mobileH`
 
@@ -34,26 +37,34 @@ Grid margins: 20px desktop, 12px mobile.
 ### Key Components
 
 **Website Rendering:**
+
 - `Website.svelte` - Read-only view of a user's bento grid
 - `EditableWebsite.svelte` - Full editing interface with drag-and-drop, card creation, and save functionality
+- Styling: two colors: base color (one the gray-ish tailwind colors: `gray`, `neutral`, `stone`, ...) and accent color (one of the not-gray-ish tailwind color: `rose`, `red`, `amber`, ...)
 
 **Card System (`src/lib/cards/`):**
+
 - `CardDefinition` type in `types.ts` defines the interface for card types
-- Each card type exports a definition with: `type`, `contentComponent`, `editingContentComponent`, optional `creationModalComponent`, `sidebarComponent`, `loadData`, `upload`
+- Each card type exports a definition with: `type`, `contentComponent`, optional `editingContentComponent`, `creationModalComponent`, `sidebarComponent`, `loadData`, `upload` (see more info and description in `src/lib/cards/types.ts`)
 - Card types: Text, Link, Image, Youtube, BlueskyPost, Embed, Map, Livestream, ATProtoCollections, Section
 - `AllCardDefinitions` and `CardDefinitionsByType` in `index.ts` aggregate all card types
+- See e.g. `src/lib/cards/EmbedCard/` and `src/lib/cards/LivestreamCard/` for examples of implementation.
+- Cards should be styled to work in light and dark mode (with `dark:` class modifier) as well as when cards are colorful (= bg-color-500 for the card background) (with `accent:` modifier).
 
 **ATProto Integration (`src/lib/oauth/`):**
+
 - `auth.svelte.ts` - OAuth client state and login/logout flow using `@atcute/oauth-browser-client`
 - `atproto.ts` - ATProto API helpers: `resolveHandle`, `listRecords`, `getRecord`, `putRecord`, `deleteRecord`, `uploadImage`
 - Data is stored in user's PDS under collection `app.blento.card`
 
 **Data Loading (`src/lib/website/`):**
+
 - `load.ts` - Fetches user data from their PDS, with Cloudflare KV caching (`USER_DATA_CACHE`)
 - `data.ts` - Defines which collections/records to fetch
 - `context.ts` - Svelte contexts for passing DID, handle, and data down the component tree
 
 ### Routes
+
 - `/` - Landing page
 - `/[handle]` - View a user's bento site (loads from their PDS)
 - `/[handle]/edit` - Edit mode for the user's site
@@ -62,10 +73,13 @@ Grid margins: 20px desktop, 12px mobile.
 - `/api/geocoding` - Geocoding API for map cards
 
 ### Item Type
+
 Cards are represented by the `Item` type (`src/lib/types.ts`) with grid position, size, cardType, and cardData properties.
 
 ### Collision/Layout Helpers
+
 `src/lib/helper.ts` contains grid layout algorithms:
+
 - `fixCollisions` - Push cards down when they overlap
 - `compactItems` - Move cards up to fill gaps
 - `simulateFinalPosition` - Preview where a dragged card will land
