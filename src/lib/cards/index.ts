@@ -1,5 +1,6 @@
 import type { Item } from '$lib/types';
 import { ATProtoCollectionsCardDefinition } from './ATProtoCollectionsCard';
+import { BigSocialCardDefinition } from './BigSocialCard';
 import { BlueskyMediaCardDefinition } from './BlueskyMediaCard';
 import { BlueskyPostCardDefinition } from './BlueskyPostCard';
 import { EmbedCardDefinition } from './EmbedCard';
@@ -17,6 +18,7 @@ export const AllCardDefinitions = [
 	ImageCardDefinition,
 	TextCardDefinition,
 	LinkCardDefinition,
+	BigSocialCardDefinition,
 	UpdatedBlentosCardDefitition,
 	YoutubeCardDefinition,
 	BlueskyPostCardDefinition,
