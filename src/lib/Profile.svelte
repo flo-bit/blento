@@ -41,7 +41,7 @@
 			{profileData?.displayName || handle}
 		</div>
 
-		<div class="scrollbar -mx-4 flex-grow overflow-y-scroll px-4">
+		<div class="scrollbar -mx-4 flex-grow overflow-y-scroll px-4 overflow-x-hidden">
 			<div
 				class="text-base-600 dark:text-base-400 prose dark:prose-invert prose-a:text-accent-500 prose-a:no-underline"
 			>

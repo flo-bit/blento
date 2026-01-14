@@ -97,6 +97,49 @@ export function fixCollisions(items: Item[], movedItem: Item, mobile: boolean = 
 	compactItems(items, mobile);
 }
 
+// Fix all collisions between items (not just one moved item)
+// Items higher on the page have priority and stay in place
+export function fixAllCollisions(items: Item[], mobile: boolean = false) {
+	// Sort by Y position (top-to-bottom, then left-to-right)
+	// Items at the top have priority and won't be moved
+	const sortedItems = items.toSorted((a, b) =>
+		mobile ? a.mobileY - b.mobileY || a.mobileX - b.mobileX : a.y - b.y || a.x - b.x
+	);
+
+	// Process each item and push it down if it overlaps with any item above it
+	for (let i = 0; i < sortedItems.length; i++) {
+		const item = sortedItems[i];
+
+		// Clamp X to valid range
+		if (mobile) {
+			item.mobileX = clamp(item.mobileX, 0, COLUMNS - item.mobileW);
+		} else {
+			item.x = clamp(item.x, 0, COLUMNS - item.w);
+		}
+
+		// Check for collisions with all items that come before (higher priority)
+		let hasCollision = true;
+		while (hasCollision) {
+			hasCollision = false;
+			for (let j = 0; j < i; j++) {
+				const other = sortedItems[j];
+				if (overlaps(item, other, mobile)) {
+					// Push item down below the colliding item
+					if (mobile) {
+						item.mobileY = other.mobileY + other.mobileH;
+					} else {
+						item.y = other.y + other.h;
+					}
+					hasCollision = true;
+					break; // Restart collision check from the beginning
+				}
+			}
+		}
+	}
+
+	compactItems(items, mobile);
+}
+
 // Move all items up as far as possible without collisions
 export function compactItems(items: Item[], mobile: boolean = false) {
 	// Sort by Y position (top-to-bottom) so upper items settle first.

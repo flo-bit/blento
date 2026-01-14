@@ -9,6 +9,7 @@ import type { Record as ListRecord } from '@atproto/api/dist/client/types/com/at
 import { data } from './data';
 import { CardDefinitionsByType } from '$lib/cards';
 import type { Item } from '$lib/types';
+import { compactItems, fixAllCollisions, fixCollisions } from '$lib/helper';
 
 type LoadedData = {
 	did: string;
@@ -38,7 +39,7 @@ export async function loadData(
 					timePassed,
 					'seconds ago'
 				);
-				return migrateData(JSON.parse(cachedResult));
+				return checkData(migrateData(JSON.parse(cachedResult)));
 			}
 		} catch (error) {
 			console.log('getting cached result failed', error);
@@ -146,7 +147,7 @@ export async function loadData(
 
 	await platform?.env?.USER_DATA_CACHE?.put(handle, JSON.stringify(result));
 
-	return migrateData(result);
+	return checkData(migrateData(result));
 }
 
 function migrateFromV0ToV1(data: LoadedData): LoadedData {
@@ -161,6 +162,21 @@ function migrateFromV0ToV1(data: LoadedData): LoadedData {
 		card.mobileH *= 2;
 		card.mobileW *= 2;
 		card.version = 1;
+	}
+
+	return data;
+}
+
+function checkData(data: LoadedData): LoadedData {
+	const cards = Object.values(data.data['app.blento.card']).map((i) => i.value) as Item[];
+
+	console.log(cards);
+	if (cards.length > 0) {
+		fixAllCollisions(cards);
+		fixAllCollisions(cards, true);
+
+		compactItems(cards);
+		compactItems(cards, true);
 	}
 
 	return data;
