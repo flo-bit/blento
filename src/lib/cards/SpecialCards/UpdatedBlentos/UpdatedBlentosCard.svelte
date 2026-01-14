@@ -7,27 +7,23 @@
 
 	let { item }: ContentComponentProps = $props();
 
-
 	const data = getAdditionalUserData();
 	// svelte-ignore state_referenced_locally
-	const profiles = (data[item.cardType] as ProfileViewDetailed[]);
+	const profiles = data[item.cardType] as ProfileViewDetailed[];
 </script>
 
-<div class="pointer-events-none">
-	<div
-		class="from-base-50 dark:from-base-950 absolute inset-0 bg-gradient-to-t to-transparent"
-	></div>
-	<div class="absolute bottom-3 left-4 text-sm font-semibold">recently updated blentos</div>
-</div>
-<div class="flex h-full max-w-full items-center gap-4 overflow-x-scroll px-8 overflow-y-hidden">
-	{#each profiles as profile}
-		<a
-			href="/{profile.handle}"
-			class=" hover:bg-base-200 dark:hover:bg-base-800 mb-4 flex h-fit min-w-24 flex-col items-center justify-center gap-2 rounded-xl p-2"
-			target="_blank"
-		>
-			<div class="line-clamp-2 font-semibold">{profile.displayName || profile.handle}</div>
-			<img src={profile.avatar} class="aspect-square size-20 rounded-full" alt="" />
-		</a>
-	{/each}
+<div class="h-full flex flex-col">
+	<div class="text-2xl font-bold px-4 py-2">Recently updated blentos</div>
+	<div class="flex grow max-w-full items-center gap-4 overflow-x-scroll overflow-y-hidden px-4">
+		{#each profiles as profile}
+			<a
+				href="/{profile.handle}"
+				class="bg-base-100 dark:bg-base-800 hover:bg-base-200 dark:hover:bg-base-700 flex h-52 w-44 min-w-44 flex-col items-center justify-center gap-2 rounded-xl transition-colors duration-150 p-2 accent:bg-accent-200/30 accent:hover:bg-accent-200/50"
+				target="_blank"
+			>
+				<img src={profile.avatar} class="aspect-square size-28 rounded-full" alt="" />
+				<div class="line-clamp-1 text-lg font-bold">{profile.displayName || profile.handle}</div>
+			</a>
+		{/each}
+	</div>
 </div>

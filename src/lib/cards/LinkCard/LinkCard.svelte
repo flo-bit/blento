@@ -12,17 +12,17 @@
 <div class="flex h-full flex-col justify-between p-4">
 	<div>
 		{#if item.cardData.favicon}
-			{#if !faviconHasError}
-				<img
-					class="mb-2 size-8 rounded-lg object-cover"
-					onerror={() => (faviconHasError = true)}
-					src={item.cardData.favicon}
-					alt=""
-				/>
-			{:else}
-				<div
-					class="bg-base-100 border-base-300 dark:border-base-800 dark:bg-base-900 mb-2 inline-flex size-8 items-center justify-center rounded-lg border shadow-sm"
-				>
+			<div
+				class="bg-base-100 border-base-300 dark:border-base-800 dark:bg-base-900 mb-2 inline-flex size-8 items-center justify-center rounded-xl border shadow-sm"
+			>
+				{#if !faviconHasError}
+					<img
+						class="size-6 rounded-lg object-cover"
+						onerror={() => (faviconHasError = true)}
+						src={item.cardData.favicon}
+						alt=""
+					/>
+				{:else}
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
 						fill="none"
@@ -37,19 +37,21 @@
 							d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244"
 						/>
 					</svg>
-				</div>
-			{/if}
+				{/if}
+			</div>
 		{/if}
 		<div
 			class={[
-				'text-base-900 dark:text-base-50 text-lg font-semibold',
+				'text-base-900 dark:text-base-50 text-lg font-bold',
 				(isMobile() && item.mobileH < 8) || (!isMobile() && item.h < 4) ? 'line-clamp-2' : ''
 			]}
 		>
 			{item.cardData.title}
 		</div>
 		<!-- <div class="text-base-800 dark:text-base-100 mt-2 text-xs">{item.cardData.description}</div> -->
-		<div class="text-accent-600 dark:text-accent-400 mt-2 text-xs font-light">
+		<div
+			class="text-accent-600 accent:text-accent-950 dark:text-accent-400 mt-2 text-xs font-semibold"
+		>
 			{item.cardData.domain}
 		</div>
 	</div>

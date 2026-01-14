@@ -5,7 +5,8 @@
 
 @source '../node_modules/@foxui';
 
-@custom-variant dark (&:where(.dark, .dark *));
+@custom-variant dark (&:where(.dark, .dark *):not(:where(.light, .light *)));
+@custom-variant accent (&:where(.accent, .accent *));
 
 .body::-webkit-scrollbar-track {
 	background-color: transparent;

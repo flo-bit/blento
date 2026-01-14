@@ -37,7 +37,7 @@
 		<span>My AT Protocol Collections</span>
 
 		{#if collections}
-			<Badge size="md">{collections.length}</Badge>
+			<Badge size="md" class="accent:text-accent-950">{collections.length}</Badge>
 		{/if}
 	</div>
 	<div class="flex flex-wrap overflow-y-scroll gap-2 px-4 overflow-x-hidden w-full">

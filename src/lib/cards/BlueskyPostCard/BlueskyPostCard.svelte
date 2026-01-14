@@ -31,6 +31,7 @@
 </script>
 
 <div class="flex h-full flex-col justify-center-safe overflow-y-scroll p-4">
+	<div class="text-2xl accent:text-base-950 w-fit font-semibold mb-6 mx-auto p-1 px-2 bg-base-200/50 dark:bg-base-700/30 rounded-xl">My latest bluesky post</div>
 	{#if feed?.[0]?.post}
 		<BlueskyPost showLogo feedViewPost={feed?.[0].post}></BlueskyPost>
 		<div class="h-4 w-full"></div>

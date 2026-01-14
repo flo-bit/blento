@@ -16,7 +16,7 @@
 
 {#snippet logo()}
 	<a
-		class="text-accent-700 dark:text-accent-400 hover:text-accent-600 dark:hover:text-accent-500"
+		class="text-accent-700 dark:text-accent-400 hover:text-accent-600 dark:hover:text-accent-500 accent:text-accent-900 accent:hover:text-accent-800"
 		href={postData?.href}
 	>
 		<svg xmlns="http://www.w3.org/2000/svg" version="1.1" class="size-4" viewBox="0 0 600 530">

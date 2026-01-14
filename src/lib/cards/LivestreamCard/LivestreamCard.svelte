@@ -76,10 +76,10 @@
 								<circle cx="50" cy="50" r="30" fill="currentColor" />
 							</svg>
 
-							live</Badge
+							<span class="accent:text-base-900">live</span></Badge
 						>
 					{:else if latestLivestream.online === false}
-						<Badge size="sm">ended</Badge>
+						<Badge size="sm" class="accent:text-base-900">ended</Badge>
 					{:else}
 						<div class="h-[22px]"></div>
 					{/if}
@@ -87,7 +87,7 @@
 
 				<a href={latestLivestream?.href} target="_blank" rel="noopener noreferrer">
 					<div
-						class="text-accent-700 dark:text-accent-300 hover:text-accent-600 dark:hover:text-accent-400 text-xl font-semibold transition-colors duration-150"
+						class="text-accent-700 dark:text-accent-300 accent:text-accent-950 hover:accent:text-accent-900 hover:text-accent-600 dark:hover:text-accent-400 text-xl font-semibold transition-colors duration-150"
 					>
 						{latestLivestream?.title}
 					</div>

@@ -116,19 +116,19 @@
 				<div class="flex items-start gap-4">
 					{#if data.author.href}
 						<a
-							class="hover:bg-accent-900/5 group/post-author -mx-2 -my-0.5 flex flex-col items-baseline gap-x-2 gap-y-0.5 rounded-xl px-2 py-0.5 sm:flex-row"
+							class="hover:bg-accent-900/5 accent:hover:bg-accent-100/10 group/post-author -mx-2 -my-0.5 flex flex-col items-baseline gap-x-2 gap-y-0.5 rounded-xl px-2 py-0.5 sm:flex-row"
 							href={data.author.href}
 						>
 							{#if data.author.displayName}
 								<div
-									class="text-base-900 group-hover/post-author:text-accent-600 dark:text-base-50 dark:group-hover/post-author:text-accent-300 line-clamp-1 text-sm leading-tight font-semibold"
+									class="text-base-900 group-hover/post-author:text-accent-600 dark:text-base-50 dark:group-hover/post-author:text-accent-300 accent:group-hover/post-author:text-accent-950 line-clamp-1 text-sm leading-tight font-semibold"
 								>
 									{data.author.displayName}
 								</div>
 							{/if}
 							<div
 								class={cn(
-									'group-hover/post-author:text-accent-600 dark:group-hover/post-author:text-accent-400 text-sm',
+									'group-hover/post-author:text-accent-600 dark:group-hover/post-author:text-accent-400 accent:text-accent-950 accent:group-hover/post-author:text-accent-900 text-sm',
 									!data.author.displayName
 										? 'text-base-900 dark:text-base-50 font-semibold'
 										: 'text-base-600 dark:text-base-400'
@@ -144,13 +144,15 @@
 							<div class="text-base-900 dark:text-base-50 text-sm leading-tight font-semibold">
 								{data.author.displayName}
 							</div>
-							<div class="text-base-600 dark:text-base-400 text-sm">
+							<div class="text-base-600 dark:text-base-400 accent:text-accent-950 text-sm">
 								@{data.author.handle}
 							</div>
 						</div>
 					{/if}
 
-					<div class="text-base-600 dark:text-base-400 block text-sm no-underline">
+					<div
+						class="text-base-600 dark:text-base-400 accent:text-accent-950 block text-sm no-underline"
+					>
 						<RelativeTime date={new Date(data.createdAt)} locale="en" />
 					</div>
 				</div>
@@ -160,7 +162,10 @@
 				{/if}
 			</div>
 
-			<Prose size="md">
+			<Prose
+				size="md"
+				class="accent:prose-a:text-accent-950 accent:text-base-900 accent:prose-p:text-base-900 accent:prose-a:underline"
+			>
 				{#if data.htmlContent}
 					{@html data.htmlContent}
 				{:else}
@@ -173,7 +178,9 @@
 			{/if}
 
 			{#if showReply || showRepost || showLike || showBookmark || customActions}
-				<div class="text-base-500 dark:text-base-400 mt-4 flex justify-between gap-2">
+				<div
+					class="text-base-500 dark:text-base-400 accent:text-base-900 mt-4 flex justify-between gap-2"
+				>
 					{#if showReply}
 						<PostAction onclick={onReplyClick}>
 							<svg
