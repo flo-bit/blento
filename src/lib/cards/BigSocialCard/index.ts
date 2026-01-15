@@ -175,7 +175,7 @@ export const platformsData: Record<string, SimpleIcon> = {
 
 export function detectPlatform(url: string): string | null {
 	for (const [platform, pattern] of Object.entries(platformPatterns)) {
-		if (pattern.test(url)) {
+		if (pattern.test(url) && platformsData[platform]) {
 			return platform;
 		}
 	}
