@@ -19,8 +19,12 @@
 	// svelte-ignore state_referenced_locally
 	setHandleContext(data.handle);
 
+	let visibleCards = $derived(
+		data.cards.filter((item) => !(isMobile && item.hideOnMobile))
+	);
+
 	let maxHeight = $derived(
-		data.cards.reduce(
+		visibleCards.reduce(
 			(max, item) => Math.max(max, isMobile ? item.mobileY + item.mobileH : item.y + item.h),
 			0
 		)
@@ -51,7 +55,7 @@
 		>
 			<div></div>
 			<div bind:this={container} class="@container/grid relative col-span-3 px-2 py-8 lg:px-8">
-				{#each data.cards.toSorted(sortItems) as item}
+				{#each visibleCards.toSorted(sortItems) as item}
 					<BaseCard {item}>
 						<Card {item} />
 					</BaseCard>
