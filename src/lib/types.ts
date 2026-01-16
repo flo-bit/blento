@@ -18,6 +18,8 @@ export type Item = {
 
 	color?: string;
 
+	hideOnMobile?: boolean;
+
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	cardData: any;
 

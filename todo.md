@@ -15,7 +15,7 @@
     - favicon
 - [x] set custom card size
 - spacer card
-- option to hide cards on mobile
+- [x] option to hide cards on mobile
 
 - [x] og images
 - separate og image for main page
