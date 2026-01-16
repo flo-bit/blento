@@ -299,3 +299,28 @@ export function isTyping() {
 
 	return isEditable;
 }
+
+export function validateLink(
+	link: string | undefined,
+	tryAdding: boolean = true
+): string | undefined {
+	if (!link) return;
+	try {
+		new URL(link);
+
+		return link;
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	} catch (e) {
+		if (!tryAdding) return;
+
+		try {
+			link = 'https://' + link;
+			new URL(link);
+
+			return link;
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		} catch (e) {
+			return;
+		}
+	}
+}

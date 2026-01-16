@@ -136,8 +136,7 @@
 		if (!cardDef) return false;
 
 		if (isMobile()) {
-			
-			return w >= minW && w*2 <= maxW && h >= minH && h*2 <= maxH;
+			return w >= minW && w * 2 <= maxW && h >= minH && h * 2 <= maxH;
 		}
 
 		return w >= minW && w <= maxW && h >= minH && h <= maxH;
@@ -154,7 +153,14 @@
 	let settingsPopoverOpen = $state(false);
 </script>
 
-<BaseCard {item} isEditing={true} bind:ref showOutline={isResizing} class="starting:scale-0 scale-100 starting:opacity-0 opacity-100" {...rest} >
+<BaseCard
+	{item}
+	isEditing={true}
+	bind:ref
+	showOutline={isResizing}
+	class="scale-100 opacity-100 starting:scale-0 starting:opacity-0"
+	{...rest}
+>
 	{@render children?.()}
 
 	{#snippet controls()}
@@ -283,7 +289,7 @@
 					{/if}
 
 					{#if cardDef.settingsComponent}
-						<Popover bind:open={settingsPopoverOpen}>
+						<Popover bind:open={settingsPopoverOpen} class="bg-base-50 dark:bg-base-900">
 							{#snippet child({ props })}
 								<button {...props} class="hover:bg-accent-500/10 cursor-pointer rounded-xl p-2">
 									<svg
@@ -307,7 +313,12 @@
 									</svg>
 								</button>
 							{/snippet}
-							<cardDef.settingsComponent bind:item />
+							<cardDef.settingsComponent
+								bind:item
+								onclose={() => {
+									settingsPopoverOpen = false;
+								}}
+							/>
 						</Popover>
 					{/if}
 				</div>

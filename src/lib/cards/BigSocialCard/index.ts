@@ -32,7 +32,8 @@ export const BigSocialCardDefinition = {
 		item.cardData.href = url;
 
 		return item;
-	}
+	},
+	urlHandlerPriority: 1
 } as CardDefinition & { type: 'bigsocial' };
 
 import {

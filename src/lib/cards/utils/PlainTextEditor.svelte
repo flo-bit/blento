@@ -76,6 +76,7 @@
 	:global(.tiptap p.is-editor-empty:first-child::before) {
 		color: var(--color-base-800);
 		content: attr(data-placeholder);
+		opacity: 50%;
 		float: left;
 		height: 0;
 		pointer-events: none;

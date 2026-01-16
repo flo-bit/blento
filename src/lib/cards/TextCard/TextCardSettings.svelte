@@ -27,7 +27,7 @@
 				viewBox="0 0 24 24"
 				fill="none"
 				stroke="currentColor"
-				stroke-width="1.5"
+				stroke-width="2"
 				stroke-linecap="round"
 				stroke-linejoin="round"><path d="M21 5H3" /><path d="M15 12H3" /><path d="M17 19H3" /></svg
 			></ToggleGroupItem
@@ -38,7 +38,7 @@
 				viewBox="0 0 24 24"
 				fill="none"
 				stroke="currentColor"
-				stroke-width="1.5"
+				stroke-width="2"
 				stroke-linecap="round"
 				stroke-linejoin="round"><path d="M21 5H3" /><path d="M17 12H7" /><path d="M19 19H5" /></svg
 			></ToggleGroupItem
@@ -49,7 +49,7 @@
 				viewBox="0 0 24 24"
 				fill="none"
 				stroke="currentColor"
-				stroke-width="1.5"
+				stroke-width="2"
 				stroke-linecap="round"
 				stroke-linejoin="round"><path d="M21 5H3" /><path d="M21 12H9" /><path d="M21 19H7" /></svg
 			></ToggleGroupItem
@@ -74,7 +74,7 @@
 				viewBox="0 0 24 24"
 				fill="none"
 				stroke="currentColor"
-				stroke-width="1.5"
+				stroke-width="2"
 				stroke-linecap="round"
 				stroke-linejoin="round"
 				><rect width="6" height="16" x="4" y="6" rx="2" /><rect
@@ -92,7 +92,7 @@
 				viewBox="0 0 24 24"
 				fill="none"
 				stroke="currentColor"
-				stroke-width="1.5"
+				stroke-width="2"
 				stroke-linecap="round"
 				stroke-linejoin="round"
 				><rect width="10" height="6" x="7" y="9" rx="2" /><path d="M22 20H2" /><path
@@ -106,7 +106,7 @@
 				viewBox="0 0 24 24"
 				fill="none"
 				stroke="currentColor"
-				stroke-width="1.5"
+				stroke-width="2"
 				stroke-linecap="round"
 				stroke-linejoin="round"
 				><rect width="14" height="6" x="5" y="12" rx="2" /><rect

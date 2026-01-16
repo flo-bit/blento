@@ -7,10 +7,9 @@ export type CreationModalComponentProps = {
 	oncancel: () => void;
 };
 
-export type SettingsModalComponentProps = {
+export type SettingsComponentProps = {
 	item: Item;
-	onsave: (item: Item) => void;
-	oncancel: () => void;
+	onclose: () => void;
 };
 
 export type SidebarComponentProps = {
@@ -37,7 +36,7 @@ export type CardDefinition = {
 	sidebarButtonText?: string;
 
 	// if this component exists, a settings button with a popover will be shown containing this component
-	settingsComponent?: Component<ContentComponentProps>;
+	settingsComponent?: Component<SettingsComponentProps>;
 
 	// optionally load some extra data
 	loadData?: (
@@ -62,4 +61,5 @@ export type CardDefinition = {
 	canResize?: boolean;
 
 	onUrlHandler?: (url: string, item: Item) => Item | null;
+	urlHandlerPriority?: number;
 };

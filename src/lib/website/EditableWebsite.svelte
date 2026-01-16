@@ -1,7 +1,17 @@
 <script lang="ts">
 	import { client, login } from '$lib/oauth/auth.svelte.js';
 
-	import { Navbar, Button, toast, Toaster, Toggle, Sidebar } from '@foxui/core';
+	import {
+		Navbar,
+		Button,
+		toast,
+		Toaster,
+		Toggle,
+		Sidebar,
+		Popover,
+		Input,
+		Label
+	} from '@foxui/core';
 	import { BlueskyLogin } from '@foxui/social';
 
 	import { COLUMNS, margin, mobileMargin } from '$lib';
@@ -14,7 +24,8 @@
 		getHideProfile,
 		getName,
 		isTyping,
-		setPositionOfNewItem
+		setPositionOfNewItem,
+		validateLink
 	} from '../helper';
 	import Profile from './Profile.svelte';
 	import type { Item, WebsiteData } from '../types';
@@ -76,7 +87,7 @@
 
 	let maxHeight = $derived(items.reduce((max, item) => Math.max(max, getY(item) + getH(item)), 0));
 
-	function newCard(type: string = 'link') {
+	function newCard(type: string = 'link', cardData?: any) {
 		// close sidebar if open
 		const popover = document.getElementById('mobile-menu');
 		if (popover) {
@@ -94,7 +105,7 @@
 			mobileX: 0,
 			mobileY: 0,
 			cardType: type,
-			cardData: {},
+			cardData: cardData ?? {},
 			version: 2,
 			page: data.page
 		};
@@ -232,6 +243,8 @@
 
 	let debugPoint = $state({ x: 0, y: 0 });
 
+	let linkPopoverOpen = $state(false);
+
 	function getDragXY(
 		e: DragEvent & {
 			currentTarget: EventTarget & HTMLDivElement;
@@ -264,6 +277,53 @@
 		}
 		return { x: gridX, y: gridY };
 	}
+
+	let linkValue = $state('');
+
+	function addLink(url: string) {
+		let link = validateLink(url);
+		if (!link) {
+			toast.error('invalid link');
+			return;
+		}
+
+		let item: Item = {
+			id: TID.nextStr(),
+			x: 0,
+			y: 0,
+			w: 2,
+			h: 2,
+			mobileH: 4,
+			mobileW: 4,
+			mobileX: 0,
+			mobileY: 0,
+			cardType: '',
+			cardData: {}
+		};
+
+		newItem.item = item;
+
+		console.log(AllCardDefinitions.toSorted(
+			(a, b) => (b.urlHandlerPriority ?? 0) - (a.urlHandlerPriority ?? 0)
+		));
+
+		for (const cardDef of AllCardDefinitions.toSorted(
+			(a, b) => (b.urlHandlerPriority ?? 0) - (a.urlHandlerPriority ?? 0)
+		)) {
+			if (cardDef.onUrlHandler?.(link, item)) {
+				item.cardType = cardDef.type;
+				saveNewItem();
+				break;
+			}
+		}
+
+		newItem = {};
+
+		if(linkValue === url) {
+			linkValue = '';
+			linkPopoverOpen = false;
+		}
+	}
 </script>
 
 <svelte:body
@@ -271,40 +331,10 @@
 		if (isTyping()) return;
 
 		const text = event.clipboardData?.getData('text/plain');
+		const link = validateLink(text, false);
+		if (!link) return;
 
-		if (!text) return;
-
-		try {
-			const url = new URL(text);
-
-			let item: Item = {
-				id: TID.nextStr(),
-				x: 0,
-				y: 0,
-				w: 2,
-				h: 2,
-				mobileH: 4,
-				mobileW: 4,
-				mobileX: 0,
-				mobileY: 0,
-				cardType: '',
-				cardData: {}
-			};
-
-			newItem.item = item;
-
-			for (const cardDef of AllCardDefinitions) {
-				if (cardDef.onUrlHandler?.(text, item)) {
-					item.cardType = cardDef.type;
-					saveNewItem();
-					return;
-				}
-			}
-
-			newItem = {};
-		} catch (e) {
-			return;
-		}
+		addLink(link);
 	}}
 />
 
@@ -514,28 +544,58 @@
 						/></svg
 					>
 				</Button>
-				<Button
-					size="iconLg"
-					variant="ghost"
-					class="backdrop-blur-none"
-					onclick={() => {
-						newCard('link');
-					}}
-				>
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						fill="none"
-						viewBox="-2 -2 28 28"
-						stroke-width="1.5"
-						stroke="currentColor"
-					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244"
-						/>
-					</svg>
-				</Button>
+
+				<Popover sideOffset={16} bind:open={linkPopoverOpen} class="bg-base-100 dark:bg-base-900">
+					{#snippet child({ props })}
+						<Button
+							size="iconLg"
+							variant="ghost"
+							class="backdrop-blur-none"
+							onclick={() => {
+								newCard('link');
+							}}
+							{...props}
+						>
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								fill="none"
+								viewBox="-2 -2 28 28"
+								stroke-width="1.5"
+								stroke="currentColor"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244"
+								/>
+							</svg>
+						</Button>
+					{/snippet}
+					<Input
+						spellcheck={false}
+						type="url"
+						bind:value={linkValue}
+						onkeydown={(event) => {
+							if (event.code === 'Enter') {
+								addLink(linkValue);
+								event.preventDefault();
+							}
+						}}
+						placeholder="Enter link"
+					/>
+					<Button onclick={() => addLink(linkValue)} size="icon"
+						><svg
+							xmlns="http://www.w3.org/2000/svg"
+							fill="none"
+							viewBox="0 0 24 24"
+							stroke-width="1.5"
+							stroke="currentColor"
+							class="size-6"
+						>
+							<path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+						</svg>
+					</Button>
+				</Popover>
 
 				<Button
 					size="iconLg"
