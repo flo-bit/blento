@@ -31,3 +31,5 @@
 - show social icon instead of favicon in link card if platform found for link
 
 - when adding images try to add them in a size that best fits aspect ratio
+
+- onboarding

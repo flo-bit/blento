@@ -9,7 +9,7 @@ export const LinkCardDefinition = {
 	contentComponent: LinkCard,
 	editingContentComponent: EditingLinkCard,
 	createNew: (card) => {
-		card.cardType = 'link';
+		card.cardData.hasFetched = false;
 	},
 	settingsComponent: LinkCardSettings,
 
@@ -28,6 +28,7 @@ export const LinkCardDefinition = {
 	onUrlHandler: (url, item) => {
 		item.cardData.href = url;
 		item.cardData.domain = new URL(url).hostname;
+		item.cardData.hasFetched = false;
 		return item;
 	},
 	urlHandlerPriority: 0

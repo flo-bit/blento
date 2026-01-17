@@ -305,6 +305,7 @@
 
 				newItem.item = item;
 				saveNewItem();
+				toast(cardDef.name + ' added!');
 				break;
 			}
 		}

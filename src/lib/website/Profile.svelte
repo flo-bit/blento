@@ -88,7 +88,7 @@
 				</div>
 			{:else if client.isLoggedIn}
 				<div>
-					<Button href={'/' + client.profile?.handle} class="mt-2">
+					<Button href="/{env.PUBLIC_IS_SELFHOSTED ? '' : client.profile?.handle}/edit" class="mt-2">
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
 							fill="none"
@@ -103,7 +103,7 @@
 							/>
 						</svg>
 
-						Open Your Blento</Button
+						Edit Your Blento</Button
 					>
 				</div>
 			{/if}

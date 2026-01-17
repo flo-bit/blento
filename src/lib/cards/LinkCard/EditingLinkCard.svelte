@@ -39,6 +39,8 @@
 		}
 	}
 
+	$inspect(hasFetched);
+
 	$effect(() => {
 		if (hasFetched !== false || isFetchingMetadata) {
 			return;
