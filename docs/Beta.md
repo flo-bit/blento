@@ -1,15 +1,10 @@
 # Todo for beta
 
-- opengraph stuff
-
-  - title, description
-  - fix opengraph image stuff
+- fix opengraph image stuff
 
 - site.standard
-
   - move subpages to own lexicon
   - move description to markdownDescription and set description as text only
-  - implement verification
 
 - fix recent blentos only showing the last ~5
 
@@ -25,8 +20,6 @@
 
 - allow setting base and accent color
 
-- edit link of image card
-
 - go straight to edit mode (and redirect to edit mode on succesfull login)
 
 - ask to fill with some default cards on page creation
@@ -34,3 +27,7 @@
 - share button (copy share link to blento, maybe post to bluesky?)
 
 - add icons to "change card to..." popover
+
+- show social icon instead of favicon in link card if platform found for link
+
+- when adding images try to add them in a size that best fits aspect ratio

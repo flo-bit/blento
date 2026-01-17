@@ -29,5 +29,12 @@ export const ImageCardDefinition = {
 
 		return item;
 	},
-	settingsComponent: ImageCardSettings
+	settingsComponent: ImageCardSettings,
+
+	canChange: (item) => Boolean(item.cardData.image),
+
+	change: (item) => {
+		return item;
+	},
+	name: 'Image Card'
 } as CardDefinition & { type: 'image' };

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Card from '../cards/Card/Card.svelte';
 	import Profile from './Profile.svelte';
-	import { getHideProfile, getName, sortItems } from '../helper';
+	import { getDescription, getHideProfile, getName, sortItems } from '../helper';
 	import { innerWidth } from 'svelte/reactivity/window';
 	import { setDidContext, setHandleContext, setIsMobile } from './context';
 	import BaseCard from '../cards/BaseCard/BaseCard.svelte';
@@ -33,6 +33,7 @@
 	favicon={data.profile.avatar ?? null}
 	title={getName(data)}
 	image={'/' + data.handle + '/og.png'}
+	description={getDescription(data)}
 />
 
 <Context {data}>
