@@ -14,6 +14,7 @@ import { UpdatedBlentosCardDefitition } from './SpecialCards/UpdatedBlentos';
 import { TextCardDefinition } from './TextCard';
 import type { CardDefinition } from './types';
 import { YoutubeCardDefinition } from './YoutubeVideo';
+import { BlueskyProfileCardDefinition } from './BlueskyProfileCard';
 
 export const AllCardDefinitions = [
 	ImageCardDefinition,
@@ -30,7 +31,8 @@ export const AllCardDefinitions = [
 	ATProtoCollectionsCardDefinition,
 	SectionCardDefinition,
 	BlueskyMediaCardDefinition,
-	DinoGameCardDefinition
+	DinoGameCardDefinition,
+	BlueskyProfileCardDefinition
 ] as const;
 
 export const CardDefinitionsByType = AllCardDefinitions.reduce(
