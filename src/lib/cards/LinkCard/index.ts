@@ -20,7 +20,7 @@ export const LinkCardDefinition = {
 		if (!href) return item;
 
 		item.cardData = {
-			href,
+			...item.cardData,
 			hasFetched: false
 		};
 		return item;

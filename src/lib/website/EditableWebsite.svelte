@@ -97,6 +97,7 @@
 		}
 
 		let item = createEmptyCard(data.page);
+		item.cardType = type;
 
 		item.cardData = cardData ?? {};
 
@@ -319,11 +320,11 @@
 		const objectUrl = URL.createObjectURL(compressedFile);
 
 		let item = createEmptyCard(data.page);
-		
+
 		item.cardType = 'image';
 		item.cardData = {
-				blob: compressedFile,
-				objectUrl
+			blob: compressedFile,
+			objectUrl
 		};
 
 		// If grid position is provided

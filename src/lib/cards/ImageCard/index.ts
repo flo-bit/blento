@@ -1,6 +1,7 @@
 import { uploadBlob } from '$lib/oauth/utils';
 import type { CardDefinition } from '../types';
 import ImageCard from './ImageCard.svelte';
+import ImageCardSettings from './ImageCardSettings.svelte';
 
 export const ImageCardDefinition = {
 	type: 'image',
@@ -27,5 +28,6 @@ export const ImageCardDefinition = {
 		}
 
 		return item;
-	}
+	},
+	settingsComponent: ImageCardSettings
 } as CardDefinition & { type: 'image' };

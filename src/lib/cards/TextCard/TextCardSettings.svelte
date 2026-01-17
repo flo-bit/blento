@@ -9,52 +9,6 @@
 </script>
 
 <div class="flex flex-col gap-2">
-	<ToggleGroup
-		type="single"
-		bind:value={
-			() => {
-				return item.cardData.textAlign ?? 'left';
-			},
-			(value) => {
-				if (!value) return;
-				item.cardData.textAlign = value;
-			}
-		}
-	>
-		<ToggleGroupItem size="sm" value="left" class={classes}
-			><svg
-				xmlns="http://www.w3.org/2000/svg"
-				viewBox="0 0 24 24"
-				fill="none"
-				stroke="currentColor"
-				stroke-width="2"
-				stroke-linecap="round"
-				stroke-linejoin="round"><path d="M21 5H3" /><path d="M15 12H3" /><path d="M17 19H3" /></svg
-			></ToggleGroupItem
-		>
-		<ToggleGroupItem size="sm" value="center" class={classes}
-			><svg
-				xmlns="http://www.w3.org/2000/svg"
-				viewBox="0 0 24 24"
-				fill="none"
-				stroke="currentColor"
-				stroke-width="2"
-				stroke-linecap="round"
-				stroke-linejoin="round"><path d="M21 5H3" /><path d="M17 12H7" /><path d="M19 19H5" /></svg
-			></ToggleGroupItem
-		>
-		<ToggleGroupItem size="sm" value="right" class={classes}
-			><svg
-				xmlns="http://www.w3.org/2000/svg"
-				viewBox="0 0 24 24"
-				fill="none"
-				stroke="currentColor"
-				stroke-width="2"
-				stroke-linecap="round"
-				stroke-linejoin="round"><path d="M21 5H3" /><path d="M21 12H9" /><path d="M21 19H7" /></svg
-			></ToggleGroupItem
-		>
-	</ToggleGroup>
 
 	<ToggleGroup
 		type="single"
@@ -119,6 +73,54 @@
 			></ToggleGroupItem
 		>
 	</ToggleGroup>
+	
+	<ToggleGroup
+		type="single"
+		bind:value={
+			() => {
+				return item.cardData.textAlign ?? 'left';
+			},
+			(value) => {
+				if (!value) return;
+				item.cardData.textAlign = value;
+			}
+		}
+	>
+		<ToggleGroupItem size="sm" value="left" class={classes}
+			><svg
+				xmlns="http://www.w3.org/2000/svg"
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="2"
+				stroke-linecap="round"
+				stroke-linejoin="round"><path d="M21 5H3" /><path d="M15 12H3" /><path d="M17 19H3" /></svg
+			></ToggleGroupItem
+		>
+		<ToggleGroupItem size="sm" value="center" class={classes}
+			><svg
+				xmlns="http://www.w3.org/2000/svg"
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="2"
+				stroke-linecap="round"
+				stroke-linejoin="round"><path d="M21 5H3" /><path d="M17 12H7" /><path d="M19 19H5" /></svg
+			></ToggleGroupItem
+		>
+		<ToggleGroupItem size="sm" value="right" class={classes}
+			><svg
+				xmlns="http://www.w3.org/2000/svg"
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="2"
+				stroke-linecap="round"
+				stroke-linejoin="round"><path d="M21 5H3" /><path d="M21 12H9" /><path d="M21 19H7" /></svg
+			></ToggleGroupItem
+		>
+	</ToggleGroup>
+
 
 	<div>
 		<Button

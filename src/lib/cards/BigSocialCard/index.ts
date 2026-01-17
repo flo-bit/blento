@@ -29,7 +29,7 @@ export const BigSocialCardDefinition = {
 		const platform = href ? detectPlatform(href) : null;
 		if (!href || !platform) return item;
 		item.cardData = {
-			href,
+			...item.cardData,
 			platform,
 			color: platformsData[platform].hex
 		};

@@ -1,20 +1,15 @@
 <script lang="ts">
 	import type { ContentComponentProps } from '../types';
 
-	let {
-		item,
-		sandbox
-	}: ContentComponentProps & {
-		sandbox: string;
-	} = $props();
+	let { item }: ContentComponentProps = $props();
 
 	// svelte-ignore state_referenced_locally
-	let domain = new URL(item.cardData.href).hostname;
+	let domain = new URL(item.cardData.embed).hostname;
 </script>
 
 {#if domain === 'stream.place'}
 	<iframe
-		src={item.cardData.href}
+		src={item.cardData.embed}
 		sandbox="allow-scripts allow-same-origin"
 		referrerpolicy="no-referrer"
 		class="absolute inset-0 h-full w-full"
