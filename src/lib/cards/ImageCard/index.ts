@@ -1,6 +1,5 @@
 import { uploadBlob } from '$lib/oauth/utils';
 import type { CardDefinition } from '../types';
-import CreateImageCardModal from './CreateImageCardModal.svelte';
 import ImageCard from './ImageCard.svelte';
 
 export const ImageCardDefinition = {
@@ -14,7 +13,6 @@ export const ImageCardDefinition = {
 			href: ''
 		};
 	},
-	creationModalComponent: CreateImageCardModal,
 	upload: async (item) => {
 		if (item.cardData.blob) {
 			item.cardData.image = await uploadBlob(item.cardData.blob);

@@ -1,36 +1,26 @@
 <script lang="ts">
 	import { client, login } from '$lib/oauth/auth.svelte.js';
 
-	import {
-		Navbar,
-		Button,
-		toast,
-		Toaster,
-		Toggle,
-		Sidebar,
-		Popover,
-		Input,
-	} from '@foxui/core';
+	import { Navbar, Button, toast, Toaster, Toggle, Sidebar, Popover, Input } from '@foxui/core';
 	import { BlueskyLogin } from '@foxui/social';
 
 	import { COLUMNS, margin, mobileMargin } from '$lib';
 	import {
-		cardsEqual,
 		clamp,
 		compactItems,
+		createEmptyCard,
 		fixCollisions,
-		getDescription,
 		getHideProfile,
 		getName,
 		isTyping,
+		savePage,
+		scrollToItem,
 		setPositionOfNewItem,
 		validateLink
 	} from '../helper';
 	import Profile from './Profile.svelte';
 	import type { Item, WebsiteData } from '../types';
-	import { deleteRecord, putRecord } from '../oauth/atproto';
 	import { innerWidth } from 'svelte/reactivity/window';
-	import { TID } from '@atproto/common-web';
 	import EditingCard from '../cards/Card/EditingCard.svelte';
 	import { AllCardDefinitions, CardDefinitionsByType } from '../cards';
 	import { tick, type Component } from 'svelte';
@@ -41,12 +31,17 @@
 	import Context from './Context.svelte';
 	import Settings from './Settings.svelte';
 	import Head from './Head.svelte';
+	import { compressImage } from '../helper';
 
 	let {
 		data
 	}: {
 		data: WebsiteData;
 	} = $props();
+
+	let imageInputRef: HTMLInputElement | undefined = $state();
+	let imageDragOver = $state(false);
+	let imageDragPosition: { x: number; y: number } | null = $state(null);
 
 	// svelte-ignore state_referenced_locally
 	let items: Item[] = $state(data.cards);
@@ -101,21 +96,10 @@
 			popover.hidePopover();
 		}
 
-		let item: Item = {
-			id: TID.nextStr(),
-			x: 0,
-			y: 0,
-			w: 2,
-			h: 2,
-			mobileH: 4,
-			mobileW: 4,
-			mobileX: 0,
-			mobileY: 0,
-			cardType: type,
-			cardData: cardData ?? {},
-			version: 2,
-			page: data.page
-		};
+		let item = createEmptyCard(data.page);
+
+		item.cardData = cardData ?? {};
+
 		const cardDef = CardDefinitionsByType[type];
 		cardDef?.createNew?.(item);
 
@@ -136,20 +120,11 @@
 
 		items = [...items, item];
 
-		const containerRect = container?.getBoundingClientRect();
-
 		newItem = {};
 
 		await tick();
 
-		// scroll to newly created card
-		if (!containerRect) return;
-		const currentMargin = isMobile ? mobileMargin : margin;
-		const currentY = isMobile ? item.mobileY : item.y;
-		const bodyRect = document.body.getBoundingClientRect();
-		const offset = containerRect.top - bodyRect.top;
-		const cellSize = (containerRect.width - currentMargin * 2) / COLUMNS;
-		window.scrollTo({ top: offset + cellSize * (currentY - 1), behavior: 'smooth' });
+		scrollToItem(item, isMobile, container);
 	}
 
 	let isSaving = $state(false);
@@ -159,87 +134,9 @@
 	async function save() {
 		isSaving = true;
 
-		const promises = [];
-		// find all cards that have been updated (where items differ from originalItems)
-		for (let item of items) {
-			const originalItem = data.cards.find((i) => cardsEqual(i, item));
+		await savePage(data, items, publication);
 
-			if (!originalItem) {
-				console.log('updated or new item', item);
-				item.updatedAt = new Date().toISOString();
-				// run optional upload function for this card type
-				const cardDef = CardDefinitionsByType[item.cardType];
-
-				if (cardDef?.upload) {
-					item = await cardDef?.upload(item);
-				}
-
-				item.page = data.page;
-				item.version = 2;
-
-				promises.push(
-					putRecord({
-						collection: 'app.blento.card',
-						rkey: item.id,
-						record: item
-					})
-				);
-			}
-		}
-
-		// delete items that are in originalItems but not in items
-		for (let originalItem of data.cards) {
-			const item = items.find((i) => i.id === originalItem.id);
-			if (!item) {
-				console.log('deleting item', originalItem);
-				promises.push(
-					deleteRecord({ collection: 'app.blento.card', rkey: originalItem.id, did: data.did })
-				);
-			}
-		}
-
-		console.log(publication, data.publication);
-		if (!publication || publication !== JSON.stringify(data.publication)) {
-			data.publication ??= {
-				name: getName(data),
-				description: getDescription(data),
-				preferences: {
-					hideProfile: getHideProfile(data)
-				}
-			};
-
-			if (!data.publication.url) {
-				data.publication.url = 'https://blento.app/' + data.handle;
-
-				if (data.page !== 'blento.self') {
-					data.publication.url += '/' + data.page.replace('blento.', '');
-				}
-			}
-			promises.push(
-				putRecord({
-					collection: 'site.standard.publication',
-					rkey: data.page,
-					record: data.publication
-				})
-			);
-
-			publication = JSON.stringify(data.publication);
-
-			console.log('updating or adding publication', data.publication);
-		}
-
-		await Promise.all(promises);
-
-		isSaving = false;
-
-		fetch('/' + data.handle + '/api/refreshData').then(() => {
-			console.log('data refreshed!');
-		});
-		console.log('refreshing data');
-
-		toast('Saved', {
-			description: 'Your website has been saved!'
-		});
+		publication = JSON.stringify(data.publication);
 	}
 
 	const sidebarItems = AllCardDefinitions.filter(
@@ -256,7 +153,9 @@
 		e: DragEvent & {
 			currentTarget: EventTarget & HTMLDivElement;
 		}
-	): { x: number; y: number; swapWithId: string | null; placement: 'above' | 'below' | null } | undefined {
+	):
+		| { x: number; y: number; swapWithId: string | null; placement: 'above' | 'below' | null }
+		| undefined {
 		if (!container || !activeDragElement.item) return;
 
 		// x, y represent the top-left corner of the dragged card
@@ -268,26 +167,31 @@
 		const cellSize = (rect.width - currentMargin * 2) / COLUMNS;
 
 		// Get card dimensions based on current view mode
-		const cardW = isMobile ? (activeDragElement.item?.mobileW ?? activeDragElement.w) : activeDragElement.w;
-		const cardH = isMobile ? (activeDragElement.item?.mobileH ?? activeDragElement.h) : activeDragElement.h;
+		const cardW = isMobile
+			? (activeDragElement.item?.mobileW ?? activeDragElement.w)
+			: activeDragElement.w;
+		const cardH = isMobile
+			? (activeDragElement.item?.mobileH ?? activeDragElement.h)
+			: activeDragElement.h;
 
 		// Get dragged card's original position
 		const draggedOrigPos = activeDragElement.originalPositions.get(activeDragElement.item.id);
-		const draggedOrigX = draggedOrigPos ? (isMobile ? draggedOrigPos.mobileX : draggedOrigPos.x) : 0;
-		const draggedOrigY = draggedOrigPos ? (isMobile ? draggedOrigPos.mobileY : draggedOrigPos.y) : 0;
+		const draggedOrigX = draggedOrigPos
+			? isMobile
+				? draggedOrigPos.mobileX
+				: draggedOrigPos.x
+			: 0;
+		const draggedOrigY = draggedOrigPos
+			? isMobile
+				? draggedOrigPos.mobileY
+				: draggedOrigPos.y
+			: 0;
 
 		// Calculate raw grid position based on top-left of dragged card
-		let gridX = clamp(
-			Math.round((x - rect.left - currentMargin) / cellSize),
-			0,
-			COLUMNS - cardW
-		);
+		let gridX = clamp(Math.round((x - rect.left - currentMargin) / cellSize), 0, COLUMNS - cardW);
 		gridX = Math.floor(gridX / 2) * 2;
 
-		let gridY = Math.max(
-			Math.round((y - rect.top - currentMargin) / cellSize),
-			0
-		);
+		let gridY = Math.max(Math.round((y - rect.top - currentMargin) / cellSize), 0);
 
 		if (isMobile) {
 			gridX = Math.floor(gridX / 2) * 2;
@@ -314,9 +218,12 @@
 			const otherH = isMobile ? other.mobileH : other.h;
 
 			// Check if dragged card's center point is within this card's original bounds
-			if (centerGridX >= otherX && centerGridX < otherX + otherW &&
-				centerGridY >= otherY && centerGridY < otherY + otherH) {
-
+			if (
+				centerGridX >= otherX &&
+				centerGridX < otherX + otherW &&
+				centerGridY >= otherY &&
+				centerGridY < otherY + otherH
+			) {
 				// Check if this is a swap situation:
 				// Cards have the same dimensions and are on the same row
 				const canSwap = cardW === otherW && cardH === otherH && draggedOrigY === otherY;
@@ -387,43 +294,175 @@
 			toast.error('invalid link');
 			return;
 		}
-
-		let item: Item = {
-			id: TID.nextStr(),
-			x: 0,
-			y: 0,
-			w: 2,
-			h: 2,
-			mobileH: 4,
-			mobileW: 4,
-			mobileX: 0,
-			mobileY: 0,
-			cardType: '',
-			cardData: {}
-		};
-
-		newItem.item = item;
-
-		console.log(AllCardDefinitions.toSorted(
-			(a, b) => (b.urlHandlerPriority ?? 0) - (a.urlHandlerPriority ?? 0)
-		));
+		let item = createEmptyCard(data.page);
 
 		for (const cardDef of AllCardDefinitions.toSorted(
 			(a, b) => (b.urlHandlerPriority ?? 0) - (a.urlHandlerPriority ?? 0)
 		)) {
 			if (cardDef.onUrlHandler?.(link, item)) {
 				item.cardType = cardDef.type;
+
+				newItem.item = item;
 				saveNewItem();
 				break;
 			}
 		}
 
-		newItem = {};
-
-		if(linkValue === url) {
+		if (linkValue === url) {
 			linkValue = '';
 			linkPopoverOpen = false;
 		}
+	}
+
+	async function processImageFile(file: File, gridX?: number, gridY?: number) {
+		const compressedFile = await compressImage(file);
+		const objectUrl = URL.createObjectURL(compressedFile);
+
+		let item = createEmptyCard(data.page);
+		
+		item.cardType = 'image';
+		item.cardData = {
+				blob: compressedFile,
+				objectUrl
+		};
+
+		// If grid position is provided
+		if (gridX !== undefined && gridY !== undefined) {
+			if (isMobile) {
+				item.mobileX = gridX;
+				item.mobileY = gridY;
+			} else {
+				item.x = gridX;
+				item.y = gridY;
+			}
+
+			items = [...items, item];
+			fixCollisions(items, item, isMobile);
+		} else {
+			setPositionOfNewItem(item, items);
+			items = [...items, item];
+		}
+
+		await tick();
+
+		scrollToItem(item, isMobile, container);
+	}
+
+	function handleImageDragOver(event: DragEvent) {
+		const dt = event.dataTransfer;
+		if (!dt) return;
+
+		let hasImage = false;
+		if (dt.items) {
+			for (let i = 0; i < dt.items.length; i++) {
+				const item = dt.items[i];
+				if (item && item.kind === 'file' && item.type.startsWith('image/')) {
+					hasImage = true;
+					break;
+				}
+			}
+		} else if (dt.files) {
+			for (let i = 0; i < dt.files.length; i++) {
+				const file = dt.files[i];
+				if (file?.type.startsWith('image/')) {
+					hasImage = true;
+					break;
+				}
+			}
+		}
+
+		if (hasImage) {
+			event.preventDefault();
+			event.stopPropagation();
+
+			imageDragOver = true;
+			imageDragPosition = { x: event.clientX, y: event.clientY };
+		}
+	}
+
+	function handleImageDragLeave(event: DragEvent) {
+		event.preventDefault();
+		event.stopPropagation();
+		imageDragOver = false;
+		imageDragPosition = null;
+	}
+
+	async function handleImageDrop(event: DragEvent) {
+		event.preventDefault();
+		event.stopPropagation();
+		const dropX = event.clientX;
+		const dropY = event.clientY;
+		imageDragOver = false;
+		imageDragPosition = null;
+
+		if (!event.dataTransfer?.files?.length) return;
+
+		const imageFiles = Array.from(event.dataTransfer.files).filter((f) =>
+			f?.type.startsWith('image/')
+		);
+		if (imageFiles.length === 0) return;
+
+		// Calculate starting grid position from drop coordinates
+		let gridX = 0;
+		let gridY = 0;
+		if (container) {
+			const rect = container.getBoundingClientRect();
+			const currentMargin = isMobile ? mobileMargin : margin;
+			const cellSize = (rect.width - currentMargin * 2) / COLUMNS;
+			const cardW = isMobile ? 4 : 2;
+
+			gridX = clamp(Math.round((dropX - rect.left - currentMargin) / cellSize), 0, COLUMNS - cardW);
+			gridX = Math.floor(gridX / 2) * 2;
+
+			gridY = Math.max(Math.round((dropY - rect.top - currentMargin) / cellSize), 0);
+			if (isMobile) {
+				gridY = Math.floor(gridY / 2) * 2;
+			}
+		}
+
+		for (const file of imageFiles) {
+			await processImageFile(file, gridX, gridY);
+
+			// Move to next cell position
+			const cardW = isMobile ? 4 : 2;
+			gridX += cardW;
+			if (gridX + cardW > COLUMNS) {
+				gridX = 0;
+				gridY += isMobile ? 4 : 2;
+			}
+		}
+	}
+
+	async function handleImageInputChange(event: Event) {
+		const target = event.target as HTMLInputElement;
+		if (!target.files || target.files.length < 1) return;
+
+		const files = Array.from(target.files);
+
+		if (files.length === 1) {
+			// Single file: use default positioning
+			await processImageFile(files[0]);
+		} else {
+			// Multiple files: place in grid pattern starting from first available position
+			let gridX = 0;
+			let gridY = maxHeight;
+			const cardW = isMobile ? 4 : 2;
+			const cardH = isMobile ? 4 : 2;
+
+			for (const file of files) {
+				await processImageFile(file, gridX, gridY);
+
+				// Move to next cell position
+				gridX += cardW;
+				if (gridX + cardW > COLUMNS) {
+					gridX = 0;
+					gridY += cardH;
+				}
+			}
+		}
+
+		// Reset the input so the same file can be selected again
+		target.value = '';
 	}
 </script>
 
@@ -439,6 +478,12 @@
 	}}
 />
 
+<svelte:window
+	ondragover={handleImageDragOver}
+	ondragleave={handleImageDragLeave}
+	ondrop={handleImageDrop}
+/>
+
 <Head
 	favicon={data.profile.avatar ?? null}
 	title={getName(data)}
@@ -448,7 +493,14 @@
 <Settings bind:open={showSettings} bind:data />
 
 <Context {data}>
-	<!-- <ImageDropper processImageFile={(file: File) => {}} /> -->
+	<input
+		type="file"
+		accept="image/*"
+		onchange={handleImageInputChange}
+		class="hidden"
+		multiple
+		bind:this={imageInputRef}
+	/>
 
 	{#if !dev}
 		<div
@@ -460,7 +512,7 @@
 
 	{#if showingMobileView}
 		<div
-			class="bg-base-200 dark:bg-base-900 pointer-events-none fixed inset-0 -z-10 h-full w-full"
+			class="bg-base-200 dark:bg-base-950 pointer-events-none fixed inset-0 -z-10 h-full w-full"
 		></div>
 	{/if}
 
@@ -480,7 +532,7 @@
 		class={[
 			'@container/wrapper relative w-full',
 			showingMobileView
-				? 'bg-base-50 dark:bg-base-950 my-4 min-h-[calc(100dhv-2em)] rounded-2xl lg:mx-auto lg:w-[400px]'
+				? 'bg-base-50 dark:bg-base-900 my-4 min-h-[calc(100dhv-2em)] rounded-2xl lg:mx-auto lg:w-[375px]'
 				: ''
 		]}
 	>
@@ -511,7 +563,9 @@
 
 					if (activeDragElement.item) {
 						// Get dragged card's original position for swapping
-						const draggedOrigPos = activeDragElement.originalPositions.get(activeDragElement.item.id);
+						const draggedOrigPos = activeDragElement.originalPositions.get(
+							activeDragElement.item.id
+						);
 
 						// Reset all items to original positions first
 						for (const it of items) {
@@ -538,7 +592,7 @@
 
 						// Handle horizontal swap
 						if (result.swapWithId && draggedOrigPos) {
-							const swapTarget = items.find(it => it.id === result.swapWithId);
+							const swapTarget = items.find((it) => it.id === result.swapWithId);
 							if (swapTarget) {
 								// Move swap target to dragged card's original position
 								if (isMobile) {
@@ -595,7 +649,10 @@
 					activeDragElement.lastPlacement = null;
 					return true;
 				}}
-				class="@container/grid relative col-span-3 px-2 py-8 @5xl/wrapper:px-8"
+				class={[
+					'@container/grid relative col-span-3 rounded-4xl px-2 py-8 @5xl/wrapper:px-8',
+					imageDragOver && 'outline-accent-500 outline-3 -outline-offset-10 outline-dashed'
+				]}
 			>
 				{#each items as item, i (item.id)}
 					<!-- {#if item !== activeDragElement.item} -->
@@ -750,7 +807,7 @@
 					variant="ghost"
 					class="backdrop-blur-none"
 					onclick={() => {
-						newCard('image');
+						imageInputRef?.click();
 					}}
 				>
 					<svg

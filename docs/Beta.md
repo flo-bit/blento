@@ -19,4 +19,10 @@
 
 - video card
 
--
+- allow changing profile picture
+
+- allow editing profile stuff inline (in sidebar profile)
+
+- allow setting base and accent color
+
+- edit link of image card

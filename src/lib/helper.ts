@@ -1,5 +1,9 @@
 import type { Item, WebsiteData } from './types';
-import { COLUMNS } from '$lib';
+import { COLUMNS, margin, mobileMargin } from '$lib';
+import { CardDefinitionsByType } from './cards';
+import { deleteRecord, putRecord } from './oauth/atproto';
+import { toast } from '@foxui/core';
+import { TID } from '@atproto/common-web';
 
 export function clamp(value: number, min: number, max: number): number {
 	return Math.min(Math.max(value, min), max);
@@ -399,4 +403,130 @@ export function compressImage(file: File, maxSize: number = 900 * 1024): Promise
 
 		img.onerror = (err) => reject(err);
 	});
+}
+
+export async function savePage(
+	data: WebsiteData,
+	currentItems: Item[],
+	originalPublication: string
+) {
+	const promises = [];
+	// find all cards that have been updated (where items differ from originalItems)
+	for (let item of currentItems) {
+		const originalItem = data.cards.find((i) => cardsEqual(i, item));
+
+		if (!originalItem) {
+			console.log('updated or new item', item);
+			item.updatedAt = new Date().toISOString();
+			// run optional upload function for this card type
+			const cardDef = CardDefinitionsByType[item.cardType];
+
+			if (cardDef?.upload) {
+				item = await cardDef?.upload(item);
+			}
+
+			item.page = data.page;
+			item.version = 2;
+
+			promises.push(
+				putRecord({
+					collection: 'app.blento.card',
+					rkey: item.id,
+					record: item
+				})
+			);
+		}
+	}
+
+	// delete items that are in originalItems but not in items
+	for (const originalItem of data.cards) {
+		const item = currentItems.find((i) => i.id === originalItem.id);
+		if (!item) {
+			console.log('deleting item', originalItem);
+			promises.push(
+				deleteRecord({ collection: 'app.blento.card', rkey: originalItem.id, did: data.did })
+			);
+		}
+	}
+
+	if (!originalPublication || originalPublication !== JSON.stringify(data.publication)) {
+		data.publication ??= {
+			name: getName(data),
+			description: getDescription(data),
+			preferences: {
+				hideProfile: getHideProfile(data)
+			}
+		};
+
+		if (!data.publication.url) {
+			data.publication.url = 'https://blento.app/' + data.handle;
+
+			if (data.page !== 'blento.self') {
+				data.publication.url += '/' + data.page.replace('blento.', '');
+			}
+		}
+		promises.push(
+			putRecord({
+				collection: 'site.standard.publication',
+				rkey: data.page,
+				record: data.publication
+			})
+		);
+
+		console.log('updating or adding publication', data.publication);
+	}
+
+	await Promise.all(promises);
+
+	fetch('/' + data.handle + '/api/refreshData').then(() => {
+		console.log('data refreshed!');
+	});
+	console.log('refreshing data');
+
+	toast('Saved', {
+		description: 'Your website has been saved!'
+	});
+}
+
+export function createEmptyCard(page: string) {
+	return {
+		id: TID.nextStr(),
+		x: 0,
+		y: 0,
+		w: 2,
+		h: 2,
+		mobileH: 4,
+		mobileW: 4,
+		mobileX: 0,
+		mobileY: 0,
+		cardType: '',
+		cardData: {},
+		page
+	} as Item;
+}
+
+export function scrollToItem(
+	item: Item,
+	isMobile: boolean,
+	container: HTMLDivElement | undefined,
+	force: boolean = false
+) {
+	// scroll to newly created card only if not fully visible
+	const containerRect = container?.getBoundingClientRect();
+	if (!containerRect) return;
+	const currentMargin = isMobile ? mobileMargin : margin;
+	const currentY = isMobile ? item.mobileY : item.y;
+	const currentH = isMobile ? item.mobileH : item.h;
+	const cellSize = (containerRect.width - currentMargin * 2) / COLUMNS;
+
+	const cardTop = containerRect.top + currentMargin + currentY * cellSize;
+	const cardBottom = containerRect.top + currentMargin + (currentY + currentH) * cellSize;
+
+	const isFullyVisible = cardTop >= 0 && cardBottom <= window.innerHeight;
+
+	if (!isFullyVisible || force) {
+		const bodyRect = document.body.getBoundingClientRect();
+		const offset = containerRect.top - bodyRect.top;
+		window.scrollTo({ top: offset + cellSize * (currentY - 1), behavior: 'smooth' });
+	}
 }
