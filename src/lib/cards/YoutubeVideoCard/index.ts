@@ -23,6 +23,7 @@ export const YoutubeCardDefinition = {
 		item.cardData.poster = posterURL;
 		item.cardData.youtubeId = id;
 		item.cardData.href = url;
+		item.cardData.showInline = true;
 
 		item.w = 4;
 		item.mobileW = 8;
@@ -46,6 +47,7 @@ export const YoutubeCardDefinition = {
 
 		item.cardData.poster = posterURL;
 		item.cardData.youtubeId = id;
+		item.cardData.showInline ??= true;
 
 		return item;
 	},
