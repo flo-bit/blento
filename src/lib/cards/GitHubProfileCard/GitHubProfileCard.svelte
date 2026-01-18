@@ -6,6 +6,8 @@
 	import type { GithubProfileLoadedData } from '.';
 	import GithubContributionsGraph from './GithubContributionsGraph.svelte';
 	import { Button } from '@foxui/core';
+	import { browser } from '$app/environment';
+	import { fade } from 'svelte/transition';
 
 	let { item }: ContentComponentProps = $props();
 
@@ -38,42 +40,42 @@
 </script>
 
 <div class="h-full overflow-hidden p-4">
-		<div class="flex h-full flex-col justify-between">
-			<!-- Header -->
-			<div class="flex justify-between">
-				<div class="flex items-center gap-3">
-					<div class="fill-base-950 size-6 shrink-0 dark:fill-white [&_svg]:size-full">
-						{@html siGithub.svg}
-					</div>
-					<a
-						href="https://github.com/{item.cardData.user}"
-						target="_blank"
-						rel="noopener noreferrer"
-						class=" flex truncate text-2xl font-bold transition-colors"
-					>
-						{item.cardData.user}
-					</a>
+	<div class="flex h-full flex-col justify-between">
+		<!-- Header -->
+		<div class="flex justify-between">
+			<div class="flex items-center gap-3">
+				<div class="fill-base-950 size-6 shrink-0 dark:fill-white [&_svg]:size-full">
+					{@html siGithub.svg}
 				</div>
-
-				{#if isMobile() ? item.mobileW > 4 : item.w > 2}
-					<Button
-						href="https://github.com/{item.cardData.user}"
-						target="_blank"
-						rel="noopener noreferrer"
-						class="z-50">Follow</Button
-					>
-				{/if}
+				<a
+					href="https://github.com/{item.cardData.user}"
+					target="_blank"
+					rel="noopener noreferrer"
+					class=" flex truncate text-2xl font-bold transition-colors"
+				>
+					{item.cardData.user}
+				</a>
 			</div>
 
-			{#if contributionsData}
-			<div class="flex">
+			{#if isMobile() ? item.mobileW > 4 : item.w > 2}
+				<Button
+					href="https://github.com/{item.cardData.user}"
+					target="_blank"
+					rel="noopener noreferrer"
+					class="z-50">Follow</Button
+				>
+			{/if}
+		</div>
+
+		{#if contributionsData && browser}
+			<div class="flex opacity-100 transition-opacity duration-300 starting:opacity-0">
 				<GithubContributionsGraph
 					data={contributionsData}
 					isBig={isMobile() ? item.mobileH > 5 : item.h > 2}
 				/>
 			</div>
-			{/if}
-		</div>
+		{/if}
+	</div>
 </div>
 
 {#if item.cardData.href}
