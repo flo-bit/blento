@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { isTyping } from '$lib/helper';
 	import type { ContentComponentProps } from '../../types';
 	import { onMount, onDestroy } from 'svelte';
 
 	let { item }: ContentComponentProps = $props();
 
 	let canvas: HTMLCanvasElement;
+	let container: HTMLDivElement;
 	let ctx: CanvasRenderingContext2D | null = null;
 	let animationId: number;
 
@@ -181,6 +181,8 @@
 	function startGame() {
 		resetGame();
 		gameState = 'playing';
+		// Focus container so keyboard events work for this game
+		container?.focus();
 	}
 
 	function jump() {
@@ -207,9 +209,8 @@
 		}
 	}
 
+	// Handle keyboard input (only responds when this game container is focused)
 	function handleKeyDown(e: KeyboardEvent) {
-		if(isTyping()) return;
-
 		if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') {
 			e.preventDefault();
 			jump();
@@ -530,10 +531,20 @@
 	});
 </script>
 
-<svelte:window onkeydown={handleKeyDown} onkeyup={handleKeyUp} />
-
-<div class="relative h-full w-full overflow-hidden">
-	<canvas bind:this={canvas} class="h-full w-full invert dark:invert-0" ontouchstart={handleTouch}
+<!-- svelte-ignore a11y_no_noninteractive_tabindex a11y_no_noninteractive_element_interactions -->
+<div
+	bind:this={container}
+	class="relative h-full w-full overflow-hidden outline-none"
+	tabindex="0"
+	role="application"
+	aria-label="Dino game"
+	onkeydown={handleKeyDown}
+	onkeyup={handleKeyUp}
+>
+	<canvas
+		bind:this={canvas}
+		class="h-full w-full touch-none select-none invert dark:invert-0"
+		ontouchstart={handleTouch}
 	></canvas>
 
 	{#if gameState === 'idle' || gameState === 'gameover'}
