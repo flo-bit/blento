@@ -37,7 +37,7 @@ export const AllCardDefinitions = [
 	BlueskyMediaCardDefinition,
 	DinoGameCardDefinition,
 	BlueskyProfileCardDefinition,
-	GithubProfileCardDefitition
+	GithubProfileCardDefitition,
 	TetrisCardDefinition
 ] as const;
 
