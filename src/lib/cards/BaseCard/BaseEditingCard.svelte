@@ -159,7 +159,7 @@
 
 	function applyChange(def: (typeof AllCardDefinitions)[number]) {
 		const updated = def.change ? def.change(item) : item;
-		if (updated !== item) {
+		if (updated && updated !== item) {
 			item = updated;
 		}
 		item.cardType = def.type;

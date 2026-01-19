@@ -50,7 +50,7 @@
 				(value) => {
 					data.publication ??= {};
 					data.publication.preferences ??= {};
-					data.publication.preferences.hideProfile = value;
+					data.publication.preferences.hideProfileSection = value;
 
 					data = { ...data };
 				}

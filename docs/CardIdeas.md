@@ -39,11 +39,15 @@
 - teal.fm
 - tangled.sh
 - popfeed.social
+  - reading goal
+  - latest ratings
+  - lists
 - smokesignal.events (https://pdsls.dev/at://did:plc:xbtmt2zjwlrfegqvch7fboei/events.smokesignal.calendar.event/3ltn2qrxf3626)
 - statusphere.xyz
 - goals.garden
 - flashes.blue (https://pdsls.dev/at://did:plc:aytgljyikzbtgrnac2u4ccft/blue.flashes.actor.portfolio, https://app.flashes.blue/profile/j4ck.xyz)
 - room: flo-bit.dev/room
+- plyr.fm
 
 ## programming
 
