@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en" class="bg-black">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>fluid text effect</title>
+
+    <style>
+        html,
+        body {
+            overflow: hidden;
+            background-color: #000;
+        }
+
+        body {
+            margin: 0;
+        }
+
+        #canvasContainer {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+        }
+    </style>
+
+</head>
+
+<body>
+    <!-- <input id="name"></input> -->
+    <div id="canvasContainer">
+        <canvas></canvas>
+        <canvas id="maskCanvas"> </canvas>
+    </div>
+    
+    <script src="./script.js"></script>
+</body>
+
+</html>
