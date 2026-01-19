@@ -2,7 +2,6 @@
 	import type { ContentComponentProps } from '../../types';
 	import { onMount, onDestroy } from 'svelte';
 	import Tetris8BitMusic from './Tetris8Bit.mp3';
-	import { isTyping } from '$lib/helper';
 
 	let { item }: ContentComponentProps = $props();
 
@@ -485,11 +484,8 @@
 		lockPiece();
 	}
 
-	// Handle keyboard input
+	// Handle keyboard input (only responds when this game container is focused)
 	function handleKeyDown(e: KeyboardEvent) {
-		// Don't capture keys when user is typing in an input field
-		if (isTyping()) return;
-
 		if (gameState !== 'playing' || isClearingAnimation) {
 			if (e.code === 'Space' || e.code === 'Enter') {
 				e.preventDefault();
@@ -669,6 +665,8 @@
 		gameState = 'playing';
 		lastDrop = performance.now();
 		startMusic();
+		// Focus container so keyboard events work for this game
+		container?.focus();
 	}
 
 	function calculateSize() {
@@ -1008,12 +1006,18 @@
 	});
 </script>
 
-<svelte:window onkeydown={handleKeyDown} />
-
-<div bind:this={container} class="relative h-full w-full overflow-hidden">
+<!-- svelte-ignore a11y_no_noninteractive_tabindex a11y_no_noninteractive_element_interactions -->
+<div
+	bind:this={container}
+	class="relative h-full w-full overflow-hidden outline-none"
+	tabindex="0"
+	role="application"
+	aria-label="Tetris game"
+	onkeydown={handleKeyDown}
+>
 	<canvas
 		bind:this={canvas}
-		class="h-full w-full touch-none"
+		class="h-full w-full touch-none select-none"
 		ontouchstart={handleTouchStart}
 		ontouchmove={handleTouchMove}
 		ontouchend={handleTouchEnd}
