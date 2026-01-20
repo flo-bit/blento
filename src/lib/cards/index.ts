@@ -22,6 +22,7 @@ import { PopfeedReviewsCardDefinition } from './PopfeedReviews';
 import { TealFMPlaysCardDefinition } from './TealFMPlaysCard';
 import { PhotoGalleryCardDefinition } from './PhotoGalleryCard';
 import { StandardSiteDocumentListCardDefinition } from './StandardSiteDocumentListCard';
+import { Depth3dCardDefinition } from './Depth3dCard';
 
 export const AllCardDefinitions = [
 	ImageCardDefinition,
@@ -46,7 +47,8 @@ export const AllCardDefinitions = [
 	PopfeedReviewsCardDefinition,
 	TealFMPlaysCardDefinition,
 	PhotoGalleryCardDefinition,
-	StandardSiteDocumentListCardDefinition
+	StandardSiteDocumentListCardDefinition,
+	Depth3dCardDefinition
 ] as const;
 
 export const CardDefinitionsByType = AllCardDefinitions.reduce(

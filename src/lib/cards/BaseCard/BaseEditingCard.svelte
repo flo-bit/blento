@@ -58,8 +58,8 @@
 
 	const cardDef = $derived(CardDefinitionsByType[item.cardType]);
 
-	const minW = $derived(cardDef.minW ?? (isMobile() ? 4 : 2));
-	const minH = $derived(cardDef.minH ?? (isMobile() ? 2 : 2));
+	const minW = $derived(cardDef.minW ?? 2);
+	const minH = $derived(cardDef.minH ?? 2);
 
 	const maxW = $derived(cardDef.maxW ?? COLUMNS);
 	const maxH = $derived(cardDef.maxH ?? (isMobile() ? 12 : 6));
