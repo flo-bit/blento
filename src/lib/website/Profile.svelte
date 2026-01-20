@@ -6,6 +6,7 @@
 	import { env } from '$env/dynamic/public';
 	import type { WebsiteData } from '$lib/types';
 	import { getDescription, getName } from '$lib/helper';
+	import { page } from '$app/state';
 
 	let {
 		data,
@@ -51,7 +52,7 @@
 
 		{#if showEditButton && client.isLoggedIn && client.profile?.did === data.did}
 			<div>
-				<Button href="{env.PUBLIC_IS_SELFHOSTED ? '' : client.profile?.handle}/edit" class="mt-2">
+				<Button href="{page.url}/edit" class="mt-2">
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
 						fill="none"

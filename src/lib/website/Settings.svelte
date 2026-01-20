@@ -64,7 +64,7 @@
 			for="hide-profile"
 			class="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
 		>
-			Hide Profile
+			Hide Profile Section
 		</Label>
 	</div>
 

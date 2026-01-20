@@ -54,6 +54,7 @@ export async function initClient() {
 	if (params.size > 0) {
 		await finalizeLogin(params, did);
 	} else if (did) {
+		console.log('resuming session');
 		await resumeSession(did);
 	}
 
@@ -118,7 +119,12 @@ async function finalizeLogin(params: URLSearchParams, did?: string) {
 
 async function resumeSession(did: string) {
 	try {
-		const session = await getSession(did as `did:${string}`, { allowStale: true });
+		const session = await getSession(did as `did:${string}:${string}`, { allowStale: true });
+		console.log('got session', session);
+
+		if (session.token.expires_at && session.token.expires_at < Date.now()) {
+			throw Error('session expired');
+		}
 		client.session = session;
 
 		setAgentAndXRPC(session);
@@ -128,6 +134,7 @@ async function resumeSession(did: string) {
 		client.isLoggedIn = true;
 	} catch (error) {
 		console.error('error resuming session', error);
+		logout();
 	}
 }
 

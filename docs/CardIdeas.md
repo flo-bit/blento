@@ -21,11 +21,12 @@
 - bluesky account card (showing follow button, follower count, avatar, name, cover image)
 - youtube channel card (showing channel name, latest videos, follow button?)
 - bluesky posts workcloud
+- steam game
 
 ## bluesky
 
 - bluesky feed
-- bluesky post (fixed or latest)
+- bluesky post (pinned, latest or fixed)
 - social accounts card (multiple)
 
 ## social
@@ -36,11 +37,12 @@
 
 - leaflet
 - skywatched
-- teal.fm
+- teal.fm 
+  - [x] last played songs
 - tangled.sh
 - popfeed.social
   - reading goal
-  - latest ratings
+  - [x] latest ratings
   - lists
 - smokesignal.events (https://pdsls.dev/at://did:plc:xbtmt2zjwlrfegqvch7fboei/events.smokesignal.calendar.event/3ltn2qrxf3626)
 - statusphere.xyz
@@ -48,6 +50,7 @@
 - flashes.blue (https://pdsls.dev/at://did:plc:aytgljyikzbtgrnac2u4ccft/blue.flashes.actor.portfolio, https://app.flashes.blue/profile/j4ck.xyz)
 - room: flo-bit.dev/room
 - plyr.fm
+- grain.social
 
 ## programming
 

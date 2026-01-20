@@ -20,6 +20,7 @@ import { BlueskyProfileCardDefinition } from './BlueskyProfileCard';
 import { GithubProfileCardDefitition } from './GitHubProfileCard';
 import { PopfeedReviewsCardDefinition } from './PopfeedReviews';
 import { TealFMPlaysCardDefinition } from './TealFMPlaysCard';
+import { PhotoGalleryCardDefinition } from './PhotoGalleryCard';
 
 export const AllCardDefinitions = [
 	ImageCardDefinition,
@@ -42,7 +43,8 @@ export const AllCardDefinitions = [
 	GithubProfileCardDefitition,
 	TetrisCardDefinition,
 	PopfeedReviewsCardDefinition,
-	TealFMPlaysCardDefinition
+	TealFMPlaysCardDefinition,
+	PhotoGalleryCardDefinition
 ] as const;
 
 export const CardDefinitionsByType = AllCardDefinitions.reduce(

@@ -9,4 +9,5 @@
   - com.germnetwork.declaration
   - pub.leaflet.document
   - blue.flashes.actor.portfolio
+  - social.grain.gallery
 - add bluesky profile card

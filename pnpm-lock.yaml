@@ -38,6 +38,9 @@ importers:
       '@foxui/time':
         specifier: ^0.4.7
         version: 0.4.7(svelte@5.46.4)(tailwindcss@4.1.5)
+      '@foxui/visual':
+        specifier: ^0.4.7
+        version: 0.4.7(svelte@5.46.4)(tailwindcss@4.1.5)
       '@tailwindcss/typography':
         specifier: ^0.5.16
         version: 0.5.16(tailwindcss@4.1.5)
@@ -668,6 +671,12 @@ packages:
 
   '@foxui/time@0.4.7':
     resolution: {integrity: sha512-N4jN1QfUi7IY53MQETZp4MDj6DwwONoRi4yrN96SjpB71w7cvhli1jQCSG4QqCtyvISaizlg4T5gzORg7PYWrA==, tarball: https://registry.npmjs.org/@foxui/time/-/time-0.4.7.tgz}
+    peerDependencies:
+      svelte: '>=5'
+      tailwindcss: '>=3'
+
+  '@foxui/visual@0.4.7':
+    resolution: {integrity: sha512-POcVBvmeHD5Z3UFBANIawn6mBZLB5XEy/jqkFp1NV1OnHSdE4vNjWYSva3GU1C/OVVPxjfNFB0SisZlHWmk5FA==, tarball: https://registry.npmjs.org/@foxui/visual/-/visual-0.4.7.tgz}
     peerDependencies:
       svelte: '>=5'
       tailwindcss: '>=3'
@@ -1502,6 +1511,9 @@ packages:
   camelize@1.0.1:
     resolution: {integrity: sha512-dU+Tx2fsypxTgtLoE36npi3UqcjSSMNYfkqgmoEhtZrraP5VWq0K7FkWVTYa8eMPtnU/G2txVsfdCJTn9uzpuQ==, tarball: https://registry.npmjs.org/camelize/-/camelize-1.0.1.tgz}
 
+  canvas-confetti@1.9.4:
+    resolution: {integrity: sha512-yxQbJkAVrFXWNbTUjPqjF7G+g6pDotOUHGbkZq2NELZUMDpiJ85rIEazVb8GTaAptNW2miJAXbs1BtioA251Pw==, tarball: https://registry.npmjs.org/canvas-confetti/-/canvas-confetti-1.9.4.tgz}
+
   chalk@4.1.2:
     resolution: {integrity: sha512-oKnbhFyRIXpUuez8iBMmyEa4nbj4IOQyuhc/wy9kY7/WVPcwIO9VA668Pu8RkO7+0G76SLROeyw9CpQ061i4mA==, tarball: https://registry.npmjs.org/chalk/-/chalk-4.1.2.tgz}
     engines: {node: '>=10'}
@@ -1512,6 +1524,10 @@ packages:
   cheerio@1.0.0-rc.11:
     resolution: {integrity: sha512-bQwNaDIBKID5ts/DsdhxrjqFXYfLw4ste+wMKqWA8DyKcS4qwsPP4Bk8ZNaTJjvpiX/qW3BT4sU7d6Bh5i+dag==, tarball: https://registry.npmjs.org/cheerio/-/cheerio-1.0.0-rc.11.tgz}
     engines: {node: '>= 6'}
+
+  cheerio@1.1.2:
+    resolution: {integrity: sha512-IkxPpb5rS/d1IiLbHMgfPuS0FgiWTtFIm/Nj+2woXDLTZ7fOT2eqzgYbdMlLweqlHbsZjxEChoVK+7iph7jyQg==, tarball: https://registry.npmjs.org/cheerio/-/cheerio-1.1.2.tgz}
+    engines: {node: '>=20.18.1'}
 
   chokidar@4.0.3:
     resolution: {integrity: sha512-Qgzu8kfBvo+cA4962jnP1KkS6Dop5NS6g7R5LFYJr4b8Ub94PPQXUksCw9PvXoeXPRRddRNC5C1JQUR2SMGtnA==, tarball: https://registry.npmjs.org/chokidar/-/chokidar-4.0.3.tgz}
@@ -1673,6 +1689,9 @@ packages:
   encodeurl@2.0.0:
     resolution: {integrity: sha512-Q0n9HRi4m6JuGIV1eFlmvJB7ZEVxu93IrMyiMsGC0lrMJMWzRgx6WGquyfQgZVb31vhGgXnfmPNNXmxnOkRBrg==, tarball: https://registry.npmjs.org/encodeurl/-/encodeurl-2.0.0.tgz}
     engines: {node: '>= 0.8'}
+
+  encoding-sniffer@0.2.1:
+    resolution: {integrity: sha512-5gvq20T6vfpekVtqrYQsSCFZ1wEg5+wW0/QaZMWkFr6BqD3NfKs0rLCx4rrVlSWJeZb5NBJgVLswK/w2MWU+Gw==, tarball: https://registry.npmjs.org/encoding-sniffer/-/encoding-sniffer-0.2.1.tgz}
 
   enhanced-resolve@5.18.1:
     resolution: {integrity: sha512-ZSW3ma5GkcQBIpwZTSRAI8N71Uuwgs93IezB7mf7R60tC8ZbJideoDNKjHn2O9KIlx6rkGTTEk1xUCK2E1Y2Yg==, tarball: https://registry.npmjs.org/enhanced-resolve/-/enhanced-resolve-5.18.1.tgz}
@@ -1949,6 +1968,9 @@ packages:
 
   hls.js@1.6.15:
     resolution: {integrity: sha512-E3a5VwgXimGHwpRGV+WxRTKeSp2DW5DI5MWv34ulL3t5UNmyJWCQ1KmLEHbYzcfThfXG8amBL+fCYPneGHC4VA==, tarball: https://registry.npmjs.org/hls.js/-/hls.js-1.6.15.tgz}
+
+  htmlparser2@10.0.0:
+    resolution: {integrity: sha512-TwAZM+zE5Tq3lrEHvOlvwgj1XLWQCtaaibSN11Q+gGBAS7Y1uZSWwXXRe4iF6OXnaq1riyQAPFOBtYc77Mxq0g==, tarball: https://registry.npmjs.org/htmlparser2/-/htmlparser2-10.0.0.tgz}
 
   htmlparser2@8.0.2:
     resolution: {integrity: sha512-GYdjWKDkbRLkZ5geuHs5NY1puJ+PXwP7+fHPRz06Eirsb9ugf6d8kkXav6ADhcODhFFPMIXyxkxSuMf3D6NCFA==, tarball: https://registry.npmjs.org/htmlparser2/-/htmlparser2-8.0.2.tgz}
@@ -2303,6 +2325,9 @@ packages:
 
   parse5-htmlparser2-tree-adapter@7.1.0:
     resolution: {integrity: sha512-ruw5xyKs6lrpo9x9rCZqZZnIUntICjQAd0Wsmp396Ul9lN/h+ifgVV1x1gZHi8euej6wTfpqX8j+BFQxF0NS/g==, tarball: https://registry.npmjs.org/parse5-htmlparser2-tree-adapter/-/parse5-htmlparser2-tree-adapter-7.1.0.tgz}
+
+  parse5-parser-stream@7.1.2:
+    resolution: {integrity: sha512-JyeQc9iwFLn5TbvvqACIF/VXG6abODeB3Fwmv/TGdLk2LfbWkaySGY72at4+Ty7EkPZj854u4CrICqNk2qIbow==, tarball: https://registry.npmjs.org/parse5-parser-stream/-/parse5-parser-stream-7.1.2.tgz}
 
   parse5@7.3.0:
     resolution: {integrity: sha512-IInvU7fabl34qmi9gY8XOVxhYyMyuH2xUNpb2q8/Y+7552KlejkRvqvD19nMoUW/uQGGbqNpA6Tufu5FL5BZgw==, tarball: https://registry.npmjs.org/parse5/-/parse5-7.3.0.tgz}
@@ -2939,6 +2964,15 @@ packages:
   w3c-keyname@2.2.8:
     resolution: {integrity: sha512-dpojBhNsCNN7T82Tm7k26A6G9ML3NkhDsnw9n/eoxSRlVBB4CEtIQ/KTCLI2Fwf3ataSXRhYFkQi3SlnFwPvPQ==, tarball: https://registry.npmjs.org/w3c-keyname/-/w3c-keyname-2.2.8.tgz}
 
+  whatwg-encoding@3.1.1:
+    resolution: {integrity: sha512-6qN4hJdMwfYBtE3YBTTHhoeuUrDBPZmbQaxWAqSALV/MeEnR5z1xd8UKud2RAkFoPkmB+hli1TZSnyi84xz1vQ==, tarball: https://registry.npmjs.org/whatwg-encoding/-/whatwg-encoding-3.1.1.tgz}
+    engines: {node: '>=18'}
+    deprecated: Use @exodus/bytes instead for a more spec-conformant and faster implementation
+
+  whatwg-mimetype@4.0.0:
+    resolution: {integrity: sha512-QaKxh0eNIi2mE9p2vEdzfagOKHCcj1pJ56EEHGQOVxp8r9/iszLUUV7v89x9O1p/T+NlTM5W7jW6+cz4Fq1YVg==, tarball: https://registry.npmjs.org/whatwg-mimetype/-/whatwg-mimetype-4.0.0.tgz}
+    engines: {node: '>=18'}
+
   which@2.0.2:
     resolution: {integrity: sha512-BLI3Tl1TW3Pvl70l3yq3Y64i+awpwXqsGBYWkkqMtnbXgrMD+yj7rhW0kuEDxzJaYXGjEW5ogapKNMEKNMjibA==, tarball: https://registry.npmjs.org/which/-/which-2.0.2.tgz}
     engines: {node: '>= 8'}
@@ -3421,6 +3455,16 @@ snapshots:
       '@foxui/core': 0.4.7(svelte@5.46.4)(tailwindcss@4.1.5)
       '@number-flow/svelte': 0.3.9(svelte@5.46.4)
       bits-ui: 1.8.0(svelte@5.46.4)
+      svelte: 5.46.4
+      tailwindcss: 4.1.5
+
+  '@foxui/visual@0.4.7(svelte@5.46.4)(tailwindcss@4.1.5)':
+    dependencies:
+      '@foxui/colors': 0.4.7(svelte@5.46.4)(tailwindcss@4.1.5)
+      '@foxui/core': 0.4.7(svelte@5.46.4)(tailwindcss@4.1.5)
+      bits-ui: 1.8.0(svelte@5.46.4)
+      canvas-confetti: 1.9.4
+      cheerio: 1.1.2
       svelte: 5.46.4
       tailwindcss: 4.1.5
 
@@ -4211,6 +4255,8 @@ snapshots:
 
   camelize@1.0.1: {}
 
+  canvas-confetti@1.9.4: {}
+
   chalk@4.1.2:
     dependencies:
       ansi-styles: 4.3.0
@@ -4235,6 +4281,20 @@ snapshots:
       parse5: 7.3.0
       parse5-htmlparser2-tree-adapter: 7.1.0
       tslib: 2.8.1
+
+  cheerio@1.1.2:
+    dependencies:
+      cheerio-select: 2.1.0
+      dom-serializer: 2.0.0
+      domhandler: 5.0.3
+      domutils: 3.2.2
+      encoding-sniffer: 0.2.1
+      htmlparser2: 10.0.0
+      parse5: 7.3.0
+      parse5-htmlparser2-tree-adapter: 7.1.0
+      parse5-parser-stream: 7.1.2
+      undici: 7.14.0
+      whatwg-mimetype: 4.0.0
 
   chokidar@4.0.3:
     dependencies:
@@ -4368,6 +4428,11 @@ snapshots:
   emoji-regex@10.6.0: {}
 
   encodeurl@2.0.0: {}
+
+  encoding-sniffer@0.2.1:
+    dependencies:
+      iconv-lite: 0.6.3
+      whatwg-encoding: 3.1.1
 
   enhanced-resolve@5.18.1:
     dependencies:
@@ -4729,6 +4794,13 @@ snapshots:
 
   hls.js@1.6.15: {}
 
+  htmlparser2@10.0.0:
+    dependencies:
+      domelementtype: 2.3.0
+      domhandler: 5.0.3
+      domutils: 3.2.2
+      entities: 6.0.1
+
   htmlparser2@8.0.2:
     dependencies:
       domelementtype: 2.3.0
@@ -5042,6 +5114,10 @@ snapshots:
   parse5-htmlparser2-tree-adapter@7.1.0:
     dependencies:
       domhandler: 5.0.3
+      parse5: 7.3.0
+
+  parse5-parser-stream@7.1.2:
+    dependencies:
       parse5: 7.3.0
 
   parse5@7.3.0:
@@ -5686,6 +5762,12 @@ snapshots:
       vite: 6.3.5(jiti@2.4.2)(lightningcss@1.29.2)
 
   w3c-keyname@2.2.8: {}
+
+  whatwg-encoding@3.1.1:
+    dependencies:
+      iconv-lite: 0.6.3
+
+  whatwg-mimetype@4.0.0: {}
 
   which@2.0.2:
     dependencies:
