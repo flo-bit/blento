@@ -87,7 +87,7 @@ export async function loadData(
 	for (const cardType of cardTypesArray) {
 		const cardDef = CardDefinitionsByType[cardType];
 
-		if (!cardDef.loadData) continue;
+		if (!cardDef?.loadData) continue;
 
 		additionDataPromises[cardType] = cardDef
 			.loadData(
