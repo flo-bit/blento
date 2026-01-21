@@ -39,13 +39,7 @@ export const GifCardDefinition = {
 	minW: 1,
 	minH: 1,
 	onUrlHandler: (url, item) => {
-		const gifUrlPatterns = [
-			/\.gif(\?.*)?$/i,
-			/giphy\.com\/gifs\//i,
-			/media\.giphy\.com/i,
-			/tenor\.com/i,
-			/imgur\.com.*\.gif/i
-		];
+		const gifUrlPatterns = [/\.gif(\?.*)?$/i, /giphy\.com\/gifs\//i, /media\.giphy\.com/i];
 
 		if (gifUrlPatterns.some((pattern) => pattern.test(url))) {
 			// Convert Giphy page URLs to direct media URLs

@@ -70,19 +70,6 @@
 			return trimmedUrl;
 		}
 
-		// Tenor page URL: https://tenor.com/view/name-name-gif-ID
-		const tenorMatch = trimmedUrl.match(/tenor\.com\/view\/.*-(\d+)(?:\?|$)/);
-		if (tenorMatch) {
-			// Tenor doesn't have a simple direct URL conversion, keep as-is for now
-			// Users should use the "Copy GIF" link from Tenor which gives media URL
-			return trimmedUrl;
-		}
-
-		// Tenor media URL - already correct
-		if (trimmedUrl.includes('media.tenor.com') || trimmedUrl.includes('c.tenor.com')) {
-			return trimmedUrl;
-		}
-
 		// Return as-is for direct GIF URLs or other sources
 		return trimmedUrl;
 	}
@@ -163,7 +150,7 @@
 			</div>
 			<div class="text-center">
 				<p class="text-base-700 dark:text-base-300 text-sm font-medium">Drop a GIF here</p>
-				<p class="text-base-500 dark:text-base-500 mt-1 text-xs">or click to enter URL</p>
+				<p class="text-base-500 dark:text-base-500 mt-1 text-xs">or click to enter GIPHY URL</p>
 			</div>
 		</div>
 	{/if}
@@ -182,7 +169,7 @@
 					onblur={handleUrlSubmit}
 					onkeydown={handleKeydown}
 					class="w-full rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-sm text-white placeholder-white/50 transition-colors outline-none focus:border-white/40 focus:bg-white/20"
-					placeholder="Paste GIF URL"
+					placeholder="Paste GIPHY URL"
 				/>
 				<p class="mt-2 text-center text-xs text-white/60">
 					Press Enter to confirm, Escape to cancel
