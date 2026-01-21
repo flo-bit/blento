@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { ContentComponentProps } from '../types';
 	import { onMount, onDestroy, tick } from 'svelte';
-	import ditheringTextureUrl from './text_effect_fluid-main/LDR_LLL1_0.png';
+	import ditheringTextureUrl from './LDR_LLL1_0.png';
 
 	let { item }: ContentComponentProps = $props();
 
@@ -10,75 +10,124 @@
 	let maskCanvas: HTMLCanvasElement;
 	let animationId: number;
 	let splatIntervalId: ReturnType<typeof setInterval>;
+	let maskDrawRaf = 0;
+	let maskReady = false;
 	let isInitialized = $state(false);
 	let resizeObserver: ResizeObserver | null = null;
 
 	// Get text from card data
 	const text = $derived((item.cardData?.text as string) || 'hello');
-	const fontWeight = $derived((item.cardData?.fontWeight as string) || '900');
-	const fontFamily = $derived((item.cardData?.fontFamily as string) || 'Arial');
-	const fontSize = $derived((item.cardData?.fontSize as number) || 0.33);
+	const fontWeight = '900';
+	const fontFamily = 'Arial';
+	const fontSize = $derived(parseFloat(item.cardData?.fontSize) || 0.33);
 
 	// Draw text mask on overlay canvas
 	function drawOverlayCanvas() {
 		if (!maskCanvas || !container) return;
 
-		const rect = container.getBoundingClientRect();
-		if (rect.width === 0 || rect.height === 0) return;
+		const width = container.clientWidth;
+		const height = container.clientHeight;
+		if (width === 0 || height === 0) return;
 
 		const dpr = window.devicePixelRatio || 1;
 
-		maskCanvas.width = rect.width * dpr;
-		maskCanvas.height = rect.height * dpr;
+		maskCanvas.width = width * dpr;
+		maskCanvas.height = height * dpr;
 
 		const ctx = maskCanvas.getContext('2d')!;
+		ctx.setTransform(1, 0, 0, 1, 0, 0);
+		ctx.globalCompositeOperation = 'source-over';
+		ctx.clearRect(0, 0, maskCanvas.width, maskCanvas.height);
 		ctx.scale(dpr, dpr);
 
 		ctx.fillStyle = 'black';
-		ctx.fillRect(0, 0, rect.width, rect.height);
+		ctx.fillRect(0, 0, width, height);
 
-		const textFontSize = Math.round(rect.width * fontSize);
-		ctx.font = fontWeight + ' ' + textFontSize + 'px ' + fontFamily;
+		// Font size as percentage of container width
+		const textFontSize = Math.round(width * fontSize);
+		ctx.font = `${fontWeight} ${textFontSize}px ${fontFamily}`;
 
 		ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
 		ctx.lineWidth = 2;
-		ctx.textBaseline = 'middle';
 		ctx.textAlign = 'center';
 
-		ctx.strokeText(text, rect.width / 2, rect.height / 2);
+		const metrics = ctx.measureText(text);
+		let textY = height / 2;
+		if (
+			metrics.actualBoundingBoxAscent !== undefined &&
+			metrics.actualBoundingBoxDescent !== undefined
+		) {
+			ctx.textBaseline = 'alphabetic';
+			textY = (height + metrics.actualBoundingBoxAscent - metrics.actualBoundingBoxDescent) / 2;
+		} else {
+			ctx.textBaseline = 'middle';
+		}
+
+		ctx.strokeText(text, width / 2, textY);
 		ctx.globalCompositeOperation = 'destination-out';
-		ctx.fillText(text, rect.width / 2, rect.height / 2);
+		ctx.fillText(text, width / 2, textY);
+		ctx.globalCompositeOperation = 'source-over';
+		maskReady = true;
+	}
+
+	function scheduleMaskDraw() {
+		const width = container?.clientWidth ?? 0;
+		const height = container?.clientHeight ?? 0;
+		if (width > 0 && height > 0) {
+			drawOverlayCanvas();
+			return;
+		}
+		if (maskDrawRaf) return;
+		maskDrawRaf = requestAnimationFrame(() => {
+			maskDrawRaf = 0;
+			const nextWidth = container?.clientWidth ?? 0;
+			const nextHeight = container?.clientHeight ?? 0;
+			if (nextWidth === 0 || nextHeight === 0) {
+				scheduleMaskDraw();
+				return;
+			}
+			drawOverlayCanvas();
+		});
 	}
 
 	// Redraw overlay when text settings change (only after initialization)
 	$effect(() => {
 		// Access all reactive values to track them
 		text;
-		fontWeight;
-		fontFamily;
 		fontSize;
 		// Only redraw if already initialized
 		if (isInitialized) {
-			drawOverlayCanvas();
+			scheduleMaskDraw();
 		}
 	});
 
 	onMount(async () => {
 		// Wait for layout to settle
 		await tick();
-		initFluidSimulation();
+		// Wait for a frame to ensure dimensions are set
+		requestAnimationFrame(() => {
+			initFluidSimulation();
+		});
+
+		if (document.fonts?.ready) {
+			document.fonts.ready.then(() => {
+				if (isInitialized) scheduleMaskDraw();
+			});
+		}
 	});
 
 	onDestroy(() => {
 		if (animationId) cancelAnimationFrame(animationId);
 		if (splatIntervalId) clearInterval(splatIntervalId);
+		if (maskDrawRaf) cancelAnimationFrame(maskDrawRaf);
 		if (resizeObserver) resizeObserver.disconnect();
 	});
 
 	function initFluidSimulation() {
 		if (!fluidCanvas || !maskCanvas || !container) return;
 
-		drawOverlayCanvas();
+		maskReady = false;
+		scheduleMaskDraw();
 
 		// Simulation config
 		const config = {
@@ -123,7 +172,7 @@
 				deltaY: 0,
 				down: false,
 				moved: false,
-				color: [30, 0, 300] as [number, number, number]
+				color: [0, 0, 0] as [number, number, number]
 			};
 		}
 
@@ -163,30 +212,50 @@
 			if (!gl) return { gl: null, ext: { supportLinearFiltering: false } as any };
 
 			let halfFloat: any;
-			let supportLinearFiltering: any;
+			let supportLinearFiltering = false;
 			if (isWebGL2) {
 				gl.getExtension('EXT_color_buffer_float');
-				supportLinearFiltering = gl.getExtension('OES_texture_float_linear');
+				supportLinearFiltering = !!gl.getExtension('OES_texture_float_linear');
 			} else {
 				halfFloat = gl.getExtension('OES_texture_half_float');
-				supportLinearFiltering = gl.getExtension('OES_texture_half_float_linear');
+				supportLinearFiltering = !!gl.getExtension('OES_texture_half_float_linear');
 			}
 
 			gl.clearColor(0.0, 0.0, 0.0, 1.0);
 
-			const halfFloatTexType = isWebGL2 ? gl.HALF_FLOAT : halfFloat?.HALF_FLOAT_OES;
+			let halfFloatTexType = isWebGL2 ? gl.HALF_FLOAT : halfFloat?.HALF_FLOAT_OES;
+			let fallbackToUnsignedByte = false;
+			if (!halfFloatTexType) {
+				halfFloatTexType = gl.UNSIGNED_BYTE;
+				supportLinearFiltering = true;
+				fallbackToUnsignedByte = true;
+			}
 			let formatRGBA: any;
 			let formatRG: any;
 			let formatR: any;
 
 			if (isWebGL2) {
-				formatRGBA = getSupportedFormat(gl, gl.RGBA16F, gl.RGBA, halfFloatTexType);
-				formatRG = getSupportedFormat(gl, gl.RG16F, gl.RG, halfFloatTexType);
-				formatR = getSupportedFormat(gl, gl.R16F, gl.RED, halfFloatTexType);
+				if (fallbackToUnsignedByte) {
+					formatRGBA = { internalFormat: gl.RGBA8, format: gl.RGBA };
+					formatRG = { internalFormat: gl.RGBA8, format: gl.RGBA };
+					formatR = { internalFormat: gl.RGBA8, format: gl.RGBA };
+				} else {
+					formatRGBA = getSupportedFormat(gl, gl.RGBA16F, gl.RGBA, halfFloatTexType);
+					formatRG = getSupportedFormat(gl, gl.RG16F, gl.RG, halfFloatTexType);
+					formatR = getSupportedFormat(gl, gl.R16F, gl.RED, halfFloatTexType);
+					if (!formatRGBA) formatRGBA = { internalFormat: gl.RGBA8, format: gl.RGBA };
+					if (!formatRG) formatRG = { internalFormat: gl.RGBA8, format: gl.RGBA };
+					if (!formatR) formatR = { internalFormat: gl.RGBA8, format: gl.RGBA };
+				}
 			} else {
-				formatRGBA = getSupportedFormat(gl, gl.RGBA, gl.RGBA, halfFloatTexType);
-				formatRG = getSupportedFormat(gl, gl.RGBA, gl.RGBA, halfFloatTexType);
-				formatR = getSupportedFormat(gl, gl.RGBA, gl.RGBA, halfFloatTexType);
+				formatRGBA = { internalFormat: gl.RGBA, format: gl.RGBA };
+				formatRG = { internalFormat: gl.RGBA, format: gl.RGBA };
+				formatR = { internalFormat: gl.RGBA, format: gl.RGBA };
+				if (!fallbackToUnsignedByte) {
+					formatRGBA = getSupportedFormat(gl, gl.RGBA, gl.RGBA, halfFloatTexType) ?? formatRGBA;
+					formatRG = getSupportedFormat(gl, gl.RGBA, gl.RGBA, halfFloatTexType) ?? formatRG;
+					formatR = getSupportedFormat(gl, gl.RGBA, gl.RGBA, halfFloatTexType) ?? formatR;
+				}
 			}
 
 			return {
@@ -226,6 +295,7 @@
 			format: number,
 			type: number
 		) {
+			if (!type) return false;
 			const texture = gl.createTexture();
 			gl.bindTexture(gl.TEXTURE_2D, texture);
 			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
@@ -729,17 +799,9 @@
 
 		// Setup blit
 		gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
-		gl.bufferData(
-			gl.ARRAY_BUFFER,
-			new Float32Array([-1, -1, -1, 1, 1, 1, 1, -1]),
-			gl.STATIC_DRAW
-		);
+		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, -1, 1, 1, 1, 1, -1]), gl.STATIC_DRAW);
 		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, gl.createBuffer());
-		gl.bufferData(
-			gl.ELEMENT_ARRAY_BUFFER,
-			new Uint16Array([0, 1, 2, 0, 2, 3]),
-			gl.STATIC_DRAW
-		);
+		gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array([0, 1, 2, 0, 2, 3]), gl.STATIC_DRAW);
 		gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
 		gl.enableVertexAttribArray(0);
 
@@ -1029,7 +1091,14 @@
 				texType,
 				gl.NEAREST
 			);
-			curl = createFBO(simRes.width, simRes.height, r.internalFormat, r.format, texType, gl.NEAREST);
+			curl = createFBO(
+				simRes.width,
+				simRes.height,
+				r.internalFormat,
+				r.format,
+				texType,
+				gl.NEAREST
+			);
 			pressure = createDoubleFBO(
 				simRes.width,
 				simRes.height,
@@ -1049,7 +1118,14 @@
 			const filtering = ext.supportLinearFiltering ? gl.LINEAR : gl.NEAREST;
 
 			sunrays = createFBO(res.width, res.height, r.internalFormat, r.format, texType, filtering);
-			sunraysTemp = createFBO(res.width, res.height, r.internalFormat, r.format, texType, filtering);
+			sunraysTemp = createFBO(
+				res.width,
+				res.height,
+				r.internalFormat,
+				r.format,
+				texType,
+				filtering
+			);
 		}
 
 		function updateKeywords() {
@@ -1070,7 +1146,7 @@
 			if (fluidCanvas.width !== width || fluidCanvas.height !== height) {
 				fluidCanvas.width = width;
 				fluidCanvas.height = height;
-				drawOverlayCanvas();
+				scheduleMaskDraw();
 				return true;
 			}
 			return false;
@@ -1128,7 +1204,13 @@
 			return radius;
 		}
 
-		function splat(x: number, y: number, dx: number, dy: number, color: { r: number; g: number; b: number }) {
+		function splat(
+			x: number,
+			y: number,
+			dx: number,
+			dy: number,
+			color: { r: number; g: number; b: number }
+		) {
 			splatProgram.bind();
 			gl.uniform1i(splatProgram.uniforms.uTarget, velocity.read.attach(0));
 			gl.uniform1f(splatProgram.uniforms.aspectRatio, fluidCanvas.width / fluidCanvas.height);
@@ -1151,16 +1233,16 @@
 				color.g *= 10.0;
 				color.b *= 10.0;
 				const x = Math.random();
-				const y = Math.random() < 0.5 ? 0.8 : 0.2;
-				const dx = 100 * (Math.random() - 0.5);
-				const dy = 1000 * (Math.random() - 0.5);
+				const y = Math.random() < 0.5 ? 0.95 : 0.05;
+				const dx = 300 * (Math.random() - 0.5);
+				const dy = 3000 * (Math.random() - 0.5);
 				splat(x, y, dx, dy, color);
 			}
 		}
 
 		function splatPointer(pointer: Pointer) {
-			const dx = pointer.deltaX * config.SPLAT_FORCE * 5;
-			const dy = pointer.deltaY * config.SPLAT_FORCE * 5;
+			const dx = pointer.deltaX * config.SPLAT_FORCE * 12;
+			const dy = pointer.deltaY * config.SPLAT_FORCE * 12;
 			splat(pointer.texcoordX, pointer.texcoordY, dx, dy, {
 				r: pointer.color[0],
 				g: pointer.color[1],
@@ -1328,7 +1410,7 @@
 				colorUpdateTimer = wrap(colorUpdateTimer, 0, 1);
 				pointers.forEach((p) => {
 					const c = generateColor();
-					p.color = [c.r * 255, c.g * 255, c.b * 255];
+					p.color = [c.r, c.g, c.b];
 				});
 			}
 		}
@@ -1355,6 +1437,14 @@
 		function update() {
 			const dt = calcDeltaTime() * (config.RENDER_SPEED ?? 1.0);
 			if (resizeCanvas()) initFramebuffers();
+			if (!maskReady) {
+				scheduleMaskDraw();
+				gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
+				gl.clearColor(0.0, 0.0, 0.0, 1.0);
+				gl.clear(gl.COLOR_BUFFER_BIT);
+				animationId = requestAnimationFrame(update);
+				return;
+			}
 			updateColors(dt);
 			applyInputs();
 			if (!config.PAUSED) step(dt);
@@ -1395,7 +1485,7 @@
 			pointer.deltaX = 0;
 			pointer.deltaY = 0;
 			const c = generateColor();
-			pointer.color = [c.r * 255, c.g * 255, c.b * 255];
+			pointer.color = [c.r, c.g, c.b];
 		}
 
 		function updatePointerMoveData(pointer: Pointer, posX: number, posY: number) {
@@ -1412,11 +1502,12 @@
 			pointer.down = false;
 		}
 
-		// Event handlers
-		fluidCanvas.addEventListener('mouseenter', (e) => {
+		// Event handlers - use container so events work over both canvases
+		container.addEventListener('mouseenter', (e) => {
 			// Create a small burst when mouse enters the card
-			const posX = scaleByPixelRatio(e.offsetX);
-			const posY = scaleByPixelRatio(e.offsetY);
+			const rect = container.getBoundingClientRect();
+			const posX = scaleByPixelRatio(e.clientX - rect.left);
+			const posY = scaleByPixelRatio(e.clientY - rect.top);
 			const x = posX / fluidCanvas.width;
 			const y = 1.0 - posY / fluidCanvas.height;
 			const color = generateColor();
@@ -1426,59 +1517,71 @@
 			splat(x, y, 300 * (Math.random() - 0.5), 300 * (Math.random() - 0.5), color);
 		});
 
-		fluidCanvas.addEventListener('mousedown', (e) => {
-			const posX = scaleByPixelRatio(e.offsetX);
-			const posY = scaleByPixelRatio(e.offsetY);
+		container.addEventListener('mousedown', (e) => {
+			const rect = container.getBoundingClientRect();
+			const posX = scaleByPixelRatio(e.clientX - rect.left);
+			const posY = scaleByPixelRatio(e.clientY - rect.top);
 			let pointer = pointers.find((p) => p.id === -1);
 			if (!pointer) pointer = PointerPrototype();
 			updatePointerDownData(pointer, -1, posX, posY);
 		});
 
-		fluidCanvas.addEventListener('mousemove', (e) => {
+		container.addEventListener('mousemove', (e) => {
 			const pointer = pointers[0];
-			const posX = scaleByPixelRatio(e.offsetX);
-			const posY = scaleByPixelRatio(e.offsetY);
+			const rect = container.getBoundingClientRect();
+			const posX = scaleByPixelRatio(e.clientX - rect.left);
+			const posY = scaleByPixelRatio(e.clientY - rect.top);
 			updatePointerMoveData(pointer, posX, posY);
 			// Always create swish effect on hover
 			if (pointer.moved) {
 				pointer.moved = false;
 				// Generate a new color for visual interest
 				const c = generateColor();
-				pointer.color = [c.r * 255, c.g * 255, c.b * 255];
-				splatPointer(pointer);
+				pointer.color = [c.r, c.g, c.b];
+				splat(
+					pointer.texcoordX,
+					pointer.texcoordY,
+					pointer.deltaX * config.SPLAT_FORCE * 12,
+					pointer.deltaY * config.SPLAT_FORCE * 12,
+					{
+						r: pointer.color[0],
+						g: pointer.color[1],
+						b: pointer.color[2]
+					}
+				);
 			}
 		});
 
-		fluidCanvas.addEventListener('mouseup', () => {
+		container.addEventListener('mouseup', () => {
 			updatePointerUpData(pointers[0]);
 		});
 
-		fluidCanvas.addEventListener('touchstart', (e) => {
+		container.addEventListener('touchstart', (e) => {
 			e.preventDefault();
 			const touches = e.targetTouches;
 			while (touches.length >= pointers.length) pointers.push(PointerPrototype());
 			for (let i = 0; i < touches.length; i++) {
-				const rect = fluidCanvas.getBoundingClientRect();
+				const rect = container.getBoundingClientRect();
 				const posX = scaleByPixelRatio(touches[i].clientX - rect.left);
 				const posY = scaleByPixelRatio(touches[i].clientY - rect.top);
 				updatePointerDownData(pointers[i + 1], touches[i].identifier, posX, posY);
 			}
 		});
 
-		fluidCanvas.addEventListener('touchmove', (e) => {
+		container.addEventListener('touchmove', (e) => {
 			e.preventDefault();
 			const touches = e.targetTouches;
 			for (let i = 0; i < touches.length; i++) {
 				const pointer = pointers[i + 1];
 				if (!pointer.down) continue;
-				const rect = fluidCanvas.getBoundingClientRect();
+				const rect = container.getBoundingClientRect();
 				const posX = scaleByPixelRatio(touches[i].clientX - rect.left);
 				const posY = scaleByPixelRatio(touches[i].clientY - rect.top);
 				updatePointerMoveData(pointer, posX, posY);
 			}
 		});
 
-		fluidCanvas.addEventListener('touchend', (e) => {
+		container.addEventListener('touchend', (e) => {
 			const touches = e.changedTouches;
 			for (let i = 0; i < touches.length; i++) {
 				const pointer = pointers.find((p) => p.id === touches[i].identifier);
@@ -1500,7 +1603,8 @@
 		// Resize observer - also triggers initial draw
 		resizeObserver = new ResizeObserver(() => {
 			resizeCanvas();
-			drawOverlayCanvas();
+			maskReady = false;
+			scheduleMaskDraw();
 		});
 		resizeObserver.observe(container);
 

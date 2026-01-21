@@ -26,6 +26,10 @@
 		onLikeClick,
 		onBookmarkClick,
 
+		replyHref,
+		repostHref,
+		likeHref,
+
 		customActions,
 
 		children,
@@ -47,6 +51,10 @@
 		onRepostClick?: () => void;
 		onLikeClick?: () => void;
 		onBookmarkClick?: () => void;
+
+		replyHref?: string;
+		repostHref?: string;
+		likeHref?: string;
 
 		customActions?: Snippet;
 
@@ -182,7 +190,7 @@
 					class="text-base-500 dark:text-base-400 accent:text-base-900 mt-4 flex justify-between gap-2"
 				>
 					{#if showReply}
-						<PostAction onclick={onReplyClick}>
+						<PostAction onclick={onReplyClick} href={replyHref}>
 							<svg
 								xmlns="http://www.w3.org/2000/svg"
 								fill="none"
@@ -204,7 +212,7 @@
 					{/if}
 
 					{#if showRepost}
-						<PostAction onclick={onRepostClick}>
+						<PostAction onclick={onRepostClick} href={repostHref}>
 							<svg
 								xmlns="http://www.w3.org/2000/svg"
 								fill="none"
@@ -228,6 +236,7 @@
 						<PostAction
 							class={liked ? 'text-accent-700 dark:text-accent-500 font-semibold' : ''}
 							onclick={onLikeClick}
+							href={likeHref}
 						>
 							{#if liked}
 								<svg

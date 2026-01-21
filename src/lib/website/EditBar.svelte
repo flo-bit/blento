@@ -2,7 +2,7 @@
 	import { dev } from '$app/environment';
 	import { client } from '$lib/oauth';
 	import type { WebsiteData } from '$lib/types';
-	import { Button, Input, Navbar, Popover, Toggle } from '@foxui/core';
+	import { Button, Input, Modal, Navbar, Popover, Toggle } from '@foxui/core';
 
 	let {
 		data,
@@ -40,6 +40,8 @@
 
 	let imageInputRef: HTMLInputElement | undefined = $state();
 	let videoInputRef: HTMLInputElement | undefined = $state();
+
+	let shareModalOpen = $state(false);
 </script>
 
 <input
@@ -59,6 +61,10 @@
 	multiple
 	bind:this={videoInputRef}
 />
+
+<Modal bind:open={shareModalOpen}>
+	
+</Modal>
 
 {#if dev || (client.isLoggedIn && client.profile?.did === data.did)}
 	<Navbar

@@ -183,12 +183,12 @@
 	{@render children?.()}
 
 	{#snippet controls()}
-		<!-- class="bg-base-100 border-base-200 dark:bg-base-800 dark:border-base-700 absolute -top-3 -left-3 hidden cursor-pointer items-center justify-center rounded-full border p-2 shadow-lg group-focus-within:inline-flex group-hover:inline-flex" -->
+		<!-- class="bg-base-100 border-base-200 dark:bg-base-800 dark:border-base-700 absolute -top-3 -left-3 hidden cursor-pointer items-center justify-center rounded-full border p-2 shadow-lg group-focus-within:inline-flex group-hover/card:inline-flex" -->
 		{#if canEdit()}
 			{#if changeOptions.length > 0}
 				<div
 					class={[
-						'absolute -top-3 -right-3 hidden group-focus-within:inline-flex group-hover:inline-flex',
+						'absolute -top-3 -right-3 hidden group-focus-within:inline-flex group-hover/card:inline-flex',
 						changePopoverOpen ? 'inline-flex' : ''
 					]}
 				>
@@ -236,7 +236,7 @@
 				onclick={() => {
 					ondelete();
 				}}
-				class="absolute -top-3 -left-3 hidden group-focus-within:inline-flex group-hover:inline-flex"
+				class="absolute -top-3 -left-3 hidden group-focus-within:inline-flex group-hover/card:inline-flex"
 			>
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
@@ -257,7 +257,7 @@
 
 			<div
 				class={[
-					'absolute -bottom-7 w-full items-center justify-center text-xs group-focus-within:inline-flex group-hover:inline-flex',
+					'absolute -bottom-7 w-full items-center justify-center text-xs group-focus-within:inline-flex group-hover/card:inline-flex',
 					colorPopoverOpen || settingsPopoverOpen ? 'inline-flex' : 'hidden'
 				]}
 			>
@@ -396,7 +396,7 @@
 
 				<div
 					onpointerdown={handleResizeStart}
-					class="bg-base-300/70 dark:bg-base-900/70 pointer-events-auto absolute right-0.5 bottom-0.5 hidden cursor-se-resize rounded-md rounded-br-3xl p-1 group-hover:block"
+					class="bg-base-300/70 dark:bg-base-900/70 pointer-events-auto absolute right-0.5 bottom-0.5 hidden cursor-se-resize rounded-md rounded-br-3xl p-1 group-hover/card:block"
 				>
 					<svg
 						xmlns="http://www.w3.org/2000/svg"

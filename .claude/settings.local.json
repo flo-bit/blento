@@ -4,7 +4,11 @@
       "Bash(pnpm check:*)",
       "mcp__ide__getDiagnostics",
       "mcp__plugin_svelte_svelte__svelte-autofixer",
-      "mcp__plugin_svelte_svelte__list-sections"
+      "mcp__plugin_svelte_svelte__list-sections",
+      "Bash(pkill:*)",
+      "Bash(timeout 8 pnpm dev:*)",
+      "Bash(git checkout:*)",
+      "Bash(npx svelte-kit:*)"
     ]
   }
 }
