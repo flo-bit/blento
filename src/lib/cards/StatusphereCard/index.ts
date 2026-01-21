@@ -43,7 +43,8 @@ export const StatusphereCardDefinition = {
 	}
 } as CardDefinition & { type: 'statusphere' };
 
-export function emojiToNotoAnimatedWebp(emoji: string): string | undefined {
+export function emojiToNotoAnimatedWebp(emoji: string | undefined): string | undefined {
+	if (!emoji) return;
 	// Convert emoji to lowercase hex codepoints joined by "-"
 	const codepoints: string[] = [];
 	for (const char of emoji) {

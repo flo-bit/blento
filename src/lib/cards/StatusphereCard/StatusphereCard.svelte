@@ -11,7 +11,7 @@
 	// svelte-ignore state_referenced_locally
 	let record = $state(data[item.cardType] as any);
 
-	let animated = $derived(emojiToNotoAnimatedWebp(record.value.status));
+	let animated = $derived(emojiToNotoAnimatedWebp(record?.value?.status));
 </script>
 
 <div class="flex h-full w-full items-center justify-center p-4">
