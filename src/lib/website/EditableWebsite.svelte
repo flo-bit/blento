@@ -324,14 +324,17 @@
 	}
 
 	async function processImageFile(file: File, gridX?: number, gridY?: number) {
-		const compressedFile = await compressImage(file);
-		const objectUrl = URL.createObjectURL(compressedFile);
+		const isGif = file.type === 'image/gif';
+
+		// Don't compress GIFs to preserve animation
+		const processedFile = isGif ? file : await compressImage(file);
+		const objectUrl = URL.createObjectURL(processedFile);
 
 		let item = createEmptyCard(data.page);
 
-		item.cardType = 'image';
+		item.cardType = isGif ? 'gif' : 'image';
 		item.cardData = {
-			blob: compressedFile,
+			blob: processedFile,
 			objectUrl
 		};
 
