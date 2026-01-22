@@ -323,7 +323,7 @@ export function validateLink(
 		new URL(link);
 
 		return link;
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		 
 	} catch (e) {
 		if (!tryAdding) return;
 
@@ -332,7 +332,7 @@ export function validateLink(
 			new URL(link);
 
 			return link;
-			// eslint-disable-next-line @typescript-eslint/no-unused-vars
+			 
 		} catch (e) {
 			return;
 		}

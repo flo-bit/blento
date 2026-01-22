@@ -10,7 +10,7 @@ export async function GET({ url }) {
 	// check if link is valid url
 	try {
 		new URL(link);
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		 
 	} catch (_) {
 		return json({ error: 'Link is not a valid url' }, { status: 500 });
 	}

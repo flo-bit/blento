@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { RelativeTime } from '@foxui/time';
+	
 	import DateTime from './DateTime.svelte';
 
 	let {

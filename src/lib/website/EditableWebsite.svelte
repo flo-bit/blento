@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { client, login } from '$lib/oauth/auth.svelte.js';
+	
 
-	import { Navbar, Button, toast, Toaster, Toggle, Sidebar, Popover, Input } from '@foxui/core';
-	import { BlueskyLogin } from '@foxui/social';
+	import {  Button, toast, Toaster, Sidebar } from '@foxui/core';
+	
 
 	import { COLUMNS, margin, mobileMargin } from '$lib';
 	import {

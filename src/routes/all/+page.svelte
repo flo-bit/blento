@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { createEmptyCard, refreshData } from '$lib/helper.js';
+	import { createEmptyCard } from '$lib/helper.js';
 	import Website from '$lib/website/Website.svelte';
-	import { onMount } from 'svelte';
+	
 
 	let { data } = $props();
 

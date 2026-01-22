@@ -10,7 +10,7 @@
 	import TurndownService from 'turndown';
 	import { RichTextLink } from './extensions/RichTextLink';
 	import type { Item } from '$lib/types';
-	import { textAlignClasses, verticalAlignClasses } from '../TextCard';
+	
 
 	let element: HTMLElement | undefined = $state();
 

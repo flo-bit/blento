@@ -7,7 +7,7 @@
 	import GithubContributionsGraph from './GithubContributionsGraph.svelte';
 	import { Button } from '@foxui/core';
 	import { browser } from '$app/environment';
-	import { fade } from 'svelte/transition';
+	
 
 	let { item }: ContentComponentProps = $props();
 
