@@ -77,6 +77,9 @@ importers:
       gsap:
         specifier: ^3.14.2
         version: 3.14.2
+      heypster-gif:
+        specifier: ^3.0.4
+        version: 3.0.4
       hls.js:
         specifier: ^1.6.15
         version: 1.6.15
@@ -1965,6 +1968,9 @@ packages:
   hex-rgb@4.3.0:
     resolution: {integrity: sha512-Ox1pJVrDCyGHMG9CFg1tmrRUMRPRsAWYc/PinY0XzJU4K7y7vjNoLKIQ7BR5UJMCxNN8EM1MNDmHWA/B3aZUuw==, tarball: https://registry.npmjs.org/hex-rgb/-/hex-rgb-4.3.0.tgz}
     engines: {node: '>=6'}
+
+  heypster-gif@3.0.4:
+    resolution: {integrity: sha512-GcmzNYxi1MQNipc/aF1zlVP4ACeqdVJZsP4CrVvx/oKW0VZd+Y/iT/EXaMDJL/dCYqx+unmmLPoDdAzIg8gX7w==, tarball: https://registry.npmjs.org/heypster-gif/-/heypster-gif-3.0.4.tgz}
 
   hls.js@1.6.15:
     resolution: {integrity: sha512-E3a5VwgXimGHwpRGV+WxRTKeSp2DW5DI5MWv34ulL3t5UNmyJWCQ1KmLEHbYzcfThfXG8amBL+fCYPneGHC4VA==, tarball: https://registry.npmjs.org/hls.js/-/hls.js-1.6.15.tgz}
@@ -4791,6 +4797,8 @@ snapshots:
       function-bind: 1.1.2
 
   hex-rgb@4.3.0: {}
+
+  heypster-gif@3.0.4: {}
 
   hls.js@1.6.15: {}
 

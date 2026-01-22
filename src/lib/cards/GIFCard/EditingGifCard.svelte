@@ -1,6 +1,8 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import type { ContentComponentProps } from '../types';
 	import GiphySearchModal from './GiphySearchModal.svelte';
+	import { toggleHeypster } from './heypster.svelte';
 
 	let { item = $bindable() }: ContentComponentProps = $props();
 
@@ -18,8 +20,22 @@
 		isSearchOpen = false;
 	}
 
+	onMount(() => {
+
+		window.addEventListener('heypsterGifClicked', (event) => {
+			if (!isSearchOpen) return;
+			const data = event.detail;
+			console.log(data);
+			item.cardData.url = data.h264;
+			toggleHeypster();
+
+			isSearchOpen = false;
+		});
+	})
+
 	function openSearch() {
 		isSearchOpen = true;
+		toggleHeypster();
 	}
 </script>
 
@@ -72,4 +88,4 @@
 	{/if}
 </div>
 
-<GiphySearchModal bind:open={isSearchOpen} onselect={handleGifSelect} oncancel={() => (isSearchOpen = false)} />
+<!-- <GiphySearchModal bind:open={isSearchOpen} onselect={handleGifSelect} oncancel={() => (isSearchOpen = false)} /> -->
