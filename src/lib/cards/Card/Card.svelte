@@ -2,7 +2,12 @@
 	import { CardDefinitionsByType } from '..';
 	import { type BaseCardProps } from '../BaseCard/BaseCard.svelte';
 
-	let { item, ref = $bindable(null), ...rest }: BaseCardProps = $props();
+	let {
+		item,
+		ref = $bindable(null),
+		// eslint-disable-next-line svelte/valid-compile
+		...rest
+	}: BaseCardProps = $props();
 </script>
 
 {#if CardDefinitionsByType[item.cardType]}

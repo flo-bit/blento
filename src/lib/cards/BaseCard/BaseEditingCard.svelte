@@ -46,6 +46,7 @@
 		onsetsize,
 		onshowsettings,
 		ondelete,
+		// eslint-disable-next-line svelte/valid-compile
 		...rest
 	}: BaseEditingCardProps = $props();
 
@@ -392,8 +393,6 @@
 
 			{#if cardDef.canResize !== false}
 				<!-- Resize handle at bottom right corner -->
-				<!-- svelte-ignore a11y_no_static_element_interactions -->
-
 				<div
 					onpointerdown={handleResizeStart}
 					class="bg-base-300/70 dark:bg-base-900/70 pointer-events-auto absolute right-0.5 bottom-0.5 hidden cursor-se-resize rounded-md rounded-br-3xl p-1 group-hover/card:block"

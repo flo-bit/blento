@@ -175,6 +175,7 @@
 				class="accent:prose-a:text-accent-950 accent:text-base-900 accent:prose-p:text-base-900 accent:prose-a:underline"
 			>
 				{#if data.htmlContent}
+					<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 					{@html data.htmlContent}
 				{:else}
 					{@render children?.()}

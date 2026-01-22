@@ -61,7 +61,7 @@ export function blueskyPostToPostData(
 		embed: post.embed
 			? ({
 					type: blueskyEmbedTypeToEmbedType(post.embed?.$type),
-					// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 					images: post.embed?.images?.map((image: any) => ({
 						alt: image.alt,
 						thumb: image.thumb,
@@ -91,7 +91,6 @@ export function blueskyPostToPostData(
 	};
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function blueskyPostToHTML(post: any, baseUrl: string = 'https://bsky.app') {
 	if (!post?.record) {
 		return '';

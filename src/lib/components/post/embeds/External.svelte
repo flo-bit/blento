@@ -3,7 +3,7 @@
 
 	const { data }: { data: PostEmbedExternal } = $props();
 
-	const domain = new URL(data.external.href).hostname.replace('www.', '');
+	const domain = $derived(new URL(data.external.href).hostname.replace('www.', ''));
 </script>
 
 <article

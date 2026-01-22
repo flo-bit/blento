@@ -4,7 +4,7 @@
 	import type { ContentComponentProps } from '../types';
 	import Video from './Video.svelte';
 
-	let { item = $bindable(), ...rest }: ContentComponentProps = $props();
+	let { item = $bindable() }: ContentComponentProps = $props();
 
 	const did = getDidContext();
 

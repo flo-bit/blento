@@ -233,6 +233,7 @@
 	function playTone(
 		frequency: number,
 		duration: number,
+		// eslint-disable-next-line no-undef
 		type: OscillatorType = 'square',
 		volume: number = 0.04
 	) {

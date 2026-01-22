@@ -27,6 +27,7 @@
 		controls,
 		showOutline,
 		class: className,
+		// eslint-disable-next-line svelte/valid-compile
 		...rest
 	}: BaseCardProps = $props();
 

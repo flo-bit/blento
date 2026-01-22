@@ -44,6 +44,7 @@
 			<div
 				class="text-base-600 dark:text-base-400 prose dark:prose-invert prose-a:text-accent-500 prose-a:no-underline"
 			>
+				<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 				{@html marked.parse(getDescription(data), {
 					renderer
 				})}

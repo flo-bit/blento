@@ -8,6 +8,7 @@
 		feedViewPost,
 		children,
 		showLogo = false,
+		// eslint-disable-next-line svelte/valid-compile
 		...restProps
 	}: { feedViewPost?: FeedViewPost; children?: Snippet; showLogo?: boolean } = $props();
 

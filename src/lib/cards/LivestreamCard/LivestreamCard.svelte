@@ -20,7 +20,6 @@
 	let isLoaded = $state(false);
 
 	const data = getAdditionalUserData();
-	// svelte-ignore state_referenced_locally
 	let latestLivestream = $state(
 		data[item.cardType] as
 			| {

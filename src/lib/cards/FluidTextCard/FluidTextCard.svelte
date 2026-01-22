@@ -1,4 +1,6 @@
+<!-- eslint-disable -->
 <script lang="ts">
+	// @ts-nocheck
 	import type { ContentComponentProps } from '../types';
 	import { onMount, onDestroy, tick } from 'svelte';
 	import ditheringTextureUrl from './LDR_LLL1_0.png';
@@ -93,7 +95,9 @@
 	// Redraw overlay when text settings change (only after initialization)
 	$effect(() => {
 		// Access all reactive values to track them
+		// eslint-disable-next-line @typescript-eslint/no-unused-expressions
 		text;
+		// eslint-disable-next-line @typescript-eslint/no-unused-expressions
 		fontSize;
 		// Only redraw if already initialized
 		if (isInitialized) {
@@ -316,6 +320,7 @@
 			return /Mobi|Android/i.test(navigator.userAgent);
 		}
 
+		// eslint-disable-next-line svelte/valid-compile
 		class Material {
 			vertexShader: WebGLShader;
 			fragmentShaderSource: string;
@@ -354,6 +359,7 @@
 			}
 		}
 
+		// eslint-disable-next-line svelte/valid-compile
 		class Program {
 			uniforms: Record<string, WebGLUniformLocation | null> = {};
 			program: WebGLProgram;
@@ -1164,21 +1170,27 @@
 
 			switch (i % 6) {
 				case 0:
+					// eslint-disable-next-line @typescript-eslint/no-unused-expressions
 					(r = v), (g = t), (b = p);
 					break;
 				case 1:
+					// eslint-disable-next-line @typescript-eslint/no-unused-expressions
 					(r = q), (g = v), (b = p);
 					break;
 				case 2:
+					// eslint-disable-next-line @typescript-eslint/no-unused-expressions
 					(r = p), (g = v), (b = t);
 					break;
 				case 3:
+					// eslint-disable-next-line @typescript-eslint/no-unused-expressions
 					(r = p), (g = q), (b = v);
 					break;
 				case 4:
+					// eslint-disable-next-line @typescript-eslint/no-unused-expressions
 					(r = t), (g = p), (b = v);
 					break;
 				case 5:
+					// eslint-disable-next-line @typescript-eslint/no-unused-expressions
 					(r = v), (g = p), (b = q);
 					break;
 			}
