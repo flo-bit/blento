@@ -5,7 +5,6 @@
 	import { CardDefinitionsByType } from '..';
 	import { PopoverEmojiPicker } from '@foxui/social';
 
-	
 	import { emojiToNotoAnimatedWebp } from '.';
 	import PlainTextEditor from '../utils/PlainTextEditor.svelte';
 	import { cn } from '@foxui/core';

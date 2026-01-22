@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { createEmptyCard } from '$lib/helper.js';
 	import Website from '$lib/website/Website.svelte';
-	
 
 	let { data } = $props();
 

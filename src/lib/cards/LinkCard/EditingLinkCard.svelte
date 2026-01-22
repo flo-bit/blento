@@ -3,7 +3,6 @@
 	import { getIsMobile } from '$lib/website/context';
 	import type { ContentComponentProps } from '../types';
 	import PlainTextEditor from '../utils/PlainTextEditor.svelte';
-	
 
 	let { item = $bindable() }: ContentComponentProps = $props();
 

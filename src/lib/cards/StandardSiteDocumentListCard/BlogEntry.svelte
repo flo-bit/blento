@@ -1,5 +1,4 @@
 <script lang="ts">
-	
 	import DateTime from './DateTime.svelte';
 
 	let {

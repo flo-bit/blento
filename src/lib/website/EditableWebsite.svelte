@@ -1,8 +1,5 @@
 <script lang="ts">
-	
-
-	import {  Button, toast, Toaster, Sidebar } from '@foxui/core';
-	
+	import { Button, toast, Toaster, Sidebar } from '@foxui/core';
 
 	import { COLUMNS, margin, mobileMargin } from '$lib';
 	import {

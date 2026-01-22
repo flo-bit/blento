@@ -10,7 +10,6 @@ export async function GET({ url }) {
 	// check if link is valid url
 	try {
 		new URL(link);
-		 
 	} catch (_) {
 		return json({ error: 'Link is not a valid url' }, { status: 500 });
 	}

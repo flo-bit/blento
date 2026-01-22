@@ -10,7 +10,6 @@
 	import TurndownService from 'turndown';
 	import { RichTextLink } from './extensions/RichTextLink';
 	import type { Item } from '$lib/types';
-	
 
 	let element: HTMLElement | undefined = $state();
 

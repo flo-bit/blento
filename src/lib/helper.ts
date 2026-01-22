@@ -323,7 +323,6 @@ export function validateLink(
 		new URL(link);
 
 		return link;
-		 
 	} catch (e) {
 		if (!tryAdding) return;
 
@@ -332,7 +331,6 @@ export function validateLink(
 			new URL(link);
 
 			return link;
-			 
 		} catch (e) {
 			return;
 		}
