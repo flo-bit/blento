@@ -15,14 +15,14 @@
 <!-- svelte-ignore a11y_click_events_have_key_events -->
 <div
 	class={cn(
-		'prose dark:prose-invert prose-neutral prose-sm prose-a:no-underline prose-a:text-accent-600 dark:prose-a:text-accent-400 accent:prose-a:text-accent-950 accent:prose-a:underline accent:prose-p:text-base-900 hover:bg-base-700/5 accent:hover:bg-accent-300/20 prose-p:first:mt-0 prose-p:last:mb-0 inline-flex h-full w-full text-lg max-w-none overflow-y-scroll rounded-md p-2 transition-colors duration-150 cursor-text',
+		'prose dark:prose-invert prose-neutral prose-sm prose-a:no-underline prose-a:text-accent-600 dark:prose-a:text-accent-400 accent:prose-a:text-accent-950 accent:prose-a:underline accent:prose-p:text-base-900 hover:bg-base-700/5 accent:hover:bg-accent-300/20 prose-p:first:mt-0 prose-p:last:mb-0 inline-flex h-full w-full max-w-none cursor-text overflow-y-scroll rounded-md p-2 text-lg transition-colors duration-150',
 		textAlignClasses[item.cardData.textAlign as string],
 		verticalAlignClasses[item.cardData.verticalAlign as string],
 		textSizeClasses[(item.cardData.textSize ?? 0) as number]
 	)}
 	onclick={() => {
-		if(editor?.isFocused) return;
-		
+		if (editor?.isFocused) return;
+
 		editor?.commands.focus('end');
 	}}
 >

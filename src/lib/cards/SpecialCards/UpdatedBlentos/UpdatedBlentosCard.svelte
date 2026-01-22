@@ -27,7 +27,7 @@
 					alt=""
 					loading="lazy"
 				/>
-				<div class="text-md line-clamp-1 text-center font-bold max-w-full">
+				<div class="text-md line-clamp-1 max-w-full text-center font-bold">
 					{profile.displayName || profile.handle}
 				</div>
 			</a>
@@ -35,10 +35,6 @@
 	</div>
 </div>
 
-
 https://coverartarchive.org/release/46656572-9172-44cc-9efa-7ee9b87fe489/front-250
 https://coverartarchive.org/release/d8e8f57d-40b6-45e3-8c01-8816d33995d1/front-250
-
-42bed944-e781-4447-82df-8cae4918dd94
-
-d8e8f57d-40b6-45e3-8c01-8816d33995d1
+42bed944-e781-4447-82df-8cae4918dd94 d8e8f57d-40b6-45e3-8c01-8816d33995d1

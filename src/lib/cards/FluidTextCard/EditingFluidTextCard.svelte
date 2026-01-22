@@ -31,7 +31,9 @@
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <!-- svelte-ignore a11y_click_events_have_key_events -->
 <div
-	class="relative h-full w-full cursor-text transition-colors duration-150 {isEditing ? 'ring-2 ring-white/30' : ''}"
+	class="relative h-full w-full cursor-text transition-colors duration-150 {isEditing
+		? 'ring-2 ring-white/30'
+		: ''}"
 	onclick={handleClick}
 >
 	<FluidTextCard {item} />
@@ -49,7 +51,7 @@
 				bind:value={item.cardData.text}
 				onblur={handleBlur}
 				onkeydown={handleKeydown}
-				class="w-full max-w-md rounded-md border border-white/20 bg-white/10 px-4 py-3 text-center text-2xl font-bold text-white outline-none transition-colors focus:border-white/40 focus:bg-white/20"
+				class="w-full max-w-md rounded-md border border-white/20 bg-white/10 px-4 py-3 text-center text-2xl font-bold text-white transition-colors outline-none focus:border-white/40 focus:bg-white/20"
 				placeholder="Enter text"
 				autofocus
 			/>

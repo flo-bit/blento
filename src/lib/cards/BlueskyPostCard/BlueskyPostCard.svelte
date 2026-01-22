@@ -16,13 +16,15 @@
 
 	onMount(async () => {
 		if (!feed) {
-			feed = ((await CardDefinitionsByType[item.cardType]?.loadData?.([], {
-				did,
-				handle,
-				platform: undefined
-			})) as any).feed
+			feed = (
+				(await CardDefinitionsByType[item.cardType]?.loadData?.([], {
+					did,
+					handle,
+					platform: undefined
+				})) as any
+			).feed;
 
-				console.log(feed);
+			console.log(feed);
 
 			data[item.cardType] = feed;
 		}
@@ -30,7 +32,11 @@
 </script>
 
 <div class="flex h-full flex-col justify-center-safe overflow-y-scroll p-4">
-	<div class="text-2xl accent:text-base-950 w-fit font-semibold mb-6 mx-auto p-1 px-2 bg-base-200/50 dark:bg-base-700/30 rounded-xl">My latest bluesky post</div>
+	<div
+		class="accent:text-base-950 bg-base-200/50 dark:bg-base-700/30 mx-auto mb-6 w-fit rounded-xl p-1 px-2 text-2xl font-semibold"
+	>
+		My latest bluesky post
+	</div>
 	{#if feed?.[0]?.post}
 		<BlueskyPost showLogo feedViewPost={feed?.[0].post}></BlueskyPost>
 		<div class="h-4 w-full"></div>

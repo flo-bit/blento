@@ -12,20 +12,20 @@ Make the game container focusable and handle keyboard events on it (not on `svel
 
 ```svelte
 <script lang="ts">
-  let container: HTMLDivElement;
+	let container: HTMLDivElement;
 </script>
 
 <!-- svelte-ignore a11y_no_noninteractive_tabindex a11y_no_noninteractive_element_interactions -->
 <div
-  bind:this={container}
-  class="relative h-full w-full overflow-hidden outline-none"
-  tabindex="0"
-  role="application"
-  aria-label="Your game name"
-  onkeydown={handleKeyDown}
-  onkeyup={handleKeyUp}
+	bind:this={container}
+	class="relative h-full w-full overflow-hidden outline-none"
+	tabindex="0"
+	role="application"
+	aria-label="Your game name"
+	onkeydown={handleKeyDown}
+	onkeyup={handleKeyUp}
 >
-  <!-- game content -->
+	<!-- game content -->
 </div>
 ```
 
@@ -35,8 +35,8 @@ When the game starts, focus the container so keyboard events work:
 
 ```typescript
 function startGame() {
-  // ... game initialization
-  container?.focus();
+	// ... game initialization
+	container?.focus();
 }
 ```
 
@@ -48,10 +48,10 @@ Instead, attach handlers directly to the container div. The handlers will only f
 
 ```typescript
 function handleKeyDown(e: KeyboardEvent) {
-  if (e.code === 'Space') {
-    e.preventDefault();
-    // handle action
-  }
+	if (e.code === 'Space') {
+		e.preventDefault();
+		// handle action
+	}
 }
 ```
 
@@ -61,11 +61,11 @@ Add `touch-none` and `select-none` classes to prevent scrolling and text selecti
 
 ```svelte
 <canvas
-  bind:this={canvas}
-  class="h-full w-full touch-none select-none"
-  ontouchstart={handleTouchStart}
-  ontouchmove={handleTouchMove}
-  ontouchend={handleTouchEnd}
+	bind:this={canvas}
+	class="h-full w-full touch-none select-none"
+	ontouchstart={handleTouchStart}
+	ontouchmove={handleTouchMove}
+	ontouchend={handleTouchEnd}
 ></canvas>
 ```
 
@@ -75,10 +75,10 @@ For mobile support, add touch event handlers to the canvas. Prevent default to s
 
 ```typescript
 function handleTouchStart(e: TouchEvent) {
-  if (gameState === 'playing') {
-    e.preventDefault();
-  }
-  // handle touch
+	if (gameState === 'playing') {
+		e.preventDefault();
+	}
+	// handle touch
 }
 ```
 

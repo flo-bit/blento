@@ -70,7 +70,7 @@
 					Edit Your Website</Button
 				>
 			</div>
-			{:else}
+		{:else}
 			<div class="h-[42px] w-1 @5xl/wrapper:hidden"></div>
 		{/if}
 
@@ -89,7 +89,10 @@
 				</div>
 			{:else if client.isLoggedIn}
 				<div>
-					<Button href="/{env.PUBLIC_IS_SELFHOSTED ? '' : client.profile?.handle}/edit" class="mt-2">
+					<Button
+						href="/{env.PUBLIC_IS_SELFHOSTED ? '' : client.profile?.handle}/edit"
+						class="mt-2"
+					>
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
 							fill="none"

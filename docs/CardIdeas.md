@@ -37,7 +37,7 @@
 
 - leaflet
 - skywatched
-- teal.fm 
+- teal.fm
   - [x] last played songs
 - tangled.sh
 - popfeed.social

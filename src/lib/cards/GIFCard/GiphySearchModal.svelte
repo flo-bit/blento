@@ -118,7 +118,12 @@
 	});
 </script>
 
-<Modal bind:open onOpenChange={(isOpen) => !isOpen && handleCancel()} closeButton={true} class="flex h-[80dvh] max-w-4xl flex-col">
+<Modal
+	bind:open
+	onOpenChange={(isOpen) => !isOpen && handleCancel()}
+	closeButton={true}
+	class="flex h-[80dvh] max-w-4xl flex-col"
+>
 	<Subheading>{searchQuery.trim() ? 'Search GIPHY' : 'Trending GIFs'}</Subheading>
 
 	<Input
@@ -141,7 +146,7 @@
 							<button
 								onclick={() => selectGif(gif)}
 								aria-label={gif.title}
-								class="block shrink-0 overflow-hidden rounded-xl transition-transform hover:scale-[1.02] focus:ring-2 focus:ring-accent-500 focus:outline-none"
+								class="focus:ring-accent-500 block shrink-0 overflow-hidden rounded-xl transition-transform hover:scale-[1.02] focus:ring-2 focus:outline-none"
 							>
 								<video
 									src={gif.images.fixed_height.mp4}
@@ -149,8 +154,9 @@
 									loop
 									muted
 									playsinline
-									class="block w-full bg-base-200 dark:bg-base-800"
-									style="aspect-ratio: {gif.images.fixed_height.width} / {gif.images.fixed_height.height}"
+									class="bg-base-200 dark:bg-base-800 block w-full"
+									style="aspect-ratio: {gif.images.fixed_height.width} / {gif.images.fixed_height
+										.height}"
 								></video>
 							</button>
 						{/each}

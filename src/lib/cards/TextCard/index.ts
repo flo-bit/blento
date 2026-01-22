@@ -37,4 +37,3 @@ export const textSizeClasses = [
 	'text-4xl',
 	'text-5xl'
 ];
-

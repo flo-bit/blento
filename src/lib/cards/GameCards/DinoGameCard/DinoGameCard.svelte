@@ -379,10 +379,7 @@
 			// Spawn obstacles
 			const baseSpawnRate = 120;
 			const spawnRate = Math.max(60, baseSpawnRate - Math.floor(score / 100) * 5);
-			if (
-				frameCount - lastSpawnFrame >= spawnRate ||
-				(obstacles.length === 0 && frameCount > 60)
-			) {
+			if (frameCount - lastSpawnFrame >= spawnRate || (obstacles.length === 0 && frameCount > 60)) {
 				spawnObstacle(canvasWidth, groundY);
 				lastSpawnFrame = frameCount;
 			}
@@ -543,7 +540,7 @@
 >
 	<canvas
 		bind:this={canvas}
-		class="h-full w-full touch-none select-none invert dark:invert-0"
+		class="h-full w-full touch-none invert select-none dark:invert-0"
 		ontouchstart={handleTouch}
 	></canvas>
 

@@ -3,6 +3,7 @@
 - fix opengraph image stuff (caching issue?)
 
 - site.standard
+
   - move subpages to own lexicon (app.blento.page)
   - move description to markdownDescription and set description as text only
 

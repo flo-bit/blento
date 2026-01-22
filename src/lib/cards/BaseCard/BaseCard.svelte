@@ -8,8 +8,7 @@
 
 	const colors = {
 		base: 'bg-base-200/50 dark:bg-base-950/50',
-		accent:
-			'bg-accent-400 dark:bg-accent-500 accent',
+		accent: 'bg-accent-400 dark:bg-accent-500 accent',
 		transparent: ''
 	} as Record<string, string>;
 
@@ -17,7 +16,7 @@
 		item: Item;
 		controls?: Snippet<[]>;
 		isEditing?: boolean;
-		showOutline?: boolean
+		showOutline?: boolean;
 	} & WithElementRef<HTMLAttributes<HTMLDivElement>>;
 
 	let {
@@ -40,7 +39,7 @@
 	bind:this={ref}
 	draggable={isEditing}
 	class={[
-		'card group/card selection:bg-accent-600/50 focus-within:outline-accent-500 @container/card absolute z-0 rounded-3xl outline-offset-2 transition-all duration-200 focus-within:outline-2 isolate',
+		'card group/card selection:bg-accent-600/50 focus-within:outline-accent-500 @container/card absolute isolate z-0 rounded-3xl outline-offset-2 transition-all duration-200 focus-within:outline-2',
 		color ? (colors[color] ?? colors.accent) : colors.base,
 		color !== 'accent' && item.color !== 'base' && item.color !== 'transparent' ? color : '',
 		showOutline ? 'outline-2' : '',
@@ -62,9 +61,12 @@
 	--columns: ${COLUMNS}`}
 	{...rest}
 >
-	<div class={["relative h-full w-full overflow-hidden rounded-[23px] isolate text-base-900 dark:text-base-50", 
-		color !== 'base' && color != 'transparent' ? 'light' : ''
-	]}>
+	<div
+		class={[
+			'text-base-900 dark:text-base-50 relative isolate h-full w-full overflow-hidden rounded-[23px]',
+			color !== 'base' && color != 'transparent' ? 'light' : ''
+		]}
+	>
 		{@render children?.()}
 	</div>
 	{@render controls?.()}

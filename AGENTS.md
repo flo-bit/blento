@@ -1,6 +1,7 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
+
 - `src/routes` contains SvelteKit routes, including dynamic handle pages in `src/routes/[handle]/[[page]]`, edit flows in `src/routes/[handle]/[[page]]/edit` and `src/routes/edit`, and API endpoints under `src/routes/api`.
 - `src/lib` holds reusable modules: card implementations in `src/lib/cards`, shared UI in `src/lib/components`, OAuth helpers in `src/lib/oauth`, and site data/loading in `src/lib/website`.
 - Root app setup lives in `src/app.html` and `src/app.css`.
@@ -8,6 +9,7 @@
 - `docs` includes contributor-facing docs like custom cards and self-hosting.
 
 ## Build, Test, and Development Commands
+
 - `pnpm dev` starts the Vite dev server.
 - `pnpm build` creates a production build.
 - `pnpm preview` builds and runs locally with Wrangler.
@@ -17,18 +19,22 @@
 - `pnpm deploy` builds and deploys to Cloudflare Workers.
 
 ## Coding Style & Naming Conventions
+
 - Indentation uses tabs, single quotes, and 100-column width (see `.prettierrc`).
 - Svelte components use PascalCase filenames; utilities and helpers use camelCase.
 - Prefer TypeScript in `src` and keep module boundaries aligned with `src/lib` subfolders (cards, components, website, oauth).
 
 ## Testing Guidelines
+
 - There is no dedicated test runner yet. Use `pnpm check` and `pnpm lint` before submitting changes.
 - For UI changes, verify key flows manually (login, card editing, save/load, and route navigation across `[handle]` pages).
 
 ## Commit & Pull Request Guidelines
+
 - Keep commits short and direct; recent history favors lowercase, imperative summaries (e.g., `small fixes`).
 - PRs should include a clear description, linked issues when relevant, and screenshots for UI changes.
 
 ## Configuration & Deployment Notes
+
 - Copy `.env.example` to `.env` and adjust `PUBLIC_*` values for local or self-hosted setups.
 - Cloudflare configuration lives in `wrangler.jsonc`; deployments use Wrangler via `pnpm deploy`.

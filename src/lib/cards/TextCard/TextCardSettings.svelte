@@ -9,7 +9,6 @@
 </script>
 
 <div class="flex flex-col gap-2">
-
 	<ToggleGroup
 		type="single"
 		bind:value={
@@ -73,7 +72,7 @@
 			></ToggleGroupItem
 		>
 	</ToggleGroup>
-	
+
 	<ToggleGroup
 		type="single"
 		bind:value={
@@ -120,7 +119,6 @@
 			></ToggleGroupItem
 		>
 	</ToggleGroup>
-
 
 	<div>
 		<Button

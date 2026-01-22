@@ -21,7 +21,7 @@
 			? `aspect-ratio: ${image.aspectRatio.width} / ${image.aspectRatio.height}`
 			: 'aspect-ratio: 1 / 1'}
 		class={[
-			'border-base-500/20 dark:border-base-400/20 w-fit max-w-full rounded-2xl border max-h-[40rem] object-contain accent:border-accent-900',
+			'border-base-500/20 dark:border-base-400/20 accent:border-accent-900 max-h-[40rem] w-fit max-w-full rounded-2xl border object-contain',
 			className
 		]}
 	/>

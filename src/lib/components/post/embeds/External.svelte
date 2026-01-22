@@ -8,7 +8,7 @@
 
 <article
 	class={[
-		'group dark:bg-base-900 bg-base-200 border-base-300 dark:border-base-600/30 max-w-md relative isolate flex flex-col justify-end overflow-hidden rounded-2xl border p-4',
+		'group dark:bg-base-900 bg-base-200 border-base-300 dark:border-base-600/30 relative isolate flex max-w-md flex-col justify-end overflow-hidden rounded-2xl border p-4',
 		data.external.thumb ? 'aspect-[16/9]' : ''
 	]}
 >
