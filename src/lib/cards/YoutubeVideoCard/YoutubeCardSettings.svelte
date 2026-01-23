@@ -7,9 +7,7 @@
 
 <div class="flex items-center space-x-2">
 	<Checkbox
-		bind:checked={
-			() => !item.cardData.showInline, (val) => (item.cardData.showInline = !val)
-		}
+		bind:checked={() => !item.cardData.showInline, (val) => (item.cardData.showInline = !val)}
 		id="show-inline"
 		aria-labelledby="show-inline-label"
 		variant="secondary"

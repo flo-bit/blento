@@ -72,4 +72,8 @@
 	{/if}
 </div>
 
-<GiphySearchModal bind:open={isSearchOpen} onselect={handleGifSelect} oncancel={() => (isSearchOpen = false)} />
+<GiphySearchModal
+	bind:open={isSearchOpen}
+	onselect={handleGifSelect}
+	oncancel={() => (isSearchOpen = false)}
+/>

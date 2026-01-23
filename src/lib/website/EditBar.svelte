@@ -62,9 +62,7 @@
 	bind:this={videoInputRef}
 />
 
-<Modal bind:open={shareModalOpen}>
-	
-</Modal>
+<Modal bind:open={shareModalOpen}></Modal>
 
 {#if dev || (user.isLoggedIn && user.profile?.did === data.did)}
 	<Navbar

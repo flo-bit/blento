@@ -22,7 +22,7 @@
 {/snippet}
 
 {#snippet halfStar()}
-	<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="size-5 fill-accent-500">
+	<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="fill-accent-500 size-5">
 		<defs>
 			<linearGradient id="half-filled" x1="0%" y1="0%" x2="100%" y2="0%">
 				<stop offset="50%" stop-color="currentColor" />
@@ -40,12 +40,12 @@
 
 <div class={cn('text-accent-500 flex', className)}>
 	{#each Array(fullStars) as _}
-		{@render star("text-accent-500")}
+		{@render star('text-accent-500')}
 	{/each}
 	{#if hasHalfStar}
 		{@render halfStar()}
 	{/if}
 	{#each Array(emptyStars) as _}
-		{@render star("text-base-400")}
+		{@render star('text-base-400')}
 	{/each}
 </div>

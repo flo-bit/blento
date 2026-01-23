@@ -18,11 +18,8 @@
 				playsinline
 				onerror={() => (hasError = true)}
 			></video>
-			
 		{:else}
-			<div
-				class="flex h-full w-full items-center justify-center bg-base-100 dark:bg-base-900"
-			>
+			<div class="bg-base-100 dark:bg-base-900 flex h-full w-full items-center justify-center">
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
 					fill="none"

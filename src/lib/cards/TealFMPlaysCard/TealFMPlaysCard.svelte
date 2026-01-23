@@ -28,10 +28,7 @@
 
 	function isNumeric(str: string) {
 		if (typeof str != 'string') return false;
-		return (
-			!isNaN(str) &&
-			!isNaN(parseFloat(str))
-		); 
+		return !isNaN(str) && !isNaN(parseFloat(str));
 	}
 </script>
 

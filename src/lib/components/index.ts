@@ -1,4 +1,3 @@
-
 export function numberToHumanReadable(number: number) {
 	if (number < 1000) {
 		return number;

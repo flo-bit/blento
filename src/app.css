@@ -49,7 +49,6 @@ body::-webkit-scrollbar-thumb:hover {
 	background-color: var(--color-base-700);
 }
 
-
 @theme inline {
 	--color-base-50: var(--base-50);
 	--color-base-100: var(--base-100);

@@ -115,7 +115,7 @@ const renderSegment = (segment: RichtextSegment, baseUrl: string) => {
 		default:
 			return `<span>${text}</span>`;
 	}
-};;
+};
 
 const RichText = ({ text, facets }: { text: string; facets?: Facet[] }, baseUrl: string) => {
 	const segments = segmentize(text, facets);

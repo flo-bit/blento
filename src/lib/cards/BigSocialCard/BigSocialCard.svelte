@@ -12,11 +12,11 @@
 	target="_blank"
 	rel="noopener noreferrer"
 	class="flex h-full w-full items-center justify-center p-10"
-	style={
-		`background-color: #${item.cardData.color}`
-	}
+	style={`background-color: #${item.cardData.color}`}
 >
-	<div class="flex aspect-square max-h-full max-w-full items-center justify-center [&_svg]:size-full [&_svg]:max-w-60 [&_svg]:fill-white">
+	<div
+		class="flex aspect-square max-h-full max-w-full items-center justify-center [&_svg]:size-full [&_svg]:max-w-60 [&_svg]:fill-white"
+	>
 		{@html platformsData[platform].svg}
 	</div>
 </a>

@@ -22,11 +22,7 @@
 <div class="flex flex-col gap-3">
 	<div>
 		<Label class="mb-1 text-xs">Change GIF</Label>
-		<Button
-			variant="secondary"
-			class="w-full justify-start"
-			onclick={() => (isSearchOpen = true)}
-		>
+		<Button variant="secondary" class="w-full justify-start" onclick={() => (isSearchOpen = true)}>
 			<svg
 				xmlns="http://www.w3.org/2000/svg"
 				fill="none"
@@ -46,4 +42,8 @@
 	</div>
 </div>
 
-<GiphySearchModal bind:open={isSearchOpen} onselect={handleGifSelect} oncancel={() => (isSearchOpen = false)} />
+<GiphySearchModal
+	bind:open={isSearchOpen}
+	onselect={handleGifSelect}
+	oncancel={() => (isSearchOpen = false)}
+/>

@@ -27,7 +27,6 @@
 
 	let player = $state();
 
-
 	onMount(async () => {
 		if (!Plyr) Plyr = (await import('plyr')).default;
 
@@ -67,7 +66,7 @@
 
 	onDestroy(() => {
 		player?.destroy();
-	})
+	});
 
 	let glow = 50;
 </script>

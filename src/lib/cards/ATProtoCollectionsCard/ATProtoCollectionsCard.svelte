@@ -32,14 +32,14 @@
 </script>
 
 <div class="h-full overflow-y-scroll py-4">
-	<div class="mb-4 inline-flex w-full items-center justify-between font-semibold px-4">
+	<div class="mb-4 inline-flex w-full items-center justify-between px-4 font-semibold">
 		<span>My AT Protocol Collections</span>
 
 		{#if collections}
 			<Badge size="md" class="accent:text-accent-950">{collections.length}</Badge>
 		{/if}
 	</div>
-	<div class="flex flex-wrap overflow-y-scroll gap-2 px-4 overflow-x-hidden w-full">
+	<div class="flex w-full flex-wrap gap-2 overflow-x-hidden overflow-y-scroll px-4">
 		{#each collections ?? [] as collection}
 			<Button target="_blank" href={getLink(collection)} size="sm">{collection}</Button>
 		{/each}
