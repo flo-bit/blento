@@ -888,21 +888,106 @@
 		let sunrays: FBO;
 		let sunraysTemp: FBO;
 
-		const blurProgram = new Program(gl, blurVertexShader, blurShader, createWebGLProgram, getUniforms);
-		const copyProgram = new Program(gl, baseVertexShader, copyShader, createWebGLProgram, getUniforms);
-		const clearProgram = new Program(gl, baseVertexShader, clearShader, createWebGLProgram, getUniforms);
-		const colorProgram = new Program(gl, baseVertexShader, colorShader, createWebGLProgram, getUniforms);
-		const splatProgram = new Program(gl, baseVertexShader, splatShader, createWebGLProgram, getUniforms);
-		const advectionProgram = new Program(gl, baseVertexShader, advectionShader, createWebGLProgram, getUniforms);
-		const divergenceProgram = new Program(gl, baseVertexShader, divergenceShader, createWebGLProgram, getUniforms);
-		const curlProgram = new Program(gl, baseVertexShader, curlShader, createWebGLProgram, getUniforms);
-		const vorticityProgram = new Program(gl, baseVertexShader, vorticityShader, createWebGLProgram, getUniforms);
-		const pressureProgram = new Program(gl, baseVertexShader, pressureShader, createWebGLProgram, getUniforms);
-		const gradienSubtractProgram = new Program(gl, baseVertexShader, gradientSubtractShader, createWebGLProgram, getUniforms);
-		const sunraysMaskProgram = new Program(gl, baseVertexShader, sunraysMaskShader, createWebGLProgram, getUniforms);
-		const sunraysProgram = new Program(gl, baseVertexShader, sunraysShader, createWebGLProgram, getUniforms);
+		const blurProgram = new Program(
+			gl,
+			blurVertexShader,
+			blurShader,
+			createWebGLProgram,
+			getUniforms
+		);
+		const copyProgram = new Program(
+			gl,
+			baseVertexShader,
+			copyShader,
+			createWebGLProgram,
+			getUniforms
+		);
+		const clearProgram = new Program(
+			gl,
+			baseVertexShader,
+			clearShader,
+			createWebGLProgram,
+			getUniforms
+		);
+		const colorProgram = new Program(
+			gl,
+			baseVertexShader,
+			colorShader,
+			createWebGLProgram,
+			getUniforms
+		);
+		const splatProgram = new Program(
+			gl,
+			baseVertexShader,
+			splatShader,
+			createWebGLProgram,
+			getUniforms
+		);
+		const advectionProgram = new Program(
+			gl,
+			baseVertexShader,
+			advectionShader,
+			createWebGLProgram,
+			getUniforms
+		);
+		const divergenceProgram = new Program(
+			gl,
+			baseVertexShader,
+			divergenceShader,
+			createWebGLProgram,
+			getUniforms
+		);
+		const curlProgram = new Program(
+			gl,
+			baseVertexShader,
+			curlShader,
+			createWebGLProgram,
+			getUniforms
+		);
+		const vorticityProgram = new Program(
+			gl,
+			baseVertexShader,
+			vorticityShader,
+			createWebGLProgram,
+			getUniforms
+		);
+		const pressureProgram = new Program(
+			gl,
+			baseVertexShader,
+			pressureShader,
+			createWebGLProgram,
+			getUniforms
+		);
+		const gradienSubtractProgram = new Program(
+			gl,
+			baseVertexShader,
+			gradientSubtractShader,
+			createWebGLProgram,
+			getUniforms
+		);
+		const sunraysMaskProgram = new Program(
+			gl,
+			baseVertexShader,
+			sunraysMaskShader,
+			createWebGLProgram,
+			getUniforms
+		);
+		const sunraysProgram = new Program(
+			gl,
+			baseVertexShader,
+			sunraysShader,
+			createWebGLProgram,
+			getUniforms
+		);
 
-		const displayMaterial = new Material(gl, baseVertexShader, displayShaderSource, compileShader, createWebGLProgram, getUniforms);
+		const displayMaterial = new Material(
+			gl,
+			baseVertexShader,
+			displayShaderSource,
+			compileShader,
+			createWebGLProgram,
+			getUniforms
+		);
 
 		function getResolution(resolution: number) {
 			let aspectRatio = gl.drawingBufferWidth / gl.drawingBufferHeight;

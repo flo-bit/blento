@@ -7,13 +7,11 @@
 	import GithubContributionsGraph from './GithubContributionsGraph.svelte';
 	import { Button } from '@foxui/core';
 	import { browser } from '$app/environment';
-	import { fade } from 'svelte/transition';
 
 	let { item }: ContentComponentProps = $props();
 
 	const data = getAdditionalUserData();
 
-	let isLoaded = $state(false);
 	// svelte-ignore state_referenced_locally
 	let contributionsData = $state(
 		(data[item.cardType] as GithubProfileLoadedData)?.[item.cardData.user]
@@ -27,13 +25,12 @@
 				if (response.ok) {
 					contributionsData = await response.json();
 					data[item.cardType] ??= {};
-					data[item.cardType][item.cardData.user] = contributionsData;
+					(data[item.cardType] as GithubProfileLoadedData)[item.cardData.user] = contributionsData;
 				}
 			} catch (error) {
 				console.error('Failed to fetch GitHub contributions:', error);
 			}
 		}
-		isLoaded = true;
 	});
 
 	let isMobile = getIsMobile();

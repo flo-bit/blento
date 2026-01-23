@@ -9,7 +9,8 @@
 
 	let did = getDidContext();
 
-	let mediaList: { fullsize: string; isVideo?: boolean; playlist?: string, thumbnail?: string }[] = $state([]);
+	let mediaList: { fullsize: string; isVideo?: boolean; playlist?: string; thumbnail?: string }[] =
+		$state([]);
 
 	let isLoading = $state(true);
 
@@ -17,13 +18,18 @@
 		const authorFeed = await getAuthorFeed({ did });
 
 		for (let post of authorFeed?.feed ?? []) {
-			let images = post.post.embed?.$type === 'app.bsky.embed.images#view' ? post.post.embed : undefined
+			let images =
+				post.post.embed?.$type === 'app.bsky.embed.images#view' ? post.post.embed : undefined;
 
 			for (let image of images?.images ?? []) {
 				mediaList.push(image);
 			}
 
-			if (post.post.embed?.$type === 'app.bsky.embed.video#view' && post.post.embed.thumbnail && post.post.embed.playlist) {
+			if (
+				post.post.embed?.$type === 'app.bsky.embed.video#view' &&
+				post.post.embed.thumbnail &&
+				post.post.embed.playlist
+			) {
 				mediaList.push({
 					...post.post.embed,
 					isVideo: true,

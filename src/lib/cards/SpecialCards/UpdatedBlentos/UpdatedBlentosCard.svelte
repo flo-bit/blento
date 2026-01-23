@@ -8,8 +8,6 @@
 	const data = getAdditionalUserData();
 	// svelte-ignore state_referenced_locally
 	const profiles = data[item.cardType] as AppBskyActorDefs.ProfileViewDetailed[];
-
-	$inspect(profiles);
 </script>
 
 <div class="flex h-full flex-col">

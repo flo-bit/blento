@@ -26,7 +26,11 @@
 
 ## Testing Guidelines
 
-- There is no dedicated test runner yet. Use `pnpm check` and `pnpm lint` before submitting changes.
+- There is no dedicated test runner yet.
+- **Before submitting changes, you must:**
+  1. Run `pnpm check` - Must complete with **0 errors and 0 warnings**
+  2. Run `pnpm format` - Format all code with Prettier
+  3. Run `pnpm lint` - Ensure no linting errors
 - For UI changes, verify key flows manually (login, card editing, save/load, and route navigation across `[handle]` pages).
 
 ## Commit & Pull Request Guidelines

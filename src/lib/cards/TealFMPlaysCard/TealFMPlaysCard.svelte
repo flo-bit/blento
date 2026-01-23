@@ -6,11 +6,27 @@
 	import AlbumArt from './AlbumArt.svelte';
 	import { RelativeTime } from '@foxui/time';
 
+	interface Artist {
+		artistName: string;
+	}
+
+	interface PlayValue {
+		releaseMbId?: string;
+		trackName: string;
+		playedTime?: string;
+		artists?: Artist[];
+		originUrl?: string;
+	}
+
+	interface Play {
+		value: PlayValue;
+	}
+
 	let { item }: { item: Item } = $props();
 
 	const data = getAdditionalUserData();
 	// svelte-ignore state_referenced_locally
-	let feed = $state(data[item.cardType] as any);
+	let feed = $state(data[item.cardType] as Play[] | undefined);
 
 	let did = getDidContext();
 	let handle = getHandleContext();
@@ -21,18 +37,18 @@
 		feed = (await CardDefinitionsByType[item.cardType]?.loadData?.([], {
 			did,
 			handle
-		})) as any;
+		})) as Play[] | undefined;
 
 		data[item.cardType] = feed;
 	});
 
 	function isNumeric(str: string) {
 		if (typeof str != 'string') return false;
-		return !isNaN(str) && !isNaN(parseFloat(str));
+		return !isNaN(Number(str)) && !isNaN(parseFloat(str));
 	}
 </script>
 
-{#snippet musicItem(play)}
+{#snippet musicItem(play: Play)}
 	<div class="flex w-full items-center gap-3">
 		<div class="size-10 shrink-0">
 			<AlbumArt releaseMbId={play.value.releaseMbId} alt="" />

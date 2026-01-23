@@ -1,5 +1,5 @@
 <script lang="ts">
-	let { releaseMbId, alt }: { releaseMbId: string; alt: string } = $props();
+	let { releaseMbId, alt }: { releaseMbId?: string; alt: string } = $props();
 
 	let isLoading = $state(true);
 	let hasError = $state(false);

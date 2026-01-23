@@ -9,8 +9,6 @@
 	const data = getAdditionalUserData();
 	// svelte-ignore state_referenced_locally
 	let record = $state(data[item.cardType] as any);
-
-	let animated = $derived(emojiToNotoAnimatedWebp(record.value.status));
 </script>
 
 <EmojiPicker

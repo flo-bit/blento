@@ -6,7 +6,7 @@ import SidebarItemBlueskyMediaCard from './SidebarItemBlueskyMediaCard.svelte';
 export const BlueskyMediaCardDefinition = {
 	type: 'blueskyMedia',
 	contentComponent: BlueskyMediaCard,
-	createNew: (card) => {},
+	createNew: () => {},
 	creationModalComponent: CreateBlueskyMediaCardModal,
 	sidebarButtonText: 'Bluesky Media',
 	sidebarComponent: SidebarItemBlueskyMediaCard

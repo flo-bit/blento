@@ -38,7 +38,6 @@
 	} = $props();
 
 	let imageDragOver = $state(false);
-	let imageDragPosition: { x: number; y: number } | null = $state(null);
 
 	// svelte-ignore state_referenced_locally
 	let items: Item[] = $state(data.cards);
@@ -136,7 +135,7 @@
 			await savePage(data, items, publication);
 
 			publication = JSON.stringify(data.publication);
-		} catch (error) {
+		} catch {
 			toast.error('Error saving page!');
 		} finally {
 			isSaving = false;
@@ -150,8 +149,6 @@
 	let showSettings = $state(false);
 
 	let debugPoint = $state({ x: 0, y: 0 });
-
-	let linkPopoverOpen = $state(false);
 
 	function getDragXY(
 		e: DragEvent & {
@@ -315,7 +312,6 @@
 
 		if (linkValue === url) {
 			linkValue = '';
-			linkPopoverOpen = false;
 		}
 	}
 
@@ -384,7 +380,6 @@
 			event.stopPropagation();
 
 			imageDragOver = true;
-			imageDragPosition = { x: event.clientX, y: event.clientY };
 		}
 	}
 
@@ -392,7 +387,6 @@
 		event.preventDefault();
 		event.stopPropagation();
 		imageDragOver = false;
-		imageDragPosition = null;
 	}
 
 	async function handleImageDrop(event: DragEvent) {
@@ -401,7 +395,6 @@
 		const dropX = event.clientX;
 		const dropY = event.clientY;
 		imageDragOver = false;
-		imageDragPosition = null;
 
 		if (!event.dataTransfer?.files?.length) return;
 

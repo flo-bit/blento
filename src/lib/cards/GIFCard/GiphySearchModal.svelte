@@ -135,7 +135,7 @@
 
 	<div class="mt-4 flex-1 overflow-y-auto">
 		{#if isLoading && displayResults.length === 0}
-			<div class="flex h-[300px] items-center justify-center">
+			<div class="flex h-75 items-center justify-center">
 				<p class="text-base-500">Loading...</p>
 			</div>
 		{:else if displayResults.length > 0}

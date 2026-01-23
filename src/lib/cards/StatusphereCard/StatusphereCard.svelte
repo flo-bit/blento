@@ -3,8 +3,6 @@
 	import { getAdditionalUserData } from '$lib/website/context';
 	import { emojiToNotoAnimatedWebp } from '.';
 
-	import icons from './icons.json';
-
 	let { item }: { item: Item } = $props();
 
 	const data = getAdditionalUserData();

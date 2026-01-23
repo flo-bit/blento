@@ -2,8 +2,6 @@
 	import type { ContentComponentProps } from '../../types';
 	import { onMount, onDestroy } from 'svelte';
 
-	let { item }: ContentComponentProps = $props();
-
 	let canvas: HTMLCanvasElement;
 	let container: HTMLDivElement;
 	let ctx: CanvasRenderingContext2D | null = null;

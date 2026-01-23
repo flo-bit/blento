@@ -34,7 +34,6 @@
 		: 'aspect-ratio: 16 / 9'}
 	class="border-base-300 dark:border-base-400/40 w-full max-w-full overflow-hidden rounded-2xl border"
 >
-	<!-- svelte-ignore a11y_media_has_caption -->
 	<video bind:this={element} class="h-full w-full" aria-label={data.video.alt}></video>
 </div>
 

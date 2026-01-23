@@ -1,10 +1,11 @@
-import type { CardDefinition } from '$lib/cards/types';
+import type { CardDefinition, ContentComponentProps } from '$lib/cards/types';
+import type { Component } from 'svelte';
 import DinoGameCard from './DinoGameCard.svelte';
 import SidebarItemDinoGameCard from './SidebarItemDinoGameCard.svelte';
 
 export const DinoGameCardDefinition = {
 	type: 'dino-game',
-	contentComponent: DinoGameCard,
+	contentComponent: DinoGameCard as unknown as Component<ContentComponentProps>,
 	sidebarComponent: SidebarItemDinoGameCard,
 	allowSetColor: true,
 	createNew: (card) => {

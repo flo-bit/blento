@@ -3,7 +3,7 @@
 	import { getImageBlobUrl } from '$lib/atproto';
 	import type { ContentComponentProps } from '../types';
 
-	let { item = $bindable(), ...rest }: ContentComponentProps = $props();
+	let { item = $bindable() }: ContentComponentProps = $props();
 
 	const did = getDidContext();
 

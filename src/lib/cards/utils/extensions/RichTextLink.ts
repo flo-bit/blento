@@ -68,11 +68,11 @@ type RichTextLinkOptions = LinkOptions;
  */
 const RichTextLink = Link.extend<RichTextLinkOptions>({
 	inclusive: false,
-	addOptions() {
+	addOptions(): LinkOptions {
 		return {
 			...this.parent?.(),
 			openOnClick: 'whenNotEditable'
-		};
+		} as LinkOptions;
 	},
 	addAttributes() {
 		return {

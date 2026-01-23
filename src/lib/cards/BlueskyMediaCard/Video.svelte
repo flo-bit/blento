@@ -43,7 +43,6 @@
 </script>
 
 <img src={video.thumbnail} class="absolute inset-0 -z-10 h-full w-full object-cover" alt="" />
-<!-- svelte-ignore a11y_media_has_caption -->
 <video
 	bind:this={element}
 	muted

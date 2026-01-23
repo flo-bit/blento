@@ -16,6 +16,13 @@ Blento is a Bluesky-powered customizable bento grid website builder. Users authe
 - `pnpm format` - Format code with Prettier
 - `pnpm deploy` - Build and deploy to Cloudflare Workers
 
+## Code Quality Requirements
+
+Before submitting changes:
+
+1. **Run `pnpm check`** - Must complete with 0 errors and 0 warnings
+2. **Run `pnpm format`** - Format all code with Prettier
+
 ## Architecture
 
 ### Tech Stack

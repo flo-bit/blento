@@ -26,7 +26,7 @@
 			} else {
 				throw new Error('response not ok');
 			}
-		} catch (error) {
+		} catch {
 			errorMessage = "Couldn't find that location!";
 			return false;
 		} finally {

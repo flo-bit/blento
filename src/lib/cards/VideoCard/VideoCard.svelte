@@ -45,7 +45,6 @@
 </script>
 
 {#key item.cardData.video || item.cardData.objectUrl}
-	<!-- svelte-ignore a11y_media_has_caption -->
 	<video
 		bind:this={element}
 		muted

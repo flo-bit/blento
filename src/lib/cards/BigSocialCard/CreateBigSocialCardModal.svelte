@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Alert, Button, Input, Modal, Subheading } from '@foxui/core';
 	import type { CreationModalComponentProps } from '../types';
-	import { detectPlatform, platformPatterns, platformsData } from '.';
+	import { detectPlatform, platformsData } from '.';
 
 	let { item = $bindable(), oncreate, oncancel }: CreationModalComponentProps = $props();
 

@@ -36,7 +36,6 @@
 		item: Item;
 		ondelete: () => void;
 		onsetsize: (newW: number, newH: number) => void;
-		onshowsettings?: () => void;
 	} & WithElementRef<HTMLAttributes<HTMLDivElement>>;
 
 	let {
@@ -44,7 +43,6 @@
 		children,
 		ref = $bindable(null),
 		onsetsize,
-		onshowsettings,
 		ondelete,
 		...rest
 	}: BaseEditingCardProps = $props();
@@ -262,7 +260,7 @@
 				]}
 			>
 				<div
-					class="bg-base-100 border-base-200 dark:bg-base-800 dark:border-base-700 z-[100] inline-flex items-center gap-0.5 rounded-2xl border p-1 px-2 shadow-lg"
+					class="bg-base-100 border-base-200 dark:bg-base-800 dark:border-base-700 z-100 inline-flex items-center gap-0.5 rounded-2xl border p-1 px-2 shadow-lg"
 				>
 					{#if cardDef.allowSetColor !== false}
 						<Popover bind:open={colorPopoverOpen}>

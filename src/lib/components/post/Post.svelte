@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Embed from './embeds/Embed.svelte';
-	import { cn, Avatar, Prose } from '@foxui/core';
+	import { cn, Prose } from '@foxui/core';
 	import type { WithChildren, WithElementRef } from 'bits-ui';
 	import type { HTMLAttributes } from 'svelte/elements';
 	import type { PostData } from '.';

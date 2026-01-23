@@ -39,13 +39,13 @@
 {/snippet}
 
 <div class={cn('text-accent-500 flex', className)}>
-	{#each Array(fullStars) as _}
+	{#each Array(fullStars)}
 		{@render star('text-accent-500')}
 	{/each}
 	{#if hasHalfStar}
 		{@render halfStar()}
 	{/if}
-	{#each Array(emptyStars) as _}
+	{#each Array(emptyStars)}
 		{@render star('text-base-400')}
 	{/each}
 </div>

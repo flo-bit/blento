@@ -3,7 +3,6 @@
 	import { getIsMobile } from '$lib/website/context';
 	import type { ContentComponentProps } from '../types';
 	import PlainTextEditor from '../utils/PlainTextEditor.svelte';
-	import { onMount } from 'svelte';
 
 	let { item = $bindable() }: ContentComponentProps = $props();
 
@@ -18,7 +17,7 @@
 		let domain: string;
 		try {
 			domain = new URL(item.cardData.href).hostname;
-		} catch (error) {
+		} catch {
 			return;
 		}
 		item.cardData.domain = domain;
@@ -34,12 +33,10 @@
 			item.cardData.title = data.title || '';
 			item.cardData.image = data.images?.[0] || '';
 			item.cardData.favicon = data.favicons?.[0] || undefined;
-		} catch (error) {
+		} catch {
 			return;
 		}
 	}
-
-	$inspect(hasFetched);
 
 	$effect(() => {
 		if (hasFetched !== false || isFetchingMetadata) {
@@ -108,7 +105,7 @@
 					placeholder="Title here"
 				/>
 			{:else}
-				<span class={'text-base-900 dark:text-base-50 line-clamp-2 text-lg font-bold'}>
+				<span class="text-base-900 dark:text-base-50 line-clamp-2 text-lg font-bold">
 					Loading data...
 				</span>
 			{/if}

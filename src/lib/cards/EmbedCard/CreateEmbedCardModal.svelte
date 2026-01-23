@@ -9,8 +9,8 @@
 	async function checkUrl() {
 		errorMessage = '';
 		try {
-			const domain = new URL(item.cardData.href);
-		} catch (error) {
+			new URL(item.cardData.href);
+		} catch {
 			errorMessage = 'Invalid URL!';
 			return false;
 		}

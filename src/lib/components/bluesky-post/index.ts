@@ -61,27 +61,27 @@ export function blueskyPostToPostData(
 		embed: post.embed
 			? ({
 					type: blueskyEmbedTypeToEmbedType(post.embed?.$type),
-					// eslint-disable-next-line @typescript-eslint/no-explicit-any
-					images: post.embed?.images?.map((image: any) => ({
+					// Cast to any to handle union type - properties are conditionally accessed
+					images: (post.embed as any)?.images?.map((image: any) => ({
 						alt: image.alt,
 						thumb: image.thumb,
 						aspectRatio: image.aspectRatio,
 						fullsize: image.fullsize
 					})),
-					external: post.embed?.external
+					external: (post.embed as any)?.external
 						? {
-								href: post.embed.external.uri,
-								title: post.embed.external.title,
-								description: post.embed.external.description,
-								thumb: post.embed.external.thumb
+								href: (post.embed as any).external.uri,
+								title: (post.embed as any).external.title,
+								description: (post.embed as any).external.description,
+								thumb: (post.embed as any).external.thumb
 							}
 						: undefined,
-					video: post.embed
+					video: (post.embed as any)?.playlist
 						? {
-								playlist: post.embed.playlist,
-								thumb: post.embed.thumbnail,
-								alt: post.embed.alt,
-								aspectRatio: post.embed.aspectRatio
+								playlist: (post.embed as any).playlist,
+								thumb: (post.embed as any).thumbnail,
+								alt: (post.embed as any).alt,
+								aspectRatio: (post.embed as any).aspectRatio
 							}
 						: undefined
 				} as PostEmbed)
@@ -91,6 +91,23 @@ export function blueskyPostToPostData(
 	};
 }
 
+interface MentionFeature {
+	$type: 'app.bsky.richtext.facet#mention';
+	did: string;
+}
+
+interface LinkFeature {
+	$type: 'app.bsky.richtext.facet#link';
+	uri: string;
+}
+
+interface TagFeature {
+	$type: 'app.bsky.richtext.facet#tag';
+	tag: string;
+}
+
+type Feature = MentionFeature | LinkFeature | TagFeature;
+
 const renderSegment = (segment: RichtextSegment, baseUrl: string) => {
 	const { text, features } = segment;
 
@@ -99,7 +116,7 @@ const renderSegment = (segment: RichtextSegment, baseUrl: string) => {
 	}
 
 	// segments can have multiple features, use the first one
-	const feature = features[0];
+	const feature = features[0] as Feature;
 
 	const createLink = (href: string, text: string) => {
 		return `<a target="_blank" rel="noopener noreferrer nofollow" href="${encodeURI(href)}">${text}</a>`;
@@ -107,11 +124,11 @@ const renderSegment = (segment: RichtextSegment, baseUrl: string) => {
 
 	switch (feature.$type) {
 		case 'app.bsky.richtext.facet#mention':
-			return createLink(`${baseUrl}/profile/${segment.handle}`, segment.text);
+			return createLink(`${baseUrl}/profile/${feature.did}`, segment.text);
 		case 'app.bsky.richtext.facet#link':
 			return createLink(feature.uri, segment.text);
 		case 'app.bsky.richtext.facet#tag':
-			return createLink(`${baseUrl}/hashtag/${segment.tag}`, segment.text);
+			return createLink(`${baseUrl}/hashtag/${feature.tag}`, segment.text);
 		default:
 			return `<span>${text}</span>`;
 	}

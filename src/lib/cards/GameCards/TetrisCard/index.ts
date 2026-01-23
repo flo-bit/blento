@@ -1,13 +1,14 @@
 //Music by DJARTMUSIC - The Return Of The 8-bit Era
 //https://pixabay.com/de/music/videospiele-the-return-of-the-8-bit-era-301292/
 
-import type { CardDefinition } from '../../types';
+import type { CardDefinition, ContentComponentProps } from '../../types';
 import TetrisCard from './TetrisCard.svelte';
 import SidebarItemTetrisCard from './SidebarItemTetrisCard.svelte';
+import type { Component } from 'svelte';
 
 export const TetrisCardDefinition = {
 	type: 'tetris',
-	contentComponent: TetrisCard,
+	contentComponent: TetrisCard as unknown as Component<ContentComponentProps>,
 	sidebarComponent: SidebarItemTetrisCard,
 	allowSetColor: true,
 	defaultColor: 'accent',

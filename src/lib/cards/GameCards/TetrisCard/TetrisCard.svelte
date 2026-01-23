@@ -1,9 +1,6 @@
 <script lang="ts">
-	import type { ContentComponentProps } from '../../types';
 	import { onMount, onDestroy } from 'svelte';
 	import Tetris8BitMusic from './Tetris8Bit.mp3';
-
-	let { item }: ContentComponentProps = $props();
 
 	let canvas: HTMLCanvasElement;
 	let container: HTMLDivElement;
@@ -252,7 +249,7 @@
 
 			oscillator.start(audioCtx.currentTime);
 			oscillator.stop(audioCtx.currentTime + duration);
-		} catch (e) {
+		} catch {
 			// Audio not supported
 		}
 	}
