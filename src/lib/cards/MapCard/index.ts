@@ -2,12 +2,11 @@ import type { CardDefinition } from '../types';
 import CreateMapCardModal from './CreateMapCardModal.svelte';
 import MapCard from './MapCard.svelte';
 import MapCardSettings from './MapCardSettings.svelte';
-import SidebarItemMapCard from './SidebarItemMapCard.svelte';
 
 export const MapCardDefinition = {
 	type: 'mapLocation',
 	contentComponent: MapCard,
-	sidebarButtonText: 'map',
+	sidebarButtonText: 'Map',
 	createNew: (item) => {
 		item.w = 4;
 		item.h = 4;
@@ -15,7 +14,6 @@ export const MapCardDefinition = {
 		item.mobileW = 8;
 	},
 
-	sidebarComponent: SidebarItemMapCard,
 	creationModalComponent: CreateMapCardModal,
 	allowSetColor: false,
 	canHaveLabel: true,

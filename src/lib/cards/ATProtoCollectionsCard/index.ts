@@ -1,7 +1,6 @@
 import { describeRepo } from '$lib/atproto';
 import type { CardDefinition } from '../types';
 import ATProtoCollectionsCard from './ATProtoCollectionsCard.svelte';
-import SidebarItemATProtoCollectionsCard from './SidebarItemATProtoCollectionsCard.svelte';
 
 export const ATProtoCollectionsCardDefinition = {
 	type: 'atprotocollections',
@@ -20,5 +19,5 @@ export const ATProtoCollectionsCardDefinition = {
 		item.w = 4;
 		item.mobileW = 8;
 	},
-	sidebarComponent: SidebarItemATProtoCollectionsCard
+	sidebarButtonText: 'Atmosphere Collections'
 } as CardDefinition & { type: 'atprotocollections' };

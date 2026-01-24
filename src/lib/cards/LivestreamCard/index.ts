@@ -2,12 +2,11 @@ import { user, listRecords, getImageBlobUrl } from '$lib/atproto';
 import type { CardDefinition } from '../types';
 import LivestreamCard from './LivestreamCard.svelte';
 import LivestreamEmbedCard from './LivestreamEmbedCard.svelte';
-import SidebarItemLivestreamCard from './SidebarItemLivestreamCard.svelte';
 
 export const LivestreamCardDefitition = {
 	type: 'latestLivestream',
 	contentComponent: LivestreamCard,
-	sidebarComponent: SidebarItemLivestreamCard,
+	sidebarButtonText: 'stream.place info',
 	createNew: (card) => {
 		card.w = 4;
 		card.h = 4;

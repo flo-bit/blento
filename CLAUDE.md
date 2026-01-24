@@ -53,7 +53,7 @@ Grid margins: 16px desktop, 12px mobile.
 **Card System (`src/lib/cards/`):**
 
 - `CardDefinition` type in `types.ts` defines the interface for card types
-- Each card type exports a definition with: `type`, `contentComponent`, optional `editingContentComponent`, `creationModalComponent`, `sidebarComponent`, `loadData`, `upload` (see more info and description in `src/lib/cards/types.ts`)
+- Each card type exports a definition with: `type`, `contentComponent`, optional `editingContentComponent`, `creationModalComponent`, `sidebarButtonText`, `loadData`, `upload` (see more info and description in `src/lib/cards/types.ts`)
 - Card types include Text, Link, Image, Bluesky, Embed, Map, Livestream, ATProto collections, and special cards (see `src/lib/cards`).
 - `AllCardDefinitions` and `CardDefinitionsByType` in `index.ts` aggregate all card types
 - See e.g. `src/lib/cards/EmbedCard/` and `src/lib/cards/LivestreamCard/` for examples of implementation.

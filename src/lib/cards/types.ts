@@ -33,8 +33,7 @@ export type CardDefinition = {
 
 	upload?: (item: Item) => Promise<Item>; // optionally upload some other data needed for this card
 
-	// one of those two has to be set for a card to appear in the sidebar
-	sidebarComponent?: Component<SidebarComponentProps>;
+	// has to be set for a card to appear in the sidebar
 	sidebarButtonText?: string;
 
 	// if this component exists, a settings button with a popover will be shown containing this component

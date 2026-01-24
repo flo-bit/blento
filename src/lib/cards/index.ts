@@ -25,6 +25,7 @@ import { TealFMPlaysCardDefinition } from './TealFMPlaysCard';
 import { PhotoGalleryCardDefinition } from './PhotoGalleryCard';
 import { StandardSiteDocumentListCardDefinition } from './StandardSiteDocumentListCard';
 import { StatusphereCardDefinition } from './StatusphereCard';
+import { EventCardDefinition } from './EventCard';
 
 export const AllCardDefinitions = [
 	ImageCardDefinition,
@@ -52,7 +53,8 @@ export const AllCardDefinitions = [
 	TealFMPlaysCardDefinition,
 	PhotoGalleryCardDefinition,
 	StandardSiteDocumentListCardDefinition,
-	StatusphereCardDefinition
+	StatusphereCardDefinition,
+	EventCardDefinition
 ] as const;
 
 export const CardDefinitionsByType = AllCardDefinitions.reduce(

@@ -3,13 +3,12 @@
 
 import type { CardDefinition, ContentComponentProps } from '../../types';
 import TetrisCard from './TetrisCard.svelte';
-import SidebarItemTetrisCard from './SidebarItemTetrisCard.svelte';
 import type { Component } from 'svelte';
 
 export const TetrisCardDefinition = {
 	type: 'tetris',
 	contentComponent: TetrisCard as unknown as Component<ContentComponentProps>,
-	sidebarComponent: SidebarItemTetrisCard,
+	sidebarButtonText: 'Tetris',
 	allowSetColor: true,
 	defaultColor: 'accent',
 	createNew: (card) => {

@@ -142,9 +142,7 @@
 		}
 	}
 
-	const sidebarItems = AllCardDefinitions.filter(
-		(cardDef) => cardDef.sidebarComponent || cardDef.sidebarButtonText
-	);
+	const sidebarItems = AllCardDefinitions.filter((cardDef) => cardDef.sidebarButtonText);
 
 	let showSettings = $state(false);
 
@@ -696,7 +694,7 @@
 
 							fixCollisions(items, item, isMobile);
 						}}
-						ondragstart={(e) => {
+						ondragstart={(e: DragEvent) => {
 							const target = e.currentTarget as HTMLDivElement;
 							activeDragElement.element = target;
 							activeDragElement.w = item.w;
@@ -732,13 +730,9 @@
 	<Sidebar mobileOnly mobileClasses="lg:block p-4 gap-4">
 		<div class="flex flex-col gap-2">
 			{#each sidebarItems as cardDef (cardDef.type)}
-				{#if cardDef.sidebarComponent}
-					<cardDef.sidebarComponent onclick={() => newCard(cardDef.type)} />
-				{:else if cardDef.sidebarButtonText}
-					<Button onclick={() => newCard(cardDef.type)} variant="ghost" class="w-full justify-start"
-						>{cardDef.sidebarButtonText}</Button
-					>
-				{/if}
+				<Button onclick={() => newCard(cardDef.type)} variant="ghost" class="w-full justify-start"
+					>{cardDef.sidebarButtonText}</Button
+				>
 			{/each}
 		</div>
 	</Sidebar>
