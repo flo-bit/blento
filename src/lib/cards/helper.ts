@@ -15,7 +15,7 @@ export function colorToHue(color: string): number {
 }
 
 export function getHexOfCardColor(item: Item) {
-	let color =
+	const color =
 		!item.color || item.color === 'transparent' || item.color === 'base' ? 'accent' : item.color;
 
 	return convertCSSToHex(getCSSVar(`--color-${color}-500`));

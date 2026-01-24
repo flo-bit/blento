@@ -29,8 +29,6 @@ export const SectionCardDefinition = {
 	settingsComponent: SectionCardSettings
 } as CardDefinition & { type: 'section' };
 
-
-
 export const textAlignClasses: Record<string, string> = {
 	left: '',
 	center: 'text-center justify-center',
@@ -43,4 +41,4 @@ export const verticalAlignClasses: Record<string, string> = {
 	bottom: 'items-end-safe'
 };
 
-export const textSizeClasses = ['text-lg', 'text-2xl', 'text-4xl', 'text-6xl'];
+export const textSizeClasses = ['text-lg', 'text-2xl', 'text-4xl', 'text-5xl'];

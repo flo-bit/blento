@@ -19,6 +19,7 @@ export type SidebarComponentProps = {
 
 export type ContentComponentProps = {
 	item: Item;
+	isEditing?: boolean;
 };
 
 export type CardDefinition = {
@@ -69,4 +70,8 @@ export type CardDefinition = {
 	change?: (item: Item) => Item;
 
 	name?: string;
+
+	canHaveLabel?: boolean;
+
+	migrate?: (item: Item) => void;
 };

@@ -22,12 +22,4 @@
 	{:else}
 		No status yet
 	{/if}
-
-	{#if item.cardData.title}
-		<div
-			class="text-base-900 dark:text-base-50 text-md bg-base-200/30 dark:bg-base-900/30 absolute top-2 right-2 left-2 z-30 line-clamp-1 rounded-lg p-1 font-bold backdrop-blur-md"
-		>
-			{item.cardData.title}
-		</div>
-	{/if}
 </div>

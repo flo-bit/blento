@@ -14,10 +14,10 @@ export const EmbedCardDefinition = {
 		card.mobileW = 8;
 	},
 
-	canChange: (item) => Boolean(item.cardData.href),
+	// canChange: (item) => Boolean(item.cardData.href),
 
-	change: (item) => {
-		return item;
-	},
+	// change: (item) => {
+	// 	return item;
+	// },
 	name: 'Embed Card'
 } as CardDefinition & { type: 'embed' };

@@ -26,6 +26,7 @@ export const GifCardDefinition = {
 	allowSetColor: false,
 	minW: 1,
 	minH: 1,
+	canHaveLabel: true,
 	onUrlHandler: (url, item) => {
 		// Match Giphy page URLs: https://giphy.com/gifs/name-ID or https://giphy.com/gifs/ID
 		const pageMatch = url.match(/giphy\.com\/gifs\/(?:.*-)?([a-zA-Z0-9]+)(?:\?|$)/);

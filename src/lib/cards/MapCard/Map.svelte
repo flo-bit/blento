@@ -13,17 +13,10 @@
 	let mapContainer: HTMLElement | undefined = $state();
 	let map: mapboxgl.Map | undefined = $state();
 
-	// Update light preset when changed in settings
-	$effect(() => {
-		const preset = item.cardData.lightPreset;
-		if (map && preset) {
-			map.setConfigProperty('basemap', 'lightPreset', preset);
-		}
-	});
-
 	onMount(() => {
 		if (!mapContainer || !env.PUBLIC_MAPBOX_TOKEN) {
 			console.log('no map container or no mapbox token');
+			return;
 		}
 
 		try {
@@ -151,7 +144,7 @@
 					map.setCenter([lon, lat]);
 				}
 			});
-			resizeObserver.observe(mapContainer);
+			if (mapContainer) resizeObserver.observe(mapContainer);
 
 			return () => {
 				resizeObserver.disconnect();
@@ -165,4 +158,4 @@
 	});
 </script>
 
-<div bind:this={mapContainer} class="absolute inset-0 isolate z-50 h-full w-full"></div>
+<div bind:this={mapContainer} class="absolute inset-0 isolate h-full w-full"></div>

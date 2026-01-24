@@ -28,7 +28,7 @@
 				item.cardData.lon = data.lon;
 				item.cardData.name = data.display_name?.split(',')[0] || search;
 				item.cardData.type = data.class || 'city';
-				item.cardData.zoom = Math.max(getZoomLevel(data.class),  getZoomLevel(data.type));
+				item.cardData.zoom = Math.max(getZoomLevel(data.class), getZoomLevel(data.type));
 			} else {
 				throw new Error('response not ok');
 			}
@@ -56,7 +56,7 @@
 			<Alert type="error" title="Failed to create map card"><span>{errorMessage}</span></Alert>
 		{/if}
 
-		<p class="text-xs mt-2">
+		<p class="mt-2 text-xs">
 			Geocoding by <a
 				href="https://nominatim.openstreetmap.org/"
 				class="text-accent-800 dark:text-accent-300"

@@ -17,5 +17,6 @@ export const PopfeedReviewsCardDefinition = {
 		return data;
 	},
 	minH: 3,
-	sidebarButtonText: 'Popfeed Reviews'
+	sidebarButtonText: 'Popfeed Reviews',
+	canHaveLabel: true
 } as CardDefinition & { type: 'recentPopfeedReviews' };

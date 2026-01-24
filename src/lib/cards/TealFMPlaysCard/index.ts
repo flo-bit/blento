@@ -21,5 +21,6 @@ export const TealFMPlaysCardDefinition = {
 		return data;
 	},
 	minW: 4,
-	sidebarButtonText: 'teal.fm Plays'
+	sidebarButtonText: 'teal.fm Plays',
+	canHaveLabel: true
 } as CardDefinition & { type: 'recentTealFMPlays' };

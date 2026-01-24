@@ -3,11 +3,12 @@
 	import type { HTMLAttributes } from 'svelte/elements';
 	import BaseCard from './BaseCard.svelte';
 	import type { Item } from '$lib/types';
-	import { Button, Label, Popover } from '@foxui/core';
+	import { Button, cn, Label, Popover } from '@foxui/core';
 	import { ColorSelect } from '@foxui/colors';
 	import { AllCardDefinitions, CardDefinitionsByType, getColor } from '..';
 	import { COLUMNS } from '$lib';
 	import { getCanEdit, getIsMobile } from '$lib/website/context';
+	import PlainTextEditor from '../utils/PlainTextEditor.svelte';
 
 	let colorsChoices = [
 		{ class: 'text-base-500', label: 'base' },
@@ -151,9 +152,7 @@
 	let settingsPopoverOpen = $state(false);
 	let changePopoverOpen = $state(false);
 
-	const changeOptions = $derived(
-		AllCardDefinitions.filter((def) => def.canChange?.(item))
-	);
+	const changeOptions = $derived(AllCardDefinitions.filter((def) => def.canChange?.(item)));
 
 	function applyChange(def: (typeof AllCardDefinitions)[number]) {
 		const updated = def.change ? def.change(item) : item;
@@ -179,6 +178,22 @@
 >
 	<div class="absolute inset-0 cursor-grab"></div>
 	{@render children?.()}
+
+	{#if cardDef.canHaveLabel}
+		<div
+			class={cn(
+				'bg-base-200/30 dark:bg-base-900/30 absolute top-2 left-2 z-100 w-fit max-w-[calc(100%-1rem)] rounded-xl p-1 px-2 backdrop-blur-md',
+				!item.cardData.label && 'hidden group-hover/card:block'
+			)}
+		>
+			<PlainTextEditor
+				class="text-base-900 dark:text-base-50 w-fit text-base font-semibold"
+				key="label"
+				bind:item
+				placeholder="Label"
+			/>
+		</div>
+	{/if}
 
 	{#snippet controls()}
 		<!-- class="bg-base-100 border-base-200 dark:bg-base-800 dark:border-base-700 absolute -top-3 -left-3 hidden cursor-pointer items-center justify-center rounded-full border p-2 shadow-lg group-focus-within:inline-flex group-hover/card:inline-flex" -->

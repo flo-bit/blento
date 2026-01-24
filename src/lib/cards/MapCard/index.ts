@@ -1,6 +1,7 @@
 import type { CardDefinition } from '../types';
 import CreateMapCardModal from './CreateMapCardModal.svelte';
 import MapCard from './MapCard.svelte';
+import MapCardSettings from './MapCardSettings.svelte';
 import SidebarItemMapCard from './SidebarItemMapCard.svelte';
 
 export const MapCardDefinition = {
@@ -16,7 +17,9 @@ export const MapCardDefinition = {
 
 	sidebarComponent: SidebarItemMapCard,
 	creationModalComponent: CreateMapCardModal,
-	allowSetColor: false
+	allowSetColor: false,
+	canHaveLabel: true,
+	settingsComponent: MapCardSettings
 } as CardDefinition & { type: 'mapLocation' };
 
 export function getZoomLevel(type: string | undefined): number {

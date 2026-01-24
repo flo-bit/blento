@@ -7,7 +7,7 @@
 
 {#if CardDefinitionsByType[item.cardType]}
 	{@const cardDef = CardDefinitionsByType[item.cardType]}
-	<cardDef.contentComponent {item} {...rest} />
+	<cardDef.contentComponent isEditing={false} {item} {...rest} />
 {:else}
 	<div class="m-4">Unsupported card type: {item.cardType}</div>
 {/if}

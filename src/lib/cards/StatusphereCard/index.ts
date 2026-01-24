@@ -40,7 +40,14 @@ export const StatusphereCardDefinition = {
 		}
 
 		return item;
-	}
+	},
+
+	migrate: (item) => {
+		if (item.cardData.title && !item.cardData.label) {
+			item.cardData.label = item.cardData.title;
+		}
+	},
+	canHaveLabel: true
 } as CardDefinition & { type: 'statusphere' };
 
 export function emojiToNotoAnimatedWebp(emoji: string | undefined): string | undefined {

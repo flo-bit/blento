@@ -2,15 +2,12 @@
 	import { platformsData } from '.';
 	import type { ContentComponentProps } from '../types';
 
-	let { item }: ContentComponentProps = $props();
+	let { item, isEditing }: ContentComponentProps = $props();
 
 	const platform = $derived(item.cardData.platform as string);
 </script>
 
-<a
-	href={item.cardData.href}
-	target="_blank"
-	rel="noopener noreferrer"
+<div
 	class="flex h-full w-full items-center justify-center p-10"
 	style={`background-color: #${item.cardData.color}`}
 >
@@ -19,4 +16,11 @@
 	>
 		{@html platformsData[platform].svg}
 	</div>
-</a>
+</div>
+
+{#if !isEditing}
+	<a href={item.cardData.href} target="_blank" rel="noopener noreferrer">
+		<div class="absolute inset-0 z-50"></div>
+		<span class="sr-only">open {platformsData[platform].title}</span>
+	</a>
+{/if}

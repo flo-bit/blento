@@ -50,7 +50,8 @@ export const BigSocialCardDefinition = {
 
 		return item;
 	},
-	urlHandlerPriority: 1
+	urlHandlerPriority: 1,
+	canHaveLabel: true
 } as CardDefinition & { type: 'bigsocial' };
 
 import {

@@ -163,6 +163,17 @@ function migrateFromV1ToV2(data: WebsiteData): WebsiteData {
 	return data;
 }
 
+function migrateCards(data: WebsiteData): WebsiteData {
+	for (const card of data.cards) {
+		const cardDef = CardDefinitionsByType[card.cardType];
+
+		if (!cardDef?.migrate) continue;
+
+		cardDef.migrate(card);
+	}
+	return data;
+}
+
 function checkData(data: WebsiteData): WebsiteData {
 	data = migrateData(data);
 
@@ -182,5 +193,5 @@ function checkData(data: WebsiteData): WebsiteData {
 }
 
 function migrateData(data: WebsiteData): WebsiteData {
-	return migrateFromV1ToV2(migrateFromV0ToV1(data));
+	return migrateCards(migrateFromV1ToV2(migrateFromV0ToV1(data)));
 }

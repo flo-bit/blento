@@ -36,5 +36,7 @@ export const ImageCardDefinition = {
 	change: (item) => {
 		return item;
 	},
-	name: 'Image Card'
+	name: 'Image Card',
+
+	canHaveLabel: true
 } as CardDefinition & { type: 'image' };

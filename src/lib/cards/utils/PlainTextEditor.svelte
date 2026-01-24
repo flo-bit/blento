@@ -74,14 +74,11 @@
 
 <style>
 	:global(.tiptap p.is-editor-empty:first-child::before) {
-		color: var(--color-base-800);
+		color: var(--color-base-500);
 		content: attr(data-placeholder);
-		opacity: 50%;
+		opacity: 100%;
 		float: left;
 		height: 0;
 		pointer-events: none;
-	}
-	:global(.dark .tiptap p.is-editor-empty:first-child::before) {
-		color: var(--color-base-200);
 	}
 </style>

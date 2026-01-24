@@ -3,7 +3,7 @@
 	import { getImageBlobUrl } from '$lib/atproto';
 	import type { ContentComponentProps } from '../types';
 
-	let { item = $bindable() }: ContentComponentProps = $props();
+	let { item = $bindable(), isEditing }: ContentComponentProps = $props();
 
 	const did = getDidContext();
 
@@ -21,16 +21,16 @@
 	<img
 		class={[
 			'absolute inset-0 h-full w-full object-cover opacity-100 transition-transform duration-300 ease-in-out',
-			item.cardData.href ? 'group-hover:scale-102' : ''
+			item.cardData.href ? 'group-hover/card:scale-101' : ''
 		]}
 		src={getSrc()}
 		alt=""
 	/>
 {/key}
-{#if item.cardData.href}
+{#if item.cardData.href && !isEditing}
 	<a
 		href={item.cardData.href}
-		class="absolute inset-0 h-full w-full"
+		class="absolute inset-0 z-50 h-full w-full"
 		target="_blank"
 		rel="noopener noreferrer"
 	>

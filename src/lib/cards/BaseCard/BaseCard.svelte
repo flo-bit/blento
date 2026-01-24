@@ -68,6 +68,14 @@
 		]}
 	>
 		{@render children?.()}
+
+		{#if !isEditing && item.cardData.label}
+			<div
+				class="text-base-900 dark:text-base-50 bg-base-200/50 dark:bg-base-900/50 absolute top-2 left-2 z-30 max-w-[calc(100%-1rem)] rounded-xl p-1 px-2 text-base font-semibold backdrop-blur-md"
+			>
+				{item.cardData.label}
+			</div>
+		{/if}
 	</div>
 	{@render controls?.()}
 </div>
