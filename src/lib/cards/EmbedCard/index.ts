@@ -14,7 +14,7 @@ export const EmbedCardDefinition = {
 		card.mobileW = 8;
 	},
 
-	canChange: (item) => Boolean(item.cardData.href),
+	canChange: (item) => Boolean(item.cardData.href && !item.cardData.href.startsWith('mailto:')),
 
 	change: (item) => {
 		return item;
