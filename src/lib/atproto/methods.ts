@@ -10,6 +10,7 @@ import {
 } from '@atcute/identity-resolver';
 import { Client, simpleFetchHandler } from '@atcute/client';
 import type { AppBskyActorDefs } from '@atcute/bluesky';
+import { redirect } from '@sveltejs/kit';
 
 export type Collection = `${string}.${string}.${string}`;
 
@@ -30,8 +31,12 @@ export async function resolveHandle({ handle }: { handle: Handle }) {
 		}
 	});
 
-	const data = await handleResolver.resolve(handle);
-	return data;
+	try {
+		const data = await handleResolver.resolve(handle);
+		return data;
+	} catch (error) {
+		redirect(307, '/?error=handle_not_found&handle=' + handle);
+	}
 }
 
 const didResolver = new CompositeDidDocumentResolver({

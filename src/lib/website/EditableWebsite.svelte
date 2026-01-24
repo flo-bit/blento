@@ -756,6 +756,4 @@
 		{handleImageInputChange}
 		{handleVideoInputChange}
 	/>
-
-	<Toaster />
 </Context>
