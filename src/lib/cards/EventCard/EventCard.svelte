@@ -7,6 +7,7 @@
 	import type { EventData } from '.';
 	import { parseUri } from '$lib/atproto';
 	import { browser } from '$app/environment';
+	import { qrOverlay } from '$lib/components/qr/qrOverlay.svelte';
 
 	let { item }: ContentComponentProps = $props();
 
@@ -268,6 +269,11 @@
 			class="absolute inset-0 h-full w-full"
 			target="_blank"
 			rel="noopener noreferrer"
+			use:qrOverlay={{
+				context: {
+					title: eventData?.name ?? ''
+				}
+			}}
 		>
 			<span class="sr-only">View event on smokesignal.events</span>
 		</a>

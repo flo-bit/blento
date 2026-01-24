@@ -14,8 +14,7 @@
 	use:qrOverlay={{
 		disabled: isEditing,
 		context: {
-			title: item.cardData.displayName || item.cardData.handle,
-			avatar: item.cardData.avatar
+			title: item.cardData.displayName || item.cardData.handle
 		}
 	}}
 >

@@ -35,8 +35,7 @@
 			class="w-fit"
 			use:qrOverlay={{
 				context: {
-					title: getName(data),
-					avatar: data.profile.avatar
+					title: getName(data) + "'s blento"
 				}
 			}}
 		>
