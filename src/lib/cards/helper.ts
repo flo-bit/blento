@@ -5,11 +5,9 @@ export function getCSSVar(variable: string) {
 	return getComputedStyle(document.body).getPropertyValue(variable).trim();
 }
 
-
 export function getHexCSSVar(variable: string) {
 	return convertCSSToHex(getCSSVar(variable));
 }
-
 
 /**
  * Converts a CSS color string to a hue value in the 0-1 range
