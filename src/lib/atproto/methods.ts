@@ -297,7 +297,7 @@ export function getImageBlobUrl({
 	};
 }) {
 	if (!did || !blob?.ref?.$link) return '';
-	return `https://cdn.bsky.app/img/feed_thumbnail/plain/${did}/${blob.ref.$link}@jpeg`;
+	return `https://cdn.bsky.app/img/feed_thumbnail/plain/${did}/${blob.ref.$link}@webp`;
 }
 
 export async function searchActorsTypeahead(

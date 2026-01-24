@@ -320,8 +320,7 @@
 
 		item.cardType = isGif ? 'gif' : 'image';
 		item.cardData = {
-			blob: processedFile,
-			objectUrl
+			image: { blob: processedFile, objectUrl }
 		};
 
 		// If grid position is provided
@@ -492,6 +491,8 @@
 		// Reset the input so the same file can be selected again
 		target.value = '';
 	}
+
+	$inspect(items);
 </script>
 
 <svelte:body

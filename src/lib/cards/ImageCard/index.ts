@@ -1,7 +1,10 @@
-import { uploadBlob } from '$lib/atproto';
+import { checkAndUploadImage } from '$lib/helper';
 import type { CardDefinition } from '../types';
 import ImageCard from './ImageCard.svelte';
 import ImageCardSettings from './ImageCardSettings.svelte';
+
+// Common image extensions
+const IMAGE_EXTENSIONS = /\.(jpe?g|png|gif|webp|svg|bmp|ico|avif|tiff?)(\?.*)?$/i;
 
 export const ImageCardDefinition = {
 	type: 'image',
@@ -15,18 +18,7 @@ export const ImageCardDefinition = {
 		};
 	},
 	upload: async (item) => {
-		if (item.cardData.blob) {
-			item.cardData.image = await uploadBlob({ blob: item.cardData.blob });
-
-			delete item.cardData.blob;
-		}
-
-		if (item.cardData.objectUrl) {
-			URL.revokeObjectURL(item.cardData.objectUrl);
-
-			delete item.cardData.objectUrl;
-		}
-
+		await checkAndUploadImage(item.cardData, 'image');
 		return item;
 	},
 	settingsComponent: ImageCardSettings,
@@ -36,6 +28,20 @@ export const ImageCardDefinition = {
 	change: (item) => {
 		return item;
 	},
+
+	onUrlHandler: (url, item) => {
+		// Check if URL points to an image
+		if (IMAGE_EXTENSIONS.test(url)) {
+			item.cardType = 'image';
+			item.cardData.image = url;
+			item.cardData.alt = '';
+			item.cardData.href = '';
+			return item;
+		}
+		return null;
+	},
+	urlHandlerPriority: 3,
+
 	name: 'Image Card',
 
 	canHaveLabel: true

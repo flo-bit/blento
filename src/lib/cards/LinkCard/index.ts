@@ -1,4 +1,4 @@
-import { validateLink } from '$lib/helper';
+import { checkAndUploadImage, validateLink } from '$lib/helper';
 import type { CardDefinition } from '../types';
 import EditingLinkCard from './EditingLinkCard.svelte';
 import LinkCard from './LinkCard.svelte';
@@ -29,6 +29,11 @@ export const LinkCardDefinition = {
 		item.cardData.href = url;
 		item.cardData.domain = new URL(url).hostname;
 		item.cardData.hasFetched = false;
+		return item;
+	},
+	upload: async (item) => {
+		await checkAndUploadImage(item.cardData, 'image');
+		await checkAndUploadImage(item.cardData, 'favicon');
 		return item;
 	},
 	urlHandlerPriority: 0

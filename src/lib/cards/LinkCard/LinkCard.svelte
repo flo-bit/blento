@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
-	import { getIsMobile } from '$lib/website/context';
+	import { getImage } from '$lib/helper';
+	import { getDidContext, getIsMobile } from '$lib/website/context';
 	import type { ContentComponentProps } from '../types';
 
 	let { item }: ContentComponentProps = $props();
@@ -8,6 +9,8 @@
 	let isMobile = getIsMobile();
 
 	let faviconHasError = $state(false);
+
+	let did = getDidContext();
 </script>
 
 <div class="flex h-full flex-col justify-between p-4">
@@ -57,8 +60,8 @@
 
 	{#if browser && ((isMobile() && item.mobileH >= 8) || (!isMobile() && item.h >= 4)) && item.cardData.image}
 		<img
-			class="mb-2 max-h-32 w-full rounded-xl object-cover opacity-100 transition-opacity duration-100 starting:opacity-0"
-			src={item.cardData.image}
+			class="mb-2 aspect-2/1 w-full rounded-xl object-cover opacity-100 transition-opacity duration-100 starting:opacity-0"
+			src={getImage(item.cardData, did)}
 			alt=""
 		/>
 	{/if}

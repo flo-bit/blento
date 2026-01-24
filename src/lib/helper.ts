@@ -1,7 +1,7 @@
 import type { Item, WebsiteData } from './types';
 import { COLUMNS, margin, mobileMargin } from '$lib';
 import { CardDefinitionsByType } from './cards';
-import { deleteRecord, putRecord } from '$lib/atproto';
+import { deleteRecord, getImageBlobUrl, putRecord, uploadBlob } from '$lib/atproto';
 import { toast } from '@foxui/core';
 import * as TID from '@atcute/tid';
 
@@ -337,7 +337,7 @@ export function validateLink(
 	}
 }
 
-export function compressImage(file: File, maxSize: number = 900 * 1024): Promise<Blob> {
+export function compressImage(file: File | Blob, maxSize: number = 900 * 1024): Promise<Blob> {
 	return new Promise((resolve, reject) => {
 		const img = new Image();
 		const reader = new FileReader();
@@ -353,9 +353,16 @@ export function compressImage(file: File, maxSize: number = 900 * 1024): Promise
 		reader.readAsDataURL(file);
 
 		img.onload = () => {
+			const maxDimension = 2048;
+
+			// If image is already small enough, return original
+			if (file.size <= maxSize) {
+				console.log('skipping compression+resizing, already small enough');
+				return resolve(file);
+			}
+
 			let width = img.width;
 			let height = img.height;
-			const maxDimension = 2048;
 
 			if (width > maxDimension || height > maxDimension) {
 				if (width > height) {
@@ -375,26 +382,23 @@ export function compressImage(file: File, maxSize: number = 900 * 1024): Promise
 			if (!ctx) return reject(new Error('Failed to get canvas context.'));
 			ctx.drawImage(img, 0, 0, width, height);
 
-			// Function to try compressing at a given quality
-			let quality = 0.8;
+			// Use WebP for both compression and transparency support
+			let quality = 0.9;
+
 			function attemptCompression() {
 				canvas.toBlob(
 					(blob) => {
 						if (!blob) {
 							return reject(new Error('Compression failed.'));
 						}
-						// If the blob is under our size limit, or quality is too low, resolve it
 						if (blob.size <= maxSize || quality < 0.3) {
-							console.log('Compression successful. Blob size:', blob.size);
-							console.log('Quality:', quality);
 							resolve(blob);
 						} else {
-							// Otherwise, reduce the quality and try again
 							quality -= 0.1;
 							attemptCompression();
 						}
 					},
-					'image/jpeg',
+					'image/webp',
 					quality
 				);
 			}
@@ -535,4 +539,50 @@ export function scrollToItem(
 		const offset = containerRect.top - bodyRect.top;
 		window.scrollTo({ top: offset + cellSize * (currentY - 1), behavior: 'smooth' });
 	}
+}
+
+export async function checkAndUploadImage(
+	objectWithImage: Record<string, any>,
+	key: string = 'image'
+) {
+	if (!objectWithImage[key]) return;
+
+	// Already uploaded as blob
+	if (typeof objectWithImage[key] === 'object' && objectWithImage[key].$type === 'blob') {
+		return;
+	}
+
+	if (typeof objectWithImage[key] === 'string') {
+		// Download image from URL via proxy (to avoid CORS) and upload as blob
+		try {
+			const proxyUrl = `/api/image-proxy?url=${encodeURIComponent(objectWithImage[key])}`;
+			const response = await fetch(proxyUrl);
+			if (!response.ok) {
+				console.error('Failed to fetch image:', objectWithImage[key]);
+				return;
+			}
+			const blob = await response.blob();
+			const compressedBlob = await compressImage(blob);
+			objectWithImage[key] = await uploadBlob({ blob: compressedBlob });
+		} catch (error) {
+			console.error('Failed to download and upload image:', error);
+		}
+		return;
+	}
+
+	if (objectWithImage[key]?.blob) {
+		const compressedBlob = await compressImage(objectWithImage[key].blob);
+		objectWithImage[key] = await uploadBlob({ blob: compressedBlob });
+	}
+}
+
+export function getImage(objectWithImage: Record<string, any>, did: string, key: string = 'image') {
+	if (!objectWithImage[key]) return;
+
+	if (objectWithImage[key].objectUrl) return objectWithImage[key].objectUrl;
+
+	if (typeof objectWithImage[key] === 'object' && objectWithImage[key].$type === 'blob') {
+		return getImageBlobUrl({ did, blob: objectWithImage[key] });
+	}
+	return objectWithImage[key];
 }

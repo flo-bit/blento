@@ -1,29 +1,20 @@
 <script lang="ts">
 	import { getDidContext } from '$lib/website/context';
-	import { getImageBlobUrl } from '$lib/atproto';
 	import type { ContentComponentProps } from '../types';
+	import { getImage } from '$lib/helper';
 
 	let { item = $bindable(), isEditing }: ContentComponentProps = $props();
 
 	const did = getDidContext();
-
-	function getSrc() {
-		if (item.cardData.objectUrl) return item.cardData.objectUrl;
-
-		if (item.cardData.image && typeof item.cardData.image === 'object') {
-			return getImageBlobUrl({ did, blob: item.cardData.image });
-		}
-		return item.cardData.image;
-	}
 </script>
 
-{#key item.cardData.image || item.cardData.objectUrl}
+{#key getImage(item.cardData, did, 'image')}
 	<img
 		class={[
 			'absolute inset-0 h-full w-full object-cover opacity-100 transition-transform duration-300 ease-in-out',
 			item.cardData.href ? 'group-hover/card:scale-101' : ''
 		]}
-		src={getSrc()}
+		src={getImage(item.cardData, did, 'image')}
 		alt=""
 	/>
 {/key}
