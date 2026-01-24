@@ -31,6 +31,7 @@
 	import { compressImage } from '../helper';
 	import Account from './Account.svelte';
 	import EditBar from './EditBar.svelte';
+	import { user } from '$lib/atproto';
 
 	let {
 		data
@@ -744,18 +745,20 @@
 		</div>
 	</Sidebar>
 
-	<EditBar
-		{data}
-		bind:linkValue
-		bind:isSaving
-		bind:showingMobileView
-		bind:showSettings
-		{newCard}
-		{addLink}
-		{save}
-		{handleImageInputChange}
-		{handleVideoInputChange}
-	/>
+	{#if user.isLoggedIn}
+		<EditBar
+			{data}
+			bind:linkValue
+			bind:isSaving
+			bind:showingMobileView
+			bind:showSettings
+			{newCard}
+			{addLink}
+			{save}
+			{handleImageInputChange}
+			{handleVideoInputChange}
+		/>
+	{/if}
 
 	<Toaster />
 </Context>
