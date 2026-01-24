@@ -205,7 +205,7 @@
 			{/if}
 
 			{#if eventData.description && ((isMobile() && item.mobileH >= 5) || (!isMobile() && item.h >= 3))}
-				<p class="text-base-500 dark:text-base-400 accent:text-base-700 mb-3 line-clamp-3 text-sm">
+				<p class="text-base-500 dark:text-base-400 accent:text-base-900 mb-3 line-clamp-3 text-sm">
 					{eventData.description}
 				</p>
 			{/if}
