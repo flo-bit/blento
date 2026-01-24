@@ -80,6 +80,6 @@
 		"turndown": "^7.2.2",
 		"wrangler": "^4.60.0"
 	},
-	"packageManager": "pnpm@9",
+	"packageManager": "pnpm@9.15.0",
 	"license": "MIT"
 }
