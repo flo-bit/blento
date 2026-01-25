@@ -188,6 +188,8 @@ export async function getRecord({
 		}
 	});
 
+	if (!record.ok) return;
+
 	return JSON.parse(JSON.stringify(record.data));
 }
 

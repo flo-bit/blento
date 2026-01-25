@@ -93,7 +93,7 @@
 		<button
 			type="button"
 			class={[
-				'group relative size-32 cursor-pointer overflow-hidden rounded-full',
+				'group relative size-32 shrink-0 cursor-pointer overflow-hidden rounded-full',
 				profilePosition === 'side' && '@5xl/wrapper:size-44'
 			]}
 			onmouseenter={() => (isHoveringAvatar = true)}
@@ -102,7 +102,7 @@
 		>
 			{#if getAvatarUrl()}
 				<img
-					class="border-base-400 dark:border-base-800 size-full rounded-full border object-cover"
+					class="border-base-400 shrink-0 dark:border-base-800 size-full rounded-full border object-cover"
 					src={getAvatarUrl()}
 					alt=""
 				/>

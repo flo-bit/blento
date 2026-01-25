@@ -33,7 +33,10 @@ export async function getCache(handle: string, page: string, cache?: UserCache) 
 		result.publication = (result.publications as Awaited<ReturnType<typeof listRecords>>).find(
 			(v) => parseUri(v.uri).rkey === result.page
 		)?.value;
-		result.publication ??= {};
+		result.publication ??= {
+			name: result.profile?.displayName || result.profile?.handle,
+			description: result.profile?.description
+		};
 
 		delete result['publications'];
 
@@ -137,7 +140,10 @@ export async function loadData(
 	parsedResult.publication = (
 		parsedResult.publications as Awaited<ReturnType<typeof listRecords>>
 	).find((v) => parseUri(v.uri).rkey === parsedResult.page)?.value;
-	parsedResult.publication ??= {};
+	parsedResult.publication ??= {
+		name: profile?.displayName || profile?.handle,
+		description: profile?.description
+	};
 
 	delete parsedResult['publications'];
 

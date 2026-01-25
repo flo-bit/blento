@@ -54,7 +54,7 @@
 			{#if data.publication?.icon || data.profile.avatar}
 				<img
 					class={[
-						'border-base-400 dark:border-base-800 size-32 rounded-full border object-cover',
+						'border-base-400 shrink-0 dark:border-base-800 size-32 rounded-full border object-cover',
 						profilePosition === 'side' && '@5xl/wrapper:size-44'
 					]}
 					src={getImage(data.publication, data.did, 'icon') || data.profile.avatar}
@@ -63,7 +63,7 @@
 			{:else}
 				<div
 					class={[
-						'bg-base-300 dark:bg-base-700 size-32 rounded-full',
+						'bg-base-300 dark:bg-base-700 shrink-0 size-32 rounded-full',
 						profilePosition === 'side' && '@5xl/wrapper:size-44'
 					]}
 				></div>
