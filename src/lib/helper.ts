@@ -455,19 +455,20 @@ export async function savePage(
 ) {
 	const promises = [];
 	// find all cards that have been updated (where items differ from originalItems)
-	for (const item of currentItems) {
+	for (let item of currentItems) {
 		const originalItem = data.cards.find((i) => cardsEqual(i, item));
 
 		if (!originalItem) {
-			let parsedItem = JSON.parse(JSON.stringify(item));
-			console.log('updated or new item', parsedItem);
-			parsedItem.updatedAt = new Date().toISOString();
+			console.log('updated or new item', item);
+			item.updatedAt = new Date().toISOString();
 			// run optional upload function for this card type
-			const cardDef = CardDefinitionsByType[parsedItem.cardType];
+			const cardDef = CardDefinitionsByType[item.cardType];
 
 			if (cardDef?.upload) {
-				parsedItem = await cardDef?.upload(parsedItem);
+				item = await cardDef?.upload(item);
 			}
+
+			const parsedItem = JSON.parse(JSON.stringify(item));
 
 			parsedItem.page = data.page;
 			parsedItem.version = 2;
@@ -536,15 +537,6 @@ export async function savePage(
 	}
 
 	await Promise.all(promises);
-
-	fetch('/' + data.handle + '/api/refresh').then(() => {
-		console.log('data refreshed!');
-	});
-	console.log('refreshing data');
-
-	toast('Saved', {
-		description: 'Your website has been saved!'
-	});
 }
 
 export function createEmptyCard(page: string) {

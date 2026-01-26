@@ -32,7 +32,9 @@
 	import { compressImage } from '../helper';
 	import Account from './Account.svelte';
 	import EditBar from './EditBar.svelte';
+	import SaveModal from './SaveModal.svelte';
 	import { user } from '$lib/atproto';
+	import { launchConfetti } from '@foxui/visual';
 
 	let {
 		data
@@ -47,6 +49,29 @@
 
 	// svelte-ignore state_referenced_locally
 	let publication = $state(JSON.stringify(data.publication));
+
+	// Track saved state for comparison
+	// svelte-ignore state_referenced_locally
+	let savedItems = $state(JSON.stringify(data.cards));
+	// svelte-ignore state_referenced_locally
+	let savedPublication = $state(JSON.stringify(data.publication));
+
+	let hasUnsavedChanges = $derived(
+		JSON.stringify(items) !== savedItems || JSON.stringify(data.publication) !== savedPublication
+	);
+
+	// Warn user before closing tab if there are unsaved changes
+	$effect(() => {
+		function handleBeforeUnload(e: BeforeUnloadEvent) {
+			if (hasUnsavedChanges) {
+				e.preventDefault();
+				return '';
+			}
+		}
+
+		window.addEventListener('beforeunload', handleBeforeUnload);
+		return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+	});
 
 	let container: HTMLDivElement | undefined = $state();
 
@@ -128,11 +153,15 @@
 	}
 
 	let isSaving = $state(false);
+	let showSaveModal = $state(false);
+	let saveSuccess = $state(false);
 
 	let newItem: { modal?: Component<CreationModalComponentProps>; item?: Item } = $state({});
 
 	async function save() {
 		isSaving = true;
+		saveSuccess = false;
+		showSaveModal = true;
 
 		try {
 			// Upload profile icon if changed
@@ -143,8 +172,20 @@
 			await savePage(data, items, publication);
 
 			publication = JSON.stringify(data.publication);
+
+			// Update saved state
+			savedItems = JSON.stringify(items);
+			savedPublication = JSON.stringify(data.publication);
+
+			saveSuccess = true;
+
+			launchConfetti();
+
+			// Refresh cached data
+			await fetch('/' + data.handle + '/api/refresh');
 		} catch (error) {
 			console.log(error);
+			showSaveModal = false;
 			toast.error('Error saving page!');
 		} finally {
 			isSaving = false;
@@ -320,14 +361,13 @@
 		const isGif = file.type === 'image/gif';
 
 		// Don't compress GIFs to preserve animation
-		const processedFile = isGif ? file : await compressImage(file);
-		const objectUrl = URL.createObjectURL(processedFile);
+		const objectUrl = URL.createObjectURL(file);
 
 		let item = createEmptyCard(data.page);
 
 		item.cardType = isGif ? 'gif' : 'image';
 		item.cardData = {
-			image: { blob: processedFile, objectUrl }
+			image: { blob: file, objectUrl }
 		};
 
 		// If grid position is provided
@@ -559,6 +599,13 @@
 		/>
 	{/if}
 
+	<SaveModal
+		bind:open={showSaveModal}
+		success={saveSuccess}
+		handle={data.handle}
+		page={data.page}
+	/>
+
 	<div
 		class={[
 			'@container/wrapper relative w-full',
@@ -784,6 +831,7 @@
 		bind:linkValue
 		bind:isSaving
 		bind:showingMobileView
+		{hasUnsavedChanges}
 		{newCard}
 		{addLink}
 		{save}
