@@ -23,7 +23,7 @@
 				<img
 					class="size-6 rounded-lg object-cover"
 					onerror={() => (faviconHasError = true)}
-					src={item.cardData.favicon}
+					src={getImage(item.cardData, did, 'favicon')}
 					alt=""
 				/>
 			{:else}
