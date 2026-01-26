@@ -25,16 +25,4 @@
 			<Button variant="ghost" onclick={logout}>Logout</Button>
 		</Popover>
 	</div>
-{:else if !user.isInitializing}
-	<div
-		class="dark:bg-base-950 border-base-200 dark:border-base-900 fixed top-4 right-4 z-20 flex flex-col gap-4 rounded-2xl border bg-white p-4 shadow-lg"
-	>
-		<span class="text-sm font-semibold">Login to edit your page</span>
-
-		<Button
-			onclick={async () => {
-				await login(data.handle as ActorIdentifier);
-			}}>Login</Button
-		>
-	</div>
 {/if}

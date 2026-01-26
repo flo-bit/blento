@@ -33,6 +33,7 @@
 	import Account from './Account.svelte';
 	import EditBar from './EditBar.svelte';
 	import SaveModal from './SaveModal.svelte';
+	import FloatingEditButton from './FloatingEditButton.svelte';
 	import { user } from '$lib/atproto';
 	import { launchConfetti } from '@foxui/visual';
 
@@ -41,6 +42,9 @@
 	}: {
 		data: WebsiteData;
 	} = $props();
+
+	// Check if floating login button will be visible (to hide MadeWithBlento)
+	const showLoginOnEditPage = $derived(!user.isInitializing && !user.isLoggedIn);
 
 	let imageDragOver = $state(false);
 
@@ -615,7 +619,7 @@
 		]}
 	>
 		{#if !getHideProfileSection(data)}
-			<EditableProfile bind:data />
+			<EditableProfile bind:data hideBlento={showLoginOnEditPage} />
 		{/if}
 
 		<div
@@ -840,4 +844,6 @@
 	/>
 
 	<Toaster />
+
+	<FloatingEditButton {data} />
 </Context>
