@@ -28,6 +28,7 @@ import { StatusphereCardDefinition } from './StatusphereCard';
 import { EventCardDefinition } from './EventCard';
 import { VCardCardDefinition } from './VCardCard';
 import { DrawCardDefinition } from './DrawCard';
+import { TimerCardDefinition } from './TimerCard';
 
 export const AllCardDefinitions = [
 	ImageCardDefinition,
@@ -58,7 +59,8 @@ export const AllCardDefinitions = [
 	StatusphereCardDefinition,
 	EventCardDefinition,
 	VCardCardDefinition,
-	DrawCardDefinition
+	DrawCardDefinition,
+	TimerCardDefinition
 ] as const;
 
 export const CardDefinitionsByType = AllCardDefinitions.reduce(

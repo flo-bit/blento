@@ -55,6 +55,7 @@
 		"@foxui/social": "^0.4.7",
 		"@foxui/time": "^0.4.7",
 		"@foxui/visual": "^0.4.7",
+		"@number-flow/svelte": "^0.3.10",
 		"@tailwindcss/typography": "^0.5.19",
 		"@tiptap/core": "^3.16.0",
 		"@tiptap/extension-document": "^3.16.0",
