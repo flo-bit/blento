@@ -11,15 +11,17 @@
 
 	const isOwnPage = $derived(user.isLoggedIn && user.profile?.did === data.did);
 	const isBlento = $derived(!env.PUBLIC_IS_SELFHOSTED && data.handle === 'blento.app');
+	const isEditPage = $derived(page.url.pathname.endsWith('/edit'));
 	const showLoginOnBlento = $derived(
 		isBlento && !user.isInitializing && !user.isLoggedIn && user.profile?.handle !== data.handle
 	);
+	const showLoginOnEditPage = $derived(isEditPage && !user.isInitializing && !user.isLoggedIn);
 	const showEditBlentoButton = $derived(
 		isBlento && user.isLoggedIn && user.profile?.handle !== data.handle
 	);
 </script>
 
-{#if isOwnPage}
+{#if isOwnPage && !isEditPage}
 	<div class="fixed bottom-6 left-6 z-49 hidden lg:block">
 		<Button size="lg" href="{page.url}/edit">
 			<svg
@@ -37,6 +39,26 @@
 				/>
 			</svg>
 			Edit Website
+		</Button>
+	</div>
+{:else if showLoginOnEditPage}
+	<div class="fixed bottom-6 left-6 z-49">
+		<Button size="lg" onclick={() => login(data.handle as ActorIdentifier)}>
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				fill="none"
+				viewBox="0 0 24 24"
+				stroke-width="1.5"
+				stroke="currentColor"
+				class="size-5"
+			>
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"
+				/>
+			</svg>
+			Login
 		</Button>
 	</div>
 {:else if showLoginOnBlento}

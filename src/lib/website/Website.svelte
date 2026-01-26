@@ -21,14 +21,18 @@
 	import FloatingEditButton from './FloatingEditButton.svelte';
 	import { user } from '$lib/atproto';
 	import { env } from '$env/dynamic/public';
+	import { page } from '$app/state';
 
 	let { data }: { data: WebsiteData } = $props();
 
 	// Check if floating edit button will be visible (to hide MadeWithBlento)
 	const isOwnPage = $derived(user.isLoggedIn && user.profile?.did === data.did);
 	const isBlento = $derived(!env.PUBLIC_IS_SELFHOSTED && data.handle === 'blento.app');
+	const isEditPage = $derived(page.url.pathname.endsWith('/edit'));
+	const showLoginOnEditPage = $derived(isEditPage && !user.isInitializing && !user.isLoggedIn);
 	const showFloatingButton = $derived(
-		isOwnPage ||
+		(isOwnPage && !isEditPage) ||
+			showLoginOnEditPage ||
 			(isBlento && !user.isInitializing && !user.isLoggedIn) ||
 			(isBlento && user.isLoggedIn && user.profile?.handle !== data.handle)
 	);
