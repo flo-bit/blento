@@ -1,11 +1,12 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { user } from '$lib/atproto';
+	import { getHandleOrDid } from '$lib/atproto/methods';
 
 	$effect(() => {
 		console.log('hello', user);
 		if (user.profile) {
-			goto('/' + user.profile.handle + '/edit', {});
+			goto('/' + getHandleOrDid(user.profile) + '/edit', {});
 		}
 	});
 </script>

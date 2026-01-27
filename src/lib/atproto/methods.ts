@@ -1,4 +1,10 @@
-import { parseResourceUri, type Did, type Handle } from '@atcute/lexicons';
+import {
+	parseResourceUri,
+	type ActorIdentifier,
+	type Did,
+	type Handle,
+	type ResourceUri
+} from '@atcute/lexicons';
 import { user } from './auth.svelte';
 import type { AllowedCollection } from './settings';
 import {
@@ -427,4 +433,32 @@ export async function getAuthorFeed(data?: {
 	if (!response.ok) return;
 
 	return response.data;
+}
+
+/**
+ * Fetches posts by their AT URIs.
+ * @param uris - Array of AT URIs (e.g., "at://did:plc:xyz/app.bsky.feed.post/abc123")
+ * @param client - The client to use (defaults to public Bluesky API)
+ * @returns Array of posts or undefined on failure
+ */
+export async function getPosts(data: { uris: string[]; client?: Client }) {
+	data.client ??= new Client({
+		handler: simpleFetchHandler({ service: 'https://public.api.bsky.app' })
+	});
+
+	const response = await data.client.get('app.bsky.feed.getPosts', {
+		params: { uris: data.uris as ResourceUri[] }
+	});
+
+	if (!response.ok) return;
+
+	return response.data.posts;
+}
+
+export function getHandleOrDid(profile: AppBskyActorDefs.ProfileViewDetailed): ActorIdentifier {
+	if (profile.handle && profile.handle !== 'handle.invalid') {
+		return profile.handle;
+	} else {
+		return profile.did;
+	}
 }

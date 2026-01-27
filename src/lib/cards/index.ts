@@ -3,6 +3,7 @@ import { ATProtoCollectionsCardDefinition } from './ATProtoCollectionsCard';
 import { BigSocialCardDefinition } from './BigSocialCard';
 import { BlueskyMediaCardDefinition } from './BlueskyMediaCard';
 import { BlueskyPostCardDefinition } from './BlueskyPostCard';
+import { LatestBlueskyPostCardDefinition } from './LatestBlueskyPostCard';
 import { DinoGameCardDefinition } from './GameCards/DinoGameCard';
 import { EmbedCardDefinition } from './EmbedCard';
 import { TetrisCardDefinition } from './GameCards/TetrisCard';
@@ -39,6 +40,7 @@ export const AllCardDefinitions = [
 	UpdatedBlentosCardDefitition,
 	YoutubeCardDefinition,
 	BlueskyPostCardDefinition,
+	LatestBlueskyPostCardDefinition,
 	LivestreamCardDefitition,
 	LivestreamEmbedCardDefitition,
 	EmbedCardDefinition,

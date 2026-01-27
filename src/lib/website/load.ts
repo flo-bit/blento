@@ -3,7 +3,9 @@ import { CardDefinitionsByType } from '$lib/cards';
 import type { Item, UserCache, WebsiteData } from '$lib/types';
 import { compactItems, fixAllCollisions } from '$lib/helper';
 import { error } from '@sveltejs/kit';
-import type { Handle } from '@atcute/lexicons';
+import type { ActorIdentifier, Did } from '@atcute/lexicons';
+
+import { isDid, isHandle } from '@atcute/lexicons/syntax';
 
 const CURRENT_CACHE_VERSION = 1;
 
@@ -48,7 +50,7 @@ export async function getCache(handle: string, page: string, cache?: UserCache) 
 }
 
 export async function loadData(
-	handle: Handle,
+	handle: ActorIdentifier,
 	cache: UserCache | undefined,
 	forceUpdate: boolean = false,
 	page: string = 'self'
@@ -62,7 +64,14 @@ export async function loadData(
 		if (cachedResult) return cachedResult;
 	}
 
-	const did = await resolveHandle({ handle });
+	let did: Did | undefined = undefined;
+	if (isHandle(handle)) {
+		did = await resolveHandle({ handle });
+	} else if (isDid(handle)) {
+		did = handle;
+	} else {
+		throw error(404);
+	}
 
 	const cards = await listRecords({ did, collection: 'app.blento.card' }).catch(() => {
 		console.error('error getting records for collection app.blento.card');

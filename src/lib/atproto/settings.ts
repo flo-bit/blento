@@ -44,4 +44,4 @@ export type AllowedCollection = ExtractCollectionBase<(typeof permissions.collec
 
 // which PDS to use for signup
 // ATTENTION: pds.rip is only for development, all accounts get deleted automatically after a week
-export const signUpPDS = 'https://selfhosted.social/';
+export const signUpPDS = 'https://pds.rip/';
