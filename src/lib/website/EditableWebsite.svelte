@@ -804,7 +804,7 @@
 		</div>
 	</div>
 
-	<Sidebar mobileOnly mobileClasses="lg:block p-4 gap-4">
+	<Sidebar mobileOnly mobileClasses="lg:block p-4 gap-4 overflow-y-auto overflow-x-hidden">
 		<div class="flex flex-col gap-2">
 			{#each sidebarItems as cardDef (cardDef.type)}
 				<Button onclick={() => newCard(cardDef.type)} variant="ghost" class="w-full justify-start"
