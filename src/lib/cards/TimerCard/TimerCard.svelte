@@ -103,13 +103,13 @@
 				style="font-variant-numeric: tabular-nums;"
 			>
 				<NumberFlow value={clockHours} format={{ minimumIntegerDigits: 2 }} />
-				<span class="text-base-400 dark:text-base-500 accent:text-base-700 mx-0.5">:</span>
+				<span class="text-base-400 dark:text-base-500 accent:text-accent-950 mx-0.5">:</span>
 				<NumberFlow
 					value={clockMinutes}
 					format={{ minimumIntegerDigits: 2 }}
 					digits={{ 1: { max: 5 } }}
 				/>
-				<span class="text-base-400 dark:text-base-500 accent:text-base-700 mx-0.5">:</span>
+				<span class="text-base-400 dark:text-base-500 accent:text-accent-950 mx-0.5">:</span>
 				<NumberFlow
 					value={clockSeconds}
 					format={{ minimumIntegerDigits: 2 }}
