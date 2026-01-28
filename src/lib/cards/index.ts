@@ -30,6 +30,7 @@ import { EventCardDefinition } from './EventCard';
 import { VCardCardDefinition } from './VCardCard';
 import { DrawCardDefinition } from './DrawCard';
 import { TimerCardDefinition } from './TimerCard';
+import { Model3DCardDefinition } from './Model3DCard';
 
 export const AllCardDefinitions = [
 	ImageCardDefinition,
@@ -62,7 +63,8 @@ export const AllCardDefinitions = [
 	EventCardDefinition,
 	VCardCardDefinition,
 	DrawCardDefinition,
-	TimerCardDefinition
+	TimerCardDefinition,
+	Model3DCardDefinition
 ] as const;
 
 export const CardDefinitionsByType = AllCardDefinitions.reduce(
