@@ -5,6 +5,7 @@
 	import { page } from '$app/state';
 	import { qrOverlay } from '$lib/components/qr/qrOverlay.svelte';
 	import MadeWithBlento from './MadeWithBlento.svelte';
+	import { Avatar } from '@foxui/core';
 
 	let {
 		data,
@@ -33,7 +34,7 @@
 >
 	<div
 		class={[
-			'flex flex-col gap-4 pt-16 pb-8',
+			'flex flex-col gap-4 pt-16 pb-4',
 			profilePosition === 'side' && '@5xl/wrapper:h-screen @5xl/wrapper:pt-24'
 		]}
 	>
@@ -46,23 +47,13 @@
 				}
 			}}
 		>
-			{#if data.publication?.icon || data.profile.avatar}
-				<img
-					class={[
-						'border-base-400 dark:border-base-800 size-32 shrink-0 rounded-full border object-cover',
-						profilePosition === 'side' && '@5xl/wrapper:size-44'
-					]}
-					src={getImage(data.publication, data.did, 'icon') || data.profile.avatar}
-					alt=""
-				/>
-			{:else}
-				<div
-					class={[
-						'bg-base-300 dark:bg-base-700 size-32 shrink-0 rounded-full',
-						profilePosition === 'side' && '@5xl/wrapper:size-44'
-					]}
-				></div>
-			{/if}
+			<Avatar
+				src={getImage(data.publication, data.did, 'icon') || data.profile.avatar}
+				class={[
+					'border-base-400 dark:border-base-800 size-32 shrink-0 rounded-full border object-cover',
+					profilePosition === 'side' && '@5xl/wrapper:size-44'
+				]}
+			/>
 		</a>
 
 		<div class="text-4xl font-bold wrap-anywhere">

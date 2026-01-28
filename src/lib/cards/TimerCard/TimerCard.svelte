@@ -1,17 +1,12 @@
 <script lang="ts">
-	import { Button } from '@foxui/core';
-	import { Timer, TimerState } from '@foxui/time';
 	import NumberFlow, { NumberFlowGroup } from '@number-flow/svelte';
 	import type { ContentComponentProps } from '../types';
 	import type { TimerCardData } from './index';
 	import { onMount } from 'svelte';
 
-	let { item, isEditing }: ContentComponentProps = $props();
+	let { item }: ContentComponentProps = $props();
 
 	let cardData = $derived(item.cardData as TimerCardData);
-
-	// For timer mode
-	let timer = $state(new TimerState(cardData.duration ?? 1000 * 60 * 5));
 
 	// For clock and event modes - current time
 	let now = $state(new Date());
@@ -85,21 +80,12 @@
 	});
 </script>
 
-<div class="flex h-full w-full flex-col items-center justify-center p-4">
-	<!-- Label -->
-	{#if cardData.label}
-		<div
-			class="text-base-600 dark:text-base-400 accent:text-base-700 mb-1 text-center text-sm font-medium"
-		>
-			{cardData.label}
-		</div>
-	{/if}
-
+<div class="@container flex h-full w-full flex-col items-center justify-center p-4">
 	<!-- Clock Mode -->
 	{#if cardData.mode === 'clock'}
 		<NumberFlowGroup>
 			<div
-				class="text-base-900 dark:text-base-100 accent:text-base-900 flex items-center text-4xl font-bold"
+				class="text-base-900 dark:text-base-100 accent:text-base-900 flex items-center text-3xl font-bold @xs:text-4xl @sm:text-5xl @md:text-6xl @lg:text-7xl"
 				style="font-variant-numeric: tabular-nums;"
 			>
 				<NumberFlow value={clockHours} format={{ minimumIntegerDigits: 2 }} />
@@ -108,42 +94,20 @@
 					value={clockMinutes}
 					format={{ minimumIntegerDigits: 2 }}
 					digits={{ 1: { max: 5 } }}
+					trend={1}
 				/>
 				<span class="text-base-400 dark:text-base-500 accent:text-accent-950 mx-0.5">:</span>
 				<NumberFlow
 					value={clockSeconds}
 					format={{ minimumIntegerDigits: 2 }}
 					digits={{ 1: { max: 5 } }}
+					trend={1}
 				/>
 			</div>
 		</NumberFlowGroup>
 		{#if timezoneDisplay}
-			<div class="text-base-500 dark:text-base-400 accent:text-base-600 mt-1 text-xs">
+			<div class="text-base-500 dark:text-base-400 accent:text-base-600 mt-1 text-xs @sm:text-sm">
 				{timezoneDisplay}
-			</div>
-		{/if}
-
-		<!-- Timer Mode -->
-	{:else if cardData.mode === 'timer'}
-		<Timer
-			bind:timer
-			showHours
-			showMinutes
-			showSeconds
-			class="text-base-900 dark:text-base-100 accent:text-base-900 text-4xl"
-		/>
-		{#if isEditing}
-			<div class="mt-3 flex gap-2">
-				{#if timer.isStopped}
-					<Button size="sm" onclick={() => timer.start()}>Start</Button>
-				{:else if timer.isRunning}
-					<Button size="sm" variant="secondary" onclick={() => timer.pause()}>Pause</Button>
-				{:else if timer.isPaused}
-					<Button size="sm" onclick={() => timer.resume()}>Resume</Button>
-				{/if}
-				{#if !timer.isStopped}
-					<Button size="sm" variant="ghost" onclick={() => timer.reset()}>Reset</Button>
-				{/if}
 			</div>
 		{/if}
 
@@ -152,7 +116,7 @@
 		{#if eventDiff !== null && !isEventComplete}
 			<NumberFlowGroup>
 				<div
-					class="text-base-900 dark:text-base-100 accent:text-base-900 flex items-baseline gap-3 text-center"
+					class="text-base-900 dark:text-base-100 accent:text-base-900 flex items-baseline gap-4 text-center @sm:gap-6 @md:gap-8"
 					style="font-variant-numeric: tabular-nums;"
 				>
 					{#if eventDays > 0}
@@ -167,7 +131,7 @@
 							value={eventHours}
 							trend={-1}
 							format={{ minimumIntegerDigits: 2 }}
-							class="text-4xl font-bold"
+							class="text-3xl font-bold @xs:text-4xl @sm:text-5xl @md:text-6xl @lg:text-7xl"
 						/>
 						<span class="text-base-500 dark:text-base-400 accent:text-base-700 text-xs">hrs</span>
 					</div>
@@ -177,7 +141,7 @@
 							trend={-1}
 							format={{ minimumIntegerDigits: 2 }}
 							digits={{ 1: { max: 5 } }}
-							class="text-4xl font-bold"
+							class="text-3xl font-bold @xs:text-4xl @sm:text-5xl @md:text-6xl @lg:text-7xl"
 						/>
 						<span class="text-base-500 dark:text-base-400 accent:text-base-700 text-xs">min</span>
 					</div>
@@ -187,14 +151,16 @@
 							trend={-1}
 							format={{ minimumIntegerDigits: 2 }}
 							digits={{ 1: { max: 5 } }}
-							class="text-4xl font-bold"
+							class="text-3xl font-bold @xs:text-4xl @sm:text-5xl @md:text-6xl @lg:text-7xl"
 						/>
 						<span class="text-base-500 dark:text-base-400 accent:text-base-700 text-xs">sec</span>
 					</div>
 				</div>
 			</NumberFlowGroup>
 		{:else if isEventComplete}
-			<div class="text-accent-600 dark:text-accent-400 accent:text-accent-900 text-2xl font-bold">
+			<div
+				class="text-accent-600 dark:text-accent-400 accent:text-accent-900 text-xl font-bold @xs:text-2xl @sm:text-3xl @md:text-4xl"
+			>
 				Event Started!
 			</div>
 		{:else}

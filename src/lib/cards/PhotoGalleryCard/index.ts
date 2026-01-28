@@ -1,6 +1,7 @@
 import type { CardDefinition } from '../types';
 import { getRecord, listRecords, parseUri } from '$lib/atproto';
 import PhotoGalleryCard from './PhotoGalleryCard.svelte';
+import type { Did } from '@atcute/lexicons';
 
 interface GalleryItem {
 	value: {
@@ -33,14 +34,14 @@ export const PhotoGalleryCardDefinition = {
 		for (const item of items) {
 			if (!item.cardData.galleryUri) continue;
 
-			const { did, collection } = parseUri(item.cardData.galleryUri);
+			const parsedUri = parseUri(item.cardData.galleryUri);
 
-			if (collection === 'social.grain.gallery') {
+			if (parsedUri?.collection === 'social.grain.gallery') {
 				const itemCollection = 'social.grain.gallery.item';
 
 				if (!galleryItems[itemCollection]) {
 					galleryItems[itemCollection] = (await listRecords({
-						did,
+						did: parsedUri.repo as Did,
 						collection: itemCollection
 					})) as unknown as GalleryItem[];
 				}
@@ -52,7 +53,12 @@ export const PhotoGalleryCardDefinition = {
 					.filter((i) => i.value.gallery === item.cardData.galleryUri)
 					.map(async (i) => {
 						const itemData = parseUri(i.value.item);
-						const record = await getRecord(itemData);
+						if (!itemData) return null;
+						const record = await getRecord({
+							did: itemData.repo as Did,
+							collection: itemData.collection!,
+							rkey: itemData.rkey
+						});
 						return { ...record, value: { ...record.value, ...i.value } };
 					});
 

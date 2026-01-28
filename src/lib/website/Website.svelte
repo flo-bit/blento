@@ -6,7 +6,8 @@
 		getHideProfileSection,
 		getProfilePosition,
 		getName,
-		sortItems
+		sortItems,
+		getImage
 	} from '../helper';
 	import { innerWidth } from 'svelte/reactivity/window';
 	import { setDidContext, setHandleContext, setIsMobile } from './context';
@@ -56,10 +57,12 @@
 </script>
 
 <Head
-	favicon={data.profile.avatar ?? null}
+	favicon={getImage(data.publication, data.did, 'icon') || data.profile.avatar}
 	title={getName(data)}
 	image={'/' + data.handle + '/og.png'}
 	description={getDescription(data)}
+	accentColor={data.publication?.preferences?.accentColor}
+	baseColor={data.publication?.preferences?.baseColor}
 />
 
 <Context {data}>
@@ -79,7 +82,7 @@
 		>
 			<div></div>
 			<div bind:this={container} class="@container/grid relative col-span-3 px-2 py-8 lg:px-8">
-				{#if data.cards.length === 0}
+				{#if data.cards.length === 0 && data.page === 'blento.self'}
 					<EmptyState {data} />
 				{:else}
 					{#each data.cards.toSorted(sortItems) as item (item.id)}

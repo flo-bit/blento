@@ -1,12 +1,24 @@
 <script lang="ts">
+	import ThemeScript from './ThemeScript.svelte';
+
 	let {
 		favicon,
 		title,
 		image,
-		description
-	}: { favicon: string | null; title: string | null; image?: string; description?: string } =
-		$props();
+		description,
+		accentColor,
+		baseColor
+	}: {
+		favicon: string | null;
+		title: string | null;
+		image?: string;
+		description?: string;
+		accentColor?: string;
+		baseColor?: string;
+	} = $props();
 </script>
+
+<ThemeScript {accentColor} {baseColor} />
 
 <svelte:head>
 	{#if favicon}

@@ -8,7 +8,7 @@
 		getIsMobile
 	} from '$lib/website/context';
 	import { CardDefinitionsByType } from '..';
-	import { getImageBlobUrl, parseUri } from '$lib/atproto';
+	import { getCDNImageBlobUrl, parseUri } from '$lib/atproto';
 
 	import { ImageMasonry } from '@foxui/visual';
 
@@ -54,9 +54,9 @@
 				return (a.value.position ?? 0) - (b.value.position ?? 0);
 			})
 			.map((i: PhotoItem) => {
-				const { did: photoDid } = parseUri(i.uri);
+				const item = parseUri(i.uri);
 				return {
-					src: getImageBlobUrl({ did: photoDid, blob: i.value.photo }),
+					src: getCDNImageBlobUrl({ did: item?.repo, blob: i.value.photo }),
 					name: '',
 					width: i.value.aspectRatio.width,
 					height: i.value.aspectRatio.height,

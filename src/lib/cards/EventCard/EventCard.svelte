@@ -8,6 +8,7 @@
 	import { parseUri } from '$lib/atproto';
 	import { browser } from '$app/environment';
 	import { qrOverlay } from '$lib/components/qr/qrOverlay.svelte';
+	import type { Did } from '@atcute/lexicons';
 
 	let { item }: ContentComponentProps = $props();
 
@@ -27,9 +28,9 @@
 	let parsedUri = $derived(item.cardData?.uri ? parseUri(item.cardData.uri) : null);
 
 	onMount(async () => {
-		if (!eventData && item.cardData?.uri) {
+		if (!eventData && item.cardData?.uri && parsedUri?.repo) {
 			const loadedData = (await CardDefinitionsByType[item.cardType]?.loadData?.([item], {
-				did: parsedUri?.did ?? ('' as `did:${string}:${string}`),
+				did: parsedUri.repo as Did,
 				handle: ''
 			})) as Record<string, EventData> | undefined;
 
@@ -92,7 +93,7 @@
 	let eventUrl = $derived(() => {
 		if (eventData?.url) return eventData.url;
 		if (parsedUri) {
-			return `https://smokesignal.events/${parsedUri.did}/${parsedUri.rkey}`;
+			return `https://smokesignal.events/${parsedUri.repo}/${parsedUri.rkey}`;
 		}
 		return '#';
 	});
@@ -104,7 +105,7 @@
 		const header = eventData.media.find((m) => m.role === 'header');
 		if (!header?.content?.ref?.$link) return null;
 		return {
-			url: `https://cdn.bsky.app/img/feed_thumbnail/plain/${parsedUri.did}/${header.content.ref.$link}@jpeg`,
+			url: `https://cdn.bsky.app/img/feed_thumbnail/plain/${parsedUri.repo}/${header.content.ref.$link}@jpeg`,
 			alt: header.alt || eventData.name
 		};
 	});

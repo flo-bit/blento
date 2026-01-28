@@ -6,6 +6,8 @@
 	import type { WebsiteData } from '$lib/types';
 	import { page } from '$app/state';
 	import type { ActorIdentifier } from '@atcute/lexicons';
+	import { loginModalState } from '$lib/atproto/UI/LoginModal.svelte';
+	import { getHandleOrDid } from '$lib/atproto/methods';
 
 	let { data }: { data: WebsiteData } = $props();
 
@@ -19,6 +21,11 @@
 	const showEditBlentoButton = $derived(
 		isBlento && user.isLoggedIn && user.profile?.handle !== data.handle
 	);
+
+	function getUserIdentifier(): ActorIdentifier {
+		const id = user.profile ? getHandleOrDid(user.profile) : (data.did as ActorIdentifier);
+		return id;
+	}
 </script>
 
 {#if isOwnPage && !isEditPage}
@@ -43,7 +50,7 @@
 	</div>
 {:else if showLoginOnEditPage}
 	<div class="fixed bottom-6 left-6 z-49">
-		<Button size="lg" onclick={() => login(data.handle as ActorIdentifier)}>
+		<Button size="lg" onclick={() => login(getUserIdentifier())}>
 			<svg
 				xmlns="http://www.w3.org/2000/svg"
 				fill="none"
@@ -63,16 +70,11 @@
 	</div>
 {:else if showLoginOnBlento}
 	<div class="fixed bottom-6 left-6 z-49">
-		<BlueskyLogin
-			login={async (handle) => {
-				await login(handle as ActorIdentifier);
-				return true;
-			}}
-		/>
+		<Button size="lg" onclick={() => loginModalState.show()}>Login</Button>
 	</div>
 {:else if showEditBlentoButton}
 	<div class="fixed bottom-6 left-6 z-49">
-		<Button size="lg" href="/{env.PUBLIC_IS_SELFHOSTED ? '' : user.profile?.handle}/edit">
+		<Button size="lg" href="/{env.PUBLIC_IS_SELFHOSTED ? '' : getUserIdentifier()}/edit">
 			<svg
 				xmlns="http://www.w3.org/2000/svg"
 				fill="none"

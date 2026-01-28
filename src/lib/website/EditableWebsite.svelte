@@ -15,7 +15,8 @@
 		savePage,
 		scrollToItem,
 		setPositionOfNewItem,
-		validateLink
+		validateLink,
+		getImage
 	} from '../helper';
 	import EditableProfile from './EditableProfile.svelte';
 	import type { Item, WebsiteData } from '../types';
@@ -29,13 +30,14 @@
 	import BaseEditingCard from '../cards/BaseCard/BaseEditingCard.svelte';
 	import Context from './Context.svelte';
 	import Head from './Head.svelte';
-	import { compressImage } from '../helper';
 	import Account from './Account.svelte';
+	import { SelectThemePopover } from '$lib/components/select-theme';
 	import EditBar from './EditBar.svelte';
 	import SaveModal from './SaveModal.svelte';
 	import FloatingEditButton from './FloatingEditButton.svelte';
 	import { user } from '$lib/atproto';
 	import { launchConfetti } from '@foxui/visual';
+	import Controls from './Controls.svelte';
 
 	let {
 		data
@@ -45,6 +47,16 @@
 
 	// Check if floating login button will be visible (to hide MadeWithBlento)
 	const showLoginOnEditPage = $derived(!user.isInitializing && !user.isLoggedIn);
+
+	let accentColor = $derived(data.publication?.preferences?.accentColor ?? 'pink');
+	let baseColor = $derived(data.publication?.preferences?.baseColor ?? 'stone');
+
+	function updateTheme(newAccent: string, newBase: string) {
+		data.publication.preferences ??= {};
+		data.publication.preferences.accentColor = newAccent;
+		data.publication.preferences.baseColor = newBase;
+		data = { ...data };
+	}
 
 	let imageDragOver = $state(false);
 
@@ -569,9 +581,11 @@
 />
 
 <Head
-	favicon={data.profile.avatar ?? null}
+	favicon={getImage(data.publication, data.did, 'icon') || data.profile.avatar}
 	title={getName(data)}
 	image={'/' + data.handle + '/og.png'}
+	accentColor={data.publication?.preferences?.accentColor}
+	baseColor={data.publication?.preferences?.baseColor}
 />
 
 <Account {data} />
@@ -584,6 +598,8 @@
 			Editing on mobile is not supported yet. Please use a desktop browser.
 		</div>
 	{/if}
+
+	<Controls bind:data />
 
 	{#if showingMobileView}
 		<div
@@ -630,38 +646,6 @@
 					: '@5xl/wrapper:max-w-4xl'
 			]}
 		>
-			{#if getHideProfileSection(data)}
-				<Button
-					size="icon"
-					variant="ghost"
-					onclick={() => {
-						data.publication.preferences ??= {};
-						data.publication.preferences.hideProfileSection = false;
-						data = { ...data };
-					}}
-					class="pointer-events-auto absolute top-2 left-2 z-20"
-				>
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						fill="none"
-						viewBox="0 0 24 24"
-						stroke-width="1.5"
-						stroke="currentColor"
-						class="size-6"
-					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z"
-						/>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
-						/>
-					</svg>
-				</Button>
-			{/if}
 			<div class="pointer-events-none"></div>
 			<!-- svelte-ignore a11y_no_static_element_interactions -->
 			<div

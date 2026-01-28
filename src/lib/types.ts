@@ -51,6 +51,10 @@ export type WebsiteData = {
 
 			// 'side' (default on desktop) or 'top' (always top like mobile view)
 			profilePosition?: 'side' | 'top';
+
+			// theme colors
+			accentColor?: string;
+			baseColor?: string;
 		};
 	};
 	profile: AppBskyActorDefs.ProfileViewDetailed;

@@ -1,4 +1,4 @@
-import { user, listRecords, getImageBlobUrl } from '$lib/atproto';
+import { user, listRecords, getCDNImageBlobUrl } from '$lib/atproto';
 import type { CardDefinition } from '../types';
 import LivestreamCard from './LivestreamCard.svelte';
 import LivestreamEmbedCard from './LivestreamEmbedCard.svelte';
@@ -35,7 +35,7 @@ export const LivestreamCardDefitition = {
 				createdAt: latest.value.createdAt,
 				title: latest.value?.title as string,
 				thumb: latest.value?.thumb?.ref?.$link
-					? getImageBlobUrl({ blob: latest.value.thumb, did })
+					? getCDNImageBlobUrl({ blob: latest.value.thumb, did })
 					: undefined,
 				href: latest.value?.canonicalUrl || latest.value.url,
 				online: undefined

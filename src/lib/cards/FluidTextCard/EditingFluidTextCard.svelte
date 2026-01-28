@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { Item } from '$lib/types';
+	import { onMount, tick } from 'svelte';
 	import type { ContentComponentProps } from '../types';
 	import FluidTextCard from './FluidTextCard.svelte';
 
@@ -26,6 +27,15 @@
 			isEditing = false;
 		}
 	}
+
+	let rerender = $state(0);
+	onMount(() => {
+		window.addEventListener('theme-changed', async () => {
+			// Force re-render to update FluidTextCard colors
+			await tick();
+			rerender = Math.random();
+		});
+	});
 </script>
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
@@ -36,7 +46,7 @@
 		: ''}"
 	onclick={handleClick}
 >
-	{#key item.color}
+	{#key item.color + '-' + rerender.toString()}
 		<FluidTextCard {item} />
 	{/key}
 

@@ -1,10 +1,7 @@
 <script lang="ts">
-	import { login, user } from '$lib/atproto';
 	import BaseCard from '$lib/cards/BaseCard/BaseCard.svelte';
 	import Card from '$lib/cards/Card/Card.svelte';
 	import type { Item, WebsiteData } from '$lib/types';
-	import type { ActorIdentifier } from '@atcute/lexicons';
-	import { Button } from '@foxui/core';
 
 	let { data }: { data: WebsiteData } = $props();
 
@@ -23,7 +20,7 @@
 			mobileW: 8,
 			mobileH: 3,
 			cardType: 'text',
-			color: 'red',
+			color: 'cyan',
 			cardData: {
 				text: `## No blento yet!`,
 				textAlign: 'center',
@@ -34,8 +31,8 @@
 		// Bluesky social icon
 		items.push({
 			id: 'empty-bluesky',
-			x: 0,
-			y: 2,
+			x: 6,
+			y: 0,
 			w: 2,
 			h: 2,
 			mobileX: 0,

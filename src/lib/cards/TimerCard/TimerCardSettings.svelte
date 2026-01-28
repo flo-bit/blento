@@ -1,7 +1,8 @@
 <script lang="ts">
 	import type { Item } from '$lib/types';
-	import { Input, Label } from '@foxui/core';
+	import { Button, Input, Label } from '@foxui/core';
 	import type { TimerCardData, TimerMode } from './index';
+	import { onMount } from 'svelte';
 
 	let { item }: { item: Item; onclose: () => void } = $props();
 
@@ -9,34 +10,56 @@
 
 	const modeOptions = [
 		{ value: 'clock', label: 'Clock', desc: 'Show current time' },
-		{ value: 'timer', label: 'Timer', desc: 'Countdown timer' },
 		{ value: 'event', label: 'Event', desc: 'Countdown to date' }
 	];
 
+	// All 24 timezones with representative cities
 	const timezoneOptions = [
-		{ value: 'UTC', label: 'UTC' },
-		{ value: 'America/New_York', label: 'New York' },
-		{ value: 'America/Chicago', label: 'Chicago' },
-		{ value: 'America/Denver', label: 'Denver' },
-		{ value: 'America/Los_Angeles', label: 'Los Angeles' },
-		{ value: 'Europe/London', label: 'London' },
-		{ value: 'Europe/Paris', label: 'Paris' },
-		{ value: 'Europe/Berlin', label: 'Berlin' },
-		{ value: 'Asia/Tokyo', label: 'Tokyo' },
-		{ value: 'Asia/Shanghai', label: 'Shanghai' },
-		{ value: 'Asia/Dubai', label: 'Dubai' },
-		{ value: 'Asia/Kolkata', label: 'Mumbai' },
-		{ value: 'Australia/Sydney', label: 'Sydney' }
+		{ value: 'Pacific/Midway', label: 'UTC-11 (Midway)' },
+		{ value: 'Pacific/Honolulu', label: 'UTC-10 (Honolulu)' },
+		{ value: 'America/Anchorage', label: 'UTC-9 (Anchorage)' },
+		{ value: 'America/Los_Angeles', label: 'UTC-8 (Los Angeles)' },
+		{ value: 'America/Denver', label: 'UTC-7 (Denver)' },
+		{ value: 'America/Chicago', label: 'UTC-6 (Chicago)' },
+		{ value: 'America/New_York', label: 'UTC-5 (New York)' },
+		{ value: 'America/Halifax', label: 'UTC-4 (Halifax)' },
+		{ value: 'America/Sao_Paulo', label: 'UTC-3 (São Paulo)' },
+		{ value: 'Atlantic/South_Georgia', label: 'UTC-2 (South Georgia)' },
+		{ value: 'Atlantic/Azores', label: 'UTC-1 (Azores)' },
+		{ value: 'UTC', label: 'UTC+0 (London)' },
+		{ value: 'Europe/Paris', label: 'UTC+1 (Paris)' },
+		{ value: 'Europe/Helsinki', label: 'UTC+2 (Helsinki)' },
+		{ value: 'Europe/Moscow', label: 'UTC+3 (Moscow)' },
+		{ value: 'Asia/Dubai', label: 'UTC+4 (Dubai)' },
+		{ value: 'Asia/Karachi', label: 'UTC+5 (Karachi)' },
+		{ value: 'Asia/Kolkata', label: 'UTC+5:30 (Mumbai)' },
+		{ value: 'Asia/Dhaka', label: 'UTC+6 (Dhaka)' },
+		{ value: 'Asia/Bangkok', label: 'UTC+7 (Bangkok)' },
+		{ value: 'Asia/Shanghai', label: 'UTC+8 (Shanghai)' },
+		{ value: 'Asia/Tokyo', label: 'UTC+9 (Tokyo)' },
+		{ value: 'Australia/Sydney', label: 'UTC+10 (Sydney)' },
+		{ value: 'Pacific/Noumea', label: 'UTC+11 (Noumea)' },
+		{ value: 'Pacific/Auckland', label: 'UTC+12 (Auckland)' }
 	];
 
-	const durationOptions = [
-		{ value: 1000 * 60, label: '1 minute' },
-		{ value: 1000 * 60 * 5, label: '5 minutes' },
-		{ value: 1000 * 60 * 10, label: '10 minutes' },
-		{ value: 1000 * 60 * 15, label: '15 minutes' },
-		{ value: 1000 * 60 * 30, label: '30 minutes' },
-		{ value: 1000 * 60 * 60, label: '1 hour' }
-	];
+	// Auto-detect timezone on mount if not set
+	onMount(() => {
+		if (!cardData.timezone) {
+			try {
+				item.cardData.timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+			} catch {
+				item.cardData.timezone = 'UTC';
+			}
+		}
+	});
+
+	function useLocalTimezone() {
+		try {
+			item.cardData.timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+		} catch {
+			item.cardData.timezone = 'UTC';
+		}
+	}
 
 	// Parse target date for inputs
 	let targetDateValue = $derived.by(() => {
@@ -59,7 +82,7 @@
 	<!-- Mode Selection -->
 	<div class="flex flex-col gap-2">
 		<Label>Mode</Label>
-		<div class="grid grid-cols-3 gap-2">
+		<div class="grid grid-cols-2 gap-2">
 			{#each modeOptions as opt (opt.value)}
 				<button
 					type="button"
@@ -78,52 +101,23 @@
 		</div>
 	</div>
 
-	<!-- Label -->
-	<div class="flex flex-col gap-2">
-		<Label for="label">Label (optional)</Label>
-		<Input
-			id="label"
-			value={cardData.label || ''}
-			oninput={(e) => (item.cardData.label = e.currentTarget.value || undefined)}
-			placeholder={cardData.mode === 'clock'
-				? 'e.g. Tokyo Time'
-				: cardData.mode === 'event'
-					? 'e.g. New Year'
-					: 'e.g. Focus Time'}
-		/>
-	</div>
-
 	<!-- Clock Settings -->
 	{#if cardData.mode === 'clock'}
 		<div class="flex flex-col gap-2">
 			<Label for="timezone">Timezone</Label>
-			<select
-				id="timezone"
-				value={cardData.timezone || 'UTC'}
-				onchange={(e) => (item.cardData.timezone = e.currentTarget.value)}
-				class="bg-base-100 dark:bg-base-800 border-base-300 dark:border-base-700 text-base-900 dark:text-base-100 rounded-xl border px-3 py-2"
-			>
-				{#each timezoneOptions as tz (tz.value)}
-					<option value={tz.value}>{tz.label}</option>
-				{/each}
-			</select>
-		</div>
-	{/if}
-
-	<!-- Timer Settings -->
-	{#if cardData.mode === 'timer'}
-		<div class="flex flex-col gap-2">
-			<Label for="duration">Duration</Label>
-			<select
-				id="duration"
-				value={cardData.duration || 1000 * 60 * 5}
-				onchange={(e) => (item.cardData.duration = parseInt(e.currentTarget.value))}
-				class="bg-base-100 dark:bg-base-800 border-base-300 dark:border-base-700 text-base-900 dark:text-base-100 rounded-xl border px-3 py-2"
-			>
-				{#each durationOptions as dur (dur.value)}
-					<option value={dur.value}>{dur.label}</option>
-				{/each}
-			</select>
+			<div class="flex gap-2">
+				<select
+					id="timezone"
+					value={cardData.timezone || 'UTC'}
+					onchange={(e) => (item.cardData.timezone = e.currentTarget.value)}
+					class="bg-base-100 dark:bg-base-800 border-base-300 dark:border-base-700 text-base-900 dark:text-base-100 flex-1 rounded-xl border px-3 py-2"
+				>
+					{#each timezoneOptions as tz (tz.value)}
+						<option value={tz.value}>{tz.label}</option>
+					{/each}
+				</select>
+				<Button size="sm" variant="ghost" onclick={useLocalTimezone}>Local</Button>
+			</div>
 		</div>
 	{/if}
 

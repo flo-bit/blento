@@ -58,11 +58,12 @@ export const EventCardDefinition = {
 			const uri = item.cardData?.uri;
 			if (!uri) continue;
 
-			const { did, rkey } = parseUri(uri);
+			const parsedUri = parseUri(uri);
+			if (!parsedUri || !parsedUri.rkey || !parsedUri.repo) continue;
 
 			try {
 				const response = await fetch(
-					`https://smokesignal.events/xrpc/community.lexicon.calendar.GetEvent?repository=${encodeURIComponent(did)}&record_key=${encodeURIComponent(rkey)}`
+					`https://smokesignal.events/xrpc/community.lexicon.calendar.GetEvent?repository=${encodeURIComponent(parsedUri.repo)}&record_key=${encodeURIComponent(parsedUri.rkey)}`
 				);
 
 				if (response.ok) {

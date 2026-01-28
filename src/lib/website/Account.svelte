@@ -2,7 +2,7 @@
 	import { user, login, logout } from '$lib/atproto';
 	import type { WebsiteData } from '$lib/types';
 	import type { ActorIdentifier } from '@atcute/lexicons';
-	import { Button, Popover } from '@foxui/core';
+	import { Avatar, Button, Popover } from '@foxui/core';
 
 	let {
 		data
@@ -18,7 +18,7 @@
 		<Popover sideOffset={8} bind:open={settingsPopoverOpen} class="bg-base-100 dark:bg-base-900">
 			{#snippet child({ props })}
 				<button {...props}>
-					<img src={user.profile?.avatar} alt="" class="size-15 rounded-full" />
+					<Avatar src={user.profile?.avatar} alt="" class="size-15 rounded-full" />
 				</button>
 			{/snippet}
 

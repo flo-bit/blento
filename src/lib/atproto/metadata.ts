@@ -1,22 +1,23 @@
 import { resolve } from '$app/paths';
-import { blobs, collections, rpcCalls, SITE } from './settings';
+import { permissions, REDIRECT_PATH, SITE } from './settings';
 
 function constructScope() {
-	const repos = collections.map((collection) => 'repo:' + collection).join(' ');
+	const repos = permissions.collections.map((collection) => 'repo:' + collection).join(' ');
 
 	let rpcs = '';
-	for (const [key, value] of Object.entries(rpcCalls)) {
+	for (const [key, value] of Object.entries(permissions.rpc ?? {})) {
 		if (Array.isArray(value)) {
 			rpcs += value.map((lxm) => 'rpc?lxm=' + lxm + '&aud=' + key).join(' ');
 		} else {
 			rpcs += 'rpc?lxm=' + value + '&aud=' + key;
 		}
 	}
+
 	let blobScope: string | undefined = undefined;
-	if (Array.isArray(blobs)) {
-		blobScope = 'blob?' + blobs.map((b) => 'accept=' + b).join('&');
-	} else if (blobs) {
-		blobScope = 'blob:' + blobs;
+	if (Array.isArray(permissions.blobs) && permissions.blobs.length > 0) {
+		blobScope = 'blob?' + permissions.blobs.map((b) => 'accept=' + b).join('&');
+	} else if (permissions.blobs && permissions.blobs.length > 0) {
+		blobScope = 'blob:' + permissions.blobs;
 	}
 
 	const scope = ['atproto', repos, rpcs, blobScope].filter((v) => v?.trim()).join(' ');
@@ -25,7 +26,7 @@ function constructScope() {
 
 export const metadata = {
 	client_id: SITE + resolve('/oauth-client-metadata.json'),
-	redirect_uris: [SITE + resolve('/oauth/callback')],
+	redirect_uris: [SITE + resolve(REDIRECT_PATH)],
 	scope: constructScope(),
 	grant_types: ['authorization_code', 'refresh_token'],
 	response_types: ['code'],

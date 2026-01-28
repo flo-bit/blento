@@ -1,8 +1,7 @@
 import type { Item, WebsiteData } from './types';
 import { COLUMNS, margin, mobileMargin } from '$lib';
 import { CardDefinitionsByType } from './cards';
-import { deleteRecord, getImageBlobUrl, putRecord, uploadBlob } from '$lib/atproto';
-import { toast } from '@foxui/core';
+import { deleteRecord, getCDNImageBlobUrl, putRecord, uploadBlob } from '$lib/atproto';
 import * as TID from '@atcute/tid';
 
 export function clamp(value: number, min: number, max: number): number {
@@ -627,7 +626,7 @@ export function getImage(
 	if (objectWithImage[key].objectUrl) return objectWithImage[key].objectUrl;
 
 	if (typeof objectWithImage[key] === 'object' && objectWithImage[key].$type === 'blob') {
-		return getImageBlobUrl({ did, blob: objectWithImage[key] });
+		return getCDNImageBlobUrl({ did, blob: objectWithImage[key] });
 	}
 	return objectWithImage[key];
 }

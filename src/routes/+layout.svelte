@@ -7,6 +7,7 @@
 	import YoutubeVideoPlayer, { videoPlayer } from '$lib/components/YoutubeVideoPlayer.svelte';
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
+	import LoginModal from '$lib/atproto/UI/LoginModal.svelte';
 
 	let { children } = $props();
 
@@ -34,3 +35,5 @@
 {#if videoPlayer.id}
 	<YoutubeVideoPlayer />
 {/if}
+
+<LoginModal />

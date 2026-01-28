@@ -22,7 +22,13 @@ export const StandardSiteDocumentListCardDefinition = {
 				if (!publications[site]) {
 					const siteParts = parseUri(site);
 
-					const publicationRecord = await getRecord(siteParts);
+					if (!siteParts) continue;
+
+					const publicationRecord = await getRecord({
+						did: siteParts.repo as `did:${string}:${string}`,
+						collection: siteParts.collection!,
+						rkey: siteParts.rkey
+					});
 
 					publications[site] = publicationRecord.value.url as string;
 				}

@@ -3,21 +3,22 @@
 ## media
 
 - general video card
-- inline youtube video
+- [x] inline youtube video
 - cartoons: aka https://www.opendoodles.com/
 - excalidraw (/svg card)
 - latest blog post (e.g. leaflet)
 - fake 3d image (with depth map)
-- fluid text effect (https://flo-bit.dev/projects/fluid-text-effect/)
-- gifs
-- little drawing app
+- [x] fluid text effect (https://flo-bit.dev/projects/fluid-text-effect/)
+- [x] gifs
+- [x] little drawing app
 - css voxel art
 - 3d model
+- spotify or apple music playlist
 
 ## social accounts
 
 - instagram card (showing follow button, follower count, latest posts)
-- github card (showing activity grid)
+- [x] github card (showing activity grid)
 - bluesky account card (showing follow button, follower count, avatar, name, cover image)
 - youtube channel card (showing channel name, latest videos, follow button?)
 - bluesky posts workcloud
@@ -40,12 +41,16 @@
 - teal.fm
   - [x] last played songs
 - tangled.sh
+  - pinned repos
+  - activity heatmap?
 - popfeed.social
   - reading goal
   - [x] latest ratings
   - lists
-- smokesignal.events (https://pdsls.dev/at://did:plc:xbtmt2zjwlrfegqvch7fboei/events.smokesignal.calendar.event/3ltn2qrxf3626)
-- statusphere.xyz (https://googlefonts.github.io/noto-emoji-animation/, https://gist.github.com/sanjacob/a0ccdf6d88f15bf158d8895090722d14)
+- smokesignal.events
+  - [x] specific event
+  - all future events i'm hosting/attending
+- [x] statusphere.xyz (TODO: assing to specific record)
 - goals.garden
 - flashes.blue (https://pdsls.dev/at://did:plc:aytgljyikzbtgrnac2u4ccft/blue.flashes.actor.portfolio, https://app.flashes.blue/profile/j4ck.xyz)
 - room: flo-bit.dev/room

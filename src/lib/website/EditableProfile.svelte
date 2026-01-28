@@ -3,21 +3,13 @@
 	import { getImage, compressImage, getProfilePosition } from '$lib/helper';
 	import PlainTextEditor from '$lib/components/PlainTextEditor.svelte';
 	import MarkdownTextEditor from '$lib/components/MarkdownTextEditor.svelte';
-	import { Button } from '@foxui/core';
+	import { Avatar, Button } from '@foxui/core';
 	import { getIsMobile } from './context';
-	import type { Editor } from '@tiptap/core';
 	import MadeWithBlento from './MadeWithBlento.svelte';
+	import { SelectThemePopover } from '$lib/components/select-theme';
 
 	let { data = $bindable(), hideBlento = false }: { data: WebsiteData; hideBlento?: boolean } =
 		$props();
-
-	let profilePosition = $derived(getProfilePosition(data));
-
-	function toggleProfilePosition() {
-		data.publication.preferences ??= {};
-		data.publication.preferences.profilePosition = profilePosition === 'side' ? 'top' : 'side';
-		data = { ...data };
-	}
 
 	let fileInput: HTMLInputElement;
 	let isHoveringAvatar = $state(false);
@@ -52,7 +44,7 @@
 		fileInput.click();
 	}
 
-	let isMobile = getIsMobile();
+	let profilePosition = $derived(getProfilePosition(data));
 </script>
 
 <div
@@ -65,76 +57,7 @@
 >
 	<div
 		class={[
-			'absolute left-2 z-20 flex gap-2',
-			profilePosition === 'side' ? 'top-2 left-14' : 'top-2'
-		]}
-	>
-		<Button
-			size="icon"
-			onclick={() => {
-				data.publication.preferences ??= {};
-				data.publication.preferences.hideProfileSection = true;
-				data = { ...data };
-			}}
-			variant="ghost"
-		>
-			<svg
-				xmlns="http://www.w3.org/2000/svg"
-				fill="none"
-				viewBox="0 0 24 24"
-				stroke-width="1.5"
-				stroke="currentColor"
-				class="size-6"
-			>
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88"
-				/>
-			</svg>
-		</Button>
-
-		<!-- Position toggle button (desktop only) -->
-		{#if !isMobile()}
-			<Button size="icon" type="button" onclick={toggleProfilePosition} variant="ghost">
-				{#if profilePosition === 'side'}
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						fill="none"
-						viewBox="0 0 24 24"
-						stroke-width="1.5"
-						stroke="currentColor"
-						class="size-6"
-					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							d="m4.5 19.5 15-15m0 0H8.25m11.25 0v11.25"
-						/>
-					</svg>
-				{:else}
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						fill="none"
-						viewBox="0 0 24 24"
-						stroke-width="1.5"
-						stroke="currentColor"
-						class="size-6"
-					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							d="m19.5 4.5-15 15m0 0h11.25m-11.25 0V8.25"
-						/>
-					</svg>
-				{/if}
-			</Button>
-		{/if}
-	</div>
-
-	<div
-		class={[
-			'flex flex-col gap-4 pt-16 pb-8',
+			'flex flex-col gap-4 pt-16 pb-4',
 			profilePosition === 'side' && '@5xl/wrapper:h-screen @5xl/wrapper:pt-24'
 		]}
 	>
@@ -149,15 +72,13 @@
 			onmouseleave={() => (isHoveringAvatar = false)}
 			onclick={handleFileInputClick}
 		>
-			{#if getAvatarUrl()}
-				<img
-					class="border-base-400 dark:border-base-800 size-full shrink-0 rounded-full border object-cover"
-					src={getAvatarUrl()}
-					alt=""
-				/>
-			{:else}
-				<div class="bg-base-300 dark:bg-base-700 size-full rounded-full"></div>
-			{/if}
+			<Avatar
+				src={getAvatarUrl()}
+				class={[
+					'border-base-400 dark:border-base-800 size-32 shrink-0 rounded-full border object-cover',
+					profilePosition === 'side' && '@5xl/wrapper:size-44'
+				]}
+			/>
 
 			<!-- Hover overlay -->
 			<div
@@ -217,8 +138,6 @@
 				/>
 			{/if}
 		</div>
-
-		<div class={['h-10.5 w-1', profilePosition === 'side' && '@5xl/wrapper:hidden']}></div>
 
 		{#if !hideBlento}
 			<MadeWithBlento class="hidden {profilePosition === 'side' && '@5xl/wrapper:block'}" />

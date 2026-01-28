@@ -30,10 +30,20 @@ export const UpdatedBlentosCardDefitition = {
 			for (const did of Array.from(uniqueDids)) {
 				const profile = getDetailedProfile({ did });
 				profiles.push(profile);
-				if (profiles.length > 20) break;
+				if (profiles.length > 30) break;
 			}
 
-			const result = [...(await Promise.all(profiles)), ...existingUsersArray];
+			for (let i = existingUsersArray.length - 1; i >= 0; i--) {
+				// if handle is handle.invalid, remove from existing users and add to profiles to refresh
+				if (existingUsersArray[i].handle === 'handle.invalid') {
+					const removed = existingUsersArray.splice(i, 1)[0];
+					profiles.push(getDetailedProfile({ did: removed.did }));
+				}
+			}
+
+			const result = [...(await Promise.all(profiles)), ...existingUsersArray].filter(
+				(v) => v && v.handle !== 'handle.invalid'
+			);
 
 			if (cache) {
 				await cache?.put('updatedBlentos', JSON.stringify(result));

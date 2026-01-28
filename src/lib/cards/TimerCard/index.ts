@@ -2,7 +2,7 @@ import type { CardDefinition } from '../types';
 import TimerCard from './TimerCard.svelte';
 import TimerCardSettings from './TimerCardSettings.svelte';
 
-export type TimerMode = 'clock' | 'timer' | 'event';
+export type TimerMode = 'clock' | 'event';
 
 export type TimerCardData = {
 	mode: TimerMode;
@@ -11,8 +11,6 @@ export type TimerCardData = {
 	timezone?: string;
 	// For event mode: target date as ISO string
 	targetDate?: string;
-	// For timer mode: duration in ms
-	duration?: number;
 };
 
 export const TimerCardDefinition = {
@@ -33,5 +31,7 @@ export const TimerCardDefinition = {
 	},
 
 	allowSetColor: true,
-	name: 'Timer Card'
+	name: 'Timer Card',
+	minW: 4,
+	canHaveLabel: true
 } as CardDefinition & { type: 'timer' };
