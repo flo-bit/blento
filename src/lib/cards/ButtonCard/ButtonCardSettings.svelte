@@ -22,7 +22,7 @@
 			id="button-href"
 			bind:value={item.cardData.href}
 			placeholder="youtube.com"
-			class="text-sm mt-2"
+			class="mt-2 text-sm"
 			onkeydown={(event) => {
 				if (event.code === 'Enter') {
 					event.preventDefault();
