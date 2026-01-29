@@ -38,12 +38,7 @@
 		"PUBLIC_DOMAIN": "https://polijn.org",
 		"PUBLIC_GIPHY_API_TOKEN": "ltXijv1bkNPrEgnpJ0tIdLWXjnAeE7bL"
 	},
-	"kv_namespaces": [
-		{
-			"binding": "USER_DATA_CACHE",
-			"id": "d6ff203259de48538d332b0a5df258a7"
-		}
-	]
+
 	/**
 	 * Service Bindings (communicate between multiple Workers)
 	 * https://developers.cloudflare.com/workers/wrangler/configuration/#service-bindings
