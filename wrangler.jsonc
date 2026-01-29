@@ -33,9 +33,9 @@
 	 * https://developers.cloudflare.com/workers/configuration/secrets/
 	 */
 	"vars": {
-		"PUBLIC_HANDLE": "blento.app",
-		"PUBLIC_IS_SELFHOSTED": "",
-		"PUBLIC_DOMAIN": "https://blento.app",
+		"PUBLIC_HANDLE": "polijn.org",
+		"PUBLIC_IS_SELFHOSTED": "true",
+		"PUBLIC_DOMAIN": "https://polijn.org",
 		"PUBLIC_GIPHY_API_TOKEN": "ltXijv1bkNPrEgnpJ0tIdLWXjnAeE7bL"
 	},
 	"kv_namespaces": [
