@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { marked } from 'marked';
-	import DOMPurify from 'isomorphic-dompurify';
+	import { sanitize } from '$lib/sanitize';
 	import type { WebsiteData } from '$lib/types';
 	import { getDescription, getImage, getName, getProfilePosition } from '$lib/helper';
 	import { page } from '$app/state';
@@ -65,7 +65,7 @@
 			<div
 				class="text-base-600 dark:text-base-400 prose dark:prose-invert prose-a:text-accent-500 prose-a:no-underline"
 			>
-				{@html DOMPurify.sanitize(
+				{@html sanitize(
 					marked.parse(getDescription(data), {
 						renderer
 					}) as string,

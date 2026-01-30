@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { marked } from 'marked';
-	import DOMPurify from 'isomorphic-dompurify';
+	import { sanitize } from '$lib/sanitize';
 	import type { ContentComponentProps } from '../types';
 	import { textAlignClasses, textSizeClasses, verticalAlignClasses } from '.';
 	import { cn } from '@foxui/core';
@@ -21,7 +21,7 @@
 	)}
 >
 	<span
-		>{@html DOMPurify.sanitize(marked.parse(item.cardData.text ?? '', { renderer }) as string, {
+		>{@html sanitize(marked.parse(item.cardData.text ?? '', { renderer }) as string, {
 			ADD_ATTR: ['target']
 		})}</span
 	>
