@@ -16,5 +16,7 @@ export {
 	getBlobURL,
 	getCDNImageBlobUrl,
 	searchActorsTypeahead,
-	getAuthorFeed
+	getAuthorFeed,
+	getPostThread,
+	createPost
 } from './methods';

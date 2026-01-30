@@ -32,9 +32,11 @@ import { DrawCardDefinition } from './DrawCard';
 import { TimerCardDefinition } from './TimerCard';
 import { SpotifyCardDefinition } from './SpotifyCard';
 import { ButtonCardDefinition } from './ButtonCard';
+import { GuestbookCardDefinition } from './GuestbookCard';
 // import { Model3DCardDefinition } from './Model3DCard';
 
 export const AllCardDefinitions = [
+	GuestbookCardDefinition,
 	ButtonCardDefinition,
 	ImageCardDefinition,
 	VideoCardDefinition,
