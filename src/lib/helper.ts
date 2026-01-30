@@ -240,7 +240,83 @@ export function cardsEqual(a: Item, b: Item) {
 	);
 }
 
-export function setPositionOfNewItem(newItem: Item, items: Item[]) {
+export function setPositionOfNewItem(
+	newItem: Item,
+	items: Item[],
+	viewportCenter?: { gridY: number; isMobile: boolean }
+) {
+	if (viewportCenter) {
+		const { gridY, isMobile } = viewportCenter;
+
+		if (isMobile) {
+			// Place at viewport center Y
+			newItem.mobileY = Math.max(0, Math.round(gridY - newItem.mobileH / 2));
+			newItem.mobileY = Math.floor(newItem.mobileY / 2) * 2;
+
+			// Try to find a free X at this Y
+			let found = false;
+			for (
+				newItem.mobileX = 0;
+				newItem.mobileX <= COLUMNS - newItem.mobileW;
+				newItem.mobileX += 2
+			) {
+				if (!items.some((item) => overlaps(newItem, item, true))) {
+					found = true;
+					break;
+				}
+			}
+			if (!found) {
+				newItem.mobileX = 0;
+			}
+
+			// Desktop: derive from mobile
+			newItem.y = Math.max(0, Math.round(newItem.mobileY / 2));
+			found = false;
+			for (newItem.x = 0; newItem.x <= COLUMNS - newItem.w; newItem.x += 2) {
+				if (!items.some((item) => overlaps(newItem, item, false))) {
+					found = true;
+					break;
+				}
+			}
+			if (!found) {
+				newItem.x = 0;
+			}
+		} else {
+			// Place at viewport center Y
+			newItem.y = Math.max(0, Math.round(gridY - newItem.h / 2));
+
+			// Try to find a free X at this Y
+			let found = false;
+			for (newItem.x = 0; newItem.x <= COLUMNS - newItem.w; newItem.x += 2) {
+				if (!items.some((item) => overlaps(newItem, item, false))) {
+					found = true;
+					break;
+				}
+			}
+			if (!found) {
+				newItem.x = 0;
+			}
+
+			// Mobile: derive from desktop
+			newItem.mobileY = Math.max(0, Math.round(newItem.y * 2));
+			found = false;
+			for (
+				newItem.mobileX = 0;
+				newItem.mobileX <= COLUMNS - newItem.mobileW;
+				newItem.mobileX += 2
+			) {
+				if (!items.some((item) => overlaps(newItem, item, true))) {
+					found = true;
+					break;
+				}
+			}
+			if (!found) {
+				newItem.mobileX = 0;
+			}
+		}
+		return;
+	}
+
 	let foundPosition = false;
 	while (!foundPosition) {
 		for (newItem.x = 0; newItem.x <= COLUMNS - newItem.w; newItem.x++) {

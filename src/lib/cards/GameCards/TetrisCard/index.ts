@@ -18,5 +18,6 @@ export const TetrisCardDefinition = {
 		card.mobileH = 12;
 		card.cardData = {};
 	},
-	maxH: 10
+	maxH: 10,
+	canHaveLabel: true
 } as CardDefinition & { type: 'tetris' };

@@ -129,6 +129,16 @@
 
 	let maxHeight = $derived(items.reduce((max, item) => Math.max(max, getY(item) + getH(item)), 0));
 
+	function getViewportCenterGridY(): { gridY: number; isMobile: boolean } | undefined {
+		if (!container) return undefined;
+		const rect = container.getBoundingClientRect();
+		const currentMargin = isMobile ? mobileMargin : margin;
+		const cellSize = (rect.width - currentMargin * 2) / COLUMNS;
+		const viewportCenterY = window.innerHeight / 2;
+		const gridY = (viewportCenterY - rect.top - currentMargin) / cellSize;
+		return { gridY, isMobile };
+	}
+
 	function newCard(type: string = 'link', cardData?: any) {
 		// close sidebar if open
 		const popover = document.getElementById('mobile-menu');
@@ -157,9 +167,16 @@
 		if (!newItem.item) return;
 		const item = newItem.item;
 
-		setPositionOfNewItem(item, items);
+		const viewportCenter = getViewportCenterGridY();
+		setPositionOfNewItem(item, items, viewportCenter);
 
 		items = [...items, item];
+
+		// Push overlapping items down, then compact to fill gaps
+		fixCollisions(items, item, false, true);
+		fixCollisions(items, item, true, true);
+		compactItems(items, false);
+		compactItems(items, true);
 
 		newItem = {};
 
@@ -373,6 +390,53 @@
 		}
 	}
 
+	function getImageDimensions(src: string): Promise<{ width: number; height: number }> {
+		return new Promise((resolve) => {
+			const img = new Image();
+			img.onload = () => resolve({ width: img.naturalWidth, height: img.naturalHeight });
+			img.onerror = () => resolve({ width: 1, height: 1 });
+			img.src = src;
+		});
+	}
+
+	function getBestGridSize(
+		imageWidth: number,
+		imageHeight: number,
+		candidates: [number, number][]
+	): [number, number] {
+		const imageRatio = imageWidth / imageHeight;
+		let best: [number, number] = candidates[0];
+		let bestDiff = Infinity;
+
+		for (const candidate of candidates) {
+			const gridRatio = candidate[0] / candidate[1];
+			const diff = Math.abs(Math.log(imageRatio) - Math.log(gridRatio));
+			if (diff < bestDiff) {
+				bestDiff = diff;
+				best = candidate;
+			}
+		}
+
+		return best;
+	}
+
+	const desktopSizeCandidates: [number, number][] = [
+		[2, 2],
+		[2, 4],
+		[4, 2],
+		[4, 4],
+		[4, 6],
+		[6, 4]
+	];
+	const mobileSizeCandidates: [number, number][] = [
+		[4, 4],
+		[4, 6],
+		[4, 8],
+		[6, 4],
+		[8, 4],
+		[8, 6]
+	];
+
 	async function processImageFile(file: File, gridX?: number, gridY?: number) {
 		const isGif = file.type === 'image/gif';
 
@@ -386,25 +450,44 @@
 			image: { blob: file, objectUrl }
 		};
 
-		// If grid position is provided
+		// Size card based on image aspect ratio
+		const { width, height } = await getImageDimensions(objectUrl);
+		const [dw, dh] = getBestGridSize(width, height, desktopSizeCandidates);
+		const [mw, mh] = getBestGridSize(width, height, mobileSizeCandidates);
+		item.w = dw;
+		item.h = dh;
+		item.mobileW = mw;
+		item.mobileH = mh;
+
+		// If grid position is provided (image dropped on grid)
 		if (gridX !== undefined && gridY !== undefined) {
 			if (isMobile) {
 				item.mobileX = gridX;
 				item.mobileY = gridY;
-				// Find valid desktop position
-				findValidPosition(item, items, false);
+				// Derive desktop Y from mobile
+				item.x = Math.floor((COLUMNS - item.w) / 2);
+				item.x = Math.floor(item.x / 2) * 2;
+				item.y = Math.max(0, Math.round(gridY / 2));
 			} else {
 				item.x = gridX;
 				item.y = gridY;
-				// Find valid mobile position
-				findValidPosition(item, items, true);
+				// Derive mobile Y from desktop
+				item.mobileX = Math.floor((COLUMNS - item.mobileW) / 2);
+				item.mobileX = Math.floor(item.mobileX / 2) * 2;
+				item.mobileY = Math.max(0, Math.round(gridY * 2));
 			}
 
 			items = [...items, item];
 			fixCollisions(items, item, isMobile);
+			fixCollisions(items, item, !isMobile);
 		} else {
-			setPositionOfNewItem(item, items);
+			const viewportCenter = getViewportCenterGridY();
+			setPositionOfNewItem(item, items, viewportCenter);
 			items = [...items, item];
+			fixCollisions(items, item, false, true);
+			fixCollisions(items, item, true, true);
+			compactItems(items, false);
+			compactItems(items, true);
 		}
 
 		await tick();
@@ -481,15 +564,12 @@
 			}
 		}
 
-		for (const file of imageFiles) {
-			await processImageFile(file, gridX, gridY);
-
-			// Move to next cell position
-			const cardW = isMobile ? 4 : 2;
-			gridX += cardW;
-			if (gridX + cardW > COLUMNS) {
-				gridX = 0;
-				gridY += isMobile ? 4 : 2;
+		for (let i = 0; i < imageFiles.length; i++) {
+			// First image gets the drop position, rest use normal placement
+			if (i === 0) {
+				await processImageFile(imageFiles[i], gridX, gridY);
+			} else {
+				await processImageFile(imageFiles[i]);
 			}
 		}
 	}
@@ -537,8 +617,13 @@
 			objectUrl
 		};
 
-		setPositionOfNewItem(item, items);
+		const viewportCenter = getViewportCenterGridY();
+		setPositionOfNewItem(item, items, viewportCenter);
 		items = [...items, item];
+		fixCollisions(items, item, false, true);
+		fixCollisions(items, item, true, true);
+		compactItems(items, false);
+		compactItems(items, true);
 
 		await tick();
 
@@ -758,7 +843,8 @@
 						bind:item={items[i]}
 						ondelete={() => {
 							items = items.filter((it) => it !== item);
-							compactItems(items, isMobile);
+							compactItems(items, false);
+							compactItems(items, true);
 						}}
 						onsetsize={(newW: number, newH: number) => {
 							if (isMobile) {

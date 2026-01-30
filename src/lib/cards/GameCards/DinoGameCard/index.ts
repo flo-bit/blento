@@ -13,5 +13,6 @@ export const DinoGameCardDefinition = {
 		card.mobileW = 8;
 		card.mobileH = 6;
 		card.cardData = {};
-	}
+	},
+	canHaveLabel: true
 } as CardDefinition & { type: 'dino-game' };
