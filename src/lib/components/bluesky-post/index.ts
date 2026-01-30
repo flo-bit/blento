@@ -2,6 +2,15 @@ import type { PostData, PostEmbed } from '../post';
 import type { PostView } from '@atcute/bluesky/types/app/feed/defs';
 import { segmentize, type Facet, type RichtextSegment } from '@atcute/bluesky-richtext-segmenter';
 
+function escapeHtml(str: string): string {
+	return str
+		.replace(/&/g, '&amp;')
+		.replace(/</g, '&lt;')
+		.replace(/>/g, '&gt;')
+		.replace(/"/g, '&quot;')
+		.replace(/'/g, '&#39;');
+}
+
 function blueskyEmbedTypeToEmbedType(type: string) {
 	switch (type) {
 		case 'app.bsky.embed.external#view':
@@ -26,6 +35,7 @@ export function blueskyPostToPostData(
 	// const reason = data.reason;
 	// const reply = data.reply?.parent;
 	// const replyId = reply?.uri?.split('/').pop();
+	console.log(JSON.parse(JSON.stringify(data)));
 
 	const id = post.uri.split('/').pop();
 
@@ -87,7 +97,8 @@ export function blueskyPostToPostData(
 				} as PostEmbed)
 			: undefined,
 
-		htmlContent: blueskyPostToHTML(post, baseUrl)
+		htmlContent: blueskyPostToHTML(post, baseUrl),
+		labels: post.labels ? post.labels.map((label) => label.val) : undefined
 	};
 }
 
@@ -110,9 +121,10 @@ type Feature = MentionFeature | LinkFeature | TagFeature;
 
 const renderSegment = (segment: RichtextSegment, baseUrl: string) => {
 	const { text, features } = segment;
+	const escaped = escapeHtml(text);
 
 	if (!features) {
-		return `<span>${text}</span>`;
+		return `<span>${escaped}</span>`;
 	}
 
 	// segments can have multiple features, use the first one
@@ -124,13 +136,13 @@ const renderSegment = (segment: RichtextSegment, baseUrl: string) => {
 
 	switch (feature.$type) {
 		case 'app.bsky.richtext.facet#mention':
-			return createLink(`${baseUrl}/profile/${feature.did}`, segment.text);
+			return createLink(`${baseUrl}/profile/${feature.did}`, escaped);
 		case 'app.bsky.richtext.facet#link':
-			return createLink(feature.uri, segment.text);
+			return createLink(feature.uri, escaped);
 		case 'app.bsky.richtext.facet#tag':
-			return createLink(`${baseUrl}/hashtag/${feature.tag}`, segment.text);
+			return createLink(`${baseUrl}/hashtag/${feature.tag}`, escaped);
 		default:
-			return `<span>${text}</span>`;
+			return `<span>${escaped}</span>`;
 	}
 };
 

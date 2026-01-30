@@ -3,6 +3,15 @@ import { loadData } from '$lib/website/load';
 import type { Handle } from '@atcute/lexicons';
 import { ImageResponse } from '@ethercorps/sveltekit-og';
 
+function escapeHtml(str: string): string {
+	return str
+		.replace(/&/g, '&amp;')
+		.replace(/</g, '&lt;')
+		.replace(/>/g, '&gt;')
+		.replace(/"/g, '&quot;')
+		.replace(/'/g, '&#39;');
+}
+
 export async function GET({ params, platform }) {
 	const handle = params.handle;
 
@@ -15,9 +24,9 @@ export async function GET({ params, platform }) {
 	const htmlString = `
 <div class="flex flex-col p-8 w-full h-full bg-neutral-900">
     <div class="flex items-center mb-8 mt-16">
-      <img src="${image}" width="128" height="128" class="rounded-full" />
+      <img src="${escapeHtml(image ?? '')}" width="128" height="128" class="rounded-full" />
 
-	    <h1 class="text-neutral-50 text-7xl ml-4">${handle}</h1>
+	    <h1 class="text-neutral-50 text-7xl ml-4">${escapeHtml(handle)}</h1>
     </div>
 
 	<p class="mt-8 text-4xl text-neutral-300">Check out my blento</p>

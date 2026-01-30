@@ -26,27 +26,24 @@
 		}
 	});
 
+	// Use card-specific emoji if set, otherwise fall back to PDS data
+	let emoji = $derived(item.cardData?.emoji ?? record?.value?.status);
+
 	let showPopover = $state(false);
 </script>
 
 <div class="flex h-full w-full items-center justify-center p-4">
 	<PopoverEmojiPicker
 		bind:open={showPopover}
-		onpicked={(emoji) => {
-			record ??= {
-				value: {}
-			};
-
-			record.value.status = emoji.unicode;
-
+		onpicked={(picked) => {
 			item.cardData.hasUpdate = true;
-			item.cardData.emoji = emoji.unicode;
+			item.cardData.emoji = picked.unicode;
 
 			showPopover = false;
 		}}
 	>
 		{#snippet child({ props })}
-			{@const animated = emojiToNotoAnimatedWebp(record?.value?.status)}
+			{@const animated = emojiToNotoAnimatedWebp(emoji)}
 
 			<button {...props} class="z-20 h-full max-h-40 w-full max-w-40">
 				{#if animated}
@@ -55,9 +52,9 @@
 						alt=""
 						class="hover:bg-base-500/10 h-full max-h-40 w-full max-w-40 rounded-2xl object-contain"
 					/>
-				{:else if record?.value?.status}
+				{:else if emoji}
 					<div class="text-9xl">
-						{record.value.status}
+						{emoji}
 					</div>
 				{:else}
 					<div>Click here to set a status</div>

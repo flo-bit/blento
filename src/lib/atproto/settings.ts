@@ -1,6 +1,7 @@
 import { dev } from '$app/environment';
+import { env } from '$env/dynamic/public';
 
-export const SITE = 'https://blento.app';
+export const SITE = env.PUBLIC_DOMAIN;
 
 type Permissions = {
 	collections: readonly string[];

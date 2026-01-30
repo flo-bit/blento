@@ -70,6 +70,16 @@ export type PostData = {
 	htmlContent?: string;
 
 	replies?: PostData[];
+
+	labels?: string[];
 };
+
+export const nsfwLabels = ['porn', 'sexual', 'graphic-media', 'nudity'];
+
+export function hasNSFWLabel(post: PostData): boolean {
+	if (!post.labels) return false;
+
+	return post.labels.some((label) => nsfwLabels.includes(label));
+}
 
 export { default as Post } from './Post.svelte';

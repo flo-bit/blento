@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { marked } from 'marked';
+	import { sanitize } from '$lib/sanitize';
 	import type { WebsiteData } from '$lib/types';
 	import { getDescription, getImage, getName, getProfilePosition } from '$lib/helper';
 	import { page } from '$app/state';
@@ -17,7 +18,7 @@
 
 	const renderer = new marked.Renderer();
 	renderer.link = ({ href, title, text }) =>
-		`<a target="_blank" href="${href}" title="${title}">${text}</a>`;
+		`<a target="_blank" href="${href}" title="${title ?? ''}">${text}</a>`;
 
 	const profileUrl = $derived(`${page.url.origin}/${data.handle}`);
 	const profilePosition = $derived(getProfilePosition(data));
@@ -64,9 +65,12 @@
 			<div
 				class="text-base-600 dark:text-base-400 prose dark:prose-invert prose-a:text-accent-500 prose-a:no-underline"
 			>
-				{@html marked.parse(getDescription(data), {
-					renderer
-				})}
+				{@html sanitize(
+					marked.parse(getDescription(data), {
+						renderer
+					}) as string,
+					{ ADD_ATTR: ['target'] }
+				)}
 			</div>
 		</div>
 

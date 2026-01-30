@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { marked } from 'marked';
+	import { sanitize } from '$lib/sanitize';
 	import type { ContentComponentProps } from '../types';
 	import { textAlignClasses, textSizeClasses, verticalAlignClasses } from '.';
 	import { cn } from '@foxui/core';
@@ -8,7 +9,7 @@
 
 	const renderer = new marked.Renderer();
 	renderer.link = ({ href, title, text }) =>
-		`<a target="_blank" href="${href}" title="${title}">${text}</a>`;
+		`<a target="_blank" href="${href}" title="${title ?? ''}">${text}</a>`;
 </script>
 
 <div
@@ -19,5 +20,9 @@
 		textSizeClasses[(item.cardData.textSize ?? 0) as number]
 	)}
 >
-	<span>{@html marked.parse(item.cardData.text ?? '', { renderer })}</span>
+	<span
+		>{@html sanitize(marked.parse(item.cardData.text ?? '', { renderer }) as string, {
+			ADD_ATTR: ['target']
+		})}</span
+	>
 </div>

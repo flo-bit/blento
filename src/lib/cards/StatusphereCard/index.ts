@@ -36,7 +36,7 @@ export const StatusphereCardDefinition = {
 				}
 			});
 			delete item.cardData.hasUpdate;
-			delete item.cardData.emoji;
+			// Keep item.cardData.emoji so each card can have its own status
 		}
 
 		return item;

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Embed from './embeds/Embed.svelte';
+	import { sanitize } from '$lib/sanitize';
 	import { cn, Prose } from '@foxui/core';
 	import type { WithChildren, WithElementRef } from 'bits-ui';
 	import type { HTMLAttributes } from 'svelte/elements';
@@ -8,6 +9,7 @@
 	import type { Snippet } from 'svelte';
 	import { numberToHumanReadable } from '..';
 	import { RelativeTime } from '@foxui/time';
+	import PostEmbed from './PostEmbed.svelte';
 
 	let {
 		ref = $bindable(),
@@ -175,15 +177,13 @@
 				class="accent:prose-a:text-accent-950 accent:text-base-900 accent:prose-p:text-base-900 accent:prose-a:underline"
 			>
 				{#if data.htmlContent}
-					{@html data.htmlContent}
+					{@html sanitize(data.htmlContent, { ADD_ATTR: ['target'] })}
 				{:else}
 					{@render children?.()}
 				{/if}
 			</Prose>
 
-			{#if data.embed}
-				<Embed embed={data.embed} />
-			{/if}
+			<PostEmbed {data} />
 
 			{#if showReply || showRepost || showLike || showBookmark || customActions}
 				<div
