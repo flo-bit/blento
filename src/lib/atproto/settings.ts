@@ -20,6 +20,7 @@ export const permissions = {
 		'app.blento.settings',
 		'app.blento.comment',
 		'app.blento.guestbook.entry',
+		'app.bsky.feed.post',
 		'site.standard.publication',
 		'site.standard.document',
 		'xyz.statusphere.status'

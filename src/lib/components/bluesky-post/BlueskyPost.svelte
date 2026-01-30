@@ -8,8 +8,16 @@
 		feedViewPost,
 		children,
 		showLogo = false,
+		showAvatar = false,
+		compact = false,
 		...restProps
-	}: { feedViewPost?: PostView; children?: Snippet; showLogo?: boolean } = $props();
+	}: {
+		feedViewPost?: PostView;
+		children?: Snippet;
+		showLogo?: boolean;
+		showAvatar?: boolean;
+		compact?: boolean;
+	} = $props();
 
 	const postData = $derived(feedViewPost ? blueskyPostToPostData(feedViewPost) : undefined);
 </script>
@@ -37,6 +45,8 @@
 		likeHref={postData?.href}
 		showBookmark={false}
 		logo={showLogo ? logo : undefined}
+		{showAvatar}
+		{compact}
 		{...restProps}
 	>
 		{@render children?.()}

@@ -36,7 +36,10 @@
 
 		children,
 
-		logo
+		logo,
+
+		showAvatar = false,
+		compact = false
 	}: WithElementRef<WithChildren<HTMLAttributes<HTMLDivElement>>> & {
 		data: PostData;
 		class?: string;
@@ -61,6 +64,9 @@
 		customActions?: Snippet;
 
 		logo?: Snippet;
+
+		showAvatar?: boolean;
+		compact?: boolean;
 	} = $props();
 </script>
 
@@ -121,6 +127,15 @@
 		</div>
 	{/if}
 	<div class="flex gap-4">
+		{#if showAvatar && data.author.avatar}
+			<a href={data.author.href} class="flex-shrink-0">
+				<img
+					src={data.author.avatar}
+					alt=""
+					class={compact ? 'size-7 rounded-full object-cover' : 'size-10 rounded-full object-cover'}
+				/>
+			</a>
+		{/if}
 		<div class="w-full">
 			<div class="mb-1 flex items-start justify-between gap-2">
 				<div class="flex items-start gap-4">
@@ -161,7 +176,10 @@
 					{/if}
 
 					<div
-						class="text-base-600 dark:text-base-400 accent:text-accent-950 block text-sm no-underline"
+						class={cn(
+							'text-base-600 dark:text-base-400 accent:text-accent-950 block no-underline',
+							compact ? 'text-xs' : 'text-sm'
+						)}
 					>
 						<RelativeTime date={new Date(data.createdAt)} locale="en" />
 					</div>
@@ -173,7 +191,7 @@
 			</div>
 
 			<Prose
-				size="md"
+				size={compact ? 'default' : 'md'}
 				class="accent:prose-a:text-accent-950 accent:text-base-900 accent:prose-p:text-base-900 accent:prose-a:underline"
 			>
 				{#if data.htmlContent}
@@ -185,7 +203,7 @@
 
 			<PostEmbed {data} />
 
-			{#if showReply || showRepost || showLike || showBookmark || customActions}
+			{#if !compact && (showReply || showRepost || showLike || showBookmark || customActions)}
 				<div
 					class="text-base-500 dark:text-base-400 accent:text-base-900 mt-4 flex justify-between gap-2"
 				>

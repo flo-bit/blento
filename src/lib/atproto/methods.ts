@@ -465,3 +465,72 @@ export function getHandleOrDid(profile: AppBskyActorDefs.ProfileViewDetailed): A
 		return profile.did;
 	}
 }
+
+/**
+ * Fetches a post's thread including replies.
+ * @param uri - The AT URI of the post
+ * @param depth - How many levels of replies to fetch (default 1)
+ * @param client - The client to use (defaults to public Bluesky API)
+ * @returns The thread data or undefined on failure
+ */
+export async function getPostThread({
+	uri,
+	depth = 1,
+	client
+}: {
+	uri: string;
+	depth?: number;
+	client?: Client;
+}) {
+	client ??= new Client({
+		handler: simpleFetchHandler({ service: 'https://public.api.bsky.app' })
+	});
+
+	const response = await client.get('app.bsky.feed.getPostThread', {
+		params: { uri: uri as ResourceUri, depth }
+	});
+
+	if (!response.ok) return;
+
+	return response.data.thread;
+}
+
+/**
+ * Creates a Bluesky post on the authenticated user's account.
+ * @param text - The post text
+ * @param facets - Optional rich text facets (links, mentions, etc.)
+ * @returns The response containing the post's URI and CID
+ * @throws If the user is not logged in
+ */
+export async function createPost({
+	text,
+	facets
+}: {
+	text: string;
+	facets?: Array<{
+		index: { byteStart: number; byteEnd: number };
+		features: Array<{ $type: string; uri?: string; did?: string; tag?: string }>;
+	}>;
+}) {
+	if (!user.client || !user.did) throw new Error('No client or did');
+
+	const record: Record<string, unknown> = {
+		$type: 'app.bsky.feed.post',
+		text,
+		createdAt: new Date().toISOString()
+	};
+
+	if (facets) {
+		record.facets = facets;
+	}
+
+	const response = await user.client.post('com.atproto.repo.createRecord', {
+		input: {
+			collection: 'app.bsky.feed.post',
+			repo: user.did,
+			record
+		}
+	});
+
+	return response;
+}
