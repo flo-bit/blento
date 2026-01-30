@@ -101,6 +101,36 @@ export async function getDetailedProfile(data?: { did?: Did; client?: Client }) 
 	return response.data;
 }
 
+export async function getBlentoOrBskyProfile(data: { did: Did; client?: Client }): Promise<
+	Awaited<ReturnType<typeof getDetailedProfile>> & {
+		hasBlento: boolean;
+	}
+> {
+	let blentoProfile;
+	try {
+		// try getting blento profile first
+		blentoProfile = await getRecord({
+			collection: 'site.standard.publication',
+			did: data?.did,
+			rkey: 'blento.self',
+			client: data?.client
+		});
+	} catch {
+		console.error('error getting blento profile, falling back to bsky profile');
+	}
+
+	const response = await getDetailedProfile(data);
+
+	return {
+		did: data.did,
+		handle: response?.handle,
+		displayName: blentoProfile?.value?.name || response?.displayName || response?.handle,
+		avatar: (getCDNImageBlobUrl({ did: data?.did, blob: blentoProfile?.value?.icon }) ||
+			response?.avatar) as `${string}:${string}`,
+		hasBlento: Boolean(blentoProfile.value)
+	};
+}
+
 /**
  * Creates an AT Protocol client for a user's PDS.
  * @param did - The DID of the user
@@ -370,6 +400,7 @@ export function getCDNImageBlobUrl({
 		};
 	};
 }) {
+	if (!blob || !did) return;
 	did ??= user.did;
 
 	return `https://cdn.bsky.app/img/feed_thumbnail/plain/${did}/${blob.ref.$link}@webp`;

@@ -1,8 +1,9 @@
-import { getDetailedProfile } from '$lib/atproto';
 import type { CardDefinition } from '../../types';
 import UpdatedBlentosCard from './UpdatedBlentosCard.svelte';
 import type { Did } from '@atcute/lexicons';
-import type { AppBskyActorDefs } from '@atcute/bluesky';
+import { getBlentoOrBskyProfile } from '$lib/atproto/methods';
+
+type ProfileWithBlentoFlag = Awaited<ReturnType<typeof getBlentoOrBskyProfile>>;
 
 export const UpdatedBlentosCardDefitition = {
 	type: 'updatedBlentos',
@@ -14,36 +15,37 @@ export const UpdatedBlentosCardDefitition = {
 			);
 			const recentRecords = await response.json();
 			const existingUsers = await cache?.get('updatedBlentos');
-			const existingUsersArray: AppBskyActorDefs.ProfileViewDetailed[] = existingUsers
+			const existingUsersArray: ProfileWithBlentoFlag[] = existingUsers
 				? JSON.parse(existingUsers)
 				: [];
 
-			const existingUsersSet = new Set(existingUsersArray.map((v) => v.did));
+			const uniqueDids = new Set<Did>(recentRecords.map((v: { did: string }) => v.did as Did));
 
-			const uniqueDids = new Set<Did>();
-			for (const record of recentRecords as { did: string }[]) {
-				if (!existingUsersSet.has(record.did as Did)) uniqueDids.add(record.did as Did);
-			}
-
-			const profiles: Promise<AppBskyActorDefs.ProfileViewDetailed | undefined>[] = [];
+			const profiles: Promise<ProfileWithBlentoFlag | undefined>[] = [];
 
 			for (const did of Array.from(uniqueDids)) {
-				const profile = getDetailedProfile({ did });
-				profiles.push(profile);
-				if (profiles.length > 30) break;
+				profiles.push(getBlentoOrBskyProfile({ did }));
 			}
 
 			for (let i = existingUsersArray.length - 1; i >= 0; i--) {
 				// if handle is handle.invalid, remove from existing users and add to profiles to refresh
-				if (existingUsersArray[i].handle === 'handle.invalid') {
+				if (
+					(existingUsersArray[i].handle === 'handle.invalid' ||
+						(!existingUsersArray[i].avatar && !existingUsersArray[i].hasBlento)) &&
+					!uniqueDids.has(existingUsersArray[i].did)
+				) {
 					const removed = existingUsersArray.splice(i, 1)[0];
-					profiles.push(getDetailedProfile({ did: removed.did }));
+					profiles.push(getBlentoOrBskyProfile({ did: removed.did }));
+					// if in unique dids, remove from older existing users and keep the newer one
+					// so updated profiles go first
+				} else if (uniqueDids.has(existingUsersArray[i].did)) {
+					existingUsersArray.splice(i, 1);
 				}
 			}
 
-			const result = [...(await Promise.all(profiles)), ...existingUsersArray].filter(
-				(v) => v && v.handle !== 'handle.invalid'
-			);
+			let result = [...(await Promise.all(profiles)), ...existingUsersArray];
+
+			result = result.filter((v) => v && v.handle !== 'handle.invalid');
 
 			if (cache) {
 				await cache?.put('updatedBlentos', JSON.stringify(result));
