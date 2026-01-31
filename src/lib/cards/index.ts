@@ -49,7 +49,7 @@ export const AllCardDefinitions = [
 	LatestBlueskyPostCardDefinition,
 	LivestreamCardDefitition,
 	LivestreamEmbedCardDefitition,
-	EmbedCardDefinition,
+	// EmbedCardDefinition,
 	MapCardDefinition,
 	ATProtoCollectionsCardDefinition,
 	SectionCardDefinition,
