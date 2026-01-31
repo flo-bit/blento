@@ -1011,22 +1011,7 @@
 				}}
 				ondragend={async (e) => {
 					e.preventDefault();
-					const cell = getDragXY(e);
-					if (!cell) return;
-
-					if (activeDragElement.item) {
-						if (isMobile) {
-							activeDragElement.item.mobileX = cell.x;
-							activeDragElement.item.mobileY = cell.y;
-						} else {
-							activeDragElement.item.x = cell.x;
-							activeDragElement.item.y = cell.y;
-						}
-
-						// Fix collisions and compact items after drag ends
-						fixCollisions(items, activeDragElement.item, isMobile);
-						onLayoutChanged();
-					}
+					// safari fix
 					activeDragElement.x = -1;
 					activeDragElement.y = -1;
 					activeDragElement.element = null;
@@ -1068,6 +1053,15 @@
 							activeDragElement.w = item.w;
 							activeDragElement.h = item.h;
 							activeDragElement.item = item;
+							// fix for div shadow during drag and drop
+							const transparent = document.createElement('div');
+							transparent.style.position = 'fixed';
+							transparent.style.top = '-1000px';
+							transparent.style.width = '1px';
+							transparent.style.height = '1px';
+							document.body.appendChild(transparent);
+							e.dataTransfer?.setDragImage(transparent, 0, 0);
+							requestAnimationFrame(() => transparent.remove());
 
 							// Store original positions of all items
 							activeDragElement.originalPositions = new Map();

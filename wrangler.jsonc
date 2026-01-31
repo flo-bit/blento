@@ -44,6 +44,7 @@
 			"id": "d6ff203259de48538d332b0a5df258a7"
 		}
 	]
+
 	/**
 	 * Service Bindings (communicate between multiple Workers)
 	 * https://developers.cloudflare.com/workers/wrangler/configuration/#service-bindings
