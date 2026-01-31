@@ -49,7 +49,7 @@
 	});
 
 	let images = $derived(
-		feed
+		(feed
 			?.toSorted((a: PhotoItem, b: PhotoItem) => {
 				return (a.value.position ?? 0) - (b.value.position ?? 0);
 			})
@@ -63,6 +63,13 @@
 					position: i.value.position ?? 0
 				};
 			})
+			.filter((i) => i.src !== undefined) || []) as {
+			src: string;
+			name: string;
+			width: number;
+			height: number;
+			position: number;
+		}[]
 	);
 
 	let isMobile = getIsMobile();

@@ -51,9 +51,7 @@ export function mirrorLayout(items: Item[], fromMobile: boolean): void {
 	if (fromMobile) {
 		// Mobile → Desktop: reflow items to use the full grid width.
 		// Sort by mobile position so items are placed in reading order.
-		const sorted = items.toSorted(
-			(a, b) => a.mobileY - b.mobileY || a.mobileX - b.mobileX
-		);
+		const sorted = items.toSorted((a, b) => a.mobileY - b.mobileY || a.mobileX - b.mobileX);
 
 		// Place each item into the first available spot on the desktop grid
 		const placed: Item[] = [];
@@ -66,11 +64,7 @@ export function mirrorLayout(items: Item[], fromMobile: boolean): void {
 	} else {
 		// Desktop → Mobile: proportional positions
 		for (const item of items) {
-			item.mobileX = clamp(
-				Math.floor((item.x * 2) / 2) * 2,
-				0,
-				COLUMNS - item.mobileW
-			);
+			item.mobileX = clamp(Math.floor((item.x * 2) / 2) * 2, 0, COLUMNS - item.mobileW);
 			item.mobileY = Math.max(0, Math.round(item.y * 2));
 		}
 		fixAllCollisions(items, true);

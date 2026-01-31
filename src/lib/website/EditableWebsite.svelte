@@ -858,14 +858,6 @@
 <Account {data} />
 
 <Context {data}>
-	{#if !dev}
-		<div
-			class="bg-base-200 dark:bg-base-800 fixed inset-0 z-50 inline-flex h-full w-full items-center justify-center p-4 text-center lg:hidden"
-		>
-			Editing on mobile is not supported yet. Please use a desktop browser.
-		</div>
-	{/if}
-
 	<CardCommand
 		bind:open={showCardCommand}
 		onselect={(cardDef: CardDefinition) => {
@@ -939,7 +931,6 @@
 		>
 			<div class="pointer-events-none"></div>
 			<!-- svelte-ignore a11y_no_static_element_interactions a11y_click_events_have_key_events -->
-			<!-- svelte-ignore a11y_click_events_have_key_events -->
 			<div
 				bind:this={container}
 				onclick={(e) => {
