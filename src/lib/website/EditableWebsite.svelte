@@ -49,9 +49,6 @@
 	// Check if floating login button will be visible (to hide MadeWithBlento)
 	const showLoginOnEditPage = $derived(!user.isInitializing && !user.isLoggedIn);
 
-	let accentColor = $derived(data.publication?.preferences?.accentColor ?? 'pink');
-	let baseColor = $derived(data.publication?.preferences?.baseColor ?? 'stone');
-
 	function updateTheme(newAccent: string, newBase: string) {
 		data.publication.preferences ??= {};
 		data.publication.preferences.accentColor = newAccent;
@@ -802,9 +799,7 @@
 		target.value = '';
 	}
 
-	// $inspect(items);
-
-	let showCardCommand = $state(true);
+	let showCardCommand = $state(false);
 </script>
 
 <svelte:body
@@ -908,6 +903,7 @@
 		>
 			<div class="pointer-events-none"></div>
 			<!-- svelte-ignore a11y_no_static_element_interactions a11y_click_events_have_key_events -->
+			<!-- svelte-ignore a11y_click_events_have_key_events -->
 			<div
 				bind:this={container}
 				onclick={(e) => {
@@ -1073,15 +1069,6 @@
 		</div>
 	</div>
 
-	<Sidebar mobileOnly mobileClasses="lg:block p-4 gap-4">
-		<div class="flex flex-col gap-2">
-			{#each sidebarItems as cardDef (cardDef.type)}
-				<Button onclick={() => newCard(cardDef.type)} variant="ghost" class="w-full justify-start"
-					>{cardDef.sidebarButtonText}</Button
-				>
-			{/each}
-		</div>
-	</Sidebar>
 
 	<EditBar
 		{data}
@@ -1096,6 +1083,7 @@
 		{handleVideoInputChange}
 		showCardCommand={() => {
 			showCardCommand = true;
+		}}
 		{selectedCard}
 		{isMobile}
 		{isCoarse}
