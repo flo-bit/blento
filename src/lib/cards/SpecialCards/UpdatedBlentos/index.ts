@@ -57,4 +57,7 @@ export const UpdatedBlentosCardDefitition = {
 			return [];
 		}
 	}
+	// name: 'Updated Blentos',
+	// groups: ['Social'],
+	// icon: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-4"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0ZM12 6c-1.602 0-3.155.474-4.434 1.357L18 16.791A8.959 8.959 0 0 0 21 12h-4.5Z" /></svg>`
 } as CardDefinition & { type: 'updatedBlentos' };

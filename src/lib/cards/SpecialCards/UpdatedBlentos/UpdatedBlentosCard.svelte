@@ -20,7 +20,6 @@
 </script>
 
 <div class="flex h-full flex-col">
-	<div class="px-4 py-2 text-2xl font-bold">Recently updated blentos</div>
 	<div class="flex max-w-full grow items-center gap-4 overflow-x-scroll overflow-y-hidden px-4">
 		{#each profiles as profile (profile.did)}
 			<a
