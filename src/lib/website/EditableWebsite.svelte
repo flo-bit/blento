@@ -201,9 +201,7 @@
 			document.body.style.removeProperty('padding-right');
 			document.body.style.removeProperty('margin-right');
 			// Remove any orphaned dialog overlay/content elements left by the portal
-			for (const el of document.querySelectorAll(
-				'[data-dialog-overlay], [data-dialog-content]'
-			)) {
+			for (const el of document.querySelectorAll('[data-dialog-overlay], [data-dialog-content]')) {
 				el.remove();
 			}
 		};

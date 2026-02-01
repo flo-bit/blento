@@ -19,7 +19,9 @@
 	// svelte-ignore state_referenced_locally
 	setAdditionalUserData(data.additionalData);
 
-	setCanEdit(() => dev || (user.isLoggedIn && user.profile?.did === data.did && isEditing === true));
+	setCanEdit(
+		() => dev || (user.isLoggedIn && user.profile?.did === data.did && isEditing === true)
+	);
 
 	// svelte-ignore state_referenced_locally
 	setDidContext(data.did as Did);
