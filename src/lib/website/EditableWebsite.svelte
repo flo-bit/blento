@@ -271,7 +271,7 @@
 			// Refresh cached data
 			await fetch('/' + data.handle + '/api/refresh');
 		} catch (error) {
-			console.log(error);
+			console.error(error);
 			showSaveModal = false;
 			toast.error('Error saving page!');
 		} finally {

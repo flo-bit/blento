@@ -65,7 +65,6 @@ export const LivestreamCardDefitition = {
 	},
 
 	onUrlHandler: (url, item) => {
-		console.log(url, 'https://stream.place/' + user.profile?.handle);
 		if (url === 'https://stream.place/' + user.profile?.handle) {
 			item.w = 4;
 			item.h = 4;

@@ -33,7 +33,6 @@
 	let handle = getHandleContext();
 
 	onMount(async () => {
-		console.log(feed);
 		if (!feed) {
 			feed = (
 				(await CardDefinitionsByType[item.cardType]?.loadData?.([item], {
@@ -41,8 +40,6 @@
 					handle
 				})) as Record<string, PhotoItem[]> | undefined
 			)?.[item.cardData.galleryUri];
-
-			console.log(feed);
 
 			data[item.cardType] = feed;
 		}

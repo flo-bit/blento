@@ -21,14 +21,11 @@
 	let handle = getHandleContext();
 
 	onMount(async () => {
-		console.log(feed);
 		if (!feed) {
 			feed = (await CardDefinitionsByType[item.cardType]?.loadData?.([], {
 				did,
 				handle
 			})) as any;
-
-			console.log(feed);
 
 			data[item.cardType] = feed;
 		}

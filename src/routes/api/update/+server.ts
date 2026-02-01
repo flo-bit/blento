@@ -18,7 +18,6 @@ export async function GET({ platform }) {
 	for (const handle of existingUsersHandle) {
 		if (!handle) continue;
 
-		console.log('updating', handle);
 		try {
 			const cached = await getCache(handle, 'self', cache as UserCache);
 			if (!cached) await loadData(handle, cache as UserCache, true);
@@ -26,7 +25,6 @@ export async function GET({ platform }) {
 			console.error(error);
 			return json('error');
 		}
-		console.log('updated', handle);
 	}
 
 	return json('ok');

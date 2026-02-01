@@ -23,8 +23,6 @@
 				})) as any
 			).feed;
 
-			console.log(feed);
-
 			data[item.cardType] = feed;
 		}
 	});

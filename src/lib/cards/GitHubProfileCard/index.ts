@@ -30,7 +30,6 @@ export const GithubProfileCardDefitition = {
 	onUrlHandler: (url, item) => {
 		const username = getGitHubUsername(url);
 
-		console.log(username);
 		if (!username) return;
 
 		item.cardData.href = url;

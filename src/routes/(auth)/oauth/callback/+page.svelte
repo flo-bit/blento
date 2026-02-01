@@ -4,7 +4,6 @@
 	import { getHandleOrDid } from '$lib/atproto/methods';
 
 	$effect(() => {
-		console.log('hello', user);
 		if (user.profile) {
 			goto('/' + getHandleOrDid(user.profile) + '/edit', {});
 		}

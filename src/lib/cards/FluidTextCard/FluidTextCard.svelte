@@ -203,7 +203,6 @@
 
 		const computedColor = getHexOfCardColor(item);
 		const hue = colorToHue(computedColor) / 360;
-		console.log(computedColor, hue);
 
 		// Wait for a frame to ensure dimensions are set
 		requestAnimationFrame(() => {

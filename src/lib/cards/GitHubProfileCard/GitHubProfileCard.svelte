@@ -21,7 +21,6 @@
 	);
 
 	onMount(async () => {
-		console.log(contributionsData);
 		if (!contributionsData && item.cardData?.user) {
 			try {
 				const response = await fetch(`/api/github?user=${encodeURIComponent(item.cardData.user)}`);
