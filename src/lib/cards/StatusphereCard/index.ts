@@ -13,10 +13,7 @@ export const StatusphereCardDefinition = {
 	contentComponent: StatusphereCard,
 	editingContentComponent: EditStatusphereCard,
 
-	createNew: (item) => {
-		item.h = 3;
-		item.mobileH = 5;
-	},
+	createNew: (item) => {},
 
 	loadData: async (items, { did }) => {
 		const data = await listRecords({ did, collection: 'xyz.statusphere.status', limit: 1 });

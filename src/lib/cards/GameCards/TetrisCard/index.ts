@@ -9,10 +9,9 @@ export const TetrisCardDefinition = {
 	type: 'tetris',
 	contentComponent: TetrisCard as unknown as Component<ContentComponentProps>,
 	allowSetColor: true,
-	defaultColor: 'accent',
 	createNew: (card) => {
-		card.w = 4;
-		card.h = 6;
+		card.w = 2;
+		card.h = 4;
 		card.mobileW = 8;
 		card.mobileH = 12;
 		card.cardData = {};

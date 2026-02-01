@@ -61,6 +61,10 @@
 		return 'lg';
 	});
 
+	function removeFriend(did: string) {
+		item.cardData.friends = item.cardData.friends.filter((d: string) => d !== did);
+	}
+
 	function getLink(profile: FriendsProfile): string {
 		if (profile.hasBlento && profile.handle && profile.handle !== 'handle.invalid') {
 			return `/${profile.handle}`;
@@ -85,17 +89,40 @@
 		<div class="">
 			<div class="flex flex-wrap items-center justify-center" style="padding: {olY}px 0 0 {olX}px;">
 				{#each profiles as profile (profile.did)}
-					<a
-						href={getLink(profile)}
-						class="accent:ring-accent-500 relative block rounded-full ring-2 ring-white transition-transform hover:scale-110 dark:ring-neutral-900"
-						style="margin: -{olY}px 0 0 -{olX}px;"
-					>
-						<Avatar
-							src={profile.avatar}
-							alt={profile.handle}
-							class={sizeClass === 'sm' ? 'size-12' : sizeClass === 'md' ? 'size-16' : 'size-20'}
-						/>
-					</a>
+					<div class="group relative" style="margin: -{olY}px 0 0 -{olX}px;">
+						<a
+							href={getLink(profile)}
+							class="accent:ring-accent-500 relative block rounded-full ring-2 ring-white transition-transform hover:scale-110 dark:ring-neutral-900"
+						>
+							<Avatar
+								src={profile.avatar}
+								alt={profile.handle}
+								class={sizeClass === 'sm' ? 'size-12' : sizeClass === 'md' ? 'size-16' : 'size-20'}
+							/>
+						</a>
+						{#if canEdit()}
+							<button
+								aria-label="Remove friend"
+								class="absolute inset-0 flex cursor-pointer items-center justify-center rounded-full bg-black/50 text-white opacity-0 transition-opacity group-hover:opacity-100"
+								onclick={(e) => {
+									e.preventDefault();
+									e.stopPropagation();
+									removeFriend(profile.did);
+								}}
+							>
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									fill="none"
+									viewBox="0 0 24 24"
+									stroke-width="2.5"
+									stroke="currentColor"
+									class="size-4"
+								>
+									<path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+								</svg>
+							</button>
+						{/if}
+					</div>
 				{/each}
 			</div>
 		</div>

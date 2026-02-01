@@ -8,16 +8,18 @@
 
 	let {
 		data,
-		children
+		children,
+		isEditing
 	}: {
 		data: WebsiteData;
 		children: Snippet<[]>;
+		isEditing?: boolean;
 	} = $props();
 
 	// svelte-ignore state_referenced_locally
 	setAdditionalUserData(data.additionalData);
 
-	setCanEdit(() => dev || (user.isLoggedIn && user.profile?.did === data.did));
+	setCanEdit(() => dev || (user.isLoggedIn && user.profile?.did === data.did && isEditing === true));
 
 	// svelte-ignore state_referenced_locally
 	setDidContext(data.did as Did);

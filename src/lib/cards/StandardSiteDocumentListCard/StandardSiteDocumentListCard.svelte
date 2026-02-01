@@ -1,9 +1,15 @@
 <script lang="ts">
-	import { getAdditionalUserData, getDidContext, getHandleContext } from '$lib/website/context';
+	import {
+		getAdditionalUserData,
+		getCanEdit,
+		getDidContext,
+		getHandleContext
+	} from '$lib/website/context';
 	import { onMount } from 'svelte';
 	import { CardDefinitionsByType } from '..';
 	import type { ContentComponentProps } from '../types';
 	import BlogEntry from './BlogEntry.svelte';
+	import { Button } from '@foxui/core';
 
 	let { item }: ContentComponentProps = $props();
 
@@ -13,6 +19,8 @@
 
 	let did = getDidContext();
 	let handle = getHandleContext();
+
+	let canEdit = getCanEdit();
 
 	onMount(async () => {
 		if (!feed) {
@@ -37,22 +45,23 @@
 			/>
 		{/each}
 	{:else if feed}
-		<div
-			class="text-base-500 dark:text-base-400 accent:text-white/60 flex h-full flex-col items-center justify-center gap-2 text-center text-sm"
-		>
-			<span>No blog posts found.</span>
-			<span>
-				Create some on <a
-					href="https://leaflet.pub"
-					target="_blank"
-					rel="noopener noreferrer"
-					class="underline">Leaflet</a
-				>
-				or
-				<a href="https://pckt.pub" target="_blank" rel="noopener noreferrer" class="underline"
-					>Pckt</a
-				>
-			</span>
+		<div class="z-50 flex h-full flex-col items-center justify-center gap-4 text-center text-sm">
+			<span class="text-lg font-semibold">No blog posts found.</span>
+
+			{#if canEdit()}
+				<span>
+					Create some for example on <Button
+						href="https://leaflet.pub"
+						target="_blank"
+						rel="noopener noreferrer"
+						class="">Leaflet</Button
+					>
+					or
+					<Button href="https://pckt.pub" target="_blank" rel="noopener noreferrer" class=""
+						>Pckt</Button
+					>
+				</span>
+			{/if}
 		</div>
 	{:else}
 		<div

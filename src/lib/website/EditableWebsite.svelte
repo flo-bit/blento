@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Button, toast, Toaster, Sidebar } from '@foxui/core';
+	import { Button, Modal, toast, Toaster, Sidebar } from '@foxui/core';
 	import { COLUMNS, margin, mobileMargin } from '$lib';
 	import {
 		checkAndUploadImage,
@@ -123,6 +123,7 @@
 
 	let showingMobileView = $state(false);
 	let isMobile = $derived(showingMobileView || (innerWidth.current ?? 1000) < 1024);
+	let showMobileWarning = $state((innerWidth.current ?? 1000) < 1024);
 
 	setIsMobile(() => isMobile);
 
@@ -191,6 +192,26 @@
 		}
 	}
 
+	function cleanupDialogArtifacts() {
+		// bits-ui's body scroll lock and portal may not clean up fully when the
+		// modal is unmounted instead of closed via the open prop.
+		const restore = () => {
+			document.body.style.removeProperty('overflow');
+			document.body.style.removeProperty('pointer-events');
+			document.body.style.removeProperty('padding-right');
+			document.body.style.removeProperty('margin-right');
+			// Remove any orphaned dialog overlay/content elements left by the portal
+			for (const el of document.querySelectorAll(
+				'[data-dialog-overlay], [data-dialog-content]'
+			)) {
+				el.remove();
+			}
+		};
+		// Run immediately and again after bits-ui's 24ms scheduled cleanup
+		restore();
+		setTimeout(restore, 50);
+	}
+
 	async function saveNewItem() {
 		if (!newItem.item) return;
 		const item = newItem.item;
@@ -211,6 +232,7 @@
 		newItem = {};
 
 		await tick();
+		cleanupDialogArtifacts();
 
 		scrollToItem(item, isMobile, container);
 	}
@@ -258,8 +280,6 @@
 			isSaving = false;
 		}
 	}
-
-	const sidebarItems = AllCardDefinitions.filter((cardDef) => cardDef.name);
 
 	function addAllCardTypes() {
 		const groupOrder = ['Core', 'Social', 'Media', 'Content', 'Visual', 'Utilities', 'Games'];
@@ -1133,7 +1153,7 @@
 
 <Account {data} />
 
-<Context {data}>
+<Context {data} isEditing={true}>
 	<CardCommand
 		bind:open={showCardCommand}
 		onselect={(cardDef: CardDefinition) => {
@@ -1172,8 +1192,10 @@
 				saveNewItem();
 			}}
 			bind:item={newItem.item}
-			oncancel={() => {
+			oncancel={async () => {
 				newItem = {};
+				await tick();
+				cleanupDialogArtifacts();
 			}}
 		/>
 	{/if}
@@ -1184,6 +1206,30 @@
 		handle={data.handle}
 		page={data.page}
 	/>
+
+	<Modal open={showMobileWarning} closeButton={false}>
+		<div class="flex flex-col items-center gap-4 text-center">
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				fill="none"
+				viewBox="0 0 24 24"
+				stroke-width="1.5"
+				stroke="currentColor"
+				class="text-accent-500 size-10"
+			>
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					d="M10.5 1.5H8.25A2.25 2.25 0 0 0 6 3.75v16.5a2.25 2.25 0 0 0 2.25 2.25h7.5A2.25 2.25 0 0 0 18 20.25V3.75a2.25 2.25 0 0 0-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3"
+				/>
+			</svg>
+			<p class="text-base-700 dark:text-base-300 text-xl font-bold">Mobile Editing</p>
+			<p class="text-base-500 dark:text-base-400 text-sm">
+				Mobile editing is currently experimental. For the best experience, use a desktop browser.
+			</p>
+			<Button class="mt-2 w-full" onclick={() => (showMobileWarning = false)}>Continue</Button>
+		</div>
+	</Modal>
 
 	<div
 		class={[

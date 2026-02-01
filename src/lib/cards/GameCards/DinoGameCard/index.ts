@@ -8,9 +8,9 @@ export const DinoGameCardDefinition = {
 	allowSetColor: true,
 	createNew: (card) => {
 		card.w = 4;
-		card.h = 4;
+		card.h = 2;
 		card.mobileW = 8;
-		card.mobileH = 6;
+		card.mobileH = 4;
 		card.cardData = {};
 	},
 	canHaveLabel: true,

@@ -75,7 +75,7 @@
 	function handleKeydown(e: KeyboardEvent) {
 		if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
 			e.preventDefault();
-			open = true;
+			open = !open;
 		}
 		if (e.key === '+' && !isTyping()) {
 			e.preventDefault();
