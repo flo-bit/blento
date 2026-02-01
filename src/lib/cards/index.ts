@@ -32,6 +32,7 @@ import { TimerCardDefinition } from './TimerCard';
 import { ClockCardDefinition } from './ClockCard';
 import { CountdownCardDefinition } from './CountdownCard';
 import { SpotifyCardDefinition } from './SpotifyCard';
+import { AppleMusicCardDefinition } from './AppleMusicCard';
 import { ButtonCardDefinition } from './ButtonCard';
 import { GuestbookCardDefinition } from './GuestbookCard';
 import { FriendsCardDefinition } from './FriendsCard';
@@ -73,6 +74,7 @@ export const AllCardDefinitions = [
 	ClockCardDefinition,
 	CountdownCardDefinition,
 	SpotifyCardDefinition,
+	AppleMusicCardDefinition,
 	// Model3DCardDefinition
 	FriendsCardDefinition
 ] as const;
