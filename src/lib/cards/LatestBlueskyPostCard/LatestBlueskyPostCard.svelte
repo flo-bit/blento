@@ -29,13 +29,10 @@
 </script>
 
 <div class="flex h-full flex-col justify-center-safe overflow-y-scroll p-4">
-	<div
-		class="accent:text-base-950 bg-base-200/50 dark:bg-base-700/30 mx-auto mb-6 w-fit rounded-xl p-1 px-2 text-2xl font-semibold"
-	>
-		My latest bluesky post
-	</div>
 	{#if feed?.[0]?.post}
-		<BlueskyPost showLogo feedViewPost={feed?.[0].post}></BlueskyPost>
+		<div class={[item.cardData.label ? "pt-8" : '']}>
+			<BlueskyPost showLogo feedViewPost={feed?.[0].post}></BlueskyPost>
+		</div>
 		<div class="h-4 w-full"></div>
 	{:else}
 		Your latest bluesky post will appear here.

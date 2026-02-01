@@ -12,7 +12,7 @@
 			goto('/' + getHandleOrDid(user.profile) + '/edit', {});
 		}
 
-		if(!user.isInitializing && !startedErrorTimer) {
+		if (!user.isInitializing && !startedErrorTimer) {
 			startedErrorTimer = true;
 
 			setTimeout(() => {
@@ -30,7 +30,6 @@
 			>There was an error signing you in, please go back to the
 			<a class="text-accent-600 dark:text-accent-400" href="/">homepage</a>
 			and try again.
-			
 		</span>
 	</div>
 {/if}

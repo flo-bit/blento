@@ -29,7 +29,7 @@
 					<Button
 						variant="ghost"
 						onclick={() => {
-							goto('/' + getHandleOrDid(user.profile), {});
+							if (user.profile) goto('/' + getHandleOrDid(user.profile), {});
 						}}>Leave edit mode</Button
 					>
 				{/if}
