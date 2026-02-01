@@ -2,6 +2,7 @@
 	import BaseCard from '$lib/cards/BaseCard/BaseCard.svelte';
 	import Card from '$lib/cards/Card/Card.svelte';
 	import type { Item, WebsiteData } from '$lib/types';
+	import { text } from '@sveltejs/kit';
 
 	let { data }: { data: WebsiteData } = $props();
 
@@ -44,6 +45,43 @@
 				platform: 'bluesky',
 				href: `https://bsky.app/profile/${data.handle}`,
 				color: '0285FF'
+			}
+		});
+
+		items.push({
+			id: 'empty-instruction',
+			x: 0,
+			y: 3,
+			w: 8,
+			h: 1,
+			mobileX: 0,
+			mobileY: 6,
+			mobileW: 8,
+			mobileH: 2,
+			cardType: 'text',
+			color: 'transparent',
+			cardData: {
+				text: `Is this your account? Login to start creating your blento!`,
+				textAlign: 'center',
+				verticalAlign: 'bottom'
+			}
+		});
+
+		items.push({
+			id: 'empty-login-button',
+			x: 0,
+			y: 4,
+			w: 8,
+			h: 1,
+			mobileX: 0,
+			mobileY: 8,
+			mobileW: 8,
+			mobileH: 2,
+			cardType: 'button',
+			color: 'transparent',
+			cardData: {
+				href: '#login',
+				text: `Login`
 			}
 		});
 

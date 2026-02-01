@@ -62,7 +62,6 @@
 		{#each mediaList as media (media.thumbnail || media.playlist)}
 			<button
 				onclick={() => {
-					console.log(media);
 					selected = media;
 					if (media.isVideo) {
 						item.cardData = {

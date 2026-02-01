@@ -39,11 +39,41 @@ export type PostEmbedVideo = {
 	};
 };
 
+export type QuotedPostData = {
+	author: {
+		displayName: string;
+		handle: string;
+		avatar?: string;
+		href?: string;
+	};
+	href?: string;
+	htmlContent?: string;
+	createdAt?: string;
+	embed?: PostEmbed;
+};
+
+export type PostEmbedRecord = {
+	type: 'record';
+	record: QuotedPostData;
+};
+
+export type PostEmbedRecordWithMedia = {
+	type: 'recordWithMedia';
+	record: QuotedPostData;
+	media: PostEmbed;
+};
+
 export type UnknownEmbed = {
 	type: 'unknown';
 } & Record<string, unknown>;
 
-export type PostEmbed = PostEmbedImage | PostEmbedExternal | PostEmbedVideo | UnknownEmbed;
+export type PostEmbed =
+	| PostEmbedImage
+	| PostEmbedExternal
+	| PostEmbedVideo
+	| PostEmbedRecord
+	| PostEmbedRecordWithMedia
+	| UnknownEmbed;
 
 export type PostData = {
 	href?: string;

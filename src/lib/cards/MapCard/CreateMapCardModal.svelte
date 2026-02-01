@@ -20,8 +20,6 @@
 			if (response.ok) {
 				const data = await response.json();
 
-				console.log(data);
-
 				if (!data.lat || !data.lon) throw new Error('lat or lon not found');
 
 				item.cardData.lat = data.lat;

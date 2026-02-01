@@ -36,6 +36,7 @@ import { AppleMusicCardDefinition } from './AppleMusicCard';
 import { ButtonCardDefinition } from './ButtonCard';
 import { GuestbookCardDefinition } from './GuestbookCard';
 import { FriendsCardDefinition } from './FriendsCard';
+import { GitHubContributorsCardDefinition } from './GitHubContributorsCard';
 // import { Model3DCardDefinition } from './Model3DCard';
 
 export const AllCardDefinitions = [
@@ -76,7 +77,8 @@ export const AllCardDefinitions = [
 	SpotifyCardDefinition,
 	AppleMusicCardDefinition,
 	// Model3DCardDefinition
-	FriendsCardDefinition
+	FriendsCardDefinition,
+	GitHubContributorsCardDefinition
 ] as const;
 
 export const CardDefinitionsByType = AllCardDefinitions.reduce(

@@ -26,10 +26,9 @@ export const GET: RequestHandler = async ({ url, platform }) => {
 
 	try {
 		const response = await fetch(GithubAPIURL + user);
-		console.log('hello', user);
 
 		if (!response.ok) {
-			console.log('error', response.statusText);
+			console.error('error', response.statusText);
 			return json(
 				{ error: 'Failed to fetch GitHub data ' + response.statusText },
 				{ status: response.status }
@@ -39,7 +38,6 @@ export const GET: RequestHandler = async ({ url, platform }) => {
 		const data = await response.json();
 
 		if (!data?.user) {
-			console.log('user not found', response.statusText);
 			return json({ error: 'User not found' }, { status: 404 });
 		}
 

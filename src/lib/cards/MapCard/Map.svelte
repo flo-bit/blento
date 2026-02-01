@@ -15,7 +15,7 @@
 
 	onMount(() => {
 		if (!mapContainer || !env.PUBLIC_MAPBOX_TOKEN) {
-			console.log('no map container or no mapbox token');
+			console.error('no map container or no mapbox token');
 			return;
 		}
 

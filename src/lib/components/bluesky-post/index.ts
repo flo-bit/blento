@@ -1,4 +1,4 @@
-import type { PostData, PostEmbed } from '../post';
+import type { PostData, PostEmbed, QuotedPostData } from '../post';
 import type { PostView } from '@atcute/bluesky/types/app/feed/defs';
 import { segmentize, type Facet, type RichtextSegment } from '@atcute/bluesky-richtext-segmenter';
 
@@ -9,97 +9,6 @@ function escapeHtml(str: string): string {
 		.replace(/>/g, '&gt;')
 		.replace(/"/g, '&quot;')
 		.replace(/'/g, '&#39;');
-}
-
-function blueskyEmbedTypeToEmbedType(type: string) {
-	switch (type) {
-		case 'app.bsky.embed.external#view':
-		case 'app.bsky.embed.external':
-			return 'external';
-		case 'app.bsky.embed.images#view':
-		case 'app.bsky.embed.images':
-			return 'images';
-		case 'app.bsky.embed.video#view':
-		case 'app.bsky.embed.video':
-			return 'video';
-		default:
-			return 'unknown';
-	}
-}
-
-export function blueskyPostToPostData(
-	data: PostView,
-	baseUrl: string = 'https://bsky.app'
-): PostData {
-	const post = data;
-	// const reason = data.reason;
-	// const reply = data.reply?.parent;
-	// const replyId = reply?.uri?.split('/').pop();
-	console.log(JSON.parse(JSON.stringify(data)));
-
-	const id = post.uri.split('/').pop();
-
-	return {
-		id,
-		href: `${baseUrl}/profile/${post.author.handle}/post/${id}`,
-		// reposted:
-		// 	reason && reason.$type === 'app.bsky.feed.defs#reasonRepost'
-		// 		? {
-		// 				handle: reason.by.handle,
-		// 				href: `${baseUrl}/profile/${reason.by.handle}`
-		// 			}
-		// 		: undefined,
-
-		// replyTo:
-		// 	reply && replyId
-		// 		? {
-		// 				handle: reply.author.handle,
-		// 				href: `${baseUrl}/profile/${reply.author.handle}/post/${replyId}`
-		// 			}
-		// 		: undefined,
-		author: {
-			displayName: post.author.displayName || '',
-			handle: post.author.handle,
-			avatar: post.author.avatar,
-			href: `${baseUrl}/profile/${post.author.did}`
-		},
-		replyCount: post.replyCount ?? 0,
-		repostCount: post.repostCount ?? 0,
-		likeCount: post.likeCount ?? 0,
-		createdAt: post.record.createdAt as string,
-
-		embed: post.embed
-			? ({
-					type: blueskyEmbedTypeToEmbedType(post.embed?.$type),
-					// Cast to any to handle union type - properties are conditionally accessed
-					images: (post.embed as any)?.images?.map((image: any) => ({
-						alt: image.alt,
-						thumb: image.thumb,
-						aspectRatio: image.aspectRatio,
-						fullsize: image.fullsize
-					})),
-					external: (post.embed as any)?.external
-						? {
-								href: (post.embed as any).external.uri,
-								title: (post.embed as any).external.title,
-								description: (post.embed as any).external.description,
-								thumb: (post.embed as any).external.thumb
-							}
-						: undefined,
-					video: (post.embed as any)?.playlist
-						? {
-								playlist: (post.embed as any).playlist,
-								thumb: (post.embed as any).thumbnail,
-								alt: (post.embed as any).alt,
-								aspectRatio: (post.embed as any).aspectRatio
-							}
-						: undefined
-				} as PostEmbed)
-			: undefined,
-
-		htmlContent: blueskyPostToHTML(post, baseUrl),
-		labels: post.labels ? post.labels.map((label) => label.val) : undefined
-	};
 }
 
 interface MentionFeature {
@@ -150,6 +59,154 @@ const RichText = ({ text, facets }: { text: string; facets?: Facet[] }, baseUrl:
 	const segments = segmentize(text, facets);
 	return segments.map((v) => renderSegment(v, baseUrl)).join('');
 };
+
+function blueskyEmbedTypeToEmbedType(type: string) {
+	switch (type) {
+		case 'app.bsky.embed.external#view':
+		case 'app.bsky.embed.external':
+			return 'external';
+		case 'app.bsky.embed.images#view':
+		case 'app.bsky.embed.images':
+			return 'images';
+		case 'app.bsky.embed.video#view':
+		case 'app.bsky.embed.video':
+			return 'video';
+		case 'app.bsky.embed.record#view':
+		case 'app.bsky.embed.record':
+			return 'record';
+		case 'app.bsky.embed.recordWithMedia#view':
+		case 'app.bsky.embed.recordWithMedia':
+			return 'recordWithMedia';
+		default:
+			return 'unknown';
+	}
+}
+
+function extractQuotedPost(recordView: any, baseUrl: string): QuotedPostData | null {
+	if (!recordView?.author) return null;
+
+	const id = recordView.uri?.split('/').pop();
+	const author = recordView.author;
+	const value = recordView.value as any;
+
+	let htmlContent = '';
+	if (value?.text) {
+		htmlContent = RichText({ text: value.text, facets: value.facets }, baseUrl).replace(
+			/\n/g,
+			'<br>'
+		);
+	}
+
+	// Convert nested media embeds (skip record embeds to avoid recursion)
+	let embed: PostEmbed | undefined;
+	const firstEmbed = recordView.embeds?.[0] as any;
+	if (firstEmbed) {
+		const embedType = blueskyEmbedTypeToEmbedType(firstEmbed.$type);
+		if (embedType !== 'record' && embedType !== 'recordWithMedia' && embedType !== 'unknown') {
+			embed = convertEmbed(firstEmbed, baseUrl);
+		}
+	}
+
+	return {
+		author: {
+			displayName: author.displayName || '',
+			handle: author.handle,
+			avatar: author.avatar,
+			href: `${baseUrl}/profile/${author.did}`
+		},
+		href: `${baseUrl}/profile/${author.handle}/post/${id}`,
+		htmlContent,
+		createdAt: value?.createdAt,
+		embed
+	};
+}
+
+function convertEmbed(embedView: any, baseUrl: string): PostEmbed {
+	const type = blueskyEmbedTypeToEmbedType(embedView?.$type);
+
+	switch (type) {
+		case 'images':
+			return {
+				type: 'images',
+				images: embedView.images?.map((image: any) => ({
+					alt: image.alt,
+					thumb: image.thumb,
+					aspectRatio: image.aspectRatio,
+					fullsize: image.fullsize
+				}))
+			};
+		case 'external':
+			return embedView.external
+				? {
+						type: 'external',
+						external: {
+							href: embedView.external.uri,
+							title: embedView.external.title,
+							description: embedView.external.description,
+							thumb: embedView.external.thumb
+						}
+					}
+				: { type: 'unknown' };
+		case 'video':
+			return embedView.playlist
+				? {
+						type: 'video',
+						video: {
+							playlist: embedView.playlist,
+							thumb: embedView.thumbnail,
+							alt: embedView.alt,
+							aspectRatio: embedView.aspectRatio
+						}
+					}
+				: { type: 'unknown' };
+		case 'record': {
+			const record = extractQuotedPost(embedView.record, baseUrl);
+			return record ? { type: 'record', record } : { type: 'unknown' };
+		}
+		case 'recordWithMedia': {
+			const record = extractQuotedPost(embedView.record?.record, baseUrl);
+			const media = embedView.media ? convertEmbed(embedView.media, baseUrl) : undefined;
+			if (record) {
+				return {
+					type: 'recordWithMedia',
+					record,
+					media: media ?? { type: 'unknown' }
+				};
+			}
+			return media ?? { type: 'unknown' };
+		}
+		default:
+			return { type: 'unknown' };
+	}
+}
+
+export function blueskyPostToPostData(
+	data: PostView,
+	baseUrl: string = 'https://bsky.app'
+): PostData {
+	const post = data;
+	const id = post.uri.split('/').pop();
+
+	return {
+		id,
+		href: `${baseUrl}/profile/${post.author.handle}/post/${id}`,
+		author: {
+			displayName: post.author.displayName || '',
+			handle: post.author.handle,
+			avatar: post.author.avatar,
+			href: `${baseUrl}/profile/${post.author.did}`
+		},
+		replyCount: post.replyCount ?? 0,
+		repostCount: post.repostCount ?? 0,
+		likeCount: post.likeCount ?? 0,
+		createdAt: post.record.createdAt as string,
+
+		embed: post.embed ? convertEmbed(post.embed, baseUrl) : undefined,
+
+		htmlContent: blueskyPostToHTML(post, baseUrl),
+		labels: post.labels ? post.labels.map((label) => label.val) : undefined
+	};
+}
 
 export function blueskyPostToHTML(post: PostView, baseUrl: string = 'https://bsky.app') {
 	if (!post?.record) {
