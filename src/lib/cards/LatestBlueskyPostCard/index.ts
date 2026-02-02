@@ -12,7 +12,7 @@ export const LatestBlueskyPostCardDefinition = {
 		card.h = 4;
 		card.mobileH = 8;
 
-		card.cardData.label = "";
+		card.cardData.label = '';
 	},
 	loadData: async (items, { did }) => {
 		const authorFeed = await getAuthorFeed({ did, filter: 'posts_no_replies', limit: 2 });
