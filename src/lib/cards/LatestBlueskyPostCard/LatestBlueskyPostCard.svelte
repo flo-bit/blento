@@ -30,7 +30,7 @@
 
 <div class="flex h-full flex-col justify-center-safe overflow-y-scroll p-4">
 	{#if feed?.[0]?.post}
-		<div class={[item.cardData.label ? "pt-8" : '']}>
+		<div class={[item.cardData.label ? 'pt-8' : '']}>
 			<BlueskyPost showLogo feedViewPost={feed?.[0].post}></BlueskyPost>
 		</div>
 		<div class="h-4 w-full"></div>
