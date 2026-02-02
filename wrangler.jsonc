@@ -42,6 +42,11 @@
 		{
 			"binding": "USER_DATA_CACHE",
 			"id": "d6ff203259de48538d332b0a5df258a7"
+		},
+		{
+			"binding": "CUSTOM_DOMAINS",
+			"id": "f449b3b5c8a349478405e2c04ed265f0",
+			"remote": true
 		}
 	]
 

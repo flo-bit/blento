@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { user, login, logout } from '$lib/atproto';
+	import { user, logout } from '$lib/atproto';
 	import { getHandleOrDid } from '$lib/atproto/methods';
 	import type { WebsiteData } from '$lib/types';
-	import type { ActorIdentifier } from '@atcute/lexicons';
 	import { Avatar, Button, Popover } from '@foxui/core';
+	import CustomDomainModal, { customDomainModalState } from '$lib/website/CustomDomainModal.svelte';
 
 	let {
 		data
@@ -34,8 +34,18 @@
 					>
 				{/if}
 
+				<Button
+					variant="ghost"
+					onclick={() => {
+						settingsPopoverOpen = false;
+						customDomainModalState.show();
+					}}>Custom Domain</Button
+				>
+
 				<Button variant="ghost" onclick={logout}>Logout</Button>
 			</div>
 		</Popover>
 	</div>
+
+	<CustomDomainModal />
 {/if}

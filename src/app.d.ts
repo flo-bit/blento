@@ -11,6 +11,7 @@ declare global {
 		interface Platform {
 			env: {
 				USER_DATA_CACHE: KVNamespace;
+				CUSTOM_DOMAINS: KVNamespace;
 			};
 		}
 	}
