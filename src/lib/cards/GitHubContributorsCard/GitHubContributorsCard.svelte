@@ -59,7 +59,7 @@
 
 	const GAP = 6;
 	const MIN_SIZE = 16;
-	const MAX_SIZE = 80;
+	const MAX_SIZE = 120;
 
 	function hexCapacity(size: number, availW: number, availH: number): number {
 		const colsWide = Math.floor((availW + GAP) / (size + GAP));
@@ -89,8 +89,8 @@
 
 		while (lo <= hi) {
 			const mid = Math.floor((lo + hi) / 2);
-			const availW = containerWidth - (layout === 'hex' ? mid : 0);
-			const availH = containerHeight - (layout === 'hex' ? mid : 0);
+			const availW = containerWidth - (layout === 'hex' ? mid / 2 : 0);
+			const availH = containerHeight - (layout === 'hex' ? mid / 2 : 0);
 			if (availW <= 0 || availH <= 0) {
 				hi = mid - 1;
 				continue;
@@ -105,10 +105,10 @@
 		return Math.max(MIN_SIZE, hi);
 	});
 
-	let padding = $derived(layout === 'hex' ? computedSize / 2 : 0);
+	let padding = $derived(layout === 'hex' ? computedSize / 4 : 0);
 
 	let rows = $derived.by(() => {
-		const availW = containerWidth - (layout === 'hex' ? computedSize : 0);
+		const availW = containerWidth - (layout === 'hex' ? computedSize / 4 : 0);
 		if (availW <= 0) return [] as GitHubContributor[][];
 
 		const colsWide = Math.floor((availW + GAP) / (computedSize + GAP));
