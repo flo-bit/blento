@@ -74,9 +74,15 @@
 	// svelte-ignore state_referenced_locally
 	let savedPublication = $state(JSON.stringify(data.publication));
 
-	let hasUnsavedChanges = $derived(
-		JSON.stringify(items) !== savedItems || JSON.stringify(data.publication) !== savedPublication
-	);
+	let hasUnsavedChanges = $state(false);
+
+	$effect(() => {
+		if (!hasUnsavedChanges) {
+			hasUnsavedChanges =
+				JSON.stringify(items) !== savedItems ||
+				JSON.stringify(data.publication) !== savedPublication;
+		}
+	});
 
 	// Warn user before closing tab if there are unsaved changes
 	$effect(() => {
