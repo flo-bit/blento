@@ -38,8 +38,8 @@
 		(val) => {
 			const profile = results.find((v) => v.handle === val);
 			if (profile) onselected?.(profile);
-
-			value = val;
+			// Only update if val has content - prevents Combobox from clearing on Enter
+			if (val) value = val;
 		}
 	}
 	bind:open={
@@ -56,6 +56,9 @@
 		oninput={(e) => {
 			value = e.currentTarget.value;
 			search(e.currentTarget.value);
+		}}
+		onkeydown={(e) => {
+			if (e.key === 'Enter') e.currentTarget.form?.requestSubmit();
 		}}
 		class="focus-within:outline-accent-600 dark:focus-within:outline-accent-500 dark:placeholder:text-base-400 w-full touch-none rounded-full border-0 bg-white ring-0 outline-1 -outline-offset-1 outline-gray-300 focus-within:outline-2 focus-within:-outline-offset-2 dark:bg-white/5 dark:outline-white/10"
 		placeholder="handle"
