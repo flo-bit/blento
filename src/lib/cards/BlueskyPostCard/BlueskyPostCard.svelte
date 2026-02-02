@@ -39,7 +39,9 @@
 
 <div class="flex h-full flex-col justify-center-safe overflow-y-scroll p-4">
 	{#if post}
-		<BlueskyPost showLogo feedViewPost={post}></BlueskyPost>
+		<div class={[item.cardData.label ? 'pt-8' : '']}>
+			<BlueskyPost showLogo feedViewPost={post}></BlueskyPost>
+		</div>
 		<div class="h-4 w-full"></div>
 	{:else}
 		<p class="text-base-600 dark:text-base-400 text-center">A bluesky post will appear here</p>

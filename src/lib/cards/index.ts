@@ -3,6 +3,7 @@ import { ATProtoCollectionsCardDefinition } from './ATProtoCollectionsCard';
 import { BigSocialCardDefinition } from './BigSocialCard';
 import { BlueskyMediaCardDefinition } from './BlueskyMediaCard';
 import { BlueskyPostCardDefinition } from './BlueskyPostCard';
+import { BlueskyFeedCardDefinition } from './BlueskyFeedCard';
 import { LatestBlueskyPostCardDefinition } from './LatestBlueskyPostCard';
 import { DinoGameCardDefinition } from './GameCards/DinoGameCard';
 import { EmbedCardDefinition } from './EmbedCard';
@@ -50,6 +51,7 @@ export const AllCardDefinitions = [
 	YoutubeCardDefinition,
 	BlueskyPostCardDefinition,
 	LatestBlueskyPostCardDefinition,
+	BlueskyFeedCardDefinition,
 	LivestreamCardDefitition,
 	LivestreamEmbedCardDefitition,
 	// EmbedCardDefinition,

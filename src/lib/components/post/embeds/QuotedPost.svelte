@@ -9,7 +9,7 @@
 </script>
 
 <div
-	class="border-base-300 dark:border-base-600/30 bg-base-950/5 dark:bg-base-950/20 overflow-hidden rounded-2xl border text-sm"
+	class="border-base-300 dark:border-base-600/30 accent:border-accent-300/20 accent:bg-accent-100/10 bg-base-950/5 dark:bg-base-950/20 overflow-hidden rounded-2xl border text-sm"
 >
 	<div class="p-3">
 		<div class="flex items-center gap-2">
@@ -22,7 +22,7 @@
 						{record.author.displayName}
 					</span>
 				{/if}
-				<span class="text-base-500 dark:text-base-400 truncate">
+				<span class="text-base-500 dark:text-base-400 accent:text-accent-950 truncate">
 					@{record.author.handle}
 				</span>
 			</div>

@@ -450,6 +450,7 @@ export async function getAuthorFeed(data?: {
 	client?: Client;
 	filter?: string;
 	limit?: number;
+	cursor?: string;
 }) {
 	data ??= {};
 	data.did ??= user.did;
@@ -461,7 +462,12 @@ export async function getAuthorFeed(data?: {
 	});
 
 	const response = await data.client.get('app.bsky.feed.getAuthorFeed', {
-		params: { actor: data.did, filter: data.filter ?? 'posts_with_media', limit: data.limit || 100 }
+		params: {
+			actor: data.did,
+			filter: data.filter ?? 'posts_with_media',
+			limit: data.limit || 100,
+			cursor: data.cursor
+		}
 	});
 
 	if (!response.ok) return;
