@@ -39,6 +39,7 @@ import { GuestbookCardDefinition } from './GuestbookCard';
 import { FriendsCardDefinition } from './FriendsCard';
 import { GitHubContributorsCardDefinition } from './GitHubContributorsCard';
 import { ProductHuntCardDefinition } from './ProductHuntCard';
+import { KickstarterCardDefinition } from './KickstarterCard';
 // import { Model3DCardDefinition } from './Model3DCard';
 
 export const AllCardDefinitions = [
@@ -82,7 +83,8 @@ export const AllCardDefinitions = [
 	// Model3DCardDefinition
 	FriendsCardDefinition,
 	GitHubContributorsCardDefinition,
-	ProductHuntCardDefinition
+	ProductHuntCardDefinition,
+	KickstarterCardDefinition
 ] as const;
 
 export const CardDefinitionsByType = AllCardDefinitions.reduce(
