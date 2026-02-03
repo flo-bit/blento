@@ -9,14 +9,14 @@
 	import { goto } from '$app/navigation';
 	import LoginModal from '$lib/atproto/UI/LoginModal.svelte';
 
-	let { children } = $props();
+	let { children, data } = $props();
 
 	const errorMessages: Record<string, (params: URLSearchParams) => string> = {
 		handle_not_found: (p) => `Handle ${p.get('handle') ?? ''} not found!`
 	};
 
 	onMount(() => {
-		initClient();
+		initClient({ customDomain: data.customDomain });
 
 		const error = page.url.searchParams.get('error');
 		if (error) {

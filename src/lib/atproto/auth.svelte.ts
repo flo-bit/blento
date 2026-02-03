@@ -37,10 +37,10 @@ export const user = $state({
 	did: undefined as Did | undefined
 });
 
-export async function initClient() {
+export async function initClient(options?: { customDomain?: string }) {
 	user.isInitializing = true;
 
-	const clientId = dev
+	const client_id = dev
 		? `http://localhost` +
 			`?redirect_uri=${encodeURIComponent('http://127.0.0.1:5179' + REDIRECT_PATH)}` +
 			`&scope=${encodeURIComponent(metadata.scope)}`
@@ -53,10 +53,17 @@ export async function initClient() {
 		}
 	});
 
+	const redirect_uri = dev ? 'http://127.0.0.1:5179' + REDIRECT_PATH : metadata.redirect_uris[0];
+
+	if (options?.customDomain) {
+		client_id.replace('blento.app', options.customDomain);
+		redirect_uri.replace('blento.app', options.customDomain);
+	}
+
 	configureOAuth({
 		metadata: {
-			client_id: clientId,
-			redirect_uri: dev ? 'http://127.0.0.1:5179' + REDIRECT_PATH : metadata.redirect_uris[0]
+			client_id,
+			redirect_uri
 		},
 		identityResolver: new LocalActorResolver({
 			handleResolver: handleResolver,
