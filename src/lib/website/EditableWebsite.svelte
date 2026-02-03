@@ -22,13 +22,13 @@
 	import EditableProfile from './EditableProfile.svelte';
 	import type { Item, WebsiteData } from '../types';
 	import { innerWidth } from 'svelte/reactivity/window';
-	import EditingCard from '../cards/Card/EditingCard.svelte';
+	import EditingCard from '../cards/_base/Card/EditingCard.svelte';
 	import { AllCardDefinitions, CardDefinitionsByType } from '../cards';
 	import { tick, type Component } from 'svelte';
 	import type { CardDefinition, CreationModalComponentProps } from '../cards/types';
 	import { dev } from '$app/environment';
 	import { setIsCoarse, setIsMobile, setSelectedCardId, setSelectCard } from './context';
-	import BaseEditingCard from '../cards/BaseCard/BaseEditingCard.svelte';
+	import BaseEditingCard from '../cards/_base/BaseCard/BaseEditingCard.svelte';
 	import Context from './Context.svelte';
 	import Head from './Head.svelte';
 	import Account from './Account.svelte';

@@ -1,6 +1,6 @@
 <script lang="ts">
-	import BaseCard from '$lib/cards/BaseCard/BaseCard.svelte';
-	import Card from '$lib/cards/Card/Card.svelte';
+	import BaseCard from '$lib/cards/_base/BaseCard/BaseCard.svelte';
+	import Card from '$lib/cards/_base/Card/Card.svelte';
 	import type { Item, WebsiteData } from '$lib/types';
 	import { text } from '@sveltejs/kit';
 

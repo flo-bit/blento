@@ -1,0 +1,294 @@
+import type { CardDefinition } from '../../types';
+import BigSocialCard from './BigSocialCard.svelte';
+import CreateBigSocialCardModal from './CreateBigSocialCardModal.svelte';
+
+export const BigSocialCardDefinition = {
+	type: 'bigsocial',
+	contentComponent: BigSocialCard,
+	creationModalComponent: CreateBigSocialCardModal,
+
+	createNew: (card) => {
+		card.cardType = 'bigsocial';
+		card.cardData = {
+			href: '',
+			platform: ''
+		};
+		card.w = 2;
+		card.h = 2;
+		card.mobileW = 4;
+		card.mobileH = 4;
+	},
+
+	canChange: (item) => {
+		const href = item.cardData?.href;
+		if (!href) return false;
+		return Boolean(detectPlatform(href));
+	},
+	change: (item) => {
+		const href = item.cardData?.href;
+		const platform = href ? detectPlatform(href) : null;
+		if (!href || !platform) return item;
+		item.cardData = {
+			...item.cardData,
+			platform,
+			color: platformsData[platform].hex
+		};
+		return item;
+	},
+	name: 'Social Icon',
+	allowSetColor: false,
+	defaultColor: 'transparent',
+	minW: 2,
+	minH: 2,
+	onUrlHandler: (url, item) => {
+		const platform = detectPlatform(url);
+		if (!platform) return null;
+
+		item.cardData.platform = platform;
+		item.cardData.color = platformsData[platform].hex;
+		item.cardData.href = url;
+
+		return item;
+	},
+	urlHandlerPriority: 1,
+	canHaveLabel: true,
+
+	keywords: [
+		'twitter',
+		'instagram',
+		'tiktok',
+		'youtube',
+		'github',
+		'discord',
+		'linkedin',
+		'mastodon',
+		'kickstarter'
+	],
+	groups: ['Social'],
+	icon: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-4"><path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 1 0 0 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186 9.566-5.314m-9.566 7.5 9.566 5.314m0 0a2.25 2.25 0 1 0 3.935 2.186 2.25 2.25 0 0 0-3.935-2.186Zm0-12.814a2.25 2.25 0 1 0 3.933-2.185 2.25 2.25 0 0 0-3.933 2.185Z" /></svg>`
+} as CardDefinition & { type: 'bigsocial' };
+
+import {
+	siInstagram,
+	siFacebook,
+	siX,
+	siYoutube,
+	siTiktok,
+	siBluesky,
+	siThreads,
+	siSnapchat,
+	siPinterest,
+	siTwitch,
+	siDiscord,
+	siGithub,
+	siSpotify,
+	siReddit,
+	siWhatsapp,
+	siTelegram,
+	siMastodon,
+	siBehance,
+	siDribbble,
+	siMedium,
+	siDevdotto,
+	siHashnode,
+	siPatreon,
+	siKofi,
+	siBuymeacoffee,
+	siSubstack,
+	siSoundcloud,
+	siBandcamp,
+	siApplepodcasts,
+	siFigma,
+	siNotion,
+	siSignal,
+	siWechat,
+	siLine,
+	siArchiveofourown,
+	siKickstarter,
+	type SimpleIcon
+} from 'simple-icons';
+
+export const platformPatterns: Record<string, RegExp> = {
+	instagram: /(?:instagram\.com|instagr\.am)/i,
+	facebook: /(?:facebook\.com|fb\.com|fb\.me)/i,
+	twitter: /(?:twitter\.com)/i,
+	x: /(?:x\.com)/i,
+	youtube: /(?:youtube\.com|youtu\.be)/i,
+	tiktok: /(?:tiktok\.com)/i,
+	linkedin: /(?:linkedin\.com)/i,
+	bluesky: /(?:bsky\.app|bsky\.social)/i,
+	threads: /(?:threads\.net)/i,
+	snapchat: /(?:snapchat\.com)/i,
+	pinterest: /(?:pinterest\.com|pin\.it)/i,
+	twitch: /(?:twitch\.tv)/i,
+	discord: /(?:discord\.gg|discord\.com)/i,
+	github: /(?:github\.com)/i,
+	spotify: /(?:spotify\.com|open\.spotify\.com)/i,
+	reddit: /(?:reddit\.com)/i,
+	whatsapp: /(?:whatsapp\.com|wa\.me)/i,
+	telegram: /(?:t\.me|telegram\.org)/i,
+	mastodon: /(?:mastodon\.social|mastodon\.online|mstdn\.social)/i,
+
+	// professional / creator
+	behance: /(?:behance\.net)/i,
+	dribbble: /(?:dribbble\.com)/i,
+	medium: /(?:medium\.com)/i,
+	devto: /(?:dev\.to)/i,
+	hashnode: /(?:hashnode\.com)/i,
+
+	// support / monetization
+	patreon: /(?:patreon\.com)/i,
+	kofi: /(?:ko-fi\.com|kofi\.com)/i,
+	buymeacoffee: /(?:buymeacoffee\.com)/i,
+	substack: /(?:substack\.com)/i,
+
+	// audio / podcasts
+	soundcloud: /(?:soundcloud\.com)/i,
+	bandcamp: /(?:bandcamp\.com)/i,
+	applepodcasts: /(?:podcasts\.apple\.com)/i,
+	googlepodcasts: /(?:podcasts\.google\.com)/i,
+
+	// tools / misc
+	figma: /(?:figma\.com)/i,
+	notion: /(?:notion\.so)/i,
+
+	// chat / messaging
+	slack: /(?:slack\.com)/i,
+	signal: /(?:signal\.org|signal\.me)/i,
+	wechat: /(?:wechat\.com|weixin\.qq\.com)/i,
+	line: /(?:line\.me)/i,
+	skype: /(?:skype\.com)/i,
+
+	ao3: /(?:archiveofourown\.org)/i,
+
+	kickstarter: /(?:kickstarter\.com)/i,
+
+	germ: /(?:ger\.mx)/i,
+
+	tangled: /(?:tangled\.org)/i,
+
+	mail: /(?:mailto:)/i
+};
+
+export const platformsData: Record<string, SimpleIcon> = {
+	instagram: siInstagram,
+	facebook: siFacebook,
+	twitter: siX,
+	x: siX,
+	youtube: siYoutube,
+	tiktok: siTiktok,
+	bluesky: siBluesky,
+	threads: siThreads,
+	snapchat: siSnapchat,
+	pinterest: siPinterest,
+	twitch: siTwitch,
+	discord: siDiscord,
+	github: siGithub,
+	spotify: siSpotify,
+	reddit: siReddit,
+	whatsapp: siWhatsapp,
+	telegram: siTelegram,
+	mastodon: siMastodon,
+
+	// professional / creator
+	behance: siBehance,
+	dribbble: siDribbble,
+	medium: siMedium,
+	devto: siDevdotto,
+	hashnode: siHashnode,
+	linkedin: {
+		slug: 'linkedin',
+		path: '',
+		title: 'LinkedIn',
+		hex: '0A66C2',
+		source: 'https://brand.linkedin.com',
+		guidelines: 'https://brand.linkedin.com/policies',
+		svg: `<svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>`
+	},
+
+	germ: {
+		slug: 'germ',
+		path: '',
+		title: 'Germ Network',
+		hex: '7EE35A',
+		source: '',
+		svg: `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_2_3)">
+<path d="M9.97852 2.31976C10.9816 4.81045 13.9828 5.28448 15.4834 3.19552C15.6921 2.89824 15.9489 2.6572 16.0371 2.6572C16.3501 2.6572 18.2841 4.7301 18.6933 5.50945C19.2791 6.62624 19.247 6.65838 18.1476 6.32093C15.018 5.34876 12.4742 6.21648 11.1742 8.69111C10.2112 10.539 11.1822 13.4475 13.0841 14.3956C14.1674 14.9339 14.7933 14.8054 16.2378 13.7207C18.0513 12.3629 19.0303 13.1342 17.626 14.8134C15.652 17.1836 12.3378 18.2039 9.32852 17.3764C8.21309 17.0711 8.11679 16.9506 8.20506 15.9623C8.35753 14.3956 7.77173 12.7405 6.63223 11.5112C5.68532 10.4908 5.75754 10.2739 7.2421 9.7838C10.797 8.59469 10.8933 4.15162 7.38655 3.17945C6.99334 3.06696 6.6884 2.92234 6.71247 2.85807C6.79272 2.62507 9.08778 1.50024 9.56926 1.46007C9.60136 1.46007 9.78592 1.84572 9.97852 2.31976Z" fill="#4183FF"/>
+<path d="M18.1316 7.74304C19.7445 8.54648 19.9773 9.14104 19.4958 11.1979L19.4935 11.2075C19.255 12.2183 19.2534 12.2252 18.7415 11.8728C17.8587 11.2782 17.0563 11.463 15.5316 12.6039C14.2637 13.56 13.8625 13.568 12.9797 12.6441C10.1791 9.71149 14.2637 5.83083 18.1316 7.74304Z" fill="#22F137"/>
+<path d="M6.50383 4.35248C8.08469 4.64976 8.71864 5.3809 8.55012 6.71462C8.42975 7.65466 8.03654 8.05638 6.6563 8.62683C4.30507 9.599 4.04026 10.5631 5.62914 12.3789C6.45568 13.327 6.82482 14.1706 6.89704 15.2714C6.96926 16.4122 6.88902 16.4122 5.66927 15.1589C3.20569 12.6521 2.61989 9.15711 4.13655 5.96741C4.96309 4.24 5.15569 4.10341 6.50383 4.35248Z" fill="#22F137"/>
+<path d="M13.7581 1.58862C14.7371 1.89393 14.681 1.83769 14.4483 2.28762C13.6618 3.80614 11.1341 3.15534 11.1341 1.43596C11.1341 1.10655 12.4341 1.18689 13.7581 1.58862Z" fill="#22F137"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M9.40876 0.19865C2.66804 1.65289 -0.260969 9.79987 3.97606 15.3115C8.39765 21.0723 17.6983 19.7867 20.3143 13.0378C23.1069 5.83083 16.952 -1.41628 9.40876 0.19865ZM14.4483 2.28762C14.681 1.83769 14.7371 1.89393 13.7581 1.58862C12.4341 1.18689 11.1341 1.10655 11.1341 1.43596C11.1341 3.15534 13.6618 3.80614 14.4483 2.28762ZM15.4834 3.19552C13.9828 5.28448 10.9816 4.81045 9.97852 2.31976C9.78592 1.84572 9.60136 1.46007 9.56926 1.46007C9.08778 1.50024 6.79272 2.62507 6.71247 2.85807C6.6884 2.92234 6.99334 3.06696 7.38655 3.17945C10.8933 4.15162 10.797 8.59469 7.2421 9.7838C5.75754 10.2739 5.68532 10.4908 6.63223 11.5112C7.77173 12.7405 8.35753 14.3956 8.20506 15.9623C8.11679 16.9506 8.21309 17.0711 9.32852 17.3764C12.3378 18.2039 15.652 17.1836 17.626 14.8134C19.0303 13.1342 18.0513 12.3629 16.2378 13.7207C14.7933 14.8054 14.1674 14.9339 13.0841 14.3956C11.1822 13.4475 10.2112 10.539 11.1742 8.69111C12.4742 6.21648 15.018 5.34876 18.1476 6.32093C19.247 6.65838 19.2791 6.62624 18.6933 5.50945C18.2841 4.7301 16.3501 2.6572 16.0371 2.6572C15.9489 2.6572 15.6921 2.89824 15.4834 3.19552ZM8.55012 6.71462C8.71864 5.3809 8.08469 4.64976 6.50383 4.35248C5.15569 4.10341 4.96309 4.24 4.13655 5.96741C2.61989 9.15711 3.20569 12.6521 5.66927 15.1589C6.88902 16.4122 6.96926 16.4122 6.89704 15.2714C6.82482 14.1706 6.45568 13.327 5.62914 12.3789C4.04026 10.5631 4.30507 9.599 6.6563 8.62683C8.03654 8.05638 8.42975 7.65466 8.55012 6.71462ZM19.4958 11.1979C19.9773 9.14104 19.7445 8.54648 18.1316 7.74304C14.2637 5.83083 10.1791 9.71149 12.9797 12.6441C13.8625 13.568 14.2637 13.56 15.5316 12.6039C17.0563 11.463 17.8587 11.2782 18.7415 11.8728C19.2534 12.2252 19.255 12.2183 19.4935 11.2075L19.4958 11.1979Z" fill="black"/>
+<path d="M11.11 21.3936C11.0939 21.4097 10.5402 21.4579 9.89025 21.4981C7.15383 21.6668 5.5489 22.5586 6.71247 23.2657C8.25321 24.2057 14.7371 24.2057 16.2779 23.2657C17.3853 22.5988 15.9248 21.707 13.4211 21.5222C11.4711 21.3776 11.1501 21.3615 11.11 21.3936Z" fill="black"/>
+</g>
+<defs>
+<clipPath id="clip0_2_3">
+<rect width="24" height="24" fill="white"/>
+</clipPath>
+</defs>
+</svg>`
+	},
+
+	mail: {
+		slug: 'mail',
+		path: '',
+		title: 'Mail',
+		hex: '0a0a0a',
+		source: '',
+		svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+  <path d="M1.5 8.67v8.58a3 3 0 0 0 3 3h15a3 3 0 0 0 3-3V8.67l-8.928 5.493a3 3 0 0 1-3.144 0L1.5 8.67Z" />
+  <path d="M22.5 6.908V6.75a3 3 0 0 0-3-3h-15a3 3 0 0 0-3 3v.158l9.714 5.978a1.5 1.5 0 0 0 1.572 0L22.5 6.908Z" />
+</svg>`
+	},
+
+	// support / monetization
+	patreon: siPatreon,
+	kofi: siKofi,
+	buymeacoffee: siBuymeacoffee,
+	substack: siSubstack,
+
+	// audio / podcasts
+	soundcloud: siSoundcloud,
+	bandcamp: siBandcamp,
+	applepodcasts: siApplepodcasts,
+
+	// tools / misc
+	figma: siFigma,
+	notion: siNotion,
+
+	// chat / messaging
+	signal: siSignal,
+	wechat: siWechat,
+	line: siLine,
+
+	ao3: siArchiveofourown,
+
+	kickstarter: siKickstarter,
+
+	tangled: {
+		slug: 'tangled',
+		path: '',
+		title: 'Tangled',
+		source: '',
+		hex: 'F9FAFB',
+		svg: `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_0_3)">
+<path d="M15.6924 23.1449C14.9386 23.1388 14.3636 22.9197 13.7398 22.5389C12.8452 22.0683 12.162 21.2777 11.6738 20.4061C10.8981 21.3685 9.86127 21.9525 8.70053 22.2824C8.2063 22.4259 7.34067 22.5715 5.90581 22.0517C3.83792 21.357 2.33162 19.2053 2.5028 17.0129C2.47149 16.1041 2.80284 15.2122 3.27252 14.4454C2.01956 13.7729 0.997858 12.644 0.606603 11.2595C0.368836 10.5016 0.378835 9.68517 0.466513 8.90605C0.78051 7.06658 2.16033 5.46701 3.93669 4.89166C4.64572 3.27586 6.19298 2.07094 7.94595 1.82563C9.10987 1.66355 10.3147 1.90721 11.3329 2.49876C12.8165 0.853348 15.4012 0.367075 17.3748 1.37784C18.8803 2.09678 19.9568 3.59674 20.2182 5.23238C21.6507 5.80626 22.8572 6.9766 23.3307 8.4623C23.6473 9.38216 23.6578 10.3954 23.4528 11.3398C23.0864 12.8136 22.0461 14.0683 20.6995 14.754C20.7027 15.0163 21.5649 16.9074 21.4207 18.3345C21.3892 20.1187 20.2575 21.8096 18.6881 22.6309C17.7723 23.1655 16.687 23.1554 15.6924 23.1449ZM11.4011 18.0091C12.6705 17.8677 13.5026 16.761 14.1489 15.7642C14.4545 15.3102 14.6879 14.802 14.9198 14.3187C15.2206 14.5943 15.4754 15.1136 15.951 15.2373C16.452 15.3933 17.0394 15.2666 17.3461 14.8115C17.9331 13.7167 17.6438 12.3956 17.3019 11.2611C17.0915 10.6094 16.8153 9.94095 16.2898 9.47906C16.4019 8.68852 15.9334 7.88564 15.2675 7.47185C14.7 7.92437 13.8365 7.92165 13.289 7.43757C12.2397 8.50775 11.2781 8.47222 10.3492 7.62407C10.1405 7.43345 9.74216 8.78756 8.34428 8.02049C7.54117 8.6934 6.91846 9.34072 6.36668 10.2727C5.83051 11.2776 5.26901 12.1699 5.22063 13.2611C5.19736 13.8988 5.69569 14.567 6.37092 14.5152C7.0458 14.5754 7.50518 13.9112 8.01618 13.6353C8.09239 14.5254 8.17824 15.4816 8.47902 16.3506C8.82426 17.475 10.0402 18.1896 11.1912 18.026C11.2726 18.0196 11.4011 18.009 11.4011 18.0091ZM12.06 14.6515C11.4426 14.2731 11.7397 13.4519 11.715 12.8554C11.7764 12.1356 11.8257 11.3788 12.1493 10.7231C12.4917 10.2556 13.3269 10.4359 13.3638 11.0358C13.3393 11.6391 13.0623 12.2398 13.0954 12.8652C13.0235 13.3875 13.1474 13.9742 12.9163 14.4515C12.7268 14.7156 12.3407 14.7924 12.06 14.6515ZM9.3636 14.3077C8.78206 13.9922 8.96681 13.1982 8.8756 12.6463C8.95122 12.0072 8.88828 11.1966 9.42332 10.7485C9.94655 10.3836 10.6588 11.0084 10.4113 11.5821C10.1474 12.3071 10.3204 13.0992 10.3259 13.8344C10.2261 14.268 9.76228 14.4982 9.3636 14.3077Z" fill="black"/>
+</g>
+<defs>
+<clipPath id="clip0_0_3">
+<rect width="24" height="24" fill="white"/>
+</clipPath>
+</defs>
+</svg>`
+	}
+};
+
+export function detectPlatform(url: string): string | null {
+	for (const [platform, pattern] of Object.entries(platformPatterns)) {
+		if (pattern.test(url) && platformsData[platform]) {
+			return platform;
+		}
+	}
+	return null;
+}
