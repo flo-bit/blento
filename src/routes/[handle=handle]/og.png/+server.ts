@@ -1,6 +1,8 @@
+import { getCDNImageBlobUrl } from '$lib/atproto/methods.js';
 import type { UserCache } from '$lib/types';
 import { loadData } from '$lib/website/load';
 import type { Handle } from '@atcute/lexicons';
+import { isDid } from '@atcute/lexicons/syntax';
 import { ImageResponse } from '@ethercorps/sveltekit-og';
 
 function escapeHtml(str: string): string {
@@ -13,20 +15,25 @@ function escapeHtml(str: string): string {
 }
 
 export async function GET({ params, platform }) {
-	const handle = params.handle;
-
 	const cache = platform?.env?.USER_DATA_CACHE as unknown;
 
 	const data = await loadData(params.handle as Handle, cache as UserCache);
 
-	const image = data.profile.avatar;
+	let image: string | undefined = data.profile.avatar;
+
+	if (data.publication.icon) {
+		image =
+			getCDNImageBlobUrl({ did: data.did, blob: data.publication.icon }) ?? data.profile.avatar;
+	}
+
+	const name = data.publication?.name ?? data.profile.displayName ?? data.profile.handle;
 
 	const htmlString = `
 <div class="flex flex-col p-8 w-full h-full bg-neutral-900">
     <div class="flex items-center mb-8 mt-16">
       <img src="${escapeHtml(image ?? '')}" width="128" height="128" class="rounded-full" />
 
-	    <h1 class="text-neutral-50 text-7xl ml-4">${escapeHtml(handle)}</h1>
+	    <h1 class="text-neutral-50 text-7xl ml-4">${escapeHtml(name)}</h1>
     </div>
 
 	<p class="mt-8 text-4xl text-neutral-300">Check out my blento</p>
