@@ -16,7 +16,7 @@ That's why all your data is saved on your atproto personal data server, so you c
 
 Should blento.app shut down at some point, someone else can also spin up a new version that shows all blentos (note: it's MIT licensed so you _could_ do that now too and offer a competing service, but please don't (except for self-hosting your own profile ofc), legal != nice).
 
-One other note: for most independence I encourage everyone to get their own domain see [how to setup a custom domain](./docs/CustomDomain.md), selfhosting on the other hand while currently possible is not encourage *yet* before this project reaches a more stable state (if you do want to selfhost though, see [here](./docs/Selfhosting.md)).
+One other note: for most independence I encourage everyone to get their own domain see [how to setup a custom domain](./docs/CustomDomain.md), selfhosting on the other hand while currently possible is not encourage _yet_ before this project reaches a more stable state (if you do want to selfhost though, see [here](./docs/Selfhosting.md)).
 
 ## Making Custom cards
 
