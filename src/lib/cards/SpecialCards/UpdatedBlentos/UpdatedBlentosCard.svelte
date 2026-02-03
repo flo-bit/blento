@@ -6,12 +6,16 @@
 
 	let { item }: ContentComponentProps = $props();
 
+	type ProfileWithUrl = AppBskyActorDefs.ProfileViewDetailed & { url?: string };
+
 	const data = getAdditionalUserData();
 	// svelte-ignore state_referenced_locally
-	const profiles = data[item.cardType] as AppBskyActorDefs.ProfileViewDetailed[];
+	const profiles = data[item.cardType] as ProfileWithUrl[];
 
-	function getLink(profile: AppBskyActorDefs.ProfileViewDetailed): string {
-		if (profile.handle && profile.handle !== 'handle.invalid') {
+	function getLink(profile: ProfileWithUrl): string {
+		if (profile.url) {
+			return profile.url;
+		} else if (profile.handle && profile.handle !== 'handle.invalid') {
 			return `/${profile.handle}`;
 		} else {
 			return `/${profile.did}`;
@@ -26,6 +30,7 @@
 				href={getLink(profile)}
 				class="bg-base-100 dark:bg-base-800 hover:bg-base-200 dark:hover:bg-base-700 accent:bg-accent-200/30 accent:hover:bg-accent-200/50 flex h-52 w-44 min-w-44 flex-col items-center justify-center gap-2 rounded-xl p-2 transition-colors duration-150"
 				target="_blank"
+				rel={profile.url ? 'nofollow noopener noreferrer' : undefined}
 			>
 				<Avatar src={profile.avatar} class="size-28" alt="" />
 				<div class="text-md line-clamp-1 max-w-full text-center font-bold">

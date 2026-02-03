@@ -104,6 +104,7 @@ export async function getDetailedProfile(data?: { did?: Did; client?: Client }) 
 export async function getBlentoOrBskyProfile(data: { did: Did; client?: Client }): Promise<
 	Awaited<ReturnType<typeof getDetailedProfile>> & {
 		hasBlento: boolean;
+		url?: string;
 	}
 > {
 	let blentoProfile;
@@ -127,7 +128,8 @@ export async function getBlentoOrBskyProfile(data: { did: Did; client?: Client }
 		displayName: blentoProfile?.value?.name || response?.displayName || response?.handle,
 		avatar: (getCDNImageBlobUrl({ did: data?.did, blob: blentoProfile?.value?.icon }) ||
 			response?.avatar) as `${string}:${string}`,
-		hasBlento: Boolean(blentoProfile.value)
+		hasBlento: Boolean(blentoProfile.value),
+		url: blentoProfile?.value?.url as string | undefined
 	};
 }
 

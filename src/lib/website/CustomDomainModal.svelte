@@ -11,6 +11,7 @@
 	import { user } from '$lib/atproto';
 	import { Button, Input } from '@foxui/core';
 	import Modal from '$lib/components/modal/Modal.svelte';
+	import { launchConfetti } from '@foxui/visual';
 
 	let step: 'input' | 'instructions' | 'verifying' | 'success' | 'error' = $state('input');
 	let domain = $state('');
@@ -55,6 +56,7 @@
 			const data = await res.json();
 
 			if (data.success) {
+				launchConfetti();
 				step = 'success';
 			} else if (data.error) {
 				errorMessage = data.error;
