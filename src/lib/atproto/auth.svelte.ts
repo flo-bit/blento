@@ -58,6 +58,10 @@ export async function initClient(options?: { customDomain?: string }) {
 	if (options?.customDomain) {
 		client_id.replace('blento.app', options.customDomain);
 		redirect_uri.replace('blento.app', options.customDomain);
+
+		console.log(client_id, redirect_uri);
+	} else {
+		console.log('no custom domain');
 	}
 
 	configureOAuth({
