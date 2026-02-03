@@ -1,5 +1,10 @@
 # Selfhosting with cloudflare workers
 
+I currently advise everyone to *not* selfhost, as long as this project is still in the beginning stages with lots of changes every day, isntead I'd suggest setting up a custom domain (see [here](./CustomDomain.md)) and only later once this project is more stable to selfhost, thanks to the magic of atproto, you'll just have to change where your domain points to and setup the selfhosted version and your content will magically transfer over.
+
+If you do still want to give selfhosting a try now, some features/cards may break on your selfhosted version, in that case sync with the upstream repo.
+
+
 1. fork this repo
 2. create a cloudflare worker application and connect it to your fork
 3. change the vars in `wrangler.jsonc` (including https:// in the PUBLIC_DOMAIN var!)
