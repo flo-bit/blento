@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Card from '../cards/Card/Card.svelte';
+	import Card from '../cards/_base/Card/Card.svelte';
 	import Profile from './Profile.svelte';
 	import {
 		getDescription,
@@ -11,7 +11,7 @@
 	} from '../helper';
 	import { innerWidth } from 'svelte/reactivity/window';
 	import { setDidContext, setHandleContext, setIsMobile } from './context';
-	import BaseCard from '../cards/BaseCard/BaseCard.svelte';
+	import BaseCard from '../cards/_base/BaseCard/BaseCard.svelte';
 	import type { WebsiteData } from '$lib/types';
 	import Context from './Context.svelte';
 	import MadeWithBlento from './MadeWithBlento.svelte';

@@ -16,6 +16,7 @@ export async function load({ platform }) {
 
 	while (!foundData && i < 20) {
 		const rando = Math.floor(Math.random() * list.keys.length);
+		console.log(list.keys[rando].name);
 
 		foundData = await getCache(list.keys[rando].name, 'self', cache as unknown as UserCache);
 

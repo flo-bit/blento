@@ -1,6 +1,6 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import type { GitHubContributionsData } from '$lib/cards/GitHubProfileCard/types';
+import type { GitHubContributionsData } from '$lib/cards/social/GitHubProfileCard/types';
 
 const GithubAPIURL = 'https://edge-function-github-contribution.vercel.app/api/github-data?user=';
 
