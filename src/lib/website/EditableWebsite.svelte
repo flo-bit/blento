@@ -4,11 +4,7 @@
 	import {
 		checkAndUploadImage,
 		clamp,
-		compactItems,
 		createEmptyCard,
-		findValidPosition,
-		fixAllCollisions,
-		fixCollisions,
 		getHideProfileSection,
 		getProfilePosition,
 		getName,
@@ -43,6 +39,7 @@
 	import CardCommand from '$lib/components/card-command/CardCommand.svelte';
 	import { shouldMirror, mirrorLayout } from './layout-mirror';
 	import { SvelteMap } from 'svelte/reactivity';
+	import { fixCollisions, compactItems, fixAllCollisions } from '$lib/layout';
 
 	let {
 		data
@@ -546,9 +543,9 @@
 				return;
 			}
 
-			fixAllCollisions(copiedCards);
+			fixAllCollisions(copiedCards, false);
 			fixAllCollisions(copiedCards, true);
-			compactItems(copiedCards);
+			compactItems(copiedCards, false);
 			compactItems(copiedCards, true);
 
 			items = copiedCards;

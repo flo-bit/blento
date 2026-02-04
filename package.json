@@ -81,6 +81,7 @@
 		"perfect-freehand": "^1.2.2",
 		"plyr": "^3.8.4",
 		"qr-code-styling": "^1.8.6",
+		"react-grid-layout": "^2.2.2",
 		"simple-icons": "^16.6.0",
 		"svelte-sonner": "^1.0.7",
 		"tailwind-merge": "^3.4.0",

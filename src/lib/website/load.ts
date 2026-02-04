@@ -1,11 +1,11 @@
 import { getDetailedProfile, listRecords, resolveHandle, parseUri, getRecord } from '$lib/atproto';
 import { CardDefinitionsByType } from '$lib/cards';
 import type { Item, UserCache, WebsiteData } from '$lib/types';
-import { compactItems, fixAllCollisions } from '$lib/helper';
 import { error } from '@sveltejs/kit';
 import type { ActorIdentifier, Did } from '@atcute/lexicons';
 
 import { isDid, isHandle } from '@atcute/lexicons/syntax';
+import { fixAllCollisions, compactItems } from '$lib/layout';
 
 const CURRENT_CACHE_VERSION = 1;
 
@@ -202,10 +202,10 @@ function checkData(data: WebsiteData): WebsiteData {
 	const cards = data.cards.filter((v) => v.page === data.page);
 
 	if (cards.length > 0) {
-		fixAllCollisions(cards);
+		fixAllCollisions(cards, false);
 		fixAllCollisions(cards, true);
 
-		compactItems(cards);
+		compactItems(cards, false);
 		compactItems(cards, true);
 	}
 

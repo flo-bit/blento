@@ -15,7 +15,6 @@
 		getSelectCard
 	} from '$lib/website/context';
 	import PlainTextEditor from '$lib/components/PlainTextEditor.svelte';
-	import { fixAllCollisions, fixCollisions } from '$lib/helper';
 
 	let colorsChoices = [
 		{ class: 'text-base-500', label: 'base' },
