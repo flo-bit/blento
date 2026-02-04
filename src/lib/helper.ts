@@ -180,27 +180,36 @@ export function compactItems(items: Item[], mobile: boolean = false) {
 		mobile ? a.mobileY - b.mobileY || a.mobileX - b.mobileX : a.y - b.y || a.x - b.x
 	);
 
+	// For each item, find the lowest Y it can occupy by checking the bottom edges
+	// of all horizontally-overlapping items already placed above it.
+	const settled: Item[] = [];
+
 	for (const item of sortedItems) {
-		// Try moving item up row by row until we hit y=0 or a collision
-		while (true) {
-			const currentY = mobile ? item.mobileY : item.y;
-			if (currentY <= 0) break;
+		const itemX = mobile ? item.mobileX : item.x;
+		const itemW = mobile ? item.mobileW : item.w;
 
-			// Temporarily move up by 1
-			if (mobile) item.mobileY -= 1;
-			else item.y -= 1;
+		let minY = 0;
 
-			// Check for collision with any other item
-			const hasCollision = items.some((other) => other !== item && overlaps(item, other, mobile));
+		for (const other of settled) {
+			const otherX = mobile ? other.mobileX : other.x;
+			const otherW = mobile ? other.mobileW : other.w;
 
-			if (hasCollision) {
-				// Revert the move
-				if (mobile) item.mobileY += 1;
-				else item.y += 1;
-				break;
+			// Check horizontal overlap
+			if (itemX < otherX + otherW && itemX + itemW > otherX) {
+				const otherBottom = mobile ? other.mobileY + other.mobileH : other.y + other.h;
+				if (otherBottom > minY) {
+					minY = otherBottom;
+				}
 			}
-			// No collision, keep the new position and try moving up again
 		}
+
+		if (mobile) {
+			item.mobileY = minY;
+		} else {
+			item.y = minY;
+		}
+
+		settled.push(item);
 	}
 }
 
@@ -553,9 +562,17 @@ export async function savePage(
 	originalPublication: string
 ) {
 	const promises = [];
+
+	// Build a lookup of original cards by ID for O(1) access
+	const originalCardsById = new Map<string, Item>();
+	for (const card of data.cards) {
+		originalCardsById.set(card.id, card);
+	}
+
 	// find all cards that have been updated (where items differ from originalItems)
 	for (let item of currentItems) {
-		const originalItem = data.cards.find((i) => cardsEqual(i, item));
+		const orig = originalCardsById.get(item.id);
+		const originalItem = orig && cardsEqual(orig, item) ? orig : undefined;
 
 		if (!originalItem) {
 			console.log('updated or new item', item);

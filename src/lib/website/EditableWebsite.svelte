@@ -57,6 +57,7 @@
 		data.publication.preferences ??= {};
 		data.publication.preferences.accentColor = newAccent;
 		data.publication.preferences.baseColor = newBase;
+		hasUnsavedChanges = true;
 		data = { ...data };
 	}
 
@@ -68,19 +69,22 @@
 	// svelte-ignore state_referenced_locally
 	let publication = $state(JSON.stringify(data.publication));
 
-	// Track saved state for comparison
 	// svelte-ignore state_referenced_locally
-	let savedItems = $state(JSON.stringify(data.cards));
-	// svelte-ignore state_referenced_locally
-	let savedPublication = $state(JSON.stringify(data.publication));
+	let savedItemsSnapshot = JSON.stringify(data.cards);
 
 	let hasUnsavedChanges = $state(false);
 
+	// Detect card content and publication changes (e.g. sidebar edits)
+	// The guard ensures JSON.stringify only runs while no changes are detected yet.
+	// Once hasUnsavedChanges is true, Svelte still fires this effect on item mutations
+	// but the early return makes it effectively free.
 	$effect(() => {
-		if (!hasUnsavedChanges) {
-			hasUnsavedChanges =
-				JSON.stringify(items) !== savedItems ||
-				JSON.stringify(data.publication) !== savedPublication;
+		if (hasUnsavedChanges) return;
+		if (
+			JSON.stringify(items) !== savedItemsSnapshot ||
+			JSON.stringify(data.publication) !== publication
+		) {
+			hasUnsavedChanges = true;
 		}
 	});
 
@@ -137,6 +141,7 @@
 	let editedOn = $state(data.publication.preferences?.editedOn ?? 0);
 
 	function onLayoutChanged() {
+		hasUnsavedChanges = true;
 		// Set the bit for the current layout: desktop=1, mobile=2
 		editedOn = editedOn | (isMobile ? 2 : 1);
 		if (shouldMirror(editedOn)) {
@@ -266,9 +271,8 @@
 
 			publication = JSON.stringify(data.publication);
 
-			// Update saved state
-			savedItems = JSON.stringify(items);
-			savedPublication = JSON.stringify(data.publication);
+			savedItemsSnapshot = JSON.stringify(items);
+			hasUnsavedChanges = false;
 
 			saveSuccess = true;
 
@@ -558,6 +562,13 @@
 		}
 	}
 
+	let lastGridPos: {
+		x: number;
+		y: number;
+		swapWithId: string | null;
+		placement: string | null;
+	} | null = $state(null);
+
 	let debugPoint = $state({ x: 0, y: 0 });
 
 	function getGridPosition(
@@ -750,8 +761,38 @@
 
 		e.preventDefault();
 
+		// Auto-scroll near edges (always process, even if grid pos unchanged)
+		const scrollZone = 100;
+		const scrollSpeed = 10;
+		const viewportHeight = window.innerHeight;
+
+		if (touch.clientY < scrollZone) {
+			const intensity = 1 - touch.clientY / scrollZone;
+			window.scrollBy(0, -scrollSpeed * intensity);
+		} else if (touch.clientY > viewportHeight - scrollZone) {
+			const intensity = 1 - (viewportHeight - touch.clientY) / scrollZone;
+			window.scrollBy(0, scrollSpeed * intensity);
+		}
+
 		const result = getGridPosition(touch.clientX, touch.clientY);
 		if (!result || !activeDragElement.item) return;
+
+		// Skip redundant work if grid position hasn't changed
+		if (
+			lastGridPos &&
+			lastGridPos.x === result.x &&
+			lastGridPos.y === result.y &&
+			lastGridPos.swapWithId === result.swapWithId &&
+			lastGridPos.placement === result.placement
+		) {
+			return;
+		}
+		lastGridPos = {
+			x: result.x,
+			y: result.y,
+			swapWithId: result.swapWithId,
+			placement: result.placement
+		};
 
 		const draggedOrigPos = activeDragElement.originalPositions.get(activeDragElement.item.id);
 
@@ -793,19 +834,6 @@
 		}
 
 		fixCollisions(items, activeDragElement.item, isMobile);
-
-		// Auto-scroll near edges
-		const scrollZone = 100;
-		const scrollSpeed = 10;
-		const viewportHeight = window.innerHeight;
-
-		if (touch.clientY < scrollZone) {
-			const intensity = 1 - touch.clientY / scrollZone;
-			window.scrollBy(0, -scrollSpeed * intensity);
-		} else if (touch.clientY > viewportHeight - scrollZone) {
-			const intensity = 1 - (viewportHeight - touch.clientY) / scrollZone;
-			window.scrollBy(0, scrollSpeed * intensity);
-		}
 	}
 
 	function touchEnd() {
@@ -822,6 +850,7 @@
 			activeDragElement.lastPlacement = null;
 		}
 
+		lastGridPos = null;
 		touchDragActive = false;
 	}
 
@@ -1270,8 +1299,38 @@
 				ondragover={(e) => {
 					e.preventDefault();
 
+					// Auto-scroll when dragging near top or bottom of viewport (always process)
+					const scrollZone = 100;
+					const scrollSpeed = 10;
+					const viewportHeight = window.innerHeight;
+
+					if (e.clientY < scrollZone) {
+						const intensity = 1 - e.clientY / scrollZone;
+						window.scrollBy(0, -scrollSpeed * intensity);
+					} else if (e.clientY > viewportHeight - scrollZone) {
+						const intensity = 1 - (viewportHeight - e.clientY) / scrollZone;
+						window.scrollBy(0, scrollSpeed * intensity);
+					}
+
 					const result = getDragXY(e);
 					if (!result) return;
+
+					// Skip redundant work if grid position hasn't changed
+					if (
+						lastGridPos &&
+						lastGridPos.x === result.x &&
+						lastGridPos.y === result.y &&
+						lastGridPos.swapWithId === result.swapWithId &&
+						lastGridPos.placement === result.placement
+					) {
+						return;
+					}
+					lastGridPos = {
+						x: result.x,
+						y: result.y,
+						swapWithId: result.swapWithId,
+						placement: result.placement
+					};
 
 					activeDragElement.x = result.x;
 					activeDragElement.y = result.y;
@@ -1323,21 +1382,6 @@
 						// Now fix collisions (with compacting)
 						fixCollisions(items, activeDragElement.item, isMobile);
 					}
-
-					// Auto-scroll when dragging near top or bottom of viewport
-					const scrollZone = 100;
-					const scrollSpeed = 10;
-					const viewportHeight = window.innerHeight;
-
-					if (e.clientY < scrollZone) {
-						// Near top - scroll up
-						const intensity = 1 - e.clientY / scrollZone;
-						window.scrollBy(0, -scrollSpeed * intensity);
-					} else if (e.clientY > viewportHeight - scrollZone) {
-						// Near bottom - scroll down
-						const intensity = 1 - (viewportHeight - e.clientY) / scrollZone;
-						window.scrollBy(0, scrollSpeed * intensity);
-					}
 				}}
 				ondragend={async (e) => {
 					e.preventDefault();
@@ -1348,6 +1392,7 @@
 					activeDragElement.item = null;
 					activeDragElement.lastTargetId = null;
 					activeDragElement.lastPlacement = null;
+					lastGridPos = null;
 					return true;
 				}}
 				class={[

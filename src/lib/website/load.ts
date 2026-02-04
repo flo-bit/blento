@@ -73,26 +73,25 @@ export async function loadData(
 		throw error(404);
 	}
 
-	const cards = await listRecords({ did, collection: 'app.blento.card' }).catch(() => {
-		console.error('error getting records for collection app.blento.card');
-		return [] as Awaited<ReturnType<typeof listRecords>>;
-	});
-
-	const mainPublication = await getRecord({
-		did,
-		collection: 'site.standard.publication',
-		rkey: 'blento.self'
-	}).catch(() => {
-		console.error('error getting record for collection site.standard.publication');
-		return undefined;
-	});
-
-	const pages = await listRecords({ did, collection: 'app.blento.page' }).catch(() => {
-		console.error('error getting records for collection app.blento.page');
-		return [] as Awaited<ReturnType<typeof listRecords>>;
-	});
-
-	const profile = await getDetailedProfile({ did });
+	const [cards, mainPublication, pages, profile] = await Promise.all([
+		listRecords({ did, collection: 'app.blento.card' }).catch(() => {
+			console.error('error getting records for collection app.blento.card');
+			return [] as Awaited<ReturnType<typeof listRecords>>;
+		}),
+		getRecord({
+			did,
+			collection: 'site.standard.publication',
+			rkey: 'blento.self'
+		}).catch(() => {
+			console.error('error getting record for collection site.standard.publication');
+			return undefined;
+		}),
+		listRecords({ did, collection: 'app.blento.page' }).catch(() => {
+			console.error('error getting records for collection app.blento.page');
+			return [] as Awaited<ReturnType<typeof listRecords>>;
+		}),
+		getDetailedProfile({ did })
+	]);
 
 	const cardTypes = new Set(cards.map((v) => v.value.cardType ?? '') as string[]);
 	const cardTypesArray = Array.from(cardTypes);
@@ -144,7 +143,7 @@ export async function loadData(
 	const stringifiedResult = JSON.stringify(result);
 	await cache?.put?.(handle, stringifiedResult);
 
-	const parsedResult = JSON.parse(stringifiedResult);
+	const parsedResult = structuredClone(result) as any;
 
 	parsedResult.publication = (
 		parsedResult.publications as Awaited<ReturnType<typeof listRecords>>
