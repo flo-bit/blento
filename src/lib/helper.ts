@@ -3,8 +3,6 @@ import { COLUMNS, margin, mobileMargin } from '$lib';
 import { CardDefinitionsByType } from './cards';
 import { deleteRecord, getCDNImageBlobUrl, putRecord, uploadBlob } from '$lib/atproto';
 import * as TID from '@atcute/tid';
-import { overlaps } from './layout';
-
 export function clamp(value: number, min: number, max: number): number {
 	return Math.min(Math.max(value, min), max);
 }
@@ -29,7 +27,6 @@ export const colors = [
 	'bg-rose-500'
 ];
 
-
 export function sortItems(a: Item, b: Item) {
 	return a.y * COLUMNS + a.x - b.y * COLUMNS - b.x;
 }
@@ -50,143 +47,6 @@ export function cardsEqual(a: Item, b: Item) {
 		a.color === b.color &&
 		a.page === b.page
 	);
-}
-
-export function setPositionOfNewItem(
-	newItem: Item,
-	items: Item[],
-	viewportCenter?: { gridY: number; isMobile: boolean }
-) {
-	if (viewportCenter) {
-		const { gridY, isMobile } = viewportCenter;
-
-		if (isMobile) {
-			// Place at viewport center Y
-			newItem.mobileY = Math.max(0, Math.round(gridY - newItem.mobileH / 2));
-			newItem.mobileY = Math.floor(newItem.mobileY / 2) * 2;
-
-			// Try to find a free X at this Y
-			let found = false;
-			for (
-				newItem.mobileX = 0;
-				newItem.mobileX <= COLUMNS - newItem.mobileW;
-				newItem.mobileX += 2
-			) {
-				if (!items.some((item) => overlaps(newItem, item, true))) {
-					found = true;
-					break;
-				}
-			}
-			if (!found) {
-				newItem.mobileX = 0;
-			}
-
-			// Desktop: derive from mobile
-			newItem.y = Math.max(0, Math.round(newItem.mobileY / 2));
-			found = false;
-			for (newItem.x = 0; newItem.x <= COLUMNS - newItem.w; newItem.x += 2) {
-				if (!items.some((item) => overlaps(newItem, item, false))) {
-					found = true;
-					break;
-				}
-			}
-			if (!found) {
-				newItem.x = 0;
-			}
-		} else {
-			// Place at viewport center Y
-			newItem.y = Math.max(0, Math.round(gridY - newItem.h / 2));
-
-			// Try to find a free X at this Y
-			let found = false;
-			for (newItem.x = 0; newItem.x <= COLUMNS - newItem.w; newItem.x += 2) {
-				if (!items.some((item) => overlaps(newItem, item, false))) {
-					found = true;
-					break;
-				}
-			}
-			if (!found) {
-				newItem.x = 0;
-			}
-
-			// Mobile: derive from desktop
-			newItem.mobileY = Math.max(0, Math.round(newItem.y * 2));
-			found = false;
-			for (
-				newItem.mobileX = 0;
-				newItem.mobileX <= COLUMNS - newItem.mobileW;
-				newItem.mobileX += 2
-			) {
-				if (!items.some((item) => overlaps(newItem, item, true))) {
-					found = true;
-					break;
-				}
-			}
-			if (!found) {
-				newItem.mobileX = 0;
-			}
-		}
-		return;
-	}
-
-	let foundPosition = false;
-	while (!foundPosition) {
-		for (newItem.x = 0; newItem.x <= COLUMNS - newItem.w; newItem.x++) {
-			const collision = items.find((item) => overlaps(newItem, item, false));
-			if (!collision) {
-				foundPosition = true;
-				break;
-			}
-		}
-		if (!foundPosition) newItem.y += 1;
-	}
-
-	let foundMobilePosition = false;
-	while (!foundMobilePosition) {
-		for (newItem.mobileX = 0; newItem.mobileX <= COLUMNS - newItem.mobileW; newItem.mobileX += 1) {
-			const collision = items.find((item) => overlaps(newItem, item, true));
-
-			if (!collision) {
-				foundMobilePosition = true;
-				break;
-			}
-		}
-		if (!foundMobilePosition) newItem.mobileY! += 1;
-	}
-}
-
-/**
- * Find a valid position for a new item in a single mode (desktop or mobile).
- * This modifies the item's position properties in-place.
- */
-export function findValidPosition(newItem: Item, items: Item[], mobile: boolean) {
-	if (mobile) {
-		let foundPosition = false;
-		newItem.mobileY = 0;
-		while (!foundPosition) {
-			for (newItem.mobileX = 0; newItem.mobileX <= COLUMNS - newItem.mobileW; newItem.mobileX++) {
-				const collision = items.find((item) => overlaps(newItem, item, true));
-				if (!collision) {
-					foundPosition = true;
-					break;
-				}
-			}
-			if (!foundPosition) newItem.mobileY! += 1;
-		}
-	} else {
-		let foundPosition = false;
-		newItem.y = 0;
-		while (!foundPosition) {
-			for (newItem.x = 0; newItem.x <= COLUMNS - newItem.w; newItem.x++) {
-				const collision = items.find((item) => overlaps(newItem, item, false));
-				if (!collision) {
-					foundPosition = true;
-					break;
-				}
-			}
-			if (!foundPosition) newItem.y += 1;
-		}
-	}
 }
 
 export async function refreshData(data: { updatedAt?: number; handle: string }) {

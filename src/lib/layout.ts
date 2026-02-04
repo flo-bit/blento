@@ -108,3 +108,145 @@ export function compactItems(items: Item[], mobile: boolean) {
 	const compacted = verticalCompactor.compact(layout, COLUMNS) as LayoutItem[];
 	applyLayout(items, compacted, mobile);
 }
+
+export function setPositionOfNewItem(
+	newItem: Item,
+	items: Item[],
+	viewportCenter?: { gridY: number; isMobile: boolean }
+) {
+	const desktopLayout = toLayout(items, false);
+	const mobileLayout = toLayout(items, true);
+
+	function hasCollision(mobile: boolean): boolean {
+		const layout = mobile ? mobileLayout : desktopLayout;
+		return getFirstCollision(layout, toLayoutItem(newItem, mobile)) !== undefined;
+	}
+
+	if (viewportCenter) {
+		const { gridY, isMobile } = viewportCenter;
+
+		if (isMobile) {
+			// Place at viewport center Y
+			newItem.mobileY = Math.max(0, Math.round(gridY - newItem.mobileH / 2));
+			newItem.mobileY = Math.floor(newItem.mobileY / 2) * 2;
+
+			// Try to find a free X at this Y
+			let found = false;
+			for (
+				newItem.mobileX = 0;
+				newItem.mobileX <= COLUMNS - newItem.mobileW;
+				newItem.mobileX += 2
+			) {
+				if (!hasCollision(true)) {
+					found = true;
+					break;
+				}
+			}
+			if (!found) {
+				newItem.mobileX = 0;
+			}
+
+			// Desktop: derive from mobile
+			newItem.y = Math.max(0, Math.round(newItem.mobileY / 2));
+			found = false;
+			for (newItem.x = 0; newItem.x <= COLUMNS - newItem.w; newItem.x += 2) {
+				if (!hasCollision(false)) {
+					found = true;
+					break;
+				}
+			}
+			if (!found) {
+				newItem.x = 0;
+			}
+		} else {
+			// Place at viewport center Y
+			newItem.y = Math.max(0, Math.round(gridY - newItem.h / 2));
+
+			// Try to find a free X at this Y
+			let found = false;
+			for (newItem.x = 0; newItem.x <= COLUMNS - newItem.w; newItem.x += 2) {
+				if (!hasCollision(false)) {
+					found = true;
+					break;
+				}
+			}
+			if (!found) {
+				newItem.x = 0;
+			}
+
+			// Mobile: derive from desktop
+			newItem.mobileY = Math.max(0, Math.round(newItem.y * 2));
+			found = false;
+			for (
+				newItem.mobileX = 0;
+				newItem.mobileX <= COLUMNS - newItem.mobileW;
+				newItem.mobileX += 2
+			) {
+				if (!hasCollision(true)) {
+					found = true;
+					break;
+				}
+			}
+			if (!found) {
+				newItem.mobileX = 0;
+			}
+		}
+		return;
+	}
+
+	let foundPosition = false;
+	while (!foundPosition) {
+		for (newItem.x = 0; newItem.x <= COLUMNS - newItem.w; newItem.x++) {
+			if (!hasCollision(false)) {
+				foundPosition = true;
+				break;
+			}
+		}
+		if (!foundPosition) newItem.y += 1;
+	}
+
+	let foundMobilePosition = false;
+	while (!foundMobilePosition) {
+		for (newItem.mobileX = 0; newItem.mobileX <= COLUMNS - newItem.mobileW; newItem.mobileX += 1) {
+			if (!hasCollision(true)) {
+				foundMobilePosition = true;
+				break;
+			}
+		}
+		if (!foundMobilePosition) newItem.mobileY! += 1;
+	}
+}
+
+/**
+ * Find a valid position for a new item in a single mode (desktop or mobile).
+ * This modifies the item's position properties in-place.
+ */
+export function findValidPosition(newItem: Item, items: Item[], mobile: boolean) {
+	const layout = toLayout(items, mobile);
+
+	if (mobile) {
+		let foundPosition = false;
+		newItem.mobileY = 0;
+		while (!foundPosition) {
+			for (newItem.mobileX = 0; newItem.mobileX <= COLUMNS - newItem.mobileW; newItem.mobileX++) {
+				if (!getFirstCollision(layout, toLayoutItem(newItem, true))) {
+					foundPosition = true;
+					break;
+				}
+			}
+			if (!foundPosition) newItem.mobileY! += 1;
+		}
+	} else {
+		let foundPosition = false;
+		newItem.y = 0;
+		while (!foundPosition) {
+			for (newItem.x = 0; newItem.x <= COLUMNS - newItem.w; newItem.x++) {
+				if (!getFirstCollision(layout, toLayoutItem(newItem, false))) {
+					foundPosition = true;
+					break;
+				}
+			}
+			if (!foundPosition) newItem.y += 1;
+		}
+	}
+}

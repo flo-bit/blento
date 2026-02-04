@@ -11,7 +11,6 @@
 		isTyping,
 		savePage,
 		scrollToItem,
-		setPositionOfNewItem,
 		validateLink,
 		getImage
 	} from '../helper';
@@ -39,7 +38,7 @@
 	import CardCommand from '$lib/components/card-command/CardCommand.svelte';
 	import { shouldMirror, mirrorLayout } from './layout-mirror';
 	import { SvelteMap } from 'svelte/reactivity';
-	import { fixCollisions, compactItems, fixAllCollisions } from '$lib/layout';
+	import { fixCollisions, compactItems, fixAllCollisions, setPositionOfNewItem } from '$lib/layout';
 
 	let {
 		data

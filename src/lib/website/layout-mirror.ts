@@ -1,7 +1,7 @@
 import { COLUMNS } from '$lib';
 import { CardDefinitionsByType } from '$lib/cards';
-import { clamp, findValidPosition } from '$lib/helper';
-import { fixAllCollisions } from '$lib/layout';
+import { clamp } from '$lib/helper';
+import { fixAllCollisions, findValidPosition } from '$lib/layout';
 import type { Item } from '$lib/types';
 
 /**
