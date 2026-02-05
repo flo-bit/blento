@@ -3,10 +3,8 @@
 	import { getImage, compressImage, getProfilePosition } from '$lib/helper';
 	import PlainTextEditor from '$lib/components/PlainTextEditor.svelte';
 	import MarkdownTextEditor from '$lib/components/MarkdownTextEditor.svelte';
-	import { Avatar, Button } from '@foxui/core';
-	import { getIsMobile } from './context';
+	import { Avatar } from '@foxui/core';
 	import MadeWithBlento from './MadeWithBlento.svelte';
-	import { SelectThemePopover } from '$lib/components/select-theme';
 
 	let { data = $bindable(), hideBlento = false }: { data: WebsiteData; hideBlento?: boolean } =
 		$props();
