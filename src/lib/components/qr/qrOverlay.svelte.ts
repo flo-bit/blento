@@ -18,6 +18,11 @@ export function qrOverlay(
 	const LONG_PRESS_DURATION = 500;
 	let longPressTimer: ReturnType<typeof setTimeout> | null = null;
 	let isLongPress = false;
+	let touchActive = false;
+
+	// Prevent iOS link preview on long-press
+	const originalCallout = node.style.getPropertyValue('-webkit-touch-callout');
+	node.style.setProperty('-webkit-touch-callout', 'none');
 
 	function getHref() {
 		return params.href || (node as HTMLAnchorElement).href || '';
@@ -27,6 +32,7 @@ export function qrOverlay(
 		if (params.disabled) return;
 		// Only start long press for primary button (touch/left-click), not right-click
 		if (e.button !== 0) return;
+		touchActive = e.pointerType === 'touch';
 		isLongPress = false;
 		longPressTimer = setTimeout(() => {
 			isLongPress = true;
@@ -39,6 +45,7 @@ export function qrOverlay(
 			clearTimeout(longPressTimer);
 			longPressTimer = null;
 		}
+		touchActive = false;
 	}
 
 	function handleClick(e: MouseEvent) {
@@ -55,11 +62,19 @@ export function qrOverlay(
 		}
 	}
 
+	function handleContextMenu(e: Event) {
+		// Prevent context menu during touch to avoid iOS preview
+		if (touchActive || isLongPress) {
+			e.preventDefault();
+		}
+	}
+
 	node.addEventListener('pointerdown', startLongPress);
 	node.addEventListener('pointerup', cancelLongPress);
 	node.addEventListener('pointercancel', cancelLongPress);
 	node.addEventListener('pointerleave', cancelLongPress);
 	node.addEventListener('click', handleClick);
+	node.addEventListener('contextmenu', handleContextMenu);
 
 	return {
 		update(newParams: { href?: string; context?: QRContext; disabled?: boolean }) {
@@ -71,7 +86,14 @@ export function qrOverlay(
 			node.removeEventListener('pointercancel', cancelLongPress);
 			node.removeEventListener('pointerleave', cancelLongPress);
 			node.removeEventListener('click', handleClick);
+			node.removeEventListener('contextmenu', handleContextMenu);
 			cancelLongPress();
+			// Restore original style
+			if (originalCallout) {
+				node.style.setProperty('-webkit-touch-callout', originalCallout);
+			} else {
+				node.style.removeProperty('-webkit-touch-callout');
+			}
 		}
 	};
 }
