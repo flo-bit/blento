@@ -7,11 +7,19 @@
 
 	const platform = $derived(item.cardData.platform as string);
 	const platformData = $derived(platformsData[platform]);
+
+	// Color logic:
+	// - base/transparent/undefined: background = brand color, icon = white
+	// - other: background = that color (from BaseCard), icon = white
+	const useBrandBackground = $derived(
+		!item.color || item.color === 'base' || item.color === 'transparent'
+	);
+	const brandColor = $derived(`#${item.cardData.color}`);
 </script>
 
 <div
 	class="flex h-full w-full items-center justify-center p-10"
-	style={`background-color: #${item.cardData.color}`}
+	style={useBrandBackground ? `background-color: ${brandColor}` : ''}
 >
 	<div
 		class="flex aspect-square max-h-full max-w-full items-center justify-center [&_svg]:size-full [&_svg]:max-w-60 [&_svg]:fill-white"

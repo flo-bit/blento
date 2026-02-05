@@ -127,7 +127,7 @@
 		const isDark = document.documentElement.classList.contains('dark');
 
 		// Draw shadow behind fluid (light mode only, transparent only)
-		if (shadowCanvas && item.color === 'transparent' && !isDark) {
+		if (shadowCanvas && item.color === 'transparent') {
 			shadowCanvas.width = width * dpr;
 			shadowCanvas.height = height * dpr;
 			const shadowCtx = shadowCanvas.getContext('2d')!;
@@ -153,10 +153,10 @@
 			}
 
 			// Draw darkened text shape behind fluid
-			shadowCtx.fillStyle = getHexCSSVar('--color-base-200');
+			shadowCtx.fillStyle = getHexCSSVar(isDark ? '--color-base-950' : '--color-base-200');
 			shadowCtx.fillText(text, width / 2, textY);
 		} else if (shadowCanvas) {
-			// Clear shadow canvas in dark mode
+			// Clear shadow canvas when not transparent
 			shadowCanvas.width = 1;
 			shadowCanvas.height = 1;
 		}
@@ -1774,7 +1774,7 @@
 		? 'bg-base-50 dark:bg-base-900'
 		: 'bg-black'}"
 >
-	<canvas bind:this={shadowCanvas} class="absolute h-full w-full dark:hidden"></canvas>
+	<canvas bind:this={shadowCanvas} class="absolute h-full w-full"></canvas>
 	<canvas bind:this={fluidCanvas} class="absolute h-full w-full"></canvas>
 	<canvas bind:this={maskCanvas} class="absolute h-full w-full"></canvas>
 </div>

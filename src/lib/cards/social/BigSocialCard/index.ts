@@ -36,8 +36,8 @@ export const BigSocialCardDefinition = {
 		return item;
 	},
 	name: 'Social Icon',
-	allowSetColor: false,
-	defaultColor: 'transparent',
+	allowSetColor: true,
+	defaultColor: 'base',
 	minW: 2,
 	minH: 2,
 	onUrlHandler: (url, item) => {
