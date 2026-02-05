@@ -1,21 +1,15 @@
 <script lang="ts">
-	import { Button, Modal, toast, Toaster, Sidebar } from '@foxui/core';
-	import { COLUMNS, margin, mobileMargin } from '$lib';
+	import { Button, Modal, toast, Toaster } from '@foxui/core';
+	import { COLUMNS } from '$lib';
 	import {
 		checkAndUploadImage,
-		clamp,
-		compactItems,
 		createEmptyCard,
-		findValidPosition,
-		fixAllCollisions,
-		fixCollisions,
 		getHideProfileSection,
 		getProfilePosition,
 		getName,
 		isTyping,
 		savePage,
 		scrollToItem,
-		setPositionOfNewItem,
 		validateLink,
 		getImage
 	} from '../helper';
@@ -32,7 +26,6 @@
 	import Context from './Context.svelte';
 	import Head from './Head.svelte';
 	import Account from './Account.svelte';
-	import { SelectThemePopover } from '$lib/components/select-theme';
 	import EditBar from './EditBar.svelte';
 	import SaveModal from './SaveModal.svelte';
 	import FloatingEditButton from './FloatingEditButton.svelte';
@@ -41,8 +34,17 @@
 	import { launchConfetti } from '@foxui/visual';
 	import Controls from './Controls.svelte';
 	import CardCommand from '$lib/components/card-command/CardCommand.svelte';
-	import { shouldMirror, mirrorLayout } from './layout-mirror';
 	import { SvelteMap } from 'svelte/reactivity';
+	import {
+		fixCollisions,
+		compactItems,
+		fixAllCollisions,
+		setPositionOfNewItem,
+		shouldMirror,
+		mirrorLayout,
+		getViewportCenterGridY,
+		EditableGrid
+	} from '$lib/layout';
 
 	let {
 		data
@@ -52,16 +54,6 @@
 
 	// Check if floating login button will be visible (to hide MadeWithBlento)
 	const showLoginOnEditPage = $derived(!user.isInitializing && !user.isLoggedIn);
-
-	function updateTheme(newAccent: string, newBase: string) {
-		data.publication.preferences ??= {};
-		data.publication.preferences.accentColor = newAccent;
-		data.publication.preferences.baseColor = newBase;
-		hasUnsavedChanges = true;
-		data = { ...data };
-	}
-
-	let imageDragOver = $state(false);
 
 	// svelte-ignore state_referenced_locally
 	let items: Item[] = $state(data.cards);
@@ -101,35 +93,7 @@
 		return () => window.removeEventListener('beforeunload', handleBeforeUnload);
 	});
 
-	let container: HTMLDivElement | undefined = $state();
-
-	let activeDragElement: {
-		element: HTMLDivElement | null;
-		item: Item | null;
-		w: number;
-		h: number;
-		x: number;
-		y: number;
-		mouseDeltaX: number;
-		mouseDeltaY: number;
-		// For hysteresis - track last decision to prevent flickering
-		lastTargetId: string | null;
-		lastPlacement: 'above' | 'below' | null;
-		// Store original positions to reset from during drag
-		originalPositions: Map<string, { x: number; y: number; mobileX: number; mobileY: number }>;
-	} = $state({
-		element: null,
-		item: null,
-		w: 0,
-		h: 0,
-		x: -1,
-		y: -1,
-		mouseDeltaX: 0,
-		mouseDeltaY: 0,
-		lastTargetId: null,
-		lastPlacement: null,
-		originalPositions: new Map()
-	});
+	let gridContainer: HTMLDivElement | undefined = $state();
 
 	let showingMobileView = $state(false);
 	let isMobile = $derived(showingMobileView || (innerWidth.current ?? 1000) < 1024);
@@ -164,18 +128,7 @@
 
 	const getY = (item: Item) => (isMobile ? (item.mobileY ?? item.y) : item.y);
 	const getH = (item: Item) => (isMobile ? (item.mobileH ?? item.h) : item.h);
-
 	let maxHeight = $derived(items.reduce((max, item) => Math.max(max, getY(item) + getH(item)), 0));
-
-	function getViewportCenterGridY(): { gridY: number; isMobile: boolean } | undefined {
-		if (!container) return undefined;
-		const rect = container.getBoundingClientRect();
-		const currentMargin = isMobile ? mobileMargin : margin;
-		const cellSize = (rect.width - currentMargin * 2) / COLUMNS;
-		const viewportCenterY = window.innerHeight / 2;
-		const gridY = (viewportCenterY - rect.top - currentMargin) / cellSize;
-		return { gridY, isMobile };
-	}
 
 	function newCard(type: string = 'link', cardData?: any) {
 		selectedCardId = null;
@@ -225,7 +178,9 @@
 		if (!newItem.item) return;
 		const item = newItem.item;
 
-		const viewportCenter = getViewportCenterGridY();
+		const viewportCenter = gridContainer
+			? getViewportCenterGridY(gridContainer, isMobile)
+			: undefined;
 		setPositionOfNewItem(item, items, viewportCenter);
 
 		items = [...items, item];
@@ -243,7 +198,7 @@
 		await tick();
 		cleanupDialogArtifacts();
 
-		scrollToItem(item, isMobile, container);
+		scrollToItem(item, isMobile, gridContainer);
 	}
 
 	let isSaving = $state(false);
@@ -546,9 +501,9 @@
 				return;
 			}
 
-			fixAllCollisions(copiedCards);
+			fixAllCollisions(copiedCards, false);
 			fixAllCollisions(copiedCards, true);
-			compactItems(copiedCards);
+			compactItems(copiedCards, false);
 			compactItems(copiedCards, true);
 
 			items = copiedCards;
@@ -561,309 +516,6 @@
 			isCopying = false;
 		}
 	}
-
-	let lastGridPos: {
-		x: number;
-		y: number;
-		swapWithId: string | null;
-		placement: string | null;
-	} | null = $state(null);
-
-	let debugPoint = $state({ x: 0, y: 0 });
-
-	function getGridPosition(
-		clientX: number,
-		clientY: number
-	):
-		| { x: number; y: number; swapWithId: string | null; placement: 'above' | 'below' | null }
-		| undefined {
-		if (!container || !activeDragElement.item) return;
-
-		// x, y represent the top-left corner of the dragged card
-		const x = clientX + activeDragElement.mouseDeltaX;
-		const y = clientY + activeDragElement.mouseDeltaY;
-
-		const rect = container.getBoundingClientRect();
-		const currentMargin = isMobile ? mobileMargin : margin;
-		const cellSize = (rect.width - currentMargin * 2) / COLUMNS;
-
-		// Get card dimensions based on current view mode
-		const cardW = isMobile
-			? (activeDragElement.item?.mobileW ?? activeDragElement.w)
-			: activeDragElement.w;
-		const cardH = isMobile
-			? (activeDragElement.item?.mobileH ?? activeDragElement.h)
-			: activeDragElement.h;
-
-		// Get dragged card's original position
-		const draggedOrigPos = activeDragElement.originalPositions.get(activeDragElement.item.id);
-
-		const draggedOrigY = draggedOrigPos
-			? isMobile
-				? draggedOrigPos.mobileY
-				: draggedOrigPos.y
-			: 0;
-
-		// Calculate raw grid position based on top-left of dragged card
-		let gridX = clamp(Math.round((x - rect.left - currentMargin) / cellSize), 0, COLUMNS - cardW);
-		gridX = Math.floor(gridX / 2) * 2;
-
-		let gridY = Math.max(Math.round((y - rect.top - currentMargin) / cellSize), 0);
-
-		if (isMobile) {
-			gridX = Math.floor(gridX / 2) * 2;
-			gridY = Math.floor(gridY / 2) * 2;
-		}
-
-		// Find if we're hovering over another card (using ORIGINAL positions)
-		const centerGridY = gridY + cardH / 2;
-		const centerGridX = gridX + cardW / 2;
-
-		let swapWithId: string | null = null;
-		let placement: 'above' | 'below' | null = null;
-
-		for (const other of items) {
-			if (other === activeDragElement.item) continue;
-
-			// Use original positions for hit testing
-			const origPos = activeDragElement.originalPositions.get(other.id);
-			if (!origPos) continue;
-
-			const otherX = isMobile ? origPos.mobileX : origPos.x;
-			const otherY = isMobile ? origPos.mobileY : origPos.y;
-			const otherW = isMobile ? other.mobileW : other.w;
-			const otherH = isMobile ? other.mobileH : other.h;
-
-			// Check if dragged card's center point is within this card's original bounds
-			if (
-				centerGridX >= otherX &&
-				centerGridX < otherX + otherW &&
-				centerGridY >= otherY &&
-				centerGridY < otherY + otherH
-			) {
-				// Check if this is a swap situation:
-				// Cards have the same dimensions and are on the same row
-				const canSwap = cardW === otherW && cardH === otherH && draggedOrigY === otherY;
-
-				if (canSwap) {
-					// Swap positions
-					swapWithId = other.id;
-					gridX = otherX;
-					gridY = otherY;
-					placement = null;
-
-					activeDragElement.lastTargetId = other.id;
-					activeDragElement.lastPlacement = null;
-				} else {
-					// Vertical placement (above/below)
-					// Detect drag direction: if dragging up, always place above
-					const isDraggingUp = gridY < draggedOrigY;
-
-					if (isDraggingUp) {
-						// When dragging up, always place above
-						placement = 'above';
-					} else {
-						// When dragging down, use top/bottom half logic
-						const midpointY = otherY + otherH / 2;
-						const hysteresis = 0.3;
-
-						if (activeDragElement.lastTargetId === other.id && activeDragElement.lastPlacement) {
-							if (activeDragElement.lastPlacement === 'above') {
-								placement = centerGridY > midpointY + hysteresis ? 'below' : 'above';
-							} else {
-								placement = centerGridY < midpointY - hysteresis ? 'above' : 'below';
-							}
-						} else {
-							placement = centerGridY < midpointY ? 'above' : 'below';
-						}
-					}
-
-					activeDragElement.lastTargetId = other.id;
-					activeDragElement.lastPlacement = placement;
-
-					if (placement === 'above') {
-						gridY = otherY;
-					} else {
-						gridY = otherY + otherH;
-					}
-				}
-				break;
-			}
-		}
-
-		// If we're not over any card, clear the tracking
-		if (!swapWithId && !placement) {
-			activeDragElement.lastTargetId = null;
-			activeDragElement.lastPlacement = null;
-		}
-
-		debugPoint.x = x - rect.left;
-		debugPoint.y = y - rect.top + currentMargin;
-
-		return { x: gridX, y: gridY, swapWithId, placement };
-	}
-
-	function getDragXY(
-		e: DragEvent & {
-			currentTarget: EventTarget & HTMLDivElement;
-		}
-	) {
-		return getGridPosition(e.clientX, e.clientY);
-	}
-
-	// Touch drag system (instant drag on selected card)
-	let touchDragActive = $state(false);
-
-	function touchStart(e: TouchEvent) {
-		if (!selectedCardId || !container) return;
-		const touch = e.touches[0];
-		if (!touch) return;
-
-		// Check if the touch is on the selected card element
-		const target = (e.target as HTMLElement)?.closest?.('.card');
-		if (!target || target.id !== selectedCardId) return;
-
-		const item = items.find((i) => i.id === selectedCardId);
-		if (!item || item.cardData?.locked) return;
-
-		// Start dragging immediately
-		touchDragActive = true;
-
-		const cardEl = container.querySelector(`#${CSS.escape(selectedCardId)}`) as HTMLDivElement;
-		if (!cardEl) return;
-
-		activeDragElement.element = cardEl;
-		activeDragElement.w = item.w;
-		activeDragElement.h = item.h;
-		activeDragElement.item = item;
-
-		// Store original positions of all items
-		activeDragElement.originalPositions = new Map();
-		for (const it of items) {
-			activeDragElement.originalPositions.set(it.id, {
-				x: it.x,
-				y: it.y,
-				mobileX: it.mobileX,
-				mobileY: it.mobileY
-			});
-		}
-
-		const rect = cardEl.getBoundingClientRect();
-		activeDragElement.mouseDeltaX = rect.left - touch.clientX;
-		activeDragElement.mouseDeltaY = rect.top - touch.clientY;
-	}
-
-	function touchMove(e: TouchEvent) {
-		if (!touchDragActive) return;
-
-		const touch = e.touches[0];
-		if (!touch) return;
-
-		e.preventDefault();
-
-		// Auto-scroll near edges (always process, even if grid pos unchanged)
-		const scrollZone = 100;
-		const scrollSpeed = 10;
-		const viewportHeight = window.innerHeight;
-
-		if (touch.clientY < scrollZone) {
-			const intensity = 1 - touch.clientY / scrollZone;
-			window.scrollBy(0, -scrollSpeed * intensity);
-		} else if (touch.clientY > viewportHeight - scrollZone) {
-			const intensity = 1 - (viewportHeight - touch.clientY) / scrollZone;
-			window.scrollBy(0, scrollSpeed * intensity);
-		}
-
-		const result = getGridPosition(touch.clientX, touch.clientY);
-		if (!result || !activeDragElement.item) return;
-
-		// Skip redundant work if grid position hasn't changed
-		if (
-			lastGridPos &&
-			lastGridPos.x === result.x &&
-			lastGridPos.y === result.y &&
-			lastGridPos.swapWithId === result.swapWithId &&
-			lastGridPos.placement === result.placement
-		) {
-			return;
-		}
-		lastGridPos = {
-			x: result.x,
-			y: result.y,
-			swapWithId: result.swapWithId,
-			placement: result.placement
-		};
-
-		const draggedOrigPos = activeDragElement.originalPositions.get(activeDragElement.item.id);
-
-		// Reset all items to original positions first
-		for (const it of items) {
-			const origPos = activeDragElement.originalPositions.get(it.id);
-			if (origPos && it !== activeDragElement.item) {
-				if (isMobile) {
-					it.mobileX = origPos.mobileX;
-					it.mobileY = origPos.mobileY;
-				} else {
-					it.x = origPos.x;
-					it.y = origPos.y;
-				}
-			}
-		}
-
-		// Update dragged item position
-		if (isMobile) {
-			activeDragElement.item.mobileX = result.x;
-			activeDragElement.item.mobileY = result.y;
-		} else {
-			activeDragElement.item.x = result.x;
-			activeDragElement.item.y = result.y;
-		}
-
-		// Handle horizontal swap
-		if (result.swapWithId && draggedOrigPos) {
-			const swapTarget = items.find((it) => it.id === result.swapWithId);
-			if (swapTarget) {
-				if (isMobile) {
-					swapTarget.mobileX = draggedOrigPos.mobileX;
-					swapTarget.mobileY = draggedOrigPos.mobileY;
-				} else {
-					swapTarget.x = draggedOrigPos.x;
-					swapTarget.y = draggedOrigPos.y;
-				}
-			}
-		}
-
-		fixCollisions(items, activeDragElement.item, isMobile);
-	}
-
-	function touchEnd() {
-		if (touchDragActive && activeDragElement.item) {
-			// Finalize position
-			fixCollisions(items, activeDragElement.item, isMobile);
-			onLayoutChanged();
-
-			activeDragElement.x = -1;
-			activeDragElement.y = -1;
-			activeDragElement.element = null;
-			activeDragElement.item = null;
-			activeDragElement.lastTargetId = null;
-			activeDragElement.lastPlacement = null;
-		}
-
-		lastGridPos = null;
-		touchDragActive = false;
-	}
-
-	// Only register non-passive touchmove when actively dragging
-	$effect(() => {
-		const el = container;
-		if (!touchDragActive || !el) return;
-
-		el.addEventListener('touchmove', touchMove, { passive: false });
-		return () => {
-			el.removeEventListener('touchmove', touchMove);
-		};
-	});
 
 	let linkValue = $state('');
 
@@ -988,7 +640,9 @@
 			fixCollisions(items, item, isMobile);
 			fixCollisions(items, item, !isMobile);
 		} else {
-			const viewportCenter = getViewportCenterGridY();
+			const viewportCenter = gridContainer
+				? getViewportCenterGridY(gridContainer, isMobile)
+				: undefined;
 			setPositionOfNewItem(item, items, viewportCenter);
 			items = [...items, item];
 			fixCollisions(items, item, false, true);
@@ -1001,84 +655,16 @@
 
 		await tick();
 
-		scrollToItem(item, isMobile, container);
+		scrollToItem(item, isMobile, gridContainer);
 	}
 
-	function handleImageDragOver(event: DragEvent) {
-		const dt = event.dataTransfer;
-		if (!dt) return;
-
-		let hasImage = false;
-		if (dt.items) {
-			for (let i = 0; i < dt.items.length; i++) {
-				const item = dt.items[i];
-				if (item && item.kind === 'file' && item.type.startsWith('image/')) {
-					hasImage = true;
-					break;
-				}
-			}
-		} else if (dt.files) {
-			for (let i = 0; i < dt.files.length; i++) {
-				const file = dt.files[i];
-				if (file?.type.startsWith('image/')) {
-					hasImage = true;
-					break;
-				}
-			}
-		}
-
-		if (hasImage) {
-			event.preventDefault();
-			event.stopPropagation();
-
-			imageDragOver = true;
-		}
-	}
-
-	function handleImageDragLeave(event: DragEvent) {
-		event.preventDefault();
-		event.stopPropagation();
-		imageDragOver = false;
-	}
-
-	async function handleImageDrop(event: DragEvent) {
-		event.preventDefault();
-		event.stopPropagation();
-		const dropX = event.clientX;
-		const dropY = event.clientY;
-		imageDragOver = false;
-
-		if (!event.dataTransfer?.files?.length) return;
-
-		const imageFiles = Array.from(event.dataTransfer.files).filter((f) =>
-			f?.type.startsWith('image/')
-		);
-		if (imageFiles.length === 0) return;
-
-		// Calculate starting grid position from drop coordinates
-		let gridX = 0;
-		let gridY = 0;
-		if (container) {
-			const rect = container.getBoundingClientRect();
-			const currentMargin = isMobile ? mobileMargin : margin;
-			const cellSize = (rect.width - currentMargin * 2) / COLUMNS;
-			const cardW = isMobile ? 4 : 2;
-
-			gridX = clamp(Math.round((dropX - rect.left - currentMargin) / cellSize), 0, COLUMNS - cardW);
-			gridX = Math.floor(gridX / 2) * 2;
-
-			gridY = Math.max(Math.round((dropY - rect.top - currentMargin) / cellSize), 0);
-			if (isMobile) {
-				gridY = Math.floor(gridY / 2) * 2;
-			}
-		}
-
-		for (let i = 0; i < imageFiles.length; i++) {
+	async function handleFileDrop(files: File[], gridX: number, gridY: number) {
+		for (let i = 0; i < files.length; i++) {
 			// First image gets the drop position, rest use normal placement
 			if (i === 0) {
-				await processImageFile(imageFiles[i], gridX, gridY);
+				await processImageFile(files[i], gridX, gridY);
 			} else {
-				await processImageFile(imageFiles[i]);
+				await processImageFile(files[i]);
 			}
 		}
 	}
@@ -1126,7 +712,9 @@
 			objectUrl
 		};
 
-		const viewportCenter = getViewportCenterGridY();
+		const viewportCenter = gridContainer
+			? getViewportCenterGridY(gridContainer, isMobile)
+			: undefined;
 		setPositionOfNewItem(item, items, viewportCenter);
 		items = [...items, item];
 		fixCollisions(items, item, false, true);
@@ -1138,7 +726,7 @@
 
 		await tick();
 
-		scrollToItem(item, isMobile, container);
+		scrollToItem(item, isMobile, gridContainer);
 	}
 
 	async function handleVideoInputChange(event: Event) {
@@ -1168,12 +756,6 @@
 
 		addLink(link);
 	}}
-/>
-
-<svelte:window
-	ondragover={handleImageDragOver}
-	ondragleave={handleImageDragLeave}
-	ondrop={handleImageDrop}
 />
 
 <Head
@@ -1285,123 +867,19 @@
 			]}
 		>
 			<div class="pointer-events-none"></div>
-			<!-- svelte-ignore a11y_no_static_element_interactions a11y_click_events_have_key_events -->
-			<div
-				bind:this={container}
-				onclick={(e) => {
-					// Deselect when tapping empty grid space
-					if (e.target === e.currentTarget || !(e.target as HTMLElement)?.closest?.('.card')) {
-						selectedCardId = null;
-					}
+			<EditableGrid
+				bind:items
+				bind:ref={gridContainer}
+				{isMobile}
+				{selectedCardId}
+				{isCoarse}
+				onlayoutchange={onLayoutChanged}
+				ondeselect={() => {
+					selectedCardId = null;
 				}}
-				ontouchstart={touchStart}
-				ontouchend={touchEnd}
-				ondragover={(e) => {
-					e.preventDefault();
-
-					// Auto-scroll when dragging near top or bottom of viewport (always process)
-					const scrollZone = 100;
-					const scrollSpeed = 10;
-					const viewportHeight = window.innerHeight;
-
-					if (e.clientY < scrollZone) {
-						const intensity = 1 - e.clientY / scrollZone;
-						window.scrollBy(0, -scrollSpeed * intensity);
-					} else if (e.clientY > viewportHeight - scrollZone) {
-						const intensity = 1 - (viewportHeight - e.clientY) / scrollZone;
-						window.scrollBy(0, scrollSpeed * intensity);
-					}
-
-					const result = getDragXY(e);
-					if (!result) return;
-
-					// Skip redundant work if grid position hasn't changed
-					if (
-						lastGridPos &&
-						lastGridPos.x === result.x &&
-						lastGridPos.y === result.y &&
-						lastGridPos.swapWithId === result.swapWithId &&
-						lastGridPos.placement === result.placement
-					) {
-						return;
-					}
-					lastGridPos = {
-						x: result.x,
-						y: result.y,
-						swapWithId: result.swapWithId,
-						placement: result.placement
-					};
-
-					activeDragElement.x = result.x;
-					activeDragElement.y = result.y;
-
-					if (activeDragElement.item) {
-						// Get dragged card's original position for swapping
-						const draggedOrigPos = activeDragElement.originalPositions.get(
-							activeDragElement.item.id
-						);
-
-						// Reset all items to original positions first
-						for (const it of items) {
-							const origPos = activeDragElement.originalPositions.get(it.id);
-							if (origPos && it !== activeDragElement.item) {
-								if (isMobile) {
-									it.mobileX = origPos.mobileX;
-									it.mobileY = origPos.mobileY;
-								} else {
-									it.x = origPos.x;
-									it.y = origPos.y;
-								}
-							}
-						}
-
-						// Update dragged item position
-						if (isMobile) {
-							activeDragElement.item.mobileX = result.x;
-							activeDragElement.item.mobileY = result.y;
-						} else {
-							activeDragElement.item.x = result.x;
-							activeDragElement.item.y = result.y;
-						}
-
-						// Handle horizontal swap
-						if (result.swapWithId && draggedOrigPos) {
-							const swapTarget = items.find((it) => it.id === result.swapWithId);
-							if (swapTarget) {
-								// Move swap target to dragged card's original position
-								if (isMobile) {
-									swapTarget.mobileX = draggedOrigPos.mobileX;
-									swapTarget.mobileY = draggedOrigPos.mobileY;
-								} else {
-									swapTarget.x = draggedOrigPos.x;
-									swapTarget.y = draggedOrigPos.y;
-								}
-							}
-						}
-
-						// Now fix collisions (with compacting)
-						fixCollisions(items, activeDragElement.item, isMobile);
-					}
-				}}
-				ondragend={async (e) => {
-					e.preventDefault();
-					// safari fix
-					activeDragElement.x = -1;
-					activeDragElement.y = -1;
-					activeDragElement.element = null;
-					activeDragElement.item = null;
-					activeDragElement.lastTargetId = null;
-					activeDragElement.lastPlacement = null;
-					lastGridPos = null;
-					return true;
-				}}
-				class={[
-					'@container/grid pointer-events-auto relative col-span-3 rounded-4xl px-2 py-8 @5xl/wrapper:px-8',
-					imageDragOver && 'outline-accent-500 outline-3 -outline-offset-10 outline-dashed'
-				]}
+				onfiledrop={handleFileDrop}
 			>
 				{#each items as item, i (item.id)}
-					<!-- {#if item !== activeDragElement.item} -->
 					<BaseEditingCard
 						bind:item={items[i]}
 						ondelete={() => {
@@ -1422,45 +900,11 @@
 							fixCollisions(items, item, isMobile);
 							onLayoutChanged();
 						}}
-						ondragstart={(e: DragEvent) => {
-							const target = e.currentTarget as HTMLDivElement;
-							activeDragElement.element = target;
-							activeDragElement.w = item.w;
-							activeDragElement.h = item.h;
-							activeDragElement.item = item;
-							// fix for div shadow during drag and drop
-							const transparent = document.createElement('div');
-							transparent.style.position = 'fixed';
-							transparent.style.top = '-1000px';
-							transparent.style.width = '1px';
-							transparent.style.height = '1px';
-							document.body.appendChild(transparent);
-							e.dataTransfer?.setDragImage(transparent, 0, 0);
-							requestAnimationFrame(() => transparent.remove());
-
-							// Store original positions of all items
-							activeDragElement.originalPositions = new Map();
-							for (const it of items) {
-								activeDragElement.originalPositions.set(it.id, {
-									x: it.x,
-									y: it.y,
-									mobileX: it.mobileX,
-									mobileY: it.mobileY
-								});
-							}
-
-							const rect = target.getBoundingClientRect();
-							activeDragElement.mouseDeltaX = rect.left - e.clientX;
-							activeDragElement.mouseDeltaY = rect.top - e.clientY;
-						}}
 					>
 						<EditingCard bind:item={items[i]} />
 					</BaseEditingCard>
-					<!-- {/if} -->
 				{/each}
-
-				<div style="height: {((maxHeight + 2) / 8) * 100}cqw;"></div>
-			</div>
+			</EditableGrid>
 		</div>
 	</div>
 

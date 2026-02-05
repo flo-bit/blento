@@ -5,16 +5,6 @@
 	import type { Snippet } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { getColor } from '../..';
-	import { getIsCoarse } from '$lib/website/context';
-
-	function tryGetIsCoarse(): (() => boolean) | undefined {
-		try {
-			return getIsCoarse();
-		} catch {
-			return undefined;
-		}
-	}
-	const isCoarse = tryGetIsCoarse();
 
 	const colors = {
 		base: 'bg-base-200/50 dark:bg-base-950/50',
@@ -49,7 +39,7 @@
 	id={item.id}
 	data-flip-id={item.id}
 	bind:this={ref}
-	draggable={isEditing && !locked && !isCoarse?.()}
+	draggable={false}
 	class={[
 		'card group/card selection:bg-accent-600/50 focus-within:outline-accent-500 @container/card absolute isolate z-0 rounded-3xl outline-offset-2 transition-all duration-200 focus-within:outline-2',
 		color ? (colors[color] ?? colors.accent) : colors.base,
