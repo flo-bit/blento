@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { colorToHue, getCSSVar, getHexOfCardColor } from '../../helper';
+	import { colorToHue, getHexCSSVar, getHexOfCardColor } from '../../helper';
 	import type { ContentComponentProps } from '../../types';
 	import { onMount, onDestroy, tick } from 'svelte';
 	let { item }: ContentComponentProps = $props();
@@ -13,6 +13,7 @@
 	let maskReady = false;
 	let isInitialized = $state(false);
 	let resizeObserver: ResizeObserver | null = null;
+	let themeObserver: MutationObserver | null = null;
 
 	// Pure hash function for shader keyword caching
 	function hashCode(s: string) {
@@ -132,17 +133,19 @@
 		ctx.clearRect(0, 0, maskCanvas.width, maskCanvas.height);
 		ctx.scale(dpr, dpr);
 
-		//const color = getCSSVar('--color-base-900');
-
-		ctx.fillStyle = 'black';
+		const isDark = document.documentElement.classList.contains('dark');
+		const bgColor =
+			item.color === 'transparent'
+				? getHexCSSVar(isDark ? '--color-base-900' : '--color-base-50')
+				: 'black';
+		ctx.fillStyle = bgColor;
 		ctx.fillRect(0, 0, width, height);
 
 		// Font size as percentage of container width
 		const textFontSize = Math.round(width * fontSize);
 		ctx.font = `${fontWeight} ${textFontSize}px ${fontFamily}`;
 
-		ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
-		ctx.lineWidth = 2;
+		ctx.lineWidth = 3;
 		ctx.textAlign = 'center';
 
 		const metrics = ctx.measureText(text);
@@ -157,7 +160,23 @@
 			ctx.textBaseline = 'middle';
 		}
 
-		ctx.strokeText(text, width / 2, textY);
+		if (item.color === 'transparent') {
+			// Partially cut out the stroke area so fluid shows through
+			ctx.globalCompositeOperation = 'destination-out';
+			ctx.globalAlpha = 0.7;
+			ctx.strokeStyle = 'white';
+			ctx.strokeText(text, width / 2, textY);
+			ctx.globalAlpha = 1;
+			ctx.globalCompositeOperation = 'source-over';
+
+			// Add overlay: brighten in dark mode, darken in light mode
+			ctx.strokeStyle = isDark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.2)';
+			ctx.strokeText(text, width / 2, textY);
+		} else {
+			ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+			ctx.strokeText(text, width / 2, textY);
+		}
+
 		ctx.globalCompositeOperation = 'destination-out';
 		ctx.fillText(text, width / 2, textY);
 		ctx.globalCompositeOperation = 'source-over';
@@ -214,6 +233,17 @@
 				if (isInitialized) scheduleMaskDraw();
 			});
 		}
+
+		// Watch for dark mode changes to redraw mask with correct background
+		if (item.color === 'transparent') {
+			themeObserver = new MutationObserver(() => {
+				if (isInitialized) scheduleMaskDraw();
+			});
+			themeObserver.observe(document.documentElement, {
+				attributes: true,
+				attributeFilter: ['class']
+			});
+		}
 	});
 
 	onDestroy(() => {
@@ -221,6 +251,7 @@
 		if (splatIntervalId) clearInterval(splatIntervalId);
 		if (maskDrawRaf) cancelAnimationFrame(maskDrawRaf);
 		if (resizeObserver) resizeObserver.disconnect();
+		if (themeObserver) themeObserver.disconnect();
 	});
 
 	function initFluidSimulation(startHue: number, endHue: number) {
@@ -246,7 +277,7 @@
 			COLOR_UPDATE_SPEED: 10,
 			PAUSED: false,
 			BACK_COLOR: { r: 0, g: 0, b: 0 },
-			TRANSPARENT: false,
+			TRANSPARENT: item.color === 'transparent',
 			BLOOM: false,
 			BLOOM_ITERATIONS: 8,
 			BLOOM_RESOLUTION: 256,
@@ -1701,7 +1732,12 @@
 	}
 </script>
 
-<div bind:this={container} class="relative h-full w-full overflow-hidden bg-black">
+<div
+	bind:this={container}
+	class="relative h-full w-full overflow-hidden {item.color === 'transparent'
+		? 'bg-base-50 dark:bg-base-900'
+		: 'bg-black'}"
+>
 	<canvas bind:this={fluidCanvas} class="absolute h-full w-full"></canvas>
 	<canvas bind:this={maskCanvas} class="absolute h-full w-full"></canvas>
 </div>
