@@ -961,18 +961,6 @@
 			class="bg-base-900/70 text-base-100 fixed top-2 right-2 z-50 flex items-center gap-2 rounded px-2 py-1 font-mono text-xs"
 		>
 			<span>editedOn: {editedOn}</span>
-			<button class="underline" onclick={addAllCardTypes}>+ all cards</button>
-			<input
-				bind:value={copyInput}
-				placeholder="handle/page"
-				class="bg-base-800 text-base-100 w-32 rounded px-1 py-0.5"
-				onkeydown={(e) => {
-					if (e.key === 'Enter') copyPageFrom();
-				}}
-			/>
-			<button class="underline" onclick={copyPageFrom} disabled={isCopying}>
-				{isCopying ? 'copying...' : 'copy'}
-			</button>
 		</div>
 	{/if}
 </Context>

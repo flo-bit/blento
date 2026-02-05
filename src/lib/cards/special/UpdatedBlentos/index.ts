@@ -46,12 +46,14 @@ export const UpdatedBlentosCardDefitition = {
 
 			let result = [...(await Promise.all(profiles)), ...existingUsersArray];
 
-			result = result.filter((v) => v && v.handle !== 'handle.invalid');
+			result = result.filter(
+				(v) => v && v.handle !== 'handle.invalid' && !v.handle.endsWith('.pds.rip')
+			);
 
 			if (cache) {
 				await cache?.put('updatedBlentos', JSON.stringify(result));
 			}
-			return JSON.parse(JSON.stringify(result));
+			return JSON.parse(JSON.stringify(result.slice(0, 20)));
 		} catch (error) {
 			console.error('error fetching updated blentos', error);
 			return [];

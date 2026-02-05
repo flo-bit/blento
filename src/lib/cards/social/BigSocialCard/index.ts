@@ -167,7 +167,9 @@ export const platformPatterns: Record<string, RegExp> = {
 
 	tangled: /(?:tangled\.org)/i,
 
-	mail: /(?:mailto:)/i
+	mail: /(?:mailto:)/i,
+
+	npmx: /(?:npmx\.dev)/i
 };
 
 export const platformsData: Record<string, SimpleIcon> = {
@@ -277,6 +279,25 @@ export const platformsData: Record<string, SimpleIcon> = {
 </g>
 <defs>
 <clipPath id="clip0_0_3">
+<rect width="24" height="24" fill="white"/>
+</clipPath>
+</defs>
+</svg>`
+	},
+
+	npmx: {
+		slug: 'npmx',
+		path: '',
+		title: 'npmx',
+		source: '',
+		hex: '0A0A0A',
+		svg: `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_4_2)">
+<path d="M6.12765 16.4049H2V20.5326H6.12765V16.4049Z" fill="#525252"/>
+<path d="M10.9049 23.8485L19.6885 -1H22L13.2164 23.8485H10.9049Z" fill="#FAFAFA"/>
+</g>
+<defs>
+<clipPath id="clip0_4_2">
 <rect width="24" height="24" fill="white"/>
 </clipPath>
 </defs>
