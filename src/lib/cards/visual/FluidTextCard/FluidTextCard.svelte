@@ -1769,11 +1769,11 @@
 
 <div
 	bind:this={container}
-	class="relative h-full w-full overflow-hidden {item.color === 'transparent'
+	class="relative h-full w-full overflow-hidden rounded-[inherit] {item.color === 'transparent'
 		? 'bg-base-50 dark:bg-base-900'
 		: 'bg-black'}"
 >
-	<canvas bind:this={shadowCanvas} class="absolute h-full w-full"></canvas>
-	<canvas bind:this={fluidCanvas} class="absolute h-full w-full"></canvas>
+	<canvas bind:this={shadowCanvas} class="absolute inset-0.5 h-[calc(100%-4px)] w-[calc(100%-4px)]"></canvas>
+	<canvas bind:this={fluidCanvas} class="absolute inset-0.5 h-[calc(100%-4px)] w-[calc(100%-4px)]"></canvas>
 	<canvas bind:this={maskCanvas} class="absolute h-full w-full"></canvas>
 </div>
