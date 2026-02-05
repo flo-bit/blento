@@ -146,8 +146,7 @@
 				metrics.actualBoundingBoxDescent !== undefined
 			) {
 				shadowCtx.textBaseline = 'alphabetic';
-				textY =
-					(height + metrics.actualBoundingBoxAscent - metrics.actualBoundingBoxDescent) / 2;
+				textY = (height + metrics.actualBoundingBoxAscent - metrics.actualBoundingBoxDescent) / 2;
 			} else {
 				shadowCtx.textBaseline = 'middle';
 			}
