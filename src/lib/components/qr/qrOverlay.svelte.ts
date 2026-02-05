@@ -23,8 +23,10 @@ export function qrOverlay(
 		return params.href || (node as HTMLAnchorElement).href || '';
 	}
 
-	function startLongPress() {
+	function startLongPress(e: PointerEvent) {
 		if (params.disabled) return;
+		// Only start long press for primary button (touch/left-click), not right-click
+		if (e.button !== 0) return;
 		isLongPress = false;
 		longPressTimer = setTimeout(() => {
 			isLongPress = true;
@@ -43,13 +45,14 @@ export function qrOverlay(
 		if (isLongPress) {
 			e.preventDefault();
 			isLongPress = false;
+			return;
 		}
-	}
 
-	function handleContextMenu(e: MouseEvent) {
-		if (params.disabled) return;
-		e.preventDefault();
-		openModal?.(getHref(), params.context ?? {});
+		// Shift-click opens QR modal
+		if (e.shiftKey && !params.disabled) {
+			e.preventDefault();
+			openModal?.(getHref(), params.context ?? {});
+		}
 	}
 
 	node.addEventListener('pointerdown', startLongPress);
@@ -57,7 +60,6 @@ export function qrOverlay(
 	node.addEventListener('pointercancel', cancelLongPress);
 	node.addEventListener('pointerleave', cancelLongPress);
 	node.addEventListener('click', handleClick);
-	node.addEventListener('contextmenu', handleContextMenu);
 
 	return {
 		update(newParams: { href?: string; context?: QRContext; disabled?: boolean }) {
@@ -69,7 +71,6 @@ export function qrOverlay(
 			node.removeEventListener('pointercancel', cancelLongPress);
 			node.removeEventListener('pointerleave', cancelLongPress);
 			node.removeEventListener('click', handleClick);
-			node.removeEventListener('contextmenu', handleContextMenu);
 			cancelLongPress();
 		}
 	};
