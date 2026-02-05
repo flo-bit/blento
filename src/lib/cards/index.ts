@@ -29,6 +29,7 @@ import { StatusphereCardDefinition } from './media/StatusphereCard';
 import { EventCardDefinition } from './social/EventCard';
 import { VCardCardDefinition } from './social/VCardCard';
 import { DrawCardDefinition } from './visual/DrawCard';
+import { RecordVisualizerCardDefinition } from './visual/RecordVisualizerCard';
 import { TimerCardDefinition } from './utilities/TimerCard';
 import { ClockCardDefinition } from './utilities/ClockCard';
 import { CountdownCardDefinition } from './utilities/CountdownCard';
@@ -75,6 +76,7 @@ export const AllCardDefinitions = [
 	EventCardDefinition,
 	VCardCardDefinition,
 	DrawCardDefinition,
+	RecordVisualizerCardDefinition,
 	TimerCardDefinition,
 	ClockCardDefinition,
 	CountdownCardDefinition,

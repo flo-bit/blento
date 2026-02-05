@@ -79,6 +79,7 @@
 		"mapbox-gl": "^3.18.1",
 		"marked": "^17.0.1",
 		"perfect-freehand": "^1.2.2",
+		"pixi.js": "^8.16.0",
 		"plyr": "^3.8.4",
 		"qr-code-styling": "^1.8.6",
 		"react-grid-layout": "^2.2.2",
