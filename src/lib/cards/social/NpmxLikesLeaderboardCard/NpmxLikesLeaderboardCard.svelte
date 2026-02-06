@@ -2,7 +2,7 @@
 	import type { Item } from '$lib/types';
 	import { onMount } from 'svelte';
 	import { getAdditionalUserData, getDidContext, getHandleContext } from '$lib/website/context';
-	import { CardDefinitionsByType } from '../..';
+	import { NpmxLikesLeaderboardCardDefinition } from '.';
 
 	interface LeaderboardEntry {
 		subjectRef: string;
@@ -27,7 +27,7 @@
 	onMount(async () => {
 		if (leaderboard) return;
 
-		leaderboard = (await CardDefinitionsByType[item.cardType]?.loadData?.([], {
+		leaderboard = (await NpmxLikesLeaderboardCardDefinition.loadData?.([], {
 			did,
 			handle
 		})) as LeaderboardData | undefined;
