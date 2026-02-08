@@ -1,6 +1,7 @@
 import type { CardDefinition } from '../../../types';
 import CreateLastFMCardModal from '../CreateLastFMCardModal.svelte';
 import LastFMRecentTracksCard from './LastFMRecentTracksCard.svelte';
+import { fetchLastFM } from '../api.remote';
 
 export const LastFMRecentTracksCardDefinition = {
 	type: 'lastfmRecentTracks',
@@ -18,46 +19,22 @@ export const LastFMRecentTracksCardDefinition = {
 			const username = item.cardData.lastfmUsername;
 			if (!username) continue;
 			try {
-				const response = await fetch(
-					`https://blento.app/api/lastfm?method=user.getRecentTracks&user=${encodeURIComponent(username)}&limit=50`
-				);
-				if (!response.ok) continue;
-				const text = await response.text();
-				const result = JSON.parse(text);
-				allData[`lastfmRecentTracks:${username}`] = result?.recenttracks?.track ?? [];
+				const data = await fetchLastFM({ method: 'user.getRecentTracks', user: username });
+				if (data) allData[`lastfmRecentTracks:${username}`] = data?.recenttracks?.track ?? [];
 			} catch (error) {
 				console.error('Failed to fetch Last.fm recent tracks:', error);
 			}
 		}
 		return allData;
 	},
-	loadDataServer: async (items, { cache, env }) => {
-		const apiKey = env?.LASTFM_API_KEY;
-		if (!apiKey) return {};
+	loadDataServer: async (items) => {
 		const allData: Record<string, unknown> = {};
 		for (const item of items) {
 			const username = item.cardData.lastfmUsername;
 			if (!username) continue;
 			try {
-				const cacheKey = `user.getRecentTracks:${username}:7day:50`;
-				const cached = await cache?.get('lastfm', cacheKey);
-				if (cached) {
-					allData[`lastfmRecentTracks:${username}`] = JSON.parse(cached)?.recenttracks?.track ?? [];
-					continue;
-				}
-				const params = new URLSearchParams({
-					method: 'user.getRecentTracks',
-					user: username,
-					api_key: apiKey,
-					format: 'json',
-					limit: '50'
-				});
-				const response = await fetch(`https://ws.audioscrobbler.com/2.0/?${params}`);
-				if (!response.ok) continue;
-				const data = await response.json();
-				if (data.error) continue;
-				await cache?.put('lastfm', cacheKey, JSON.stringify(data), 15 * 60);
-				allData[`lastfmRecentTracks:${username}`] = data?.recenttracks?.track ?? [];
+				const data = await fetchLastFM({ method: 'user.getRecentTracks', user: username });
+				if (data) allData[`lastfmRecentTracks:${username}`] = data?.recenttracks?.track ?? [];
 			} catch (error) {
 				console.error('Failed to fetch Last.fm recent tracks:', error);
 			}

@@ -2,6 +2,7 @@ import type { CardDefinition } from '../../../types';
 import CreateLastFMCardModal from '../CreateLastFMCardModal.svelte';
 import LastFMTopAlbumsCard from './LastFMTopAlbumsCard.svelte';
 import LastFMTopAlbumsCardSettings from './LastFMTopAlbumsCardSettings.svelte';
+import { fetchLastFM } from '../api.remote';
 
 export const LastFMTopAlbumsCardDefinition = {
 	type: 'lastfmTopAlbums',
@@ -22,49 +23,23 @@ export const LastFMTopAlbumsCardDefinition = {
 			const period = item.cardData.period ?? '7day';
 			if (!username) continue;
 			try {
-				const response = await fetch(
-					`https://blento.app/api/lastfm?method=user.getTopAlbums&user=${encodeURIComponent(username)}&period=${period}&limit=50`
-				);
-				if (!response.ok) continue;
-				const text = await response.text();
-				const result = JSON.parse(text);
-				allData[`lastfmTopAlbums:${username}:${period}`] = result?.topalbums?.album ?? [];
+				const data = await fetchLastFM({ method: 'user.getTopAlbums', user: username, period });
+				if (data) allData[`lastfmTopAlbums:${username}:${period}`] = data?.topalbums?.album ?? [];
 			} catch (error) {
 				console.error('Failed to fetch Last.fm top albums:', error);
 			}
 		}
 		return allData;
 	},
-	loadDataServer: async (items, { cache, env }) => {
-		const apiKey = env?.LASTFM_API_KEY;
-		if (!apiKey) return {};
+	loadDataServer: async (items) => {
 		const allData: Record<string, unknown> = {};
 		for (const item of items) {
 			const username = item.cardData.lastfmUsername;
 			const period = item.cardData.period ?? '7day';
 			if (!username) continue;
 			try {
-				const cacheKey = `user.getTopAlbums:${username}:${period}:50`;
-				const cached = await cache?.get('lastfm', cacheKey);
-				if (cached) {
-					allData[`lastfmTopAlbums:${username}:${period}`] =
-						JSON.parse(cached)?.topalbums?.album ?? [];
-					continue;
-				}
-				const params = new URLSearchParams({
-					method: 'user.getTopAlbums',
-					user: username,
-					api_key: apiKey,
-					format: 'json',
-					limit: '50',
-					period
-				});
-				const response = await fetch(`https://ws.audioscrobbler.com/2.0/?${params}`);
-				if (!response.ok) continue;
-				const data = await response.json();
-				if (data.error) continue;
-				await cache?.put('lastfm', cacheKey, JSON.stringify(data), 60 * 60);
-				allData[`lastfmTopAlbums:${username}:${period}`] = data?.topalbums?.album ?? [];
+				const data = await fetchLastFM({ method: 'user.getTopAlbums', user: username, period });
+				if (data) allData[`lastfmTopAlbums:${username}:${period}`] = data?.topalbums?.album ?? [];
 			} catch (error) {
 				console.error('Failed to fetch Last.fm top albums:', error);
 			}

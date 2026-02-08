@@ -2,6 +2,7 @@ import type { CardDefinition } from '../../types';
 import GitHubContributorsCard from './GitHubContributorsCard.svelte';
 import CreateGitHubContributorsCardModal from './CreateGitHubContributorsCardModal.svelte';
 import GitHubContributorsCardSettings from './GitHubContributorsCardSettings.svelte';
+import { fetchGitHubContributors } from './api.remote';
 
 export type GitHubContributor = {
 	username: string;
@@ -33,19 +34,15 @@ export const GitHubContributorsCardDefinition = {
 			const key = `${owner}/${repo}`;
 			if (contributorsData[key]) continue;
 			try {
-				const response = await fetch(
-					`https://blento.app/api/github/contributors?owner=${encodeURIComponent(owner)}&repo=${encodeURIComponent(repo)}`
-				);
-				if (response.ok) {
-					contributorsData[key] = await response.json();
-				}
+				const data = await fetchGitHubContributors({ owner, repo });
+				if (data) contributorsData[key] = data;
 			} catch (error) {
 				console.error('Failed to fetch GitHub contributors:', error);
 			}
 		}
 		return contributorsData;
 	},
-	loadDataServer: async (items, { cache }) => {
+	loadDataServer: async (items) => {
 		const contributorsData: GitHubContributorsLoadedData = {};
 		for (const item of items) {
 			const { owner, repo } = item.cardData;
@@ -53,18 +50,8 @@ export const GitHubContributorsCardDefinition = {
 			const key = `${owner}/${repo}`;
 			if (contributorsData[key]) continue;
 			try {
-				const cached = await cache?.get('gh-contrib', key);
-				if (cached) {
-					contributorsData[key] = JSON.parse(cached);
-					continue;
-				}
-				const response = await fetch(
-					`https://edge-function-github-contribution.vercel.app/api/github-contributors?owner=${encodeURIComponent(owner)}&repo=${encodeURIComponent(repo)}`
-				);
-				if (!response.ok) continue;
-				const data = await response.json();
-				await cache?.put('gh-contrib', key, JSON.stringify(data));
-				contributorsData[key] = data;
+				const data = await fetchGitHubContributors({ owner, repo });
+				if (data) contributorsData[key] = data;
 			} catch (error) {
 				console.error('Failed to fetch GitHub contributors:', error);
 			}

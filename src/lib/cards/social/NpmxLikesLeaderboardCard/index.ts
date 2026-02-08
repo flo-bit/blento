@@ -1,5 +1,6 @@
 import type { CardDefinition } from '../../types';
 import NpmxLikesLeaderboardCard from './NpmxLikesLeaderboardCard.svelte';
+import { fetchNpmxLeaderboard } from './api.remote';
 
 export const NpmxLikesLeaderboardCardDefinition = {
 	type: 'npmxLikesLeaderboard',
@@ -11,25 +12,10 @@ export const NpmxLikesLeaderboardCardDefinition = {
 		card.mobileH = 6;
 	},
 	loadData: async () => {
-		const res = await fetch('https://blento.app/api/npmx-leaderboard');
-		const data = await res.json();
-		return data;
+		return await fetchNpmxLeaderboard();
 	},
-	loadDataServer: async (_items, { cache }) => {
-		try {
-			const cached = await cache?.get('npmx', 'likes');
-			if (cached) return JSON.parse(cached);
-			const response = await fetch(
-				'https://npmx-likes-leaderboard-api-production.up.railway.app/api/leaderboard/likes?limit=20'
-			);
-			if (!response.ok) return undefined;
-			const data = await response.json();
-			await cache?.put('npmx', 'likes', JSON.stringify(data));
-			return data;
-		} catch (error) {
-			console.error('Error fetching npmx leaderboard:', error);
-			return undefined;
-		}
+	loadDataServer: async () => {
+		return await fetchNpmxLeaderboard();
 	},
 	minW: 3,
 	canHaveLabel: true,

@@ -1,8 +1,8 @@
 import type { CardDefinition } from '../../types';
 import CreateGitHubProfileCardModal from './CreateGitHubProfileCardModal.svelte';
-import type GithubContributionsGraph from './GithubContributionsGraph.svelte';
 import GitHubProfileCard from './GitHubProfileCard.svelte';
 import type { GitHubContributionsData } from './types';
+import { fetchGitHubContributions } from './api.remote';
 
 export type GithubProfileLoadedData = Record<string, GitHubContributionsData | undefined>;
 
@@ -12,41 +12,27 @@ export const GithubProfileCardDefitition = {
 	creationModalComponent: CreateGitHubProfileCardModal,
 
 	loadData: async (items) => {
-		const githubData: Record<string, GithubContributionsGraph> = {};
+		const githubData: Record<string, GitHubContributionsData> = {};
 		for (const item of items) {
+			const user = item.cardData.user;
+			if (!user) continue;
 			try {
-				const response = await fetch(
-					`https://blento.app/api/github?user=${encodeURIComponent(item.cardData.user)}`
-				);
-				if (response.ok) {
-					githubData[item.cardData.user] = await response.json();
-				}
+				const data = await fetchGitHubContributions(user);
+				if (data) githubData[user] = data;
 			} catch (error) {
 				console.error('Failed to fetch GitHub contributions:', error);
 			}
 		}
 		return githubData;
 	},
-	loadDataServer: async (items, { cache }) => {
+	loadDataServer: async (items) => {
 		const githubData: Record<string, GitHubContributionsData> = {};
 		for (const item of items) {
 			const user = item.cardData.user;
 			if (!user) continue;
 			try {
-				const cached = await cache?.get('github', user);
-				if (cached) {
-					githubData[user] = JSON.parse(cached);
-					continue;
-				}
-				const response = await fetch(
-					`https://edge-function-github-contribution.vercel.app/api/github-data?user=${encodeURIComponent(user)}`
-				);
-				if (!response.ok) continue;
-				const data = await response.json();
-				if (!data?.user) continue;
-				const result = data.user as GitHubContributionsData;
-				await cache?.put('github', user, JSON.stringify(result));
-				githubData[user] = result;
+				const data = await fetchGitHubContributions(user);
+				if (data) githubData[user] = data;
 			} catch (error) {
 				console.error('Failed to fetch GitHub contributions:', error);
 			}
