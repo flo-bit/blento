@@ -27,6 +27,32 @@ export const GithubProfileCardDefitition = {
 		}
 		return githubData;
 	},
+	loadDataServer: async (items, { cache }) => {
+		const githubData: Record<string, GitHubContributionsData> = {};
+		for (const item of items) {
+			const user = item.cardData.user;
+			if (!user) continue;
+			try {
+				const cached = await cache?.get('github', user);
+				if (cached) {
+					githubData[user] = JSON.parse(cached);
+					continue;
+				}
+				const response = await fetch(
+					`https://edge-function-github-contribution.vercel.app/api/github-data?user=${encodeURIComponent(user)}`
+				);
+				if (!response.ok) continue;
+				const data = await response.json();
+				if (!data?.user) continue;
+				const result = data.user as GitHubContributionsData;
+				await cache?.put('github', user, JSON.stringify(result));
+				githubData[user] = result;
+			} catch (error) {
+				console.error('Failed to fetch GitHub contributions:', error);
+			}
+		}
+		return githubData;
+	},
 	onUrlHandler: (url, item) => {
 		const username = getGitHubUsername(url);
 

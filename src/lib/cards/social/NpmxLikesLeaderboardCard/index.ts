@@ -15,6 +15,22 @@ export const NpmxLikesLeaderboardCardDefinition = {
 		const data = await res.json();
 		return data;
 	},
+	loadDataServer: async (_items, { cache }) => {
+		try {
+			const cached = await cache?.get('npmx', 'likes');
+			if (cached) return JSON.parse(cached);
+			const response = await fetch(
+				'https://npmx-likes-leaderboard-api-production.up.railway.app/api/leaderboard/likes?limit=20'
+			);
+			if (!response.ok) return undefined;
+			const data = await response.json();
+			await cache?.put('npmx', 'likes', JSON.stringify(data));
+			return data;
+		} catch (error) {
+			console.error('Error fetching npmx leaderboard:', error);
+			return undefined;
+		}
+	},
 	minW: 3,
 	canHaveLabel: true,
 

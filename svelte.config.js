@@ -11,8 +11,12 @@ const config = {
 		adapter: adapter(),
 		paths: {
 			base: ''
+		},
+		experimental: {
+			remoteFunctions: true
 		}
 	},
+
 	compilerOptions: {
 		experimental: {
 			async: true

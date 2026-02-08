@@ -1,5 +1,6 @@
 import { loadData } from '$lib/website/load';
 import { env } from '$env/dynamic/public';
+import { env as privateEnv } from '$env/dynamic/private';
 import { createCache } from '$lib/cache';
 import type { ActorIdentifier } from '@atcute/lexicons';
 
@@ -15,11 +16,11 @@ export async function load({ platform, request }) {
 		try {
 			const did = await kv.get(customDomain);
 
-			if (did) return await loadData(did as ActorIdentifier, cache);
+			if (did) return await loadData(did as ActorIdentifier, cache, false, 'self', privateEnv);
 		} catch (error) {
 			console.error('failed to get custom domain kv', error);
 		}
 	}
 
-	return await loadData(handle as ActorIdentifier, cache);
+	return await loadData(handle as ActorIdentifier, cache, false, 'self', privateEnv);
 }

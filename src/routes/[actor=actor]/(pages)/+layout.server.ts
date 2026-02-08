@@ -9,5 +9,5 @@ export async function load({ params, platform }) {
 
 	const cache = createCache(platform);
 
-	return await loadData(params.actor, cache, false, params.page);
+	return await loadData(params.actor, cache, false, params.page, env);
 }

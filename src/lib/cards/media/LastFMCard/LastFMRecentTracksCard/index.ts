@@ -31,6 +31,39 @@ export const LastFMRecentTracksCardDefinition = {
 		}
 		return allData;
 	},
+	loadDataServer: async (items, { cache, env }) => {
+		const apiKey = env?.LASTFM_API_KEY;
+		if (!apiKey) return {};
+		const allData: Record<string, unknown> = {};
+		for (const item of items) {
+			const username = item.cardData.lastfmUsername;
+			if (!username) continue;
+			try {
+				const cacheKey = `user.getRecentTracks:${username}:7day:50`;
+				const cached = await cache?.get('lastfm', cacheKey);
+				if (cached) {
+					allData[`lastfmRecentTracks:${username}`] = JSON.parse(cached)?.recenttracks?.track ?? [];
+					continue;
+				}
+				const params = new URLSearchParams({
+					method: 'user.getRecentTracks',
+					user: username,
+					api_key: apiKey,
+					format: 'json',
+					limit: '50'
+				});
+				const response = await fetch(`https://ws.audioscrobbler.com/2.0/?${params}`);
+				if (!response.ok) continue;
+				const data = await response.json();
+				if (data.error) continue;
+				await cache?.put('lastfm', cacheKey, JSON.stringify(data), 15 * 60);
+				allData[`lastfmRecentTracks:${username}`] = data?.recenttracks?.track ?? [];
+			} catch (error) {
+				console.error('Failed to fetch Last.fm recent tracks:', error);
+			}
+		}
+		return allData;
+	},
 	onUrlHandler: (url, item) => {
 		const username = getLastFMUsername(url);
 		if (!username) return null;

@@ -44,7 +44,8 @@ export async function loadData(
 	handle: ActorIdentifier,
 	cache: CacheService | undefined,
 	forceUpdate: boolean = false,
-	page: string = 'self'
+	page: string = 'self',
+	env?: Record<string, string | undefined>
 ): Promise<WebsiteData> {
 	if (!handle) throw error(404);
 	if (handle === 'favicon.ico') throw error(404);
@@ -94,13 +95,17 @@ export async function loadData(
 	for (const cardType of cardTypesArray) {
 		const cardDef = CardDefinitionsByType[cardType];
 
-		if (!cardDef?.loadData) continue;
+		const items = cards.filter((v) => cardType === v.value.cardType).map((v) => v.value) as Item[];
 
 		try {
-			additionDataPromises[cardType] = cardDef.loadData(
-				cards.filter((v) => cardType === v.value.cardType).map((v) => v.value) as Item[],
-				loadOptions
-			);
+			if (cardDef?.loadDataServer) {
+				additionDataPromises[cardType] = cardDef.loadDataServer(items, {
+					...loadOptions,
+					env
+				});
+			} else if (cardDef?.loadData) {
+				additionDataPromises[cardType] = cardDef.loadData(items, loadOptions);
+			}
 		} catch {
 			console.error('error getting additional data for', cardType);
 		}

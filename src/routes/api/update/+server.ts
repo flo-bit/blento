@@ -1,5 +1,6 @@
 import { createCache } from '$lib/cache';
 import { getCache, loadData } from '$lib/website/load';
+import { env } from '$env/dynamic/private';
 import { json } from '@sveltejs/kit';
 import type { AppBskyActorDefs } from '@atcute/bluesky';
 
@@ -20,7 +21,7 @@ export async function GET({ platform }) {
 
 		try {
 			const cached = await getCache(handle, 'self', cache);
-			if (!cached) await loadData(handle, cache, true);
+			if (!cached) await loadData(handle, cache, true, 'self', env);
 		} catch (error) {
 			console.error(error);
 			return json('error');

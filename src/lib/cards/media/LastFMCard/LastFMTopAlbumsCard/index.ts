@@ -35,6 +35,42 @@ export const LastFMTopAlbumsCardDefinition = {
 		}
 		return allData;
 	},
+	loadDataServer: async (items, { cache, env }) => {
+		const apiKey = env?.LASTFM_API_KEY;
+		if (!apiKey) return {};
+		const allData: Record<string, unknown> = {};
+		for (const item of items) {
+			const username = item.cardData.lastfmUsername;
+			const period = item.cardData.period ?? '7day';
+			if (!username) continue;
+			try {
+				const cacheKey = `user.getTopAlbums:${username}:${period}:50`;
+				const cached = await cache?.get('lastfm', cacheKey);
+				if (cached) {
+					allData[`lastfmTopAlbums:${username}:${period}`] =
+						JSON.parse(cached)?.topalbums?.album ?? [];
+					continue;
+				}
+				const params = new URLSearchParams({
+					method: 'user.getTopAlbums',
+					user: username,
+					api_key: apiKey,
+					format: 'json',
+					limit: '50',
+					period
+				});
+				const response = await fetch(`https://ws.audioscrobbler.com/2.0/?${params}`);
+				if (!response.ok) continue;
+				const data = await response.json();
+				if (data.error) continue;
+				await cache?.put('lastfm', cacheKey, JSON.stringify(data), 60 * 60);
+				allData[`lastfmTopAlbums:${username}:${period}`] = data?.topalbums?.album ?? [];
+			} catch (error) {
+				console.error('Failed to fetch Last.fm top albums:', error);
+			}
+		}
+		return allData;
+	},
 	allowSetColor: true,
 	defaultColor: 'base',
 	minW: 2,

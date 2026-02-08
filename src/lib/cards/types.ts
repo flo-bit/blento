@@ -40,6 +40,23 @@ export type CardDefinition = {
 		{ did, handle, cache }: { did: Did; handle: string; cache?: CacheService }
 	) => Promise<unknown>;
 
+	// server-side version of loadData that calls external APIs directly
+	// instead of going through self-referential /api/ routes (avoids 522 on Cloudflare Workers)
+	loadDataServer?: (
+		items: Item[],
+		{
+			did,
+			handle,
+			cache,
+			env
+		}: {
+			did: Did;
+			handle: string;
+			cache?: CacheService;
+			env?: Record<string, string | undefined>;
+		}
+	) => Promise<unknown>;
+
 	// show color selection popup
 	allowSetColor?: boolean;
 
