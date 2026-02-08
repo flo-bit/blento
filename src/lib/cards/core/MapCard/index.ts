@@ -14,7 +14,7 @@ export const MapCardDefinition = {
 	},
 
 	creationModalComponent: CreateMapCardModal,
-	allowSetColor: false,
+	allowSetColor: true,
 	canHaveLabel: true,
 	settingsComponent: MapCardSettings,
 

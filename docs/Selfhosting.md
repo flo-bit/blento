@@ -35,4 +35,4 @@ DONE :) your blento should be live after a minute or two at `your-cloudflare-wor
 6. some cards need their own additional env keys, if you have these cards in your profile, create your keys and add them to your cloudflare worker
 
 - github profile: GITHUB_TOKEN (token with public_repo access)
-- map: PUBLIC_MAPBOX_TOKEN
+- map: no token needed (uses OpenFreeMap)
