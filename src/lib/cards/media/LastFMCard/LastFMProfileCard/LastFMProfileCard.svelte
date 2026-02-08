@@ -4,6 +4,7 @@
 	import { getAdditionalUserData } from '$lib/website/context';
 	import type { ContentComponentProps } from '../../../types';
 	import { qrOverlay } from '$lib/components/qr/qrOverlay.svelte';
+	import { fetchLastFM } from '../api.remote';
 
 	interface UserInfo {
 		name: string;
@@ -27,11 +28,11 @@
 		if (!item.cardData.lastfmUsername) return;
 
 		try {
-			const response = await fetch(
-				`/api/lastfm?method=user.getInfo&user=${encodeURIComponent(item.cardData.lastfmUsername)}`
-			);
-			if (response.ok) {
-				const result = await response.json();
+			const result = await fetchLastFM({
+				method: 'user.getInfo',
+				user: item.cardData.lastfmUsername
+			});
+			if (result) {
 				userInfo = result?.user;
 				data[cacheKey] = userInfo;
 			}

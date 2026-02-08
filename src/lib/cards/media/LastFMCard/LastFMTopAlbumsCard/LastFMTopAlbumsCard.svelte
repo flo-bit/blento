@@ -3,6 +3,7 @@
 	import type { ContentComponentProps } from '../../../types';
 	import { getAdditionalUserData } from '$lib/website/context';
 	import ImageGrid from '$lib/components/ImageGrid.svelte';
+	import { fetchLastFM } from '../api.remote';
 
 	interface Album {
 		name: string;
@@ -30,11 +31,12 @@
 		loading = true;
 
 		try {
-			const response = await fetch(
-				`/api/lastfm?method=user.getTopAlbums&user=${encodeURIComponent(item.cardData.lastfmUsername)}&period=${period}&limit=50`
-			);
-			if (response.ok) {
-				const result = await response.json();
+			const result = await fetchLastFM({
+				method: 'user.getTopAlbums',
+				user: item.cardData.lastfmUsername,
+				period
+			});
+			if (result) {
 				albums = result?.topalbums?.album ?? [];
 				data[cacheKey] = albums;
 			} else {

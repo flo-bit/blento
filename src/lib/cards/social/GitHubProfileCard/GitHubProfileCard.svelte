@@ -8,6 +8,7 @@
 	import { Button } from '@foxui/core';
 	import { browser } from '$app/environment';
 	import { qrOverlay } from '$lib/components/qr/qrOverlay.svelte';
+	import { fetchGitHubContributions } from './api.remote';
 
 	let { item, isEditing }: ContentComponentProps = $props();
 
@@ -23,9 +24,8 @@
 	onMount(async () => {
 		if (!contributionsData && item.cardData?.user) {
 			try {
-				const response = await fetch(`/api/github?user=${encodeURIComponent(item.cardData.user)}`);
-				if (response.ok) {
-					contributionsData = await response.json();
+				contributionsData = await fetchGitHubContributions(item.cardData.user);
+				if (contributionsData) {
 					data[item.cardType] ??= {};
 					(data[item.cardType] as GithubProfileLoadedData)[item.cardData.user] = contributionsData;
 				}

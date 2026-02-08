@@ -1,8 +1,8 @@
 import { getCDNImageBlobUrl } from '$lib/atproto/methods.js';
-import type { UserCache } from '$lib/types';
+import { createCache } from '$lib/cache';
 import { loadData } from '$lib/website/load';
+import { env } from '$env/dynamic/private';
 import type { Handle } from '@atcute/lexicons';
-import { isDid } from '@atcute/lexicons/syntax';
 import { ImageResponse } from '@ethercorps/sveltekit-og';
 
 function escapeHtml(str: string): string {
@@ -15,9 +15,9 @@ function escapeHtml(str: string): string {
 }
 
 export async function GET({ params, platform }) {
-	const cache = platform?.env?.USER_DATA_CACHE as unknown;
+	const cache = createCache(platform);
 
-	const data = await loadData(params.handle as Handle, cache as UserCache);
+	const data = await loadData(params.actor, cache, false, 'self', env);
 
 	let image: string | undefined = data.profile.avatar;
 

@@ -4,6 +4,7 @@
 	import type { ContentComponentProps } from '../../../types';
 	import LastFMAlbumArt from '../LastFMAlbumArt.svelte';
 	import { RelativeTime } from '@foxui/time';
+	import { fetchLastFM } from '../api.remote';
 
 	interface Track {
 		name: string;
@@ -29,11 +30,11 @@
 		if (!item.cardData.lastfmUsername) return;
 
 		try {
-			const response = await fetch(
-				`/api/lastfm?method=user.getRecentTracks&user=${encodeURIComponent(item.cardData.lastfmUsername)}&limit=50`
-			);
-			if (response.ok) {
-				const result = await response.json();
+			const result = await fetchLastFM({
+				method: 'user.getRecentTracks',
+				user: item.cardData.lastfmUsername
+			});
+			if (result) {
 				tracks = result?.recenttracks?.track ?? [];
 				data[cacheKey] = tracks;
 			} else {

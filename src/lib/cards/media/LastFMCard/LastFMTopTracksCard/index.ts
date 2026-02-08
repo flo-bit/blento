@@ -2,6 +2,7 @@ import type { CardDefinition } from '../../../types';
 import CreateLastFMCardModal from '../CreateLastFMCardModal.svelte';
 import LastFMPeriodSettings from '../LastFMPeriodSettings.svelte';
 import LastFMTopTracksCard from './LastFMTopTracksCard.svelte';
+import { fetchLastFM } from '../api.remote';
 
 export const LastFMTopTracksCardDefinition = {
 	type: 'lastfmTopTracks',
@@ -22,13 +23,23 @@ export const LastFMTopTracksCardDefinition = {
 			const period = item.cardData.period ?? '7day';
 			if (!username) continue;
 			try {
-				const response = await fetch(
-					`https://blento.app/api/lastfm?method=user.getTopTracks&user=${encodeURIComponent(username)}&period=${period}&limit=50`
-				);
-				if (!response.ok) continue;
-				const text = await response.text();
-				const result = JSON.parse(text);
-				allData[`lastfmTopTracks:${username}:${period}`] = result?.toptracks?.track ?? [];
+				const data = await fetchLastFM({ method: 'user.getTopTracks', user: username, period });
+				if (data) allData[`lastfmTopTracks:${username}:${period}`] = data?.toptracks?.track ?? [];
+			} catch (error) {
+				console.error('Failed to fetch Last.fm top tracks:', error);
+			}
+		}
+		return allData;
+	},
+	loadDataServer: async (items) => {
+		const allData: Record<string, unknown> = {};
+		for (const item of items) {
+			const username = item.cardData.lastfmUsername;
+			const period = item.cardData.period ?? '7day';
+			if (!username) continue;
+			try {
+				const data = await fetchLastFM({ method: 'user.getTopTracks', user: username, period });
+				if (data) allData[`lastfmTopTracks:${username}:${period}`] = data?.toptracks?.track ?? [];
 			} catch (error) {
 				console.error('Failed to fetch Last.fm top tracks:', error);
 			}

@@ -15,7 +15,7 @@ export const UpdatedBlentosCardDefitition = {
 				'https://ufos-api.microcosm.blue/records?collection=app.blento.card'
 			);
 			const recentRecords = await response.json();
-			const existingUsers = await cache?.get('updatedBlentos');
+			const existingUsers = await cache?.get('meta', 'updatedBlentos');
 			const existingUsersArray: ProfileWithBlentoFlag[] = existingUsers
 				? JSON.parse(existingUsers)
 				: [];
@@ -50,9 +50,8 @@ export const UpdatedBlentosCardDefitition = {
 				(v) => v && v.handle !== 'handle.invalid' && !v.handle.endsWith('.pds.rip')
 			);
 
-			if (cache) {
-				await cache?.put('updatedBlentos', JSON.stringify(result));
-			}
+			await cache?.put('meta', 'updatedBlentos', JSON.stringify(result));
+
 			return JSON.parse(JSON.stringify(result.slice(0, 20)));
 		} catch (error) {
 			console.error('error fetching updated blentos', error);

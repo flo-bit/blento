@@ -53,7 +53,9 @@ Grid margins: 16px desktop, 12px mobile.
 **Card System (`src/lib/cards/`):**
 
 - `CardDefinition` type in `types.ts` defines the interface for card types
-- Each card type exports a definition with: `type`, `contentComponent`, optional `editingContentComponent`, `creationModalComponent`, `sidebarButtonText`, `loadData`, `upload` (see more info and description in `src/lib/cards/types.ts`)
+- Each card type exports a definition with: `type`, `contentComponent`, optional `editingContentComponent`, `creationModalComponent`, `sidebarButtonText`, `loadData`, `loadDataServer`, `upload` (see more info and description in `src/lib/cards/types.ts`)
+- `loadData` fetches external data on the client (via remote functions). `loadDataServer` is the server-side equivalent used during SSR to avoid self-referential HTTP requests on Cloudflare Workers.
+- Cards that need external data use `.remote.ts` files (SvelteKit remote functions) co-located in the card folder (e.g. `GitHubProfileCard/api.remote.ts`, `LastFMCard/api.remote.ts`). These use `query()` from `$app/server` and run server-side, with SvelteKit generating fetch wrappers for client use.
 - Card types include Text, Link, Image, Bluesky, Embed, Map, Livestream, ATProto collections, and special cards (see `src/lib/cards`).
 - `AllCardDefinitions` and `CardDefinitionsByType` in `index.ts` aggregate all card types
 - See e.g. `src/lib/cards/EmbedCard/` and `src/lib/cards/LivestreamCard/` for examples of implementation.
@@ -66,9 +68,21 @@ Grid margins: 16px desktop, 12px mobile.
 - Data is stored in user's PDS under collection `app.blento.card`
 - **Important**: ATProto does not allow floating point numbers in records. All numeric values must be integers.
 
+**Caching (`src/lib/cache.ts`):**
+
+- `CacheService` class wraps a single Cloudflare KV namespace (`USER_DATA_CACHE`) with namespaced keys
+- Keys are stored as `namespace:key` (e.g. `blento:did:plc:abc`, `github:someuser`, `lastfm:method:user:period:limit`)
+- Per-namespace default TTLs via KV `expirationTtl`: `blento` (24h), `identity` (7d), `github` (12h), `gh-contrib` (12h), `lastfm` (1h, overridable), `npmx` (12h), `meta` (no expiry)
+- Blento data is keyed by DID with bidirectional handle↔DID identity mappings (`identity:h:{handle}` → DID, `identity:d:{did}` → handle)
+- `getBlento(identifier)` accepts either a handle or DID and resolves automatically
+- `putBlento(did, handle, data)` writes data + both identity mappings
+- Generic `get(namespace, key)` / `put(namespace, key, value, ttl?)` and JSON variants `getJSON` / `putJSON` for all namespaces
+- `createCache(platform)` factory function creates a `CacheService` from `platform.env`
+- `CUSTOM_DOMAINS` KV namespace is separate and accessed directly for custom domain → DID resolution
+
 **Data Loading (`src/lib/website/`):**
 
-- `load.ts` - Fetches user data from their PDS, with optional KV caching via `UserCache`
+- `load.ts` - Fetches user data from their PDS, with optional caching via `CacheService`
 - `data.ts` - Defines which collections/records to fetch
 - `context.ts` - Svelte contexts for passing DID, handle, and data down the component tree
 
@@ -80,7 +94,7 @@ Grid margins: 16px desktop, 12px mobile.
 - `/edit` - Self-hosted edit mode
 - `/api/links` - Link preview API
 - `/api/geocoding` - Geocoding API for map cards
-- `/api/instagram`, `/api/reloadRecent`, `/api/update` - Additional data endpoints
+- `/api/reloadRecent`, `/api/update` - Additional data endpoints
 
 ### Item Type
 

@@ -1,5 +1,6 @@
 import type { CardDefinition } from '../../types';
 import NpmxLikesLeaderboardCard from './NpmxLikesLeaderboardCard.svelte';
+import { fetchNpmxLeaderboard } from './api.remote';
 
 export const NpmxLikesLeaderboardCardDefinition = {
 	type: 'npmxLikesLeaderboard',
@@ -11,9 +12,10 @@ export const NpmxLikesLeaderboardCardDefinition = {
 		card.mobileH = 6;
 	},
 	loadData: async () => {
-		const res = await fetch('https://blento.app/api/npmx-leaderboard');
-		const data = await res.json();
-		return data;
+		return await fetchNpmxLeaderboard();
+	},
+	loadDataServer: async () => {
+		return await fetchNpmxLeaderboard();
 	},
 	minW: 3,
 	canHaveLabel: true,

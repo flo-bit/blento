@@ -1,12 +1,14 @@
 import { loadData } from '$lib/website/load';
+import { createCache } from '$lib/cache';
+import { env } from '$env/dynamic/private';
+
 import { error } from '@sveltejs/kit';
-import type { UserCache } from '$lib/types';
 import { text } from '@sveltejs/kit';
 
 export async function GET({ params, platform }) {
-	const cache = platform?.env?.USER_DATA_CACHE as unknown;
+	const cache = createCache(platform);
 
-	const data = await loadData(params.handle, cache as UserCache, false, params.page);
+	const data = await loadData(params.actor, cache, false, params.page, env);
 
 	if (!data.publication) throw error(300);
 

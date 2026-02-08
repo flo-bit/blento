@@ -4,6 +4,7 @@
 	import { getAdditionalUserData, getCanEdit } from '$lib/website/context';
 	import type { GitHubContributor, GitHubContributorsLoadedData } from '.';
 	import ImageGrid from '$lib/components/ImageGrid.svelte';
+	import { fetchGitHubContributors } from './api.remote';
 
 	let { item }: ContentComponentProps = $props();
 
@@ -41,13 +42,8 @@
 	async function loadContributors() {
 		if (!owner || !repo) return;
 		try {
-			const response = await fetch(
-				`/api/github/contributors?owner=${encodeURIComponent(owner)}&repo=${encodeURIComponent(repo)}`
-			);
-			if (response.ok) {
-				const data = await response.json();
-				clientContributors = data;
-			}
+			const data = await fetchGitHubContributors({ owner, repo });
+			if (data) clientContributors = data;
 		} catch (error) {
 			console.error('Failed to fetch GitHub contributors:', error);
 		}

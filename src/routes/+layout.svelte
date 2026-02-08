@@ -17,7 +17,6 @@
 	};
 
 	onMount(() => {
-		console.log(data.customDomain);
 		initClient({ customDomain: data.customDomain });
 
 		const error = page.url.searchParams.get('error');

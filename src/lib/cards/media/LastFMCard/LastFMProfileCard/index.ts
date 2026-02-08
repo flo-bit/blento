@@ -1,6 +1,7 @@
 import type { CardDefinition } from '../../../types';
 import CreateLastFMCardModal from '../CreateLastFMCardModal.svelte';
 import LastFMProfileCard from './LastFMProfileCard.svelte';
+import { fetchLastFM } from '../api.remote';
 
 export const LastFMProfileCardDefinition = {
 	type: 'lastfmProfile',
@@ -18,13 +19,22 @@ export const LastFMProfileCardDefinition = {
 			const username = item.cardData.lastfmUsername;
 			if (!username) continue;
 			try {
-				const response = await fetch(
-					`https://blento.app/api/lastfm?method=user.getInfo&user=${encodeURIComponent(username)}`
-				);
-				if (!response.ok) continue;
-				const text = await response.text();
-				const result = JSON.parse(text);
-				allData[`lastfmProfile:${username}`] = result?.user;
+				const data = await fetchLastFM({ method: 'user.getInfo', user: username });
+				if (data) allData[`lastfmProfile:${username}`] = data?.user;
+			} catch (error) {
+				console.error('Failed to fetch Last.fm profile:', error);
+			}
+		}
+		return allData;
+	},
+	loadDataServer: async (items) => {
+		const allData: Record<string, unknown> = {};
+		for (const item of items) {
+			const username = item.cardData.lastfmUsername;
+			if (!username) continue;
+			try {
+				const data = await fetchLastFM({ method: 'user.getInfo', user: username });
+				if (data) allData[`lastfmProfile:${username}`] = data?.user;
 			} catch (error) {
 				console.error('Failed to fetch Last.fm profile:', error);
 			}

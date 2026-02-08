@@ -1,10 +1,13 @@
 import { getDetailedProfile } from '$lib/atproto';
+import { createCache } from '$lib/cache';
 import { json } from '@sveltejs/kit';
 import type { AppBskyActorDefs } from '@atcute/bluesky';
 
 export async function GET({ platform }) {
-	if (!platform?.env?.USER_DATA_CACHE) return json('no cache');
-	const existingUsers = await platform?.env?.USER_DATA_CACHE?.get('updatedBlentos');
+	const cache = createCache(platform);
+	if (!cache) return json('no cache');
+
+	const existingUsers = await cache.get('meta', 'updatedBlentos');
 
 	const existingUsersArray: AppBskyActorDefs.ProfileViewDetailed[] = existingUsers
 		? JSON.parse(existingUsers)
@@ -21,7 +24,7 @@ export async function GET({ platform }) {
 
 	const newProfiles = await Promise.all(newProfilesPromises);
 
-	await platform?.env?.USER_DATA_CACHE.put('updatedBlentos', JSON.stringify(newProfiles));
+	await cache.put('meta', 'updatedBlentos', JSON.stringify(newProfiles));
 
 	return json('ok');
 }
