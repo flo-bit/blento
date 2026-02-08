@@ -1,6 +1,7 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { env } from '$env/dynamic/private';
+import { createCache } from '$lib/cache';
 
 const LASTFM_API_URL = 'https://ws.audioscrobbler.com/2.0/';
 
@@ -12,10 +13,10 @@ const ALLOWED_METHODS = [
 ];
 
 const CACHE_TTL: Record<string, number> = {
-	'user.getRecentTracks': 15 * 60 * 1000,
-	'user.getTopTracks': 60 * 60 * 1000,
-	'user.getTopAlbums': 60 * 60 * 1000,
-	'user.getInfo': 12 * 60 * 60 * 1000
+	'user.getRecentTracks': 15 * 60,
+	'user.getTopTracks': 60 * 60,
+	'user.getTopAlbums': 60 * 60,
+	'user.getInfo': 12 * 60 * 60
 };
 
 export const GET: RequestHandler = async ({ url, platform }) => {
@@ -32,16 +33,12 @@ export const GET: RequestHandler = async ({ url, platform }) => {
 		return json({ error: 'Method not allowed' }, { status: 400 });
 	}
 
-	const cacheKey = `#lastfm:${method}:${user}:${period}:${limit}`;
-	const cachedData = await platform?.env?.USER_DATA_CACHE?.get(cacheKey);
+	const cache = createCache(platform);
+	const cacheKey = `${method}:${user}:${period}:${limit}`;
+	const cachedData = await cache?.get('lastfm', cacheKey);
 
 	if (cachedData) {
-		const parsed = JSON.parse(cachedData);
-		const ttl = CACHE_TTL[method] || 60 * 60 * 1000;
-
-		if (Date.now() - (parsed._cachedAt || 0) < ttl) {
-			return json(parsed);
-		}
+		return json(JSON.parse(cachedData));
 	}
 
 	const apiKey = env?.LASTFM_API_KEY;
@@ -77,9 +74,8 @@ export const GET: RequestHandler = async ({ url, platform }) => {
 			return json({ error: data.message || 'Last.fm API error' }, { status: 400 });
 		}
 
-		data._cachedAt = Date.now();
-
-		await platform?.env?.USER_DATA_CACHE?.put(cacheKey, JSON.stringify(data));
+		const ttl = CACHE_TTL[method] || 60 * 60;
+		await cache?.put('lastfm', cacheKey, JSON.stringify(data), ttl);
 
 		return json(data);
 	} catch (error) {

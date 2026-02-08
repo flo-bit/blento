@@ -1,10 +1,10 @@
 import { loadData } from '$lib/website/load';
 import { env } from '$env/dynamic/public';
-import type { UserCache } from '$lib/types';
+import { createCache } from '$lib/cache';
 import type { Did, Handle } from '@atcute/lexicons';
 
 export async function load({ params, platform, request }) {
-	const cache = platform?.env?.USER_DATA_CACHE as unknown;
+	const cache = createCache(platform);
 
 	const handle = env.PUBLIC_HANDLE;
 
@@ -15,11 +15,11 @@ export async function load({ params, platform, request }) {
 	if (kv && customDomain) {
 		try {
 			const did = await kv.get(customDomain);
-			return await loadData(did as Did, cache as UserCache, false, params.page);
+			return await loadData(did as Did, cache, false, params.page);
 		} catch {
 			console.error('failed');
 		}
 	}
 
-	return await loadData(handle as Handle, cache as UserCache, false, params.page);
+	return await loadData(handle as Handle, cache, false, params.page);
 }

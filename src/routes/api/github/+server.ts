@@ -1,6 +1,7 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import type { GitHubContributionsData } from '$lib/cards/social/GitHubProfileCard/types';
+import { createCache } from '$lib/cache';
 
 const GithubAPIURL = 'https://edge-function-github-contribution.vercel.app/api/github-data?user=';
 
@@ -11,17 +12,11 @@ export const GET: RequestHandler = async ({ url, platform }) => {
 		return json({ error: 'No user provided' }, { status: 400 });
 	}
 
-	const cachedData = await platform?.env?.USER_DATA_CACHE?.get('#github:' + user);
+	const cache = createCache(platform);
+	const cachedData = await cache?.get('github', user);
 
 	if (cachedData) {
-		const parsedCache = JSON.parse(cachedData);
-
-		const TWELVE_HOURS = 12 * 60 * 60 * 1000;
-		const now = Date.now();
-
-		if (now - (parsedCache.updatedAt || 0) < TWELVE_HOURS) {
-			return json(parsedCache);
-		}
+		return json(JSON.parse(cachedData));
 	}
 
 	try {
@@ -42,9 +37,8 @@ export const GET: RequestHandler = async ({ url, platform }) => {
 		}
 
 		const result = data.user as GitHubContributionsData;
-		result.updatedAt = Date.now();
 
-		await platform?.env?.USER_DATA_CACHE?.put('#github:' + user, JSON.stringify(result));
+		await cache?.put('github', user, JSON.stringify(result));
 
 		return json(result);
 	} catch (error) {

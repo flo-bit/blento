@@ -66,9 +66,20 @@ Grid margins: 16px desktop, 12px mobile.
 - Data is stored in user's PDS under collection `app.blento.card`
 - **Important**: ATProto does not allow floating point numbers in records. All numeric values must be integers.
 
+**Caching (`src/lib/cache.ts`):**
+
+- `CacheService` class wraps a single Cloudflare KV namespace (`USER_DATA_CACHE`) with namespaced keys
+- Keys are stored as `namespace:key` (e.g. `user:did:plc:abc`, `github:someuser`, `lastfm:method:user:period:limit`)
+- Per-namespace default TTLs via KV `expirationTtl`: `user` (24h), `identity` (7d), `github` (12h), `gh-contrib` (12h), `lastfm` (1h, overridable), `npmx` (12h), `meta` (no expiry)
+- User data is keyed by DID with bidirectional handle↔DID identity mappings (`identity:h:{handle}` → DID, `identity:d:{did}` → handle)
+- `getUser(identifier)` accepts either a handle or DID and resolves automatically
+- `putUser(did, handle, data)` writes data + both identity mappings
+- `createCache(platform)` factory function creates a `CacheService` from `platform.env`
+- `CUSTOM_DOMAINS` KV namespace is separate and accessed directly for custom domain → DID resolution
+
 **Data Loading (`src/lib/website/`):**
 
-- `load.ts` - Fetches user data from their PDS, with optional KV caching via `UserCache`
+- `load.ts` - Fetches user data from their PDS, with optional caching via `CacheService`
 - `data.ts` - Defines which collections/records to fetch
 - `context.ts` - Svelte contexts for passing DID, handle, and data down the component tree
 

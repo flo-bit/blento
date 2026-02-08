@@ -66,8 +66,3 @@ export type WebsiteData = {
 	updatedAt: number;
 	version?: number;
 };
-
-export type UserCache = {
-	get: (key: string) => string;
-	put: (key: string, value: string) => void;
-};

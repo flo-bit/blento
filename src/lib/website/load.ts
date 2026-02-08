@@ -1,6 +1,7 @@
 import { getDetailedProfile, listRecords, resolveHandle, parseUri, getRecord } from '$lib/atproto';
 import { CardDefinitionsByType } from '$lib/cards';
-import type { Item, UserCache, WebsiteData } from '$lib/types';
+import type { CacheService } from '$lib/cache';
+import type { Item, WebsiteData } from '$lib/types';
 import { error } from '@sveltejs/kit';
 import type { ActorIdentifier, Did } from '@atcute/lexicons';
 
@@ -9,24 +10,15 @@ import { fixAllCollisions, compactItems } from '$lib/layout';
 
 const CURRENT_CACHE_VERSION = 1;
 
-export async function getCache(handle: string, page: string, cache?: UserCache) {
+export async function getCache(identifier: string, page: string, cache?: CacheService) {
 	try {
-		const cachedResult = await cache?.get?.(handle);
+		const cachedResult = await cache?.getUser(identifier);
 
 		if (!cachedResult) return;
 		const result = JSON.parse(cachedResult);
-		const update = result.updatedAt;
-		const timePassed = (Date.now() - update) / 1000;
-
-		const ONE_DAY = 60 * 60 * 24;
 
 		if (!result.version || result.version !== CURRENT_CACHE_VERSION) {
 			console.log('skipping cache because of version mismatch');
-			return;
-		}
-
-		if (timePassed > ONE_DAY) {
-			console.log('skipping cache because of age');
 			return;
 		}
 
@@ -42,7 +34,6 @@ export async function getCache(handle: string, page: string, cache?: UserCache) 
 
 		delete result['publications'];
 
-		console.log('using cached result for handle', handle, 'last update', timePassed, 'seconds ago');
 		return checkData(result);
 	} catch (error) {
 		console.log('getting cached result failed', error);
@@ -51,7 +42,7 @@ export async function getCache(handle: string, page: string, cache?: UserCache) 
 
 export async function loadData(
 	handle: ActorIdentifier,
-	cache: UserCache | undefined,
+	cache: CacheService | undefined,
 	forceUpdate: boolean = false,
 	page: string = 'self'
 ): Promise<WebsiteData> {
@@ -74,8 +65,8 @@ export async function loadData(
 	}
 
 	const [cards, mainPublication, pages, profile] = await Promise.all([
-		listRecords({ did, collection: 'app.blento.card' }).catch(() => {
-			console.error('error getting records for collection app.blento.card');
+		listRecords({ did, collection: 'app.blento.card' }).catch((e) => {
+			console.error('error getting records for collection app.blento.card', e);
 			return [] as Awaited<ReturnType<typeof listRecords>>;
 		}),
 		getRecord({
@@ -140,8 +131,11 @@ export async function loadData(
 		version: CURRENT_CACHE_VERSION
 	};
 
-	const stringifiedResult = JSON.stringify(result);
-	await cache?.put?.(handle, stringifiedResult);
+	// Only cache results that have cards to avoid caching PDS errors
+	if (result.cards.length > 0) {
+		const stringifiedResult = JSON.stringify(result);
+		await cache?.putUser(did, handle as string, stringifiedResult);
+	}
 
 	const parsedResult = structuredClone(result) as any;
 

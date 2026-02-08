@@ -1,11 +1,13 @@
-import type { UserCache } from '$lib/types';
+import { createCache } from '$lib/cache';
 import { getCache, loadData } from '$lib/website/load';
-import type { AppBskyActorDefs } from '@atcute/bluesky';
 import { json } from '@sveltejs/kit';
+import type { AppBskyActorDefs } from '@atcute/bluesky';
 
 export async function GET({ platform }) {
-	if (!platform?.env?.USER_DATA_CACHE) return json('no cache');
-	const existingUsers = await platform?.env?.USER_DATA_CACHE?.get('updatedBlentos');
+	const cache = createCache(platform);
+	if (!cache) return json('no cache');
+
+	const existingUsers = await cache.get('meta', 'updatedBlentos');
 
 	const existingUsersArray: AppBskyActorDefs.ProfileViewDetailed[] = existingUsers
 		? JSON.parse(existingUsers)
@@ -13,14 +15,12 @@ export async function GET({ platform }) {
 
 	const existingUsersHandle = existingUsersArray.map((v) => v.handle);
 
-	const cache = platform?.env?.USER_DATA_CACHE as unknown;
-
 	for (const handle of existingUsersHandle) {
 		if (!handle) continue;
 
 		try {
-			const cached = await getCache(handle, 'self', cache as UserCache);
-			if (!cached) await loadData(handle, cache as UserCache, true);
+			const cached = await getCache(handle, 'self', cache);
+			if (!cached) await loadData(handle, cache, true);
 		} catch (error) {
 			console.error(error);
 			return json('error');

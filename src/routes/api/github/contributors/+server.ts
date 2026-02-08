@@ -1,5 +1,6 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
+import { createCache } from '$lib/cache';
 
 const GithubContributorsAPIURL =
 	'https://edge-function-github-contribution.vercel.app/api/github-contributors';
@@ -12,18 +13,12 @@ export const GET: RequestHandler = async ({ url, platform }) => {
 		return json({ error: 'Missing owner or repo parameter' }, { status: 400 });
 	}
 
-	const cacheKey = `#github-contributors:${owner}/${repo}`;
-	const cachedData = await platform?.env?.USER_DATA_CACHE?.get(cacheKey);
+	const cache = createCache(platform);
+	const cacheKey = `${owner}/${repo}`;
+	const cachedData = await cache?.get('gh-contrib', cacheKey);
 
 	if (cachedData) {
-		const parsedCache = JSON.parse(cachedData);
-
-		const TWELVE_HOURS = 12 * 60 * 60 * 1000;
-		const now = Date.now();
-
-		if (now - (parsedCache.updatedAt || 0) < TWELVE_HOURS) {
-			return json(parsedCache.data);
-		}
+		return json(JSON.parse(cachedData));
 	}
 
 	try {
@@ -40,10 +35,7 @@ export const GET: RequestHandler = async ({ url, platform }) => {
 
 		const data = await response.json();
 
-		await platform?.env?.USER_DATA_CACHE?.put(
-			cacheKey,
-			JSON.stringify({ data, updatedAt: Date.now() })
-		);
+		await cache?.put('gh-contrib', cacheKey, JSON.stringify(data));
 
 		return json(data);
 	} catch (error) {
