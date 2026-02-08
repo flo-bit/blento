@@ -1,8 +1,10 @@
+import type { ActorIdentifier, Did } from '@atcute/lexicons';
+import { isDid } from '@atcute/lexicons/syntax';
 import type { KVNamespace } from '@cloudflare/workers-types';
 
 /** TTL in seconds for each cache namespace */
 const NAMESPACE_TTL = {
-	user: 60 * 60 * 24, // 24 hours
+	blento: 60 * 60 * 24, // 24 hours
 	identity: 60 * 60 * 24 * 7, // 7 days
 	github: 60 * 60 * 12, // 12 hours
 	'gh-contrib': 60 * 60 * 12, // 12 hours
@@ -22,7 +24,12 @@ export class CacheService {
 		return this.kv.get(`${namespace}:${key}`);
 	}
 
-	async put(namespace: CacheNamespace, key: string, value: string, ttlSeconds?: number): Promise<void> {
+	async put(
+		namespace: CacheNamespace,
+		key: string,
+		value: string,
+		ttlSeconds?: number
+	): Promise<void> {
 		const ttl = ttlSeconds ?? NAMESPACE_TTL[namespace] ?? 0;
 		await this.kv.put(`${namespace}:${key}`, value, ttl > 0 ? { expirationTtl: ttl } : undefined);
 	}
@@ -54,34 +61,32 @@ export class CacheService {
 		await this.put(namespace, key, JSON.stringify(value), ttlSeconds);
 	}
 
-	// === User data (keyed by DID, with handle↔did resolution) ===
-
-	async getUser(identifier: string): Promise<string | null> {
+	// === blento data (keyed by DID, with handle↔did resolution) ===
+	async getBlento(identifier: ActorIdentifier): Promise<string | null> {
 		const did = await this.resolveDid(identifier);
 		if (!did) return null;
-		return this.get('user', did);
+		return this.get('blento', did);
 	}
 
-	async putUser(did: string, handle: string, data: string): Promise<void> {
+	async putBlento(did: string, handle: string, data: string): Promise<void> {
 		await Promise.all([
-			this.put('user', did, data),
+			this.put('blento', did, data),
 			this.put('identity', `h:${handle}`, did),
 			this.put('identity', `d:${did}`, handle)
 		]);
 	}
 
-	async listUsers(): Promise<string[]> {
-		return this.list('user');
+	async listBlentos(): Promise<string[]> {
+		return this.list('blento');
 	}
 
 	// === Identity resolution ===
-
-	async resolveDid(identifier: string): Promise<string | null> {
-		if (identifier.startsWith('did:')) return identifier;
+	async resolveDid(identifier: ActorIdentifier): Promise<string | null> {
+		if (isDid(identifier)) return identifier;
 		return this.get('identity', `h:${identifier}`);
 	}
 
-	async resolveHandle(did: string): Promise<string | null> {
+	async resolveHandle(did: Did): Promise<string | null> {
 		return this.get('identity', `d:${did}`);
 	}
 }

@@ -10,9 +10,9 @@ import { fixAllCollisions, compactItems } from '$lib/layout';
 
 const CURRENT_CACHE_VERSION = 1;
 
-export async function getCache(identifier: string, page: string, cache?: CacheService) {
+export async function getCache(identifier: ActorIdentifier, page: string, cache?: CacheService) {
 	try {
-		const cachedResult = await cache?.getUser(identifier);
+		const cachedResult = await cache?.getBlento(identifier);
 
 		if (!cachedResult) return;
 		const result = JSON.parse(cachedResult);
@@ -134,7 +134,7 @@ export async function loadData(
 	// Only cache results that have cards to avoid caching PDS errors
 	if (result.cards.length > 0) {
 		const stringifiedResult = JSON.stringify(result);
-		await cache?.putUser(did, handle as string, stringifiedResult);
+		await cache?.putBlento(did, handle as string, stringifiedResult);
 	}
 
 	const parsedResult = structuredClone(result) as any;
