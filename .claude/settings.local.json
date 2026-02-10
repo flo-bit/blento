@@ -1,34 +1,34 @@
 {
-  "permissions": {
-    "allow": [
-      "Bash(pnpm check:*)",
-      "mcp__ide__getDiagnostics",
-      "mcp__plugin_svelte_svelte__svelte-autofixer",
-      "mcp__plugin_svelte_svelte__list-sections",
-      "Bash(pkill:*)",
-      "Bash(timeout 8 pnpm dev:*)",
-      "Bash(git checkout:*)",
-      "Bash(npx svelte-kit:*)",
-      "Bash(ls:*)",
-      "Bash(pnpm format:*)",
-      "Bash(pnpm add:*)",
-      "WebSearch",
-      "WebFetch(domain:github.com)",
-      "WebFetch(domain:flipclockjs.com)",
-      "WebFetch(domain:codepen.io)",
-      "WebFetch(domain:flo-bit.dev)",
-      "Bash(pnpm install)",
-      "Bash(pnpm install:*)",
-      "Bash(pnpm config:*)",
-      "Bash(lsof:*)",
-      "Bash(pnpm dev)",
-      "Bash(pnpm exec svelte-kit:*)",
-      "Bash(pnpm build:*)",
-      "Bash(pnpm remove:*)",
-      "Bash(grep:*)",
-      "Bash(find:*)",
-      "Bash(npx prettier:*)",
-      "Bash(node -e:*)"
-    ]
-  }
+	"permissions": {
+		"allow": [
+			"Bash(pnpm check:*)",
+			"mcp__ide__getDiagnostics",
+			"mcp__plugin_svelte_svelte__svelte-autofixer",
+			"mcp__plugin_svelte_svelte__list-sections",
+			"Bash(pkill:*)",
+			"Bash(timeout 8 pnpm dev:*)",
+			"Bash(git checkout:*)",
+			"Bash(npx svelte-kit:*)",
+			"Bash(ls:*)",
+			"Bash(pnpm format:*)",
+			"Bash(pnpm add:*)",
+			"WebSearch",
+			"WebFetch(domain:github.com)",
+			"WebFetch(domain:flipclockjs.com)",
+			"WebFetch(domain:codepen.io)",
+			"WebFetch(domain:flo-bit.dev)",
+			"Bash(pnpm install)",
+			"Bash(pnpm install:*)",
+			"Bash(pnpm config:*)",
+			"Bash(lsof:*)",
+			"Bash(pnpm dev)",
+			"Bash(pnpm exec svelte-kit:*)",
+			"Bash(pnpm build:*)",
+			"Bash(pnpm remove:*)",
+			"Bash(grep:*)",
+			"Bash(find:*)",
+			"Bash(npx prettier:*)",
+			"Bash(node -e:*)"
+		]
+	}
 }

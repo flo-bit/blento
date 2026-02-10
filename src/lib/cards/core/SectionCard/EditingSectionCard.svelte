@@ -9,7 +9,7 @@
 
 <div
 	class={[
-		'line-clamp-1 inline-flex h-full w-full rounded-md py-2 px-4 font-semibold',
+		'line-clamp-1 inline-flex h-full w-full rounded-md px-4 py-2 font-semibold',
 		textAlignClasses[item.cardData.textAlign as string],
 		verticalAlignClasses[item.cardData.verticalAlign ?? ('center' as string)],
 		textSizeClasses[(item.cardData.textSize ?? 1) as number]
