@@ -47,5 +47,5 @@
 		</Popover>
 	</div>
 
-	<CustomDomainModal />
+	<CustomDomainModal publicationUrl={data.publication?.url} />
 {/if}

@@ -7,23 +7,60 @@
 </script>
 
 <script lang="ts">
-	import { putRecord, getRecord } from '$lib/atproto/methods';
+	import { putRecord, getRecord, getHandleOrDid } from '$lib/atproto/methods';
 	import { user } from '$lib/atproto';
 	import { Button, Input } from '@foxui/core';
 	import Modal from '$lib/components/modal/Modal.svelte';
 	import { launchConfetti } from '@foxui/visual';
 
-	let step: 'input' | 'instructions' | 'verifying' | 'success' | 'error' = $state('input');
+	let { publicationUrl }: { publicationUrl?: string } = $props();
+
+	let currentDomain = $derived(
+		publicationUrl?.startsWith('https://') && !publicationUrl.includes('blento.app')
+			? publicationUrl.replace('https://', '')
+			: ''
+	);
+
+	let step: 'current' | 'input' | 'instructions' | 'verifying' | 'removing' | 'success' | 'error' =
+		$state('input');
 	let domain = $state('');
 	let errorMessage = $state('');
+	let errorHint = $state('');
 
 	$effect(() => {
-		if (!customDomainModalState.visible) {
+		if (customDomainModalState.visible) {
+			step = currentDomain ? 'current' : 'input';
+		} else {
 			step = 'input';
 			domain = '';
 			errorMessage = '';
+			errorHint = '';
 		}
 	});
+
+	async function removeDomain() {
+		step = 'removing';
+		try {
+			const existing = await getRecord({
+				collection: 'site.standard.publication',
+				rkey: 'blento.self'
+			});
+
+			if (existing?.value) {
+				const { url: _url, ...rest } = existing.value as Record<string, unknown>;
+				await putRecord({
+					collection: 'site.standard.publication',
+					rkey: 'blento.self',
+					record: rest
+				});
+			}
+
+			step = 'input';
+		} catch (err: unknown) {
+			errorMessage = err instanceof Error ? err.message : String(err);
+			step = 'error';
+		}
+	}
 
 	function goToInstructions() {
 		if (!domain.trim()) return;
@@ -33,6 +70,23 @@
 	async function verify() {
 		step = 'verifying';
 		try {
+			// Step 1: Verify DNS records
+			const dnsRes = await fetch('/api/verify-domain', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ domain })
+			});
+
+			const dnsData = await dnsRes.json();
+
+			if (!dnsRes.ok || dnsData.error) {
+				errorMessage = dnsData.error;
+				errorHint = dnsData.hint || '';
+				step = 'error';
+				return;
+			}
+
+			// Step 2: Write URL to ATProto profile
 			const existing = await getRecord({
 				collection: 'site.standard.publication',
 				rkey: 'blento.self'
@@ -47,21 +101,29 @@
 				}
 			});
 
-			const res = await fetch('/api/verify-domain', {
+			// Step 3: Activate domain in KV (server verifies profile has the URL)
+			const activateRes = await fetch('/api/activate-domain', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ did: user.did, domain })
 			});
 
-			const data = await res.json();
+			const activateData = await activateRes.json();
 
-			if (data.success) {
-				launchConfetti();
-				step = 'success';
-			} else if (data.error) {
-				errorMessage = data.error;
+			if (!activateRes.ok || activateData.error) {
+				errorMessage = activateData.error;
+				errorHint = '';
 				step = 'error';
+				return;
 			}
+
+			// Refresh cached profile
+			if (user.profile) {
+				fetch(`/${getHandleOrDid(user.profile)}/api/refresh`).catch(() => {});
+			}
+
+			launchConfetti();
+			step = 'success';
 		} catch (err: unknown) {
 			errorMessage = err instanceof Error ? err.message : String(err);
 			step = 'error';
@@ -74,7 +136,23 @@
 </script>
 
 <Modal bind:open={customDomainModalState.visible}>
-	{#if step === 'input'}
+	{#if step === 'current'}
+		<h3 class="text-base-900 dark:text-base-100 font-semibold" id="custom-domain-modal-title">
+			Custom Domain
+		</h3>
+
+		<div
+			class="bg-base-200 dark:bg-base-700 mt-2 flex items-center justify-between rounded-2xl px-3 py-2 font-mono text-sm"
+		>
+			<span>{currentDomain}</span>
+		</div>
+
+		<div class="mt-4 flex gap-2">
+			<Button variant="ghost" onclick={removeDomain}>Remove</Button>
+			<Button variant="ghost" onclick={() => (step = 'input')}>Change</Button>
+			<Button onclick={() => customDomainModalState.hide()}>Close</Button>
+		</div>
+	{:else if step === 'input'}
 		<h3 class="text-base-900 dark:text-base-100 font-semibold" id="custom-domain-modal-title">
 			Custom Domain
 		</h3>
@@ -150,6 +228,28 @@
 			</svg>
 			<span class="text-base-600 dark:text-base-400 text-sm">Verifying...</span>
 		</div>
+	{:else if step === 'removing'}
+		<h3 class="text-base-900 dark:text-base-100 font-semibold" id="custom-domain-modal-title">
+			Removing...
+		</h3>
+
+		<div class="mt-4 flex items-center gap-2">
+			<svg
+				class="text-base-500 size-5 animate-spin"
+				xmlns="http://www.w3.org/2000/svg"
+				fill="none"
+				viewBox="0 0 24 24"
+			>
+				<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"
+				></circle>
+				<path
+					class="opacity-75"
+					fill="currentColor"
+					d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+				></path>
+			</svg>
+			<span class="text-base-600 dark:text-base-400 text-sm">Removing domain...</span>
+		</div>
 	{:else if step === 'success'}
 		<h3 class="text-base-900 dark:text-base-100 font-semibold" id="custom-domain-modal-title">
 			Domain verified!
@@ -170,6 +270,11 @@
 		<p class="mt-2 text-sm text-red-500 dark:text-red-400">
 			{errorMessage}
 		</p>
+		{#if errorHint}
+			<p class="mt-1 text-sm font-bold text-red-500 dark:text-red-400">
+				{errorHint}
+			</p>
+		{/if}
 
 		<div class="mt-4 flex gap-2">
 			<Button variant="ghost" onclick={() => customDomainModalState.hide()}>Close</Button>
