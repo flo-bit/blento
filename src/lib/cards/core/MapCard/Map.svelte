@@ -28,7 +28,8 @@
 	class="absolute inset-0 isolate h-full w-full"
 	onfocusin={(e) => {
 		if (!isEditing && e.target instanceof HTMLElement) e.target.blur();
-	}}>
+	}}
+>
 	<div class="h-full w-full">
 		<MapLibre
 			bind:map
