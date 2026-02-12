@@ -23,6 +23,7 @@
 	import { user } from '$lib/atproto';
 	import { env } from '$env/dynamic/public';
 	import { page } from '$app/state';
+	import StickerLayer from '$lib/stickers/StickerLayer.svelte';
 
 	let { data }: { data: WebsiteData } = $props();
 
@@ -91,6 +92,9 @@
 						</BaseCard>
 					{/each}
 					<div style="height: {(maxHeight / 8) * 100}cqw;"></div>
+				{/if}
+				{#if data.stickers?.length}
+					<StickerLayer stickers={data.stickers} />
 				{/if}
 			</div>
 		</div>

@@ -8,7 +8,7 @@ import type { ActorIdentifier, Did } from '@atcute/lexicons';
 import { isDid, isHandle } from '@atcute/lexicons/syntax';
 import { fixAllCollisions, compactItems } from '$lib/layout';
 
-const CURRENT_CACHE_VERSION = 1;
+const CURRENT_CACHE_VERSION = 2;
 
 export async function getCache(identifier: ActorIdentifier, page: string, cache?: CacheService) {
 	try {
@@ -65,7 +65,7 @@ export async function loadData(
 		throw error(404);
 	}
 
-	const [cards, mainPublication, pages, profile] = await Promise.all([
+	const [cards, mainPublication, pages, profile, stickers] = await Promise.all([
 		listRecords({ did, collection: 'app.blento.card' }).catch((e) => {
 			console.error('error getting records for collection app.blento.card', e);
 			return [] as Awaited<ReturnType<typeof listRecords>>;
@@ -82,7 +82,11 @@ export async function loadData(
 			console.error('error getting records for collection app.blento.page');
 			return [] as Awaited<ReturnType<typeof listRecords>>;
 		}),
-		getDetailedProfile({ did })
+		getDetailedProfile({ did }),
+		listRecords({ did, collection: 'app.blento.sticker' }).catch(() => {
+			console.error('error getting records for collection app.blento.sticker');
+			return [] as Awaited<ReturnType<typeof listRecords>>;
+		})
 	]);
 
 	const cardTypes = new Set(cards.map((v) => v.value.cardType ?? '') as string[]);
@@ -129,6 +133,7 @@ export async function loadData(
 		cards: (cards.map((v) => {
 			return { ...v.value };
 		}) ?? []) as Item[],
+		stickers: stickers.map((v) => ({ ...v.value })),
 		publications: [mainPublication, ...pages].filter((v) => v),
 		additionalData,
 		profile,
@@ -209,6 +214,7 @@ function checkData(data: WebsiteData): WebsiteData {
 	}
 
 	data.cards = cards;
+	data.stickers = (data.stickers ?? []).filter((v) => v.page === data.page);
 
 	return data;
 }

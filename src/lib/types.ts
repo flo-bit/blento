@@ -1,5 +1,6 @@
 import type { Blob } from '@atcute/lexicons';
 import type { AppBskyActorDefs } from '@atcute/bluesky';
+import type { Sticker } from '$lib/stickers/types';
 
 export type Item = {
 	id: string;
@@ -33,6 +34,7 @@ export type WebsiteData = {
 	handle: string;
 
 	cards: Item[];
+	stickers: Sticker[];
 	publication: {
 		url?: string;
 		name?: string;

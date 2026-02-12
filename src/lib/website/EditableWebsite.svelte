@@ -45,6 +45,8 @@
 		getViewportCenterGridY,
 		EditableGrid
 	} from '$lib/layout';
+	import { EditableStickerLayer, StickerCreationModal, saveStickers } from '$lib/stickers';
+	import type { Sticker } from '$lib/stickers/types';
 
 	let {
 		data
@@ -66,6 +68,14 @@
 
 	let hasUnsavedChanges = $state(false);
 
+	// svelte-ignore state_referenced_locally
+	let stickers: Sticker[] = $state(data.stickers ?? []);
+
+	// svelte-ignore state_referenced_locally
+	let savedStickersSnapshot = JSON.stringify(data.stickers ?? []);
+
+	let showStickerModal = $state(false);
+
 	// Detect card content and publication changes (e.g. sidebar edits)
 	// The guard ensures JSON.stringify only runs while no changes are detected yet.
 	// Once hasUnsavedChanges is true, Svelte still fires this effect on item mutations
@@ -74,7 +84,8 @@
 		if (hasUnsavedChanges) return;
 		if (
 			JSON.stringify(items) !== savedItemsSnapshot ||
-			JSON.stringify(data.publication) !== publication
+			JSON.stringify(data.publication) !== publication ||
+			JSON.stringify(stickers) !== savedStickersSnapshot
 		) {
 			hasUnsavedChanges = true;
 		}
@@ -222,11 +233,15 @@
 			data.publication.preferences ??= {};
 			data.publication.preferences.editedOn = editedOn;
 
-			await savePage(data, items, publication);
+			await Promise.all([
+				savePage(data, items, publication),
+				saveStickers(data.stickers ?? [], stickers, data.page)
+			]);
 
 			publication = JSON.stringify(data.publication);
 
 			savedItemsSnapshot = JSON.stringify(items);
+			savedStickersSnapshot = JSON.stringify(stickers);
 			hasUnsavedChanges = false;
 
 			saveSuccess = true;
@@ -905,8 +920,25 @@
 					</BaseEditingCard>
 				{/each}
 			</EditableGrid>
+			<EditableStickerLayer
+				bind:stickers
+				onchange={() => {
+					hasUnsavedChanges = true;
+				}}
+			/>
 		</div>
 	</div>
+
+	{#if showStickerModal}
+		<StickerCreationModal
+			bind:open={showStickerModal}
+			page={data.page}
+			oncreate={(sticker) => {
+				stickers = [...stickers, sticker];
+				hasUnsavedChanges = true;
+			}}
+		/>
+	{/if}
 
 	<EditBar
 		{data}
@@ -921,6 +953,9 @@
 		{handleVideoInputChange}
 		showCardCommand={() => {
 			showCardCommand = true;
+		}}
+		addSticker={() => {
+			showStickerModal = true;
 		}}
 		{selectedCard}
 		{isMobile}

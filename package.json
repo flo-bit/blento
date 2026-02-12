@@ -70,6 +70,7 @@
 		"@tiptap/extension-text": "^3.16.0",
 		"@tiptap/starter-kit": "^3.16.0",
 		"@types/three": "^0.176.0",
+		"animejs": "^4.3.5",
 		"bits-ui": "^2.15.4",
 		"clsx": "^2.1.1",
 		"dompurify": "^3.3.1",
