@@ -11,7 +11,7 @@
 	);
 </script>
 
-<Map bind:item />
+<Map bind:item {isEditing} />
 
 {#if item.cardData.linkToGoogleMaps && !isEditing}
 	<a
