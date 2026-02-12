@@ -10,6 +10,9 @@ export default defineConfig({
 		port: 5179
 	},
 	build: {
-		sourcemap: true
+		sourcemap: true,
+		rollupOptions: {
+			external: ['cloudflare:sockets']
+		}
 	}
 });
