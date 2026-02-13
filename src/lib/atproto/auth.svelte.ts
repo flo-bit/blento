@@ -198,7 +198,7 @@ async function finalizeLogin(params: SvelteURLSearchParams, did?: Did) {
 
 async function resumeSession(did: Did) {
 	try {
-		const session = await getSession(did, { allowStale: true });
+		const session = await getSession(did);
 
 		if (session.token.expires_at && session.token.expires_at < Date.now()) {
 			throw Error('session expired');

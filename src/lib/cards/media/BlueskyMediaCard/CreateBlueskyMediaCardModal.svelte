@@ -43,8 +43,6 @@
 		mediaList = collected;
 		isLoading = false;
 	});
-
-
 </script>
 
 <Modal
