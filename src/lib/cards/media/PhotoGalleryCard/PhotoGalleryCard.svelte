@@ -1,16 +1,12 @@
 <script lang="ts">
 	import type { Item } from '$lib/types';
 	import { onMount } from 'svelte';
-	import {
-		getAdditionalUserData,
-		getDidContext,
-		getHandleContext,
-		getIsMobile
-	} from '$lib/website/context';
-	import { CardDefinitionsByType } from '../..';
+	import { getAdditionalUserData, getIsMobile } from '$lib/website/context';
 	import { getCDNImageBlobUrl, parseUri } from '$lib/atproto';
+	import { loadGrainGalleryData } from './helpers';
 
 	import { ImageMasonry } from '@foxui/visual';
+	import { openImageViewer } from '$lib/components/image-viewer/imageViewer.svelte';
 
 	interface PhotoItem {
 		uri: string;
@@ -29,17 +25,11 @@
 		(data[item.cardType] as Record<string, PhotoItem[]> | undefined)?.[item.cardData.galleryUri]
 	);
 
-	let did = getDidContext();
-	let handle = getHandleContext();
-
 	onMount(async () => {
 		if (!feed) {
-			feed = (
-				(await CardDefinitionsByType[item.cardType]?.loadData?.([item], {
-					did,
-					handle
-				})) as Record<string, PhotoItem[]> | undefined
-			)?.[item.cardData.galleryUri];
+			feed = ((await loadGrainGalleryData([item])) as Record<string, PhotoItem[]> | undefined)?.[
+				item.cardData.galleryUri
+			];
 
 			data[item.cardType] = feed;
 		}
@@ -52,12 +42,14 @@
 			})
 			.map((i: PhotoItem) => {
 				const item = parseUri(i.uri);
+				const src = getCDNImageBlobUrl({ did: item?.repo, blob: i.value.photo });
 				return {
-					src: getCDNImageBlobUrl({ did: item?.repo, blob: i.value.photo }),
+					src,
 					name: '',
 					width: i.value.aspectRatio.width,
 					height: i.value.aspectRatio.height,
-					position: i.value.position ?? 0
+					position: i.value.position ?? 0,
+					onclick: src ? () => openImageViewer(src) : undefined
 				};
 			})
 			.filter((i) => i.src !== undefined) || []) as {
@@ -66,6 +58,7 @@
 			width: number;
 			height: number;
 			position: number;
+			onclick?: () => void;
 		}[]
 	);
 
