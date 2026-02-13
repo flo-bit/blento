@@ -159,7 +159,7 @@
 			success = true;
 
 			// Redirect to the logged-in user's destination page edit
-			const destPath = destinationPage.trim() === '' ? '' : `/${destinationPage.trim()}`;
+			const destPath = destinationPage.trim() === '' ? '' : `/p/${destinationPage.trim()}`;
 			setTimeout(() => {
 				goto(`/${userHandle}${destPath}/edit`);
 			}, 1000);
