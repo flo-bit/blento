@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { Button, Input, Modal, Subheading } from '@foxui/core';
+	import { Button, Input, Subheading } from '@foxui/core';
+	import Modal from '$lib/components/modal/Modal.svelte';
 	import { env } from '$env/dynamic/public';
 	import PoweredByGiphy from './PoweredByGiphy.gif';
 

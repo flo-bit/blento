@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { Button, Input, Label, Modal, Subheading } from '@foxui/core';
+	import { Button, Subheading } from '@foxui/core';
+	import Modal from '$lib/components/modal/Modal.svelte';
 	import type { CreationModalComponentProps } from '../../types';
 	import { onMount } from 'svelte';
 	import { getDidContext } from '$lib/website/context';
@@ -17,12 +18,13 @@
 	onMount(async () => {
 		const authorFeed = await getAuthorFeed({ did });
 
+		const collected: typeof mediaList = [];
 		for (let post of authorFeed?.feed ?? []) {
 			let images =
 				post.post.embed?.$type === 'app.bsky.embed.images#view' ? post.post.embed : undefined;
 
 			for (let image of images?.images ?? []) {
-				mediaList.push(image);
+				collected.push(image);
 			}
 
 			if (
@@ -30,7 +32,7 @@
 				post.post.embed.thumbnail &&
 				post.post.embed.playlist
 			) {
-				mediaList.push({
+				collected.push({
 					...post.post.embed,
 					isVideo: true,
 					fullsize: ''
@@ -38,10 +40,11 @@
 			}
 		}
 
+		mediaList = collected;
 		isLoading = false;
 	});
 
-	let selected = $state();
+
 </script>
 
 <Modal
@@ -57,29 +60,28 @@
 	<Subheading>Select an image or video</Subheading>
 
 	<div
-		class="bg-base-100 dark:bg-base-950 grid h-[50dvh] grid-cols-2 gap-4 overflow-y-scroll rounded-2xl p-4 lg:grid-cols-3"
+		class="bg-base-200 dark:bg-base-950/30 grid h-[50dvh] grid-cols-2 gap-4 overflow-y-scroll rounded-2xl p-4 lg:grid-cols-3"
 	>
-		{#each mediaList as media (media.thumbnail || media.playlist)}
+		{#each mediaList as media (media.fullsize || media.thumbnail || media.playlist)}
 			<button
 				onclick={() => {
-					selected = media;
 					if (media.isVideo) {
 						item.cardData = {
 							video: media
 						};
-					} else item.cardData.image = media;
+					} else {
+						item.cardData = {
+							image: media
+						};
+					}
+					oncreate();
 				}}
 				class="relative cursor-pointer"
 			>
 				<img
 					src={media.fullsize || media.thumbnail}
 					alt=""
-					class={[
-						'h-32 w-full rounded-xl object-cover',
-						selected === media
-							? 'outline-accent-500 opacity-100 outline-2 -outline-offset-2'
-							: 'opacity-80'
-					]}
+					class="h-32 w-full rounded-xl object-cover opacity-80 hover:opacity-100"
 				/>
 				{#if media.isVideo}
 					<div class="absolute inset-0 inline-flex items-center justify-center">
@@ -106,21 +108,12 @@
 		{/if}
 	</div>
 
-	<Label class="mt-4">Link (optional):</Label>
-	<Input bind:value={item.cardData.href} />
-
-	<div class="mt-4 flex justify-end gap-2">
+	<div class="mt-4 flex justify-end">
 		<Button
 			onclick={() => {
 				oncancel();
 			}}
 			variant="ghost">Cancel</Button
-		>
-		<Button
-			disabled={!selected}
-			onclick={async () => {
-				oncreate();
-			}}>Create</Button
 		>
 	</div>
 </Modal>

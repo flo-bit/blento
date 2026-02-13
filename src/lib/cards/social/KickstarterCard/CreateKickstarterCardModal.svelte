@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { Alert, Button, Modal, Subheading } from '@foxui/core';
+	import { Alert, Button, Subheading } from '@foxui/core';
+	import Modal from '$lib/components/modal/Modal.svelte';
 	import type { CreationModalComponentProps } from '../../types';
 
 	let { item = $bindable(), oncreate, oncancel }: CreationModalComponentProps = $props();
