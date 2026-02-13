@@ -2,8 +2,8 @@
 
 ## Project Structure & Module Organization
 
-- `src/routes` contains SvelteKit routes, including dynamic handle pages in `src/routes/[handle]/[[page]]`, edit flows in `src/routes/[handle]/[[page]]/edit` and `src/routes/edit`, and API endpoints under `src/routes/api`.
-- `src/lib` holds reusable modules: card implementations in `src/lib/cards`, shared UI in `src/lib/components`, OAuth helpers in `src/lib/oauth`, and site data/loading in `src/lib/website`.
+- `src/routes` contains SvelteKit routes. User-facing pages are under `src/routes/[[actor=actor]]/(pages)/` with an optional actor param (double brackets). When omitted, the actor is resolved from custom domain KV or `PUBLIC_HANDLE`. API endpoints live under `src/routes/api` and `src/routes/[[actor=actor]]/api`.
+- `src/lib` holds reusable modules: card implementations in `src/lib/cards`, shared UI in `src/lib/components`, ATProto/OAuth helpers in `src/lib/atproto`, and site data/loading in `src/lib/website`.
 - Root app setup lives in `src/app.html` and `src/app.css`.
 - `static` is for public assets served as-is.
 - `docs` includes contributor-facing docs like custom cards and self-hosting.

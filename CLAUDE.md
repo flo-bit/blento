@@ -61,12 +61,13 @@ Grid margins: 16px desktop, 12px mobile.
 - See e.g. `src/lib/cards/EmbedCard/` and `src/lib/cards/LivestreamCard/` for examples of implementation.
 - Cards should be styled to work in light and dark mode (with `dark:` class modifier) as well as when cards are colorful (= bg-color-500 for the card background) (with `accent:` modifier).
 
-**ATProto Integration (`src/lib/oauth/`):**
+**ATProto Integration (`src/lib/atproto/`):**
 
 - `auth.svelte.ts` - OAuth client state and login/logout flow using `@atcute/oauth-browser-client`
 - `atproto.ts` - ATProto API helpers: `resolveHandle`, `listRecords`, `getRecord`, `putRecord`, `deleteRecord`, `uploadImage`
 - Data is stored in user's PDS under collection `app.blento.card`
 - **Important**: ATProto does not allow floating point numbers in records. All numeric values must be integers.
+- Login redirect: before OAuth redirect, the current path is saved to `localStorage` (`login-redirect`) and restored after callback
 
 **Caching (`src/lib/cache.ts`):**
 
@@ -88,13 +89,18 @@ Grid margins: 16px desktop, 12px mobile.
 
 ### Routes
 
-- `/` - Landing page
-- `/[handle]/[[page]]` - View a user's bento site (loads from their PDS)
-- `/[handle]/[[page]]/edit` - Edit mode for a user's site page
-- `/edit` - Self-hosted edit mode
-- `/api/links` - Link preview API
+All user-facing pages live under `src/routes/[[actor=actor]]/(pages)/` using an optional `[[actor=actor]]` param. When the actor param is omitted, the layout resolves the actor from a custom domain (via KV lookup) or the `PUBLIC_HANDLE` env var.
+
+- `/` - Landing page (or a user's site when on a custom domain)
+- `/[actor]` - View a user's bento site (loads from their PDS)
+- `/[actor]/edit` - Edit mode for a user's main page
+- `/[actor]/p/[page]` - View a named sub-page
+- `/[actor]/p/[page]/edit` - Edit mode for a sub-page
+- `/[actor]/p/[page]/copy` - Copy a page to your own site
+- `/[actor]/og.png` - Dynamic OG image generation
+- `/[actor]/api/refresh` - Cache refresh endpoint
+- `/[actor]/.well-known/site.standard.publication` - Site publication metadata
 - `/api/geocoding` - Geocoding API for map cards
-- `/api/reloadRecent`, `/api/update` - Additional data endpoints
 
 ### Item Type
 

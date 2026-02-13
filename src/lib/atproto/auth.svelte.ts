@@ -126,6 +126,8 @@ async function startAuthorization(identity?: ActorIdentifier) {
 		scope: metadata.scope
 	});
 
+	localStorage.setItem('login-redirect', location.pathname + location.search);
+
 	// let browser persist local storage
 	await new Promise((resolve) => setTimeout(resolve, 200));
 

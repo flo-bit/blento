@@ -2,8 +2,11 @@ import { getCDNImageBlobUrl } from '$lib/atproto/methods.js';
 import { createCache } from '$lib/cache';
 import { loadData } from '$lib/website/load';
 import { env } from '$env/dynamic/private';
-import type { Handle } from '@atcute/lexicons';
+import { env as publicEnv } from '$env/dynamic/public';
+
+import type { ActorIdentifier } from '@atcute/lexicons';
 import { ImageResponse } from '@ethercorps/sveltekit-og';
+import { error } from '@sveltejs/kit';
 
 function escapeHtml(str: string): string {
 	return str
@@ -14,10 +17,34 @@ function escapeHtml(str: string): string {
 		.replace(/'/g, '&#39;');
 }
 
-export async function GET({ params, platform }) {
+export async function GET({ params, platform, request }) {
 	const cache = createCache(platform);
 
-	const data = await loadData(params.actor, cache, false, 'self', env);
+	const customDomain = request.headers.get('X-Custom-Domain')?.toLowerCase();
+
+	let actor: ActorIdentifier | undefined = params.actor;
+
+	if (!actor) {
+		const kv = platform?.env?.CUSTOM_DOMAINS;
+
+		if (kv && customDomain) {
+			try {
+				const did = await kv.get(customDomain);
+
+				if (did) actor = did as ActorIdentifier;
+			} catch (error) {
+				console.error('failed to get custom domain kv', error);
+			}
+		} else {
+			actor = publicEnv.PUBLIC_HANDLE as ActorIdentifier;
+		}
+	}
+
+	if (!actor) {
+		throw error(404, 'Page not found');
+	}
+
+	const data = await loadData(actor, cache, false, 'self', env);
 
 	let image: string | undefined = data.profile.avatar;
 

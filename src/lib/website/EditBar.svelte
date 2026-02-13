@@ -63,7 +63,7 @@
 	function getShareUrl() {
 		const base = typeof window !== 'undefined' ? window.location.origin : '';
 		const pagePath =
-			data.page && data.page !== 'blento.self' ? `/${data.page.replace('blento.', '')}` : '';
+			data.page && data.page !== 'blento.self' ? `/p/${data.page.replace('blento.', '')}` : '';
 		return `${base}/${data.handle}${pagePath}`;
 	}
 

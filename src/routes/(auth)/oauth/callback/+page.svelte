@@ -7,9 +7,18 @@
 
 	let startedErrorTimer = $state();
 
+	let hasRedirected = $state(false);
+
 	$effect(() => {
 		if (user.profile) {
-			goto('/' + getHandleOrDid(user.profile) + '/edit', {});
+			if (hasRedirected) return;
+
+			const redirect = localStorage.getItem('login-redirect');
+			localStorage.removeItem('login-redirect');
+			console.log('redirect', redirect);
+			goto(redirect || '/' + getHandleOrDid(user.profile) + '/edit', {});
+
+			hasRedirected = true;
 		}
 
 		if (!user.isInitializing && !startedErrorTimer) {
@@ -17,14 +26,14 @@
 
 			setTimeout(() => {
 				showError = true;
-			}, 3000);
+			}, 5000);
 		}
 	});
 </script>
 
-{#if user.isInitializing || !showError}
+{#if !showError}
 	<div class="flex min-h-screen w-full items-center justify-center text-3xl">Loading...</div>
-{:else if showError}
+{:else}
 	<div class="flex min-h-screen w-full items-center justify-center text-3xl">
 		<span class="max-w-xl text-center font-medium"
 			>There was an error signing you in, please go back to the
