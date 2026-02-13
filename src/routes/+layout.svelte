@@ -18,13 +18,6 @@
 
 	onMount(() => {
 		initClient({ customDomain: data.customDomain });
-
-		const error = page.url.searchParams.get('error');
-		if (error) {
-			const msg = errorMessages[error]?.(page.url.searchParams) ?? error;
-			toast.error(msg);
-			goto(page.url.pathname, { replaceState: true });
-		}
 	});
 </script>
 
@@ -33,6 +26,7 @@
 </Tooltip.Provider>
 
 <ThemeToggle class="fixed top-2 left-2 z-10" />
+
 <Toaster />
 
 {#if videoPlayer.id}
