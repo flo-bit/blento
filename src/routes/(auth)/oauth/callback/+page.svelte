@@ -11,11 +11,11 @@
 
 	$effect(() => {
 		if (user.profile) {
-			if(hasRedirected) return;
+			if (hasRedirected) return;
 
 			const redirect = localStorage.getItem('login-redirect');
 			localStorage.removeItem('login-redirect');
-			console.log('redirect', redirect)
+			console.log('redirect', redirect);
 			goto(redirect || '/' + getHandleOrDid(user.profile) + '/edit', {});
 
 			hasRedirected = true;
