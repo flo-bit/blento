@@ -137,7 +137,9 @@
 					{/if}
 
 					{#if entry.type === 'annotation' && entry.value.body?.value}
-						<span class="text-base-900 dark:text-base-100 accent:text-black text-sm leading-snug font-medium">
+						<span
+							class="text-base-900 dark:text-base-100 accent:text-black text-sm leading-snug font-medium"
+						>
 							{truncate(entry.value.body.value as string, 120)}
 						</span>
 					{/if}

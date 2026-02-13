@@ -48,6 +48,7 @@ import { LastFMTopAlbumsCardDefinition } from './media/LastFMCard/LastFMTopAlbum
 import { LastFMProfileCardDefinition } from './media/LastFMCard/LastFMProfileCard';
 import { PlyrFMCardDefinition } from './media/PlyrFMCard';
 import { MarginCardDefinition } from './social/MarginCard';
+import { SembleCollectionCardDefinition } from './social/SembleCollectionCard';
 // import { Model3DCardDefinition } from './visual/Model3DCard';
 
 export const AllCardDefinitions = [
@@ -100,7 +101,8 @@ export const AllCardDefinitions = [
 	LastFMTopAlbumsCardDefinition,
 	LastFMProfileCardDefinition,
 	PlyrFMCardDefinition,
-	MarginCardDefinition
+	MarginCardDefinition,
+	SembleCollectionCardDefinition
 ] as const;
 
 export const CardDefinitionsByType = AllCardDefinitions.reduce(
