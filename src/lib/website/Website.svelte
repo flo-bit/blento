@@ -18,6 +18,7 @@
 	import Head from './Head.svelte';
 	import type { Did, Handle } from '@atcute/lexicons';
 	import QRModalProvider from '$lib/components/qr/QRModalProvider.svelte';
+	import ImageViewerProvider from '$lib/components/image-viewer/ImageViewerProvider.svelte';
 	import EmptyState from './EmptyState.svelte';
 	import FloatingEditButton from './FloatingEditButton.svelte';
 	import { user } from '$lib/atproto';
@@ -67,6 +68,7 @@
 
 <Context {data}>
 	<QRModalProvider />
+	<ImageViewerProvider />
 	<div class="@container/wrapper relative w-full">
 		{#if !getHideProfileSection(data)}
 			<Profile {data} hideBlento={showFloatingButton} />
