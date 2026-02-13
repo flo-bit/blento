@@ -17,14 +17,14 @@
 
 			setTimeout(() => {
 				showError = true;
-			}, 3000);
+			}, 5000);
 		}
 	});
 </script>
 
-{#if user.isInitializing || !showError}
+{#if !showError}
 	<div class="flex min-h-screen w-full items-center justify-center text-3xl">Loading...</div>
-{:else if showError}
+{:else}
 	<div class="flex min-h-screen w-full items-center justify-center text-3xl">
 		<span class="max-w-xl text-center font-medium"
 			>There was an error signing you in, please go back to the
