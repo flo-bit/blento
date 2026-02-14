@@ -24,7 +24,8 @@ export type EventData = {
 		alt?: string;
 		role?: string;
 		content?: {
-			ref?: {
+			$type: 'blob';
+			ref: {
 				$link: string;
 			};
 			mimeType?: string;

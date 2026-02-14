@@ -1,8 +1,10 @@
 <script lang="ts">
 	import type { EventData } from '$lib/cards/social/EventCard';
+	import { getCDNImageBlobUrl } from '$lib/atproto';
 	import { Avatar as FoxAvatar, Badge } from '@foxui/core';
 	import Avatar from 'svelte-boring-avatars';
 	import EventRsvp from './EventRsvp.svelte';
+	import { page } from '$app/state';
 
 	let { data } = $props();
 
@@ -80,23 +82,31 @@
 	let headerImage = $derived.by(() => {
 		if (!eventData.media || eventData.media.length === 0) return null;
 		const media = eventData.media.find((m) => m.role === 'thumbnail');
-		if (!media?.content?.ref?.$link) return null;
-		return {
-			url: `https://cdn.bsky.app/img/feed_thumbnail/plain/${did}/${media.content.ref.$link}@jpeg`,
-			alt: media.alt || eventData.name
-		};
+		if (!media?.content) return null;
+		const url = getCDNImageBlobUrl({ did, blob: media.content, type: 'jpeg' });
+		if (!url) return null;
+		return { url, alt: media.alt || eventData.name };
 	});
 
 	let eventUrl = $derived(eventData.url || `https://smokesignal.events/${did}/${rkey}`);
 	let eventUri = $derived(`at://${did}/community.lexicon.calendar.event/${rkey}`);
+
+	let ogImageUrl = $derived(`${page.url.origin}${page.url.pathname}/og.png`);
 </script>
 
 <svelte:head>
 	<title>{eventData.name}</title>
 	<meta name="description" content={eventData.description || `Event: ${eventData.name}`} />
+	<meta property="og:title" content={eventData.name} />
+	<meta property="og:description" content={eventData.description || `Event: ${eventData.name}`} />
+	<meta property="og:image" content={ogImageUrl} />
+	<meta name="twitter:card" content="summary_large_image" />
+	<meta name="twitter:title" content={eventData.name} />
+	<meta name="twitter:description" content={eventData.description || `Event: ${eventData.name}`} />
+	<meta name="twitter:image" content={ogImageUrl} />
 </svelte:head>
 
-<div class="bg-base-50 dark:bg-base-950 min-h-screen px-8 py-8 sm:py-12">
+<div class="bg-base-50 dark:bg-base-950 min-h-screen px-6 py-12 sm:py-12">
 	<div class="mx-auto max-w-4xl">
 		<!-- Two-column layout: image left, details right -->
 		<div

@@ -5,35 +5,14 @@ import { isHandle } from '@atcute/lexicons/syntax';
 import { createCache, type CachedProfile } from '$lib/cache';
 import type { ActorIdentifier, Did } from '@atcute/lexicons';
 import { env as publicEnv } from '$env/dynamic/public';
+import { getActor } from '$lib/actor';
 
 export async function load({ params, platform, request }) {
 	const { rkey } = params;
 
 	const cache = createCache(platform);
 
-	const customDomain = request.headers.get('X-Custom-Domain')?.toLowerCase();
-
-	let actor: ActorIdentifier | undefined = params.actor;
-
-	if (!actor) {
-		const kv = platform?.env?.CUSTOM_DOMAINS;
-
-		if (kv && customDomain) {
-			try {
-				const did = await kv.get(customDomain);
-
-				if (did) actor = did as ActorIdentifier;
-			} catch (error) {
-				console.error('failed to get custom domain kv', error);
-			}
-		} else {
-			actor = publicEnv.PUBLIC_HANDLE as ActorIdentifier;
-		}
-	} else if (customDomain && params.actor) {
-		actor = undefined;
-	}
-
-	const did = isHandle(actor) ? await resolveHandle({ handle: actor }) : actor;
+	const did = await getActor({ request, paramActor: params.actor, platform });
 
 	if (!did || !rkey) {
 		throw error(404, 'Event not found');
