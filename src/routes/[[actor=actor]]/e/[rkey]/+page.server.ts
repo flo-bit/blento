@@ -1,6 +1,6 @@
 import { error } from '@sveltejs/kit';
 import type { EventData } from '$lib/cards/social/EventCard';
-import { getBlentoOrBskyProfile, resolveHandle } from '$lib/atproto/methods.js';
+import { getBlentoOrBskyProfile, getRecord, resolveHandle } from '$lib/atproto/methods.js';
 import { isHandle } from '@atcute/lexicons/syntax';
 import { createCache, type CachedProfile } from '$lib/cache';
 import type { Did } from '@atcute/lexicons';
@@ -20,7 +20,7 @@ export async function load({ params, platform }) {
 			`https://smokesignal.events/xrpc/community.lexicon.calendar.GetEvent?repository=${encodeURIComponent(did)}&record_key=${encodeURIComponent(rkey)}`
 		);
 
-		const [eventResponse, hostProfile] = await Promise.all([
+		const [eventResponse, hostProfile, eventRecord] = await Promise.all([
 			fetch(
 				`https://smokesignal.events/xrpc/community.lexicon.calendar.GetEvent?repository=${encodeURIComponent(did)}&record_key=${encodeURIComponent(rkey)}`
 			),
@@ -37,7 +37,12 @@ export async function load({ params, platform }) {
 								url: p.url
 							})
 						)
-						.catch(() => null)
+						.catch(() => null),
+			getRecord({
+				did: did as Did,
+				collection: 'community.lexicon.calendar.event',
+				rkey
+			}).catch(() => null)
 		]);
 
 		if (!eventResponse.ok) {
@@ -50,7 +55,8 @@ export async function load({ params, platform }) {
 			eventData,
 			did,
 			rkey,
-			hostProfile: hostProfile ?? null
+			hostProfile: hostProfile ?? null,
+			eventCid: (eventRecord?.cid as string) ?? null
 		};
 	} catch (e) {
 		if (e && typeof e === 'object' && 'status' in e) throw e;
