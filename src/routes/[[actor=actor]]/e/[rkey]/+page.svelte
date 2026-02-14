@@ -12,9 +12,7 @@
 	let hostProfile = $derived(data.hostProfile);
 
 	let hostUrl = $derived(
-		hostProfile?.hasBlento
-			? `/${hostProfile.handle}`
-			: `https://bsky.app/profile/${hostProfile?.handle || did}`
+		hostProfile?.url ?? `https://bsky.app/profile/${hostProfile?.handle || did}`
 	);
 
 	let startDate = $derived(new Date(eventData.startsAt));
