@@ -12,7 +12,7 @@
 			frameborder="0"
 			allow="autoplay; encrypted-media"
 			loading="lazy"
-			title="Plyr.fm track"
+			title="Plyr.fm"
 		></iframe>
 	</div>
 {:else}

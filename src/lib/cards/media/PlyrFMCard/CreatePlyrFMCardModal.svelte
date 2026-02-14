@@ -2,7 +2,7 @@
 	import { Alert, Button, Input, Subheading } from '@foxui/core';
 	import Modal from '$lib/components/modal/Modal.svelte';
 	import type { CreationModalComponentProps } from '../../types';
-	import { toPlyrFMEmbedUrl } from './index';
+	import { toPlyrFMEmbedUrl, toPlyrFMCollectionEmbedUrl } from './index';
 
 	let { item = $bindable(), oncreate, oncancel }: CreationModalComponentProps = $props();
 
@@ -14,21 +14,27 @@
 		const embedUrl = toPlyrFMEmbedUrl(item.cardData.href);
 
 		if (!embedUrl) {
-			errorMessage = 'Please enter a valid plyr.fm track URL';
+			errorMessage = 'Please enter a valid plyr.fm URL (track, playlist, or album)';
 			return false;
 		}
 
 		item.cardData.href = embedUrl;
+
+		// resize to collection dimensions if it's a playlist or album
+		if (toPlyrFMCollectionEmbedUrl(item.cardData.href)) {
+			item.h = 5;
+			item.mobileH = 10;
+		}
 
 		return true;
 	}
 </script>
 
 <Modal open={true} closeButton={false}>
-	<Subheading>Enter a Plyr.fm track URL</Subheading>
+	<Subheading>Enter a Plyr.fm URL</Subheading>
 	<Input
 		bind:value={item.cardData.href}
-		placeholder="https://plyr.fm/track/..."
+		placeholder="https://plyr.fm/track/... or /playlist/... or /u/.../album/..."
 		onkeydown={(e) => {
 			if (e.key === 'Enter' && checkUrl()) oncreate();
 		}}
