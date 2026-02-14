@@ -8,7 +8,7 @@ export async function GET({ params, platform, request }) {
 	const cache = createCache(platform);
 	if (!cache) return json('no cache');
 
-	const actor = await getActor({ request, paramActor: params.actor, platform });
+	const actor = await getActor({ request, paramActor: params.actor, platform, blockBoth: false });
 
 	if (!actor) {
 		throw error(404, 'Page not found');
