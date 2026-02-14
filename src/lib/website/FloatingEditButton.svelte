@@ -30,7 +30,7 @@
 
 {#if isOwnPage && !isEditPage}
 	<div class="fixed bottom-6 left-6 z-49 hidden lg:block">
-		<Button size="lg" href="{page.url}/edit">
+		<Button size="lg" href="{page.url.pathname.replace(/\/$/, '')}/edit">
 			<svg
 				xmlns="http://www.w3.org/2000/svg"
 				fill="none"
@@ -74,7 +74,7 @@
 	</div>
 {:else if showEditBlentoButton}
 	<div class="fixed bottom-6 left-6 z-49">
-		<Button size="lg" href="/{env.PUBLIC_IS_SELFHOSTED ? '' : getUserIdentifier()}/edit">
+		<Button size="lg" href="{env.PUBLIC_IS_SELFHOSTED ? '' : `/${getUserIdentifier()}`}/edit">
 			<svg
 				xmlns="http://www.w3.org/2000/svg"
 				fill="none"
