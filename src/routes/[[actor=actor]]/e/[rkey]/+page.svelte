@@ -262,7 +262,7 @@
 						Links
 					</p>
 					<div class="space-y-3">
-						{#each eventData.uris as link}
+						{#each eventData.uris as link (link.name + link.uri)}
 							<a
 								href={link.uri}
 								target="_blank"
