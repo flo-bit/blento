@@ -66,7 +66,7 @@ export async function loadData(
 	}
 
 	const [cards, mainPublication, pages, profile] = await Promise.all([
-		listRecords({ did, collection: 'app.blento.card' }).catch((e) => {
+		listRecords({ did, collection: 'app.blento.card', limit: 0 }).catch((e) => {
 			console.error('error getting records for collection app.blento.card', e);
 			return [] as Awaited<ReturnType<typeof listRecords>>;
 		}),
