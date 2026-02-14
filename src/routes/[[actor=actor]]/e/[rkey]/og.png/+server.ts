@@ -7,6 +7,7 @@ import type { EventData } from '$lib/cards/social/EventCard';
 import { ImageResponse } from '@ethercorps/sveltekit-og';
 import { error } from '@sveltejs/kit';
 import EventOgImage from './EventOgImage.svelte';
+import { getActor } from '$lib/actor';
 
 function formatDate(dateStr: string): string {
 	const date = new Date(dateStr);
@@ -19,26 +20,7 @@ function formatDate(dateStr: string): string {
 export async function GET({ params, platform, request }) {
 	const { rkey } = params;
 
-	const customDomain = request.headers.get('X-Custom-Domain')?.toLowerCase();
-
-	let actor: ActorIdentifier | undefined = params.actor;
-
-	if (!actor) {
-		const kv = platform?.env?.CUSTOM_DOMAINS;
-
-		if (kv && customDomain) {
-			try {
-				const did = await kv.get(customDomain);
-				if (did) actor = did as ActorIdentifier;
-			} catch (error) {
-				console.error('failed to get custom domain kv', error);
-			}
-		} else {
-			actor = publicEnv.PUBLIC_HANDLE as ActorIdentifier;
-		}
-	}
-
-	const did = isHandle(actor) ? await resolveHandle({ handle: actor }) : actor;
+	const did = await getActor({ request, paramActor: params.actor, platform });
 
 	if (!did || !rkey) {
 		throw error(404, 'Event not found');

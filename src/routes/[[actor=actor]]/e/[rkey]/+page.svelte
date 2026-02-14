@@ -106,7 +106,7 @@
 	<meta name="twitter:image" content={ogImageUrl} />
 </svelte:head>
 
-<div class="bg-base-50 dark:bg-base-950 min-h-screen px-8 py-8 sm:py-12">
+<div class="bg-base-50 dark:bg-base-950 min-h-screen px-6 py-12 sm:py-12">
 	<div class="mx-auto max-w-4xl">
 		<!-- Two-column layout: image left, details right -->
 		<div

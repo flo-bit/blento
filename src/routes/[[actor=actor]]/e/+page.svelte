@@ -11,6 +11,9 @@
 	let hostProfile = $derived(data.hostProfile);
 
 	let hostName = $derived(hostProfile?.displayName || hostProfile?.handle || did);
+	let hostUrl = $derived(
+		hostProfile?.url ?? `https://bsky.app/profile/${hostProfile?.handle || did}`
+	);
 
 	function formatDate(dateStr: string): string {
 		const date = new Date(dateStr);
@@ -88,14 +91,24 @@
 	<meta name="twitter:description" content="Events hosted by {hostName}" />
 </svelte:head>
 
-<div class="bg-base-50 dark:bg-base-950 min-h-screen px-8 py-8 sm:py-12">
+<div class="bg-base-50 dark:bg-base-950 min-h-screen px-6 py-12 sm:py-12">
 	<div class="mx-auto max-w-4xl">
 		<!-- Header -->
-		<div class="mb-8 flex items-center gap-3">
-			<FoxAvatar src={hostProfile?.avatar} alt={hostName} class="size-10 shrink-0" />
-			<div>
-				<h1 class="text-base-900 dark:text-base-50 text-2xl font-bold sm:text-3xl">Events</h1>
-				<p class="text-base-500 dark:text-base-400 text-sm">Hosted by {hostName}</p>
+		<div class="mb-8">
+			<h1 class="text-base-900 dark:text-base-50 mb-2 text-2xl font-bold sm:text-3xl">
+				Upcoming events
+			</h1>
+			<div class="flex items-center gap-2">
+				<span class="text-base-500 dark:text-base-400 text-sm">Hosted by</span>
+				<a
+					href={hostUrl}
+					target={hostProfile?.hasBlento ? undefined : '_blank'}
+					rel={hostProfile?.hasBlento ? undefined : 'noopener noreferrer'}
+					class="flex items-center gap-1.5 hover:underline"
+				>
+					<FoxAvatar src={hostProfile?.avatar} alt={hostName} class="size-5 shrink-0" />
+					<span class="text-base-900 dark:text-base-100 text-sm font-medium">{hostName}</span>
+				</a>
 			</div>
 		</div>
 
@@ -116,11 +129,11 @@
 							<img
 								src={thumbnail.url}
 								alt={thumbnail.alt}
-								class="aspect-[3/2] w-full object-cover"
+								class="aspect-square w-full object-cover"
 							/>
 						{:else}
 							<div
-								class="bg-base-100 dark:bg-base-900 aspect-[3/2] w-full [&>svg]:h-full [&>svg]:w-full"
+								class="bg-base-100 dark:bg-base-900 aspect-square w-full [&>svg]:h-full [&>svg]:w-full"
 							>
 								<Avatar
 									size={400}
