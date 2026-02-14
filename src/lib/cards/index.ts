@@ -46,7 +46,7 @@ import { LastFMRecentTracksCardDefinition } from './media/LastFMCard/LastFMRecen
 import { LastFMTopTracksCardDefinition } from './media/LastFMCard/LastFMTopTracksCard';
 import { LastFMTopAlbumsCardDefinition } from './media/LastFMCard/LastFMTopAlbumsCard';
 import { LastFMProfileCardDefinition } from './media/LastFMCard/LastFMProfileCard';
-import { PlyrFMCardDefinition } from './media/PlyrFMCard';
+import { PlyrFMCardDefinition, PlyrFMCollectionCardDefinition } from './media/PlyrFMCard';
 import { MarginCardDefinition } from './social/MarginCard';
 import { SembleCollectionCardDefinition } from './social/SembleCollectionCard';
 // import { Model3DCardDefinition } from './visual/Model3DCard';
@@ -101,6 +101,7 @@ export const AllCardDefinitions = [
 	LastFMTopAlbumsCardDefinition,
 	LastFMProfileCardDefinition,
 	PlyrFMCardDefinition,
+	PlyrFMCollectionCardDefinition,
 	MarginCardDefinition,
 	SembleCollectionCardDefinition
 ] as const;
