@@ -98,7 +98,7 @@
 			<h1 class="text-base-900 dark:text-base-50 mb-2 text-2xl font-bold sm:text-3xl">
 				Upcoming events
 			</h1>
-			<div class="flex items-center gap-2 mt-4">
+			<div class="mt-4 flex items-center gap-2">
 				<span class="text-base-500 dark:text-base-400 text-sm">Hosted by</span>
 				<a
 					href={hostUrl}

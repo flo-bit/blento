@@ -21,7 +21,7 @@ export async function load({ params, platform, request }) {
 	try {
 		const [eventResponse, hostProfile, eventRecord] = await Promise.all([
 			fetch(
-				`https://smokesignal.events/xrpc/community.lexicon.calendar.GetEvent?repository=${encodeURIComponent(did)}&record_key=${encodeURIComponent(rkey)}`
+				`https://smokesignal.events/xrpc/community.lexicon.calendar.getEvent?repository=${encodeURIComponent(did)}&record_key=${encodeURIComponent(rkey)}`
 			),
 			cache
 				? cache.getProfile(did as Did).catch(() => null)

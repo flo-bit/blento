@@ -58,6 +58,5 @@
 			</svg>
 			<span class="ml-3 text-2xl text-neutral-300">{dateStr}</span>
 		</div>
-
 	</div>
 </div>
