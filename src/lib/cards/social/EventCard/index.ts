@@ -33,6 +33,10 @@ export type EventData = {
 			height: number;
 		};
 	}>;
+	uris?: Array<{
+		uri: string;
+		name?: string;
+	}>;
 	countGoing?: number;
 	countInterested?: number;
 	url: string;

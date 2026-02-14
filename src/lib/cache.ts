@@ -1,6 +1,7 @@
 import type { ActorIdentifier, Did } from '@atcute/lexicons';
 import { isDid } from '@atcute/lexicons/syntax';
 import type { KVNamespace } from '@cloudflare/workers-types';
+import { getBlentoOrBskyProfile } from '$lib/atproto/methods';
 
 /** TTL in seconds for each cache namespace */
 const NAMESPACE_TTL = {
@@ -10,6 +11,7 @@ const NAMESPACE_TTL = {
 	'gh-contrib': 60 * 60 * 12, // 12 hours
 	lastfm: 60 * 60, // 1 hour (default, overridable per-put)
 	npmx: 60 * 60 * 12, // 12 hours
+	profile: 60 * 60 * 24, // 24 hours
 	meta: 0 // no auto-expiry
 } as const;
 
@@ -89,7 +91,35 @@ export class CacheService {
 	async resolveHandle(did: Did): Promise<string | null> {
 		return this.get('identity', `d:${did}`);
 	}
+
+	// === Profile cache (did → profile data) ===
+	async getProfile(did: Did): Promise<CachedProfile> {
+		const cached = await this.getJSON<CachedProfile>('profile', did);
+		if (cached) return cached;
+
+		const profile = await getBlentoOrBskyProfile({ did });
+		const data: CachedProfile = {
+			did: profile.did as string,
+			handle: profile.handle as string,
+			displayName: profile.displayName as string | undefined,
+			avatar: profile.avatar as string | undefined,
+			hasBlento: profile.hasBlento,
+			url: profile.url
+		};
+
+		await this.putJSON('profile', did, data);
+		return data;
+	}
 }
+
+export type CachedProfile = {
+	did: string;
+	handle: string;
+	displayName?: string;
+	avatar?: string;
+	hasBlento: boolean;
+	url?: string;
+};
 
 export function createCache(platform?: App.Platform): CacheService | undefined {
 	const kv = platform?.env?.USER_DATA_CACHE;
