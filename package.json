@@ -84,6 +84,7 @@
 		"qr-code-styling": "^1.8.6",
 		"react-grid-layout": "^2.2.2",
 		"simple-icons": "^16.6.0",
+		"svelte-boring-avatars": "^1.2.6",
 		"svelte-sonner": "^1.0.7",
 		"tailwind-merge": "^3.4.0",
 		"tailwind-variants": "^3.2.2",

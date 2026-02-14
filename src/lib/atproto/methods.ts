@@ -122,12 +122,15 @@ export async function getBlentoOrBskyProfile(data: { did: Did; client?: Client }
 
 	const response = await getDetailedProfile(data);
 
+	const avatar = blentoProfile?.value?.icon
+		? getCDNImageBlobUrl({ did: data?.did, blob: blentoProfile?.value?.icon })
+		: response?.avatar;
+
 	return {
 		did: data.did,
 		handle: response?.handle,
 		displayName: blentoProfile?.value?.name || response?.displayName || response?.handle,
-		avatar: (getCDNImageBlobUrl({ did: data?.did, blob: blentoProfile?.value?.icon }) ||
-			response?.avatar) as `${string}:${string}`,
+		avatar: avatar as `${string}:${string}`,
 		hasBlento: Boolean(blentoProfile.value),
 		url: blentoProfile?.value?.url as string | undefined
 	};

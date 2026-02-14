@@ -140,6 +140,9 @@ importers:
       simple-icons:
         specifier: ^16.6.0
         version: 16.6.0
+      svelte-boring-avatars:
+        specifier: ^1.2.6
+        version: 1.2.6
       svelte-sonner:
         specifier: ^1.0.7
         version: 1.0.7(svelte@5.48.0)
@@ -2791,6 +2794,9 @@ packages:
   supports-color@7.2.0:
     resolution: {integrity: sha512-qpCAvRl9stuOHveKsn7HncJRvv501qIacKzQlO/+Lwxc9+0q2wLyv4Dfvt80/DPn2pqOBsJdDiogXGR9+OvwRw==}
     engines: {node: '>=8'}
+
+  svelte-boring-avatars@1.2.6:
+    resolution: {integrity: sha512-8+Z1DhsMUVI/V/5ik00Arw0PgbJcMdhTXq3YGqccBc5bYFeceCtMEMB0aWGhi8xFV+0aqZbWvS89Hcj16LlfHA==, tarball: https://registry.npmjs.org/svelte-boring-avatars/-/svelte-boring-avatars-1.2.6.tgz}
 
   svelte-check@4.3.5:
     resolution: {integrity: sha512-e4VWZETyXaKGhpkxOXP+B/d0Fp/zKViZoJmneZWe/05Y2aqSKj3YN2nLfYPJBQ87WEiY4BQCQ9hWGu9mPT1a1Q==}
@@ -5609,6 +5615,8 @@ snapshots:
   supports-color@7.2.0:
     dependencies:
       has-flag: 4.0.0
+
+  svelte-boring-avatars@1.2.6: {}
 
   svelte-check@4.3.5(picomatch@4.0.3)(svelte@5.48.0)(typescript@5.9.3):
     dependencies:

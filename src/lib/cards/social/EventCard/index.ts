@@ -13,6 +13,7 @@ export type EventData = {
 	endsAt?: string;
 	description?: string;
 	locations?: Array<{
+		$type: string;
 		address?: {
 			locality?: string;
 			region?: string;
@@ -32,6 +33,10 @@ export type EventData = {
 			width: number;
 			height: number;
 		};
+	}>;
+	uris?: Array<{
+		uri: string;
+		name?: string;
 	}>;
 	countGoing?: number;
 	countInterested?: number;

@@ -23,7 +23,8 @@ export const permissions = {
 		'app.bsky.feed.post?action=create',
 		'site.standard.publication',
 		'site.standard.document',
-		'xyz.statusphere.status'
+		'xyz.statusphere.status',
+		'community.lexicon.calendar.rsvp'
 	],
 
 	// what types of authenticated proxied requests you can make to services
