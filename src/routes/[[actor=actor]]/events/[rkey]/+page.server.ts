@@ -1,24 +1,28 @@
 import { error } from '@sveltejs/kit';
 import type { EventData } from '$lib/cards/social/EventCard';
-import { getBlentoOrBskyProfile } from '$lib/atproto/methods.js';
+import { getBlentoOrBskyProfile, getRecord } from '$lib/atproto/methods.js';
 import { createCache, type CachedProfile } from '$lib/cache';
 import type { Did } from '@atcute/lexicons';
-import { getActor } from '$lib/actor.js';
+import { getActor } from '$lib/actor';
 
 export async function load({ params, platform, request }) {
+	const { rkey } = params;
+
 	const cache = createCache(platform);
 
 	const did = await getActor({ request, paramActor: params.actor, platform });
 
-	if (!did) {
-		throw error(404, 'Events not found');
+	if (!did || !rkey) {
+		throw error(404, 'Event not found');
 	}
 
 	try {
-		const [eventsResponse, hostProfile] = await Promise.all([
-			fetch(
-				`https://smokesignal.events/xrpc/community.lexicon.calendar.searchEvents?repository=${encodeURIComponent(did)}&query=upcoming`
-			),
+		const [eventRecord, hostProfile] = await Promise.all([
+			getRecord({
+				did: did as Did,
+				collection: 'community.lexicon.calendar.event',
+				rkey
+			}),
 			cache
 				? cache.getProfile(did as Did).catch(() => null)
 				: getBlentoOrBskyProfile({ did: did as Did })
@@ -35,20 +39,21 @@ export async function load({ params, platform, request }) {
 						.catch(() => null)
 		]);
 
-		if (!eventsResponse.ok) {
-			throw error(404, 'Events not found');
+		if (!eventRecord?.value) {
+			throw error(404, 'Event not found');
 		}
 
-		const data: { results: EventData[] } = await eventsResponse.json();
-		const events = data.results;
+		const eventData: EventData = eventRecord.value as EventData;
 
 		return {
-			events,
+			eventData,
 			did,
-			hostProfile: hostProfile ?? null
+			rkey,
+			hostProfile: hostProfile ?? null,
+			eventCid: (eventRecord.cid as string) ?? null
 		};
 	} catch (e) {
 		if (e && typeof e === 'object' && 'status' in e) throw e;
-		throw error(404, 'Events not found');
+		throw error(404, 'Event not found');
 	}
 }

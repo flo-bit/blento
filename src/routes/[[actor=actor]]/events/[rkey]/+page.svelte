@@ -88,7 +88,7 @@
 		return { url, alt: media.alt || eventData.name };
 	});
 
-	let eventUrl = $derived(eventData.url || `https://smokesignal.events/${did}/${rkey}`);
+	let smokesignalUrl = $derived(`https://smokesignal.events/${did}/${rkey}`);
 	let eventUri = $derived(`at://${did}/community.lexicon.calendar.event/${rkey}`);
 
 	let ogImageUrl = $derived(`${page.url.origin}${page.url.pathname}/og.png`);
@@ -247,20 +247,6 @@
 				</a>
 			</div>
 
-			{#if (eventData.countGoing && eventData.countGoing > 0) || (eventData.countInterested && eventData.countInterested > 0)}
-				<!-- Counts -->
-				<div
-					class="text-base-900 dark:text-base-100 order-4 space-y-2.5 text-base font-medium md:order-0 md:col-start-1"
-				>
-					{#if eventData.countGoing && eventData.countGoing > 0}
-						<p>{eventData.countGoing} Going</p>
-					{/if}
-					{#if eventData.countInterested && eventData.countInterested > 0}
-						<p>{eventData.countInterested} Interested</p>
-					{/if}
-				</div>
-			{/if}
-
 			{#if eventData.uris && eventData.uris.length > 0}
 				<!-- Links -->
 				<div class="order-5 md:order-0 md:col-start-1">
@@ -300,7 +286,7 @@
 
 			<!-- View on Smoke Signal link -->
 			<a
-				href={eventUrl}
+				href={smokesignalUrl}
 				target="_blank"
 				rel="noopener noreferrer"
 				class="text-base-500 dark:text-base-400 hover:text-base-700 dark:hover:text-base-200 order-6 inline-flex items-center gap-1.5 text-sm transition-colors md:order-0 md:col-start-2"

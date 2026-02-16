@@ -1,8 +1,6 @@
-import { getCDNImageBlobUrl, resolveHandle } from '$lib/atproto/methods.js';
-import { env as publicEnv } from '$env/dynamic/public';
+import { getCDNImageBlobUrl, getRecord } from '$lib/atproto/methods.js';
 
-import type { ActorIdentifier } from '@atcute/lexicons';
-import { isHandle } from '@atcute/lexicons/syntax';
+import type { Did } from '@atcute/lexicons';
 import type { EventData } from '$lib/cards/social/EventCard';
 import { ImageResponse } from '@ethercorps/sveltekit-og';
 import { error } from '@sveltejs/kit';
@@ -29,15 +27,17 @@ export async function GET({ params, platform, request }) {
 	let eventData: EventData;
 
 	try {
-		const eventResponse = await fetch(
-			`https://smokesignal.events/xrpc/community.lexicon.calendar.GetEvent?repository=${encodeURIComponent(did)}&record_key=${encodeURIComponent(rkey)}`
-		);
+		const eventRecord = await getRecord({
+			did: did as Did,
+			collection: 'community.lexicon.calendar.event',
+			rkey
+		});
 
-		if (!eventResponse.ok) {
+		if (!eventRecord?.value) {
 			throw error(404, 'Event not found');
 		}
 
-		eventData = await eventResponse.json();
+		eventData = eventRecord.value as EventData;
 	} catch (e) {
 		if (e && typeof e === 'object' && 'status' in e) throw e;
 		throw error(404, 'Event not found');

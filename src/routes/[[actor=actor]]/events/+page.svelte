@@ -6,7 +6,7 @@
 
 	let { data } = $props();
 
-	let events: EventData[] = $derived(data.events);
+	let events: (EventData & { rkey: string })[] = $derived(data.events);
 	let did: string = $derived(data.did);
 	let hostProfile = $derived(data.hostProfile);
 
@@ -74,10 +74,6 @@
 		return { url, alt: media.alt || event.name };
 	}
 
-	function getRkey(event: EventData): string {
-		return event.url.split('/').pop() || '';
-	}
-
 	let actorPrefix = $derived(data.hostProfile?.handle ? `/${data.hostProfile.handle}` : `/${did}`);
 </script>
 
@@ -98,7 +94,7 @@
 			<h1 class="text-base-900 dark:text-base-50 mb-2 text-2xl font-bold sm:text-3xl">
 				Upcoming events
 			</h1>
-			<div class="flex items-center gap-2 mt-4">
+			<div class="mt-4 flex items-center gap-2">
 				<span class="text-base-500 dark:text-base-400 text-sm">Hosted by</span>
 				<a
 					href={hostUrl}
@@ -116,10 +112,10 @@
 			<p class="text-base-500 dark:text-base-400 py-12 text-center">No events found.</p>
 		{:else}
 			<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-				{#each events as event (event.url)}
+				{#each events as event (event.rkey)}
 					{@const thumbnail = getThumbnail(event)}
 					{@const location = getLocationString(event.locations)}
-					{@const rkey = getRkey(event)}
+					{@const rkey = event.rkey}
 					<a
 						href="{actorPrefix}/e/{rkey}"
 						class="border-base-200 dark:border-base-800 hover:border-base-300 dark:hover:border-base-700 group block overflow-hidden rounded-xl border transition-colors"
@@ -168,12 +164,6 @@
 									<span class="text-base-500 dark:text-base-400 truncate text-xs">{location}</span>
 								{/if}
 							</div>
-
-							{#if event.countGoing && event.countGoing > 0}
-								<p class="text-base-500 dark:text-base-400 mt-2 text-xs">
-									{event.countGoing} going
-								</p>
-							{/if}
 						</div>
 					</a>
 				{/each}

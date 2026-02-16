@@ -2,6 +2,8 @@
 	import { Alert, Button, Input, Subheading } from '@foxui/core';
 	import Modal from '$lib/components/modal/Modal.svelte';
 	import type { CreationModalComponentProps } from '../../types';
+	import { getRecord } from '$lib/atproto/methods';
+	import type { Did } from '@atcute/lexicons';
 
 	const EVENT_COLLECTION = 'community.lexicon.calendar.event';
 
@@ -38,12 +40,14 @@
 				throw new Error('Invalid URL format');
 			}
 
-			// Validate the event exists by fetching it
-			const response = await fetch(
-				`https://smokesignal.events/xrpc/community.lexicon.calendar.GetEvent?repository=${encodeURIComponent(parsed.did)}&record_key=${encodeURIComponent(parsed.rkey)}`
-			);
+			// Validate the event exists by fetching the record directly
+			const record = await getRecord({
+				did: parsed.did as Did,
+				collection: EVENT_COLLECTION,
+				rkey: parsed.rkey
+			});
 
-			if (!response.ok) {
+			if (!record?.value) {
 				throw new Error('Event not found');
 			}
 
@@ -55,7 +59,7 @@
 			errorMessage =
 				err instanceof Error && err.message === 'Event not found'
 					? "Couldn't find that event. Please check the URL and try again."
-					: 'Invalid URL. Please enter a valid smokesignal.events URL or AT URI.';
+					: 'Invalid URL. Please enter a valid event AT URI or smokesignal.events URL.';
 			return false;
 		} finally {
 			isValidating = false;
@@ -70,10 +74,10 @@
 		}}
 		class="flex flex-col gap-2"
 	>
-		<Subheading>Enter a Smoke Signal event URL</Subheading>
+		<Subheading>Enter an event URL</Subheading>
 		<Input
 			bind:value={eventUrl}
-			placeholder="https://smokesignal.events/did:.../..."
+			placeholder="at://did:.../community.lexicon.calendar.event/..."
 			class="mt-4"
 		/>
 
@@ -82,11 +86,7 @@
 		{/if}
 
 		<p class="text-base-500 dark:text-base-400 mt-2 text-xs">
-			Paste a URL from <a
-				href="https://smokesignal.events"
-				class="text-accent-800 dark:text-accent-300"
-				target="_blank">smokesignal.events</a
-			> or an AT URI for a calendar event.
+			Paste an AT URI for a calendar event or a smokesignal.events URL.
 		</p>
 
 		<div class="mt-4 flex justify-end gap-2">

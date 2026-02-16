@@ -91,9 +91,8 @@
 	}
 
 	let eventUrl = $derived(() => {
-		if (eventData?.url) return eventData.url;
 		if (parsedUri) {
-			return `https://smokesignal.events/${parsedUri.repo}/${parsedUri.rkey}`;
+			return `/${parsedUri.repo}/events/${parsedUri.rkey}`;
 		}
 		return '#';
 	});
@@ -144,9 +143,7 @@
 				</div>
 
 				{#if isMobile() ? item.mobileW > 4 : item.w > 2}
-					<Button href={eventUrl()} target="_blank" rel="noopener noreferrer" class="z-50"
-						>View event</Button
-					>
+					<Button href={eventUrl()} target="_blank" class="z-50">View event</Button>
 				{/if}
 			</div>
 
@@ -211,51 +208,6 @@
 					{eventData.description}
 				</p>
 			{/if}
-
-			{#if (eventData.countGoing !== undefined || eventData.countInterested !== undefined) && ((isMobile() && item.mobileH >= 4) || (!isMobile() && item.h >= 3))}
-				<div
-					class="text-base-600 dark:text-base-400 accent:text-base-800 flex flex-wrap gap-3 text-xs"
-				>
-					{#if eventData.countGoing !== undefined}
-						<div class="flex items-center gap-1">
-							<svg
-								xmlns="http://www.w3.org/2000/svg"
-								fill="none"
-								viewBox="0 0 24 24"
-								stroke-width="1.5"
-								stroke="currentColor"
-								class="size-4"
-							>
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-								/>
-							</svg>
-							<span>{eventData.countGoing} going</span>
-						</div>
-					{/if}
-					{#if eventData.countInterested !== undefined}
-						<div class="flex items-center gap-1">
-							<svg
-								xmlns="http://www.w3.org/2000/svg"
-								fill="none"
-								viewBox="0 0 24 24"
-								stroke-width="1.5"
-								stroke="currentColor"
-								class="size-4"
-							>
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"
-								/>
-							</svg>
-							<span>{eventData.countInterested} interested</span>
-						</div>
-					{/if}
-				</div>
-			{/if}
 		</div>
 
 		{#if showImage}
@@ -267,16 +219,15 @@
 
 		<a
 			href={eventUrl()}
-			class="absolute inset-0 h-full w-full"
 			target="_blank"
-			rel="noopener noreferrer"
+			class="absolute inset-0 h-full w-full"
 			use:qrOverlay={{
 				context: {
 					title: eventData?.name ?? ''
 				}
 			}}
 		>
-			<span class="sr-only">View event on smokesignal.events</span>
+			<span class="sr-only">View event</span>
 		</a>
 	{:else if isLoaded}
 		<div class="flex h-full w-full items-center justify-center">

@@ -1,7 +1,8 @@
-import { parseUri } from '$lib/atproto';
+import { parseUri, getRecord } from '$lib/atproto';
 import type { CardDefinition } from '../../types';
 import CreateEventCardModal from './CreateEventCardModal.svelte';
 import EventCard from './EventCard.svelte';
+import type { Did } from '@atcute/lexicons';
 
 const EVENT_COLLECTION = 'community.lexicon.calendar.event';
 
@@ -39,9 +40,7 @@ export type EventData = {
 		uri: string;
 		name?: string;
 	}>;
-	countGoing?: number;
-	countInterested?: number;
-	url: string;
+	url?: string;
 };
 
 export const EventCardDefinition = {
@@ -66,13 +65,14 @@ export const EventCardDefinition = {
 			if (!parsedUri || !parsedUri.rkey || !parsedUri.repo) continue;
 
 			try {
-				const response = await fetch(
-					`https://smokesignal.events/xrpc/community.lexicon.calendar.GetEvent?repository=${encodeURIComponent(parsedUri.repo)}&record_key=${encodeURIComponent(parsedUri.rkey)}`
-				);
+				const record = await getRecord({
+					did: parsedUri.repo as Did,
+					collection: EVENT_COLLECTION,
+					rkey: parsedUri.rkey
+				});
 
-				if (response.ok) {
-					const data = await response.json();
-					eventDataMap[item.id] = data as EventData;
+				if (record?.value) {
+					eventDataMap[item.id] = record.value as EventData;
 				}
 			} catch (error) {
 				console.error('Failed to fetch event data:', error);
@@ -118,7 +118,7 @@ export const EventCardDefinition = {
 
 	name: 'Event',
 
-	keywords: ['calendar', 'meetup', 'schedule', 'date', 'rsvp'],
+	keywords: ['calendar', 'meetup', 'schedule', 'date', 'rsvp', 'smokesignal'],
 	groups: ['Social'],
 	icon: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-4"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" /></svg>`
 } as CardDefinition & { type: 'event' };
