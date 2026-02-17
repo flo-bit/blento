@@ -6,6 +6,7 @@ import { BlueskyPostCardDefinition } from './social/BlueskyPostCard';
 import { BlueskyFeedCardDefinition } from './social/BlueskyFeedCard';
 import { LatestBlueskyPostCardDefinition } from './social/LatestBlueskyPostCard';
 import { DinoGameCardDefinition } from './games/DinoGameCard';
+import { SnakeGameCardDefinition } from './games/SnakeGameCard';
 import { EmbedCardDefinition } from './media/EmbedCard';
 import { TetrisCardDefinition } from './games/TetrisCard';
 import { ImageCardDefinition } from './core/ImageCard';
@@ -71,6 +72,7 @@ export const AllCardDefinitions = [
 	SectionCardDefinition,
 	BlueskyMediaCardDefinition,
 	DinoGameCardDefinition,
+	SnakeGameCardDefinition,
 	BlueskyProfileCardDefinition,
 	GithubProfileCardDefitition,
 	TetrisCardDefinition,
