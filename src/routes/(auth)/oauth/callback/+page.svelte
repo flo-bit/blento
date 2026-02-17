@@ -13,10 +13,15 @@
 		if (user.profile) {
 			if (hasRedirected) return;
 
-			const redirect = localStorage.getItem('login-redirect');
+			let redirect = localStorage.getItem('login-redirect');
 			localStorage.removeItem('login-redirect');
-			console.log('redirect', redirect);
-			goto(redirect || '/' + getHandleOrDid(user.profile) + '/edit', {});
+
+			const editPath = '/' + getHandleOrDid(user.profile) + '/edit';
+			if (!redirect || redirect === '/' || redirect === 'https://blento.app' || redirect === 'https://blento.app/') {
+				redirect = editPath;
+			}
+
+			goto(redirect, {});
 
 			hasRedirected = true;
 		}

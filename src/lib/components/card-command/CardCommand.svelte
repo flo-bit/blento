@@ -3,19 +3,7 @@
 	import type { CardDefinition } from '$lib/cards/types';
 	import { Command, Dialog } from 'bits-ui';
 	import { isTyping } from '$lib/helper';
-
-	const CardDefGroups = [
-		'Core',
-		...Array.from(
-			new Set(
-				AllCardDefinitions.map((cardDef) => cardDef.groups)
-					.flat()
-					.filter((g) => g)
-			)
-		)
-			.sort()
-			.filter((g) => g !== 'Core')
-	];
+	import { describeRepo, user } from '$lib/atproto';
 
 	let {
 		open = $bindable(false),
@@ -26,6 +14,39 @@
 		onselect: (cardDef: CardDefinition) => void;
 		onlink?: (url: string, cardDef: CardDefinition) => void;
 	} = $props();
+
+	let collections = $state<string[]>([]);
+	let fetchedForDid = $state<string | undefined>(undefined);
+
+	$effect(() => {
+		if (open && user.did && fetchedForDid !== user.did) {
+			const did = user.did;
+			describeRepo({ did }).then((result) => {
+				if (result?.collections) {
+					collections = result.collections;
+				}
+				fetchedForDid = did;
+			});
+		}
+	});
+
+	let filteredCardDefs = $derived(
+		AllCardDefinitions.filter((d) => !d.canAdd || d.canAdd({ collections }))
+	);
+
+	let cardDefGroups = $derived([
+		'Core',
+		...Array.from(
+			new Set(
+				filteredCardDefs
+					.map((cardDef) => cardDef.groups)
+					.flat()
+					.filter((g) => g)
+			)
+		)
+			.sort()
+			.filter((g) => g !== 'Core')
+	]);
 
 	let searchValue = $state('');
 
@@ -44,7 +65,8 @@
 
 	let urlMatchingCards = $derived.by(() => {
 		if (!normalizedUrl) return [];
-		return AllCardDefinitions.filter((d) => d.onUrlHandler)
+		return filteredCardDefs
+			.filter((d) => d.onUrlHandler)
 			.filter((d) => {
 				try {
 					const testItem = { cardData: {} };
@@ -150,8 +172,8 @@
 							<Command.Separator class="bg-base-900/5 dark:bg-base-50/5 my-1 h-px w-full" />
 						{/if}
 
-						{#each CardDefGroups as group, index (group)}
-							{#if group && AllCardDefinitions.some((cardDef) => cardDef.groups?.includes(group))}
+						{#each cardDefGroups as group, index (group)}
+							{#if group && filteredCardDefs.some((cardDef) => cardDef.groups?.includes(group))}
 								<Command.Group>
 									<Command.GroupHeading
 										class="text-base-600 dark:text-base-400 px-3 pt-4 pb-2 text-xs"
@@ -159,7 +181,7 @@
 										{group}
 									</Command.GroupHeading>
 									<Command.GroupItems>
-										{#each AllCardDefinitions.filter( (cardDef) => cardDef.groups?.includes(group) ) as cardDef (cardDef.type)}
+										{#each filteredCardDefs.filter( (cardDef) => cardDef.groups?.includes(group) ) as cardDef (cardDef.type)}
 											<Command.Item
 												onSelect={() => {
 													open = false;
@@ -179,7 +201,7 @@
 										{/each}
 									</Command.GroupItems>
 								</Command.Group>
-								{#if index < CardDefGroups.length - 1}
+								{#if index < cardDefGroups.length - 1}
 									<Command.Separator class="bg-base-900/5 dark:bg-base-50/5 my-1 h-px w-full" />
 								{/if}
 							{/if}
