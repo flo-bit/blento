@@ -23,7 +23,8 @@
 
 	let step: 'current' | 'input' | 'instructions' | 'verifying' | 'removing' | 'success' | 'error' =
 		$state('input');
-	let domain = $state('');
+	let rawDomain = $state('');
+	let domain = $derived(rawDomain.replace(/^https?:\/\//, '').replace(/\/+$/, ''));
 	let errorMessage = $state('');
 	let errorHint = $state('');
 
@@ -32,7 +33,7 @@
 			step = currentDomain ? 'current' : 'input';
 		} else {
 			step = 'input';
-			domain = '';
+			rawDomain = '';
 			errorMessage = '';
 			errorHint = '';
 		}
@@ -157,7 +158,7 @@
 			Custom Domain
 		</h3>
 
-		<Input type="text" bind:value={domain} placeholder="mydomain.com" />
+		<Input type="text" bind:value={rawDomain} placeholder="mydomain.com" />
 
 		<div class="mt-4 flex gap-2">
 			<Button variant="ghost" onclick={() => customDomainModalState.hide()}>Cancel</Button>
