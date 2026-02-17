@@ -66,8 +66,8 @@
 	}
 
 	function getLink(profile: FriendsProfile): string {
-		if (profile.hasBlento && profile.handle && profile.handle !== 'handle.invalid') {
-			return `/${profile.handle}`;
+		if (profile.hasBlento && profile.url) {
+			return profile.url;
 		}
 		if (profile.handle && profile.handle !== 'handle.invalid') {
 			return `https://bsky.app/profile/${profile.handle}`;
