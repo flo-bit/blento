@@ -20,7 +20,9 @@
 	setAdditionalUserData(data.additionalData);
 
 	setCanEdit(
-		() => (dev && isEditing === true) || (user.isLoggedIn && user.profile?.did === data.did && isEditing === true)
+		() =>
+			(dev && isEditing === true) ||
+			(user.isLoggedIn && user.profile?.did === data.did && isEditing === true)
 	);
 
 	// svelte-ignore state_referenced_locally
