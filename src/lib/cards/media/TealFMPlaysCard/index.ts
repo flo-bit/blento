@@ -22,6 +22,7 @@ export const TealFMPlaysCardDefinition = {
 	},
 	minW: 4,
 	canHaveLabel: true,
+	canAdd: ({ collections }) => collections.includes('fm.teal.alpha.feed.play'),
 
 	keywords: ['music', 'scrobble', 'listening', 'songs'],
 	name: 'Teal.fm Plays',

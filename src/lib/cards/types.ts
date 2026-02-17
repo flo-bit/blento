@@ -73,6 +73,8 @@ export type CardDefinition = {
 
 	canResize?: boolean;
 
+	canAdd?: (context: { collections: string[] }) => boolean;
+
 	onUrlHandler?: (url: string, item: Item) => Item | null;
 	urlHandlerPriority?: number;
 
