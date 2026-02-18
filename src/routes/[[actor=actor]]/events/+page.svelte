@@ -89,8 +89,8 @@
 	<meta name="twitter:description" content="Events hosted by {hostName}" />
 </svelte:head>
 
-<div class="bg-base-50 dark:bg-base-950 min-h-screen px-6 py-12 sm:py-12">
-	<div class="mx-auto max-w-4xl">
+<div class="min-h-screen px-6 py-12 sm:py-12">
+	<div class="mx-auto max-w-2xl">
 		<!-- Header -->
 		<div class="mb-8 flex items-start justify-between">
 			<div>
@@ -125,7 +125,7 @@
 					{@const rkey = event.rkey}
 					<a
 						href="{actorPrefix}/events/{rkey}"
-						class="border-base-200 dark:border-base-800 hover:border-base-300 dark:hover:border-base-700 group bg-base-100 dark:bg-base-900 block overflow-hidden rounded-2xl border transition-colors"
+						class="border-base-200 dark:border-base-800 hover:border-base-300 dark:hover:border-base-700 group bg-base-100 dark:bg-base-950 block overflow-hidden rounded-2xl border transition-colors"
 					>
 						<!-- Thumbnail -->
 						<div class="p-4">

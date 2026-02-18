@@ -359,8 +359,8 @@
 	<title>Create Event</title>
 </svelte:head>
 
-<div class="bg-base-50 dark:bg-base-950 min-h-screen px-6 py-12 sm:py-12">
-	<div class="mx-auto max-w-4xl">
+<div class="min-h-screen px-6 py-12 sm:py-12">
+	<div class="mx-auto max-w-2xl">
 		{#if user.isInitializing}
 			<div class="flex items-center gap-3">
 				<div class="bg-base-300 dark:bg-base-700 size-5 animate-pulse rounded-full"></div>

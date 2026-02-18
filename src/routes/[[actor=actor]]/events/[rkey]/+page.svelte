@@ -171,8 +171,8 @@
 	<meta name="twitter:image" content={ogImageUrl} />
 </svelte:head>
 
-<div class="bg-base-50 dark:bg-base-950 min-h-screen px-6 py-12 sm:py-12">
-	<div class="mx-auto max-w-4xl">
+<div class="min-h-screen px-6 py-12 sm:py-12">
+	<div class="mx-auto max-w-2xl">
 		<!-- Banner image (full width, only when no thumbnail) -->
 		{#if isBannerOnly && displayImage}
 			<img
