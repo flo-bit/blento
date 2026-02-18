@@ -1,6 +1,6 @@
 import { error } from '@sveltejs/kit';
 import type { EventData } from '$lib/cards/social/EventCard';
-import { getBlentoOrBskyProfile } from '$lib/atproto/methods.js';
+import { getBlentoOrBskyProfile, listRecords } from '$lib/atproto/methods.js';
 import { createCache, type CachedProfile } from '$lib/cache';
 import type { Did } from '@atcute/lexicons';
 import { getActor } from '$lib/actor.js';
@@ -15,10 +15,12 @@ export async function load({ params, platform, request }) {
 	}
 
 	try {
-		const [eventsResponse, hostProfile] = await Promise.all([
-			fetch(
-				`https://smokesignal.events/xrpc/community.lexicon.calendar.searchEvents?repository=${encodeURIComponent(did)}&query=upcoming`
-			),
+		const [records, hostProfile] = await Promise.all([
+			listRecords({
+				did: did as Did,
+				collection: 'community.lexicon.calendar.event',
+				limit: 100
+			}),
 			cache
 				? cache.getProfile(did as Did).catch(() => null)
 				: getBlentoOrBskyProfile({ did: did as Did })
@@ -35,12 +37,10 @@ export async function load({ params, platform, request }) {
 						.catch(() => null)
 		]);
 
-		if (!eventsResponse.ok) {
-			throw error(404, 'Events not found');
-		}
-
-		const data: { results: EventData[] } = await eventsResponse.json();
-		const events = data.results;
+		const events = records.map((r) => ({
+			...(r.value as EventData),
+			rkey: r.uri.split('/').pop() as string
+		}));
 
 		return {
 			events,

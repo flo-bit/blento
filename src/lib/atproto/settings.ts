@@ -24,7 +24,8 @@ export const permissions = {
 		'site.standard.publication',
 		'site.standard.document',
 		'xyz.statusphere.status',
-		'community.lexicon.calendar.rsvp'
+		'community.lexicon.calendar.rsvp',
+		'community.lexicon.calendar.event'
 	],
 
 	// what types of authenticated proxied requests you can make to services

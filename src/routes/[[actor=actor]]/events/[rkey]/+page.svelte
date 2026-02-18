@@ -5,6 +5,8 @@
 	import Avatar from 'svelte-boring-avatars';
 	import EventRsvp from './EventRsvp.svelte';
 	import { page } from '$app/state';
+	import { segmentize, type Facet } from '@atcute/bluesky-richtext-segmenter';
+	import { sanitize } from '$lib/sanitize';
 
 	let { data } = $props();
 
@@ -79,7 +81,7 @@
 
 	let location = $derived(getLocationString(eventData.locations));
 
-	let headerImage = $derived.by(() => {
+	let thumbnailImage = $derived.by(() => {
 		if (!eventData.media || eventData.media.length === 0) return null;
 		const media = eventData.media.find((m) => m.role === 'thumbnail');
 		if (!media?.content) return null;
@@ -88,7 +90,70 @@
 		return { url, alt: media.alt || eventData.name };
 	});
 
-	let eventUrl = $derived(eventData.url || `https://smokesignal.events/${did}/${rkey}`);
+	let bannerImage = $derived.by(() => {
+		if (!eventData.media || eventData.media.length === 0) return null;
+		const media = eventData.media.find((m) => m.role === 'header');
+		if (!media?.content) return null;
+		const url = getCDNImageBlobUrl({ did, blob: media.content, type: 'jpeg' });
+		if (!url) return null;
+		return { url, alt: media.alt || eventData.name };
+	});
+
+	// Prefer thumbnail; fall back to header/banner image
+	let displayImage = $derived(thumbnailImage ?? bannerImage);
+	let isBannerOnly = $derived(!thumbnailImage && !!bannerImage);
+
+	let isSameDay = $derived(
+		endDate &&
+			startDate.getFullYear() === endDate.getFullYear() &&
+			startDate.getMonth() === endDate.getMonth() &&
+			startDate.getDate() === endDate.getDate()
+	);
+
+	function escapeHtml(str: string): string {
+		return str
+			.replace(/&/g, '&amp;')
+			.replace(/</g, '&lt;')
+			.replace(/>/g, '&gt;')
+			.replace(/"/g, '&quot;')
+			.replace(/'/g, '&#39;');
+	}
+
+	function renderDescription(text: string, facets?: Facet[]): string {
+		const segments = segmentize(text, facets);
+		const html = segments
+			.map((segment) => {
+				const escaped = escapeHtml(segment.text);
+				const feature = segment.features?.[0] as
+					| { $type: string; did?: string; uri?: string; tag?: string }
+					| undefined;
+				if (!feature) return `<span>${escaped}</span>`;
+
+				const link = (href: string) =>
+					`<a target="_blank" rel="noopener noreferrer nofollow" href="${encodeURI(href)}" class="text-accent-600 dark:text-accent-400 hover:underline">${escaped}</a>`;
+
+				switch (feature.$type) {
+					case 'app.bsky.richtext.facet#mention':
+						return link(`https://bsky.app/profile/${feature.did}`);
+					case 'app.bsky.richtext.facet#link':
+						return link(feature.uri!);
+					case 'app.bsky.richtext.facet#tag':
+						return link(`https://bsky.app/hashtag/${feature.tag}`);
+					default:
+						return `<span>${escaped}</span>`;
+				}
+			})
+			.join('');
+		return html.replace(/\n/g, '<br>');
+	}
+
+	let descriptionHtml = $derived(
+		eventData.description
+			? sanitize(renderDescription(eventData.description, eventData.facets as Facet[] | undefined))
+			: null
+	);
+
+	let smokesignalUrl = $derived(`https://smokesignal.events/${did}/${rkey}`);
 	let eventUri = $derived(`at://${did}/community.lexicon.calendar.event/${rkey}`);
 
 	let ogImageUrl = $derived(`${page.url.origin}${page.url.pathname}/og.png`);
@@ -108,32 +173,43 @@
 
 <div class="bg-base-50 dark:bg-base-950 min-h-screen px-6 py-12 sm:py-12">
 	<div class="mx-auto max-w-4xl">
+		<!-- Banner image (full width, only when no thumbnail) -->
+		{#if isBannerOnly && displayImage}
+			<img
+				src={displayImage.url}
+				alt={displayImage.alt}
+				class="border-base-200 dark:border-base-800 mb-8 aspect-3/1 w-full rounded-2xl border object-cover"
+			/>
+		{/if}
+
 		<!-- Two-column layout: image left, details right -->
 		<div
 			class="grid grid-cols-1 gap-8 md:grid-cols-[14rem_1fr] md:gap-x-10 md:gap-y-6 lg:grid-cols-[16rem_1fr]"
 		>
-			<!-- Image -->
-			<div class="order-1 max-w-sm md:order-0 md:col-start-1 md:max-w-none">
-				{#if headerImage}
-					<img
-						src={headerImage.url}
-						alt={headerImage.alt}
-						class="border-base-200 dark:border-base-800 aspect-square w-full rounded-2xl border object-cover"
-					/>
-				{:else}
-					<div
-						class="border-base-200 dark:border-base-800 aspect-square w-full overflow-hidden rounded-2xl border [&>svg]:h-full [&>svg]:w-full"
-					>
-						<Avatar
-							size={256}
-							name={data.rkey}
-							variant="marble"
-							colors={['#92A1C6', '#146A7C', '#F0AB3D', '#C271B4', '#C20D90']}
-							square
+			<!-- Thumbnail image (left column) -->
+			{#if !isBannerOnly}
+				<div class="order-1 max-w-sm md:order-0 md:col-start-1 md:max-w-none">
+					{#if displayImage}
+						<img
+							src={displayImage.url}
+							alt={displayImage.alt}
+							class="border-base-200 dark:border-base-800 aspect-square w-full rounded-2xl border object-cover"
 						/>
-					</div>
-				{/if}
-			</div>
+					{:else}
+						<div
+							class="border-base-200 dark:border-base-800 aspect-square w-full overflow-hidden rounded-2xl border [&>svg]:h-full [&>svg]:w-full"
+						>
+							<Avatar
+								size={256}
+								name={data.rkey}
+								variant="marble"
+								colors={['#92A1C6', '#146A7C', '#F0AB3D', '#C271B4', '#C20D90']}
+								square
+							/>
+						</div>
+					{/if}
+				</div>
+			{/if}
 
 			<!-- Right column: event details -->
 			<div class="order-2 min-w-0 md:order-0 md:col-start-2 md:row-span-5 md:row-start-1">
@@ -167,11 +243,15 @@
 					<div>
 						<p class="text-base-900 dark:text-base-50 font-semibold">
 							{formatWeekday(startDate)}, {formatFullDate(startDate)}
+							{#if endDate && !isSameDay}
+								- {formatWeekday(endDate)}, {formatFullDate(endDate)}
+							{/if}
 						</p>
 						<p class="text-base-500 dark:text-base-400 text-sm">
 							{formatTime(startDate)}
-							{#if endDate}
-								- {formatTime(endDate)}{/if}
+							{#if endDate && isSameDay}
+								- {formatTime(endDate)}
+							{/if}
 						</p>
 					</div>
 				</div>
@@ -209,15 +289,15 @@
 				<EventRsvp {eventUri} eventCid={data.eventCid} />
 
 				<!-- About Event -->
-				{#if eventData.description}
+				{#if descriptionHtml}
 					<div class="mt-8 mb-8">
 						<p
 							class="text-base-500 dark:text-base-400 mb-3 text-xs font-semibold tracking-wider uppercase"
 						>
 							About
 						</p>
-						<p class="text-base-700 dark:text-base-300 leading-relaxed whitespace-pre-wrap">
-							{eventData.description}
+						<p class="text-base-700 dark:text-base-300 leading-relaxed">
+							{@html descriptionHtml}
 						</p>
 					</div>
 				{/if}
@@ -246,20 +326,6 @@
 					</span>
 				</a>
 			</div>
-
-			{#if (eventData.countGoing && eventData.countGoing > 0) || (eventData.countInterested && eventData.countInterested > 0)}
-				<!-- Counts -->
-				<div
-					class="text-base-900 dark:text-base-100 order-4 space-y-2.5 text-base font-medium md:order-0 md:col-start-1"
-				>
-					{#if eventData.countGoing && eventData.countGoing > 0}
-						<p>{eventData.countGoing} Going</p>
-					{/if}
-					{#if eventData.countInterested && eventData.countInterested > 0}
-						<p>{eventData.countInterested} Interested</p>
-					{/if}
-				</div>
-			{/if}
 
 			{#if eventData.uris && eventData.uris.length > 0}
 				<!-- Links -->
@@ -300,7 +366,7 @@
 
 			<!-- View on Smoke Signal link -->
 			<a
-				href={eventUrl}
+				href={smokesignalUrl}
 				target="_blank"
 				rel="noopener noreferrer"
 				class="text-base-500 dark:text-base-400 hover:text-base-700 dark:hover:text-base-200 order-6 inline-flex items-center gap-1.5 text-sm transition-colors md:order-0 md:col-start-2"

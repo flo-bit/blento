@@ -1,10 +1,8 @@
 import { error } from '@sveltejs/kit';
 import type { EventData } from '$lib/cards/social/EventCard';
-import { getBlentoOrBskyProfile, getRecord, resolveHandle } from '$lib/atproto/methods.js';
-import { isHandle } from '@atcute/lexicons/syntax';
+import { getBlentoOrBskyProfile, getRecord } from '$lib/atproto/methods.js';
 import { createCache, type CachedProfile } from '$lib/cache';
-import type { ActorIdentifier, Did } from '@atcute/lexicons';
-import { env as publicEnv } from '$env/dynamic/public';
+import type { Did } from '@atcute/lexicons';
 import { getActor } from '$lib/actor';
 
 export async function load({ params, platform, request }) {
@@ -19,10 +17,12 @@ export async function load({ params, platform, request }) {
 	}
 
 	try {
-		const [eventResponse, hostProfile, eventRecord] = await Promise.all([
-			fetch(
-				`https://smokesignal.events/xrpc/community.lexicon.calendar.GetEvent?repository=${encodeURIComponent(did)}&record_key=${encodeURIComponent(rkey)}`
-			),
+		const [eventRecord, hostProfile] = await Promise.all([
+			getRecord({
+				did: did as Did,
+				collection: 'community.lexicon.calendar.event',
+				rkey
+			}),
 			cache
 				? cache.getProfile(did as Did).catch(() => null)
 				: getBlentoOrBskyProfile({ did: did as Did })
@@ -36,26 +36,22 @@ export async function load({ params, platform, request }) {
 								url: p.url
 							})
 						)
-						.catch(() => null),
-			getRecord({
-				did: did as Did,
-				collection: 'community.lexicon.calendar.event',
-				rkey
-			}).catch(() => null)
+						.catch(() => null)
 		]);
 
-		if (!eventResponse.ok) {
+		if (!eventRecord?.value) {
 			throw error(404, 'Event not found');
 		}
 
-		const eventData: EventData = await eventResponse.json();
+		const eventData: EventData = eventRecord.value as EventData;
+		console.log(eventData);
 
 		return {
 			eventData,
 			did,
 			rkey,
 			hostProfile: hostProfile ?? null,
-			eventCid: (eventRecord?.cid as string) ?? null
+			eventCid: (eventRecord.cid as string) ?? null
 		};
 	} catch (e) {
 		if (e && typeof e === 'object' && 'status' in e) throw e;
