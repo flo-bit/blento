@@ -18,7 +18,7 @@ export const StandardSiteDocumentListCardDefinition = {
 		for (const record of records) {
 			const site = record.value.site as string;
 
-			if (site.startsWith('at://')) {
+			if (site && site.startsWith('at://')) {
 				if (!publications[site]) {
 					const siteParts = parseUri(site);
 
@@ -37,7 +37,7 @@ export const StandardSiteDocumentListCardDefinition = {
 
 				record.value.href = publications[site] + record.value.path;
 			} else {
-				record.value.href = site + record.value.path;
+				record.value.href = (site ?? '') + record.value.path;
 			}
 		}
 

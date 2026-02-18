@@ -125,7 +125,7 @@
 					{@const rkey = event.rkey}
 					<a
 						href="{actorPrefix}/events/{rkey}"
-						class="border-base-200 dark:border-base-800 hover:border-base-300 dark:hover:border-base-700 group block overflow-hidden rounded-2xl border transition-colors"
+						class="border-base-200 dark:border-base-800 hover:border-base-300 dark:hover:border-base-700 group block overflow-hidden rounded-2xl border transition-colors bg-base-100 dark:bg-base-900"
 					>
 						<!-- Thumbnail -->
 						<div class="p-4">
