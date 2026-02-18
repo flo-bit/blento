@@ -43,7 +43,11 @@ export async function load({ params, platform, request }) {
 			const site = record.value.site as string;
 			if (!site) continue;
 
-			if (site.startsWith('at://')) {
+			const rkey = record.uri.split('/').pop();
+
+			if (site === `at://${did}/site.standard.publication/blento.self`) {
+				record.value.href = `./blog/${rkey}`;
+			} else if (site.startsWith('at://')) {
 				if (!publications[site]) {
 					const siteParts = parseUri(site);
 					if (!siteParts) continue;

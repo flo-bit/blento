@@ -72,13 +72,13 @@
 		{#if posts.length === 0}
 			<p class="text-base-500 dark:text-base-400 py-12 text-center">No blog posts found.</p>
 		{:else}
-			<div class="divide-base-200 dark:divide-base-800 divide-y">
+			<div class="divide-base-100 dark:divide-base-900 divide-y">
 				{#each posts as post (post.rkey)}
 					{@const coverUrl = getCoverUrl(post.coverImage)}
 					<a
 						href={post.href}
-						target="_blank"
-						rel="noopener noreferrer"
+						target={post.href.startsWith('./') ? undefined : '_blank'}
+						rel={post.href.startsWith('./') ? undefined : 'noopener noreferrer'}
 						class="group flex items-start gap-4 py-6"
 					>
 						<div class="min-w-0 flex-1">

@@ -1,0 +1,175 @@
+/* GitHub Light theme for code blocks */
+.tiptap {
+	:first-child {
+		margin-top: 0;
+	}
+
+	pre {
+		background: #f6f8fa;
+		border-radius: 1rem;
+		color: #1f2328;
+		font-family: 'JetBrainsMono', monospace;
+		border: 1px solid #d1d9e0;
+		margin: 1.5rem 0;
+		padding: 0.75rem 1rem;
+
+		code {
+			background: none;
+			color: inherit;
+			font-size: 0.8rem;
+			padding: 0;
+		}
+
+		.hljs-comment,
+		.hljs-quote {
+			color: #59636e;
+			font-style: italic;
+		}
+
+		.hljs-keyword,
+		.hljs-selector-tag {
+			color: #cf222e;
+		}
+
+		.hljs-tag,
+		.hljs-name {
+			color: #116329;
+		}
+
+		.hljs-attribute {
+			color: #0550ae;
+		}
+
+		.hljs-variable,
+		.hljs-template-variable,
+		.hljs-regexp,
+		.hljs-link {
+			color: #0550ae;
+		}
+
+		.hljs-number,
+		.hljs-literal {
+			color: #0550ae;
+		}
+
+		.hljs-string,
+		.hljs-symbol,
+		.hljs-bullet {
+			color: #0a3069;
+		}
+
+		.hljs-title,
+		.hljs-section {
+			color: #0550ae;
+			font-weight: 600;
+		}
+
+		.hljs-type,
+		.hljs-built_in,
+		.hljs-builtin-name,
+		.hljs-params {
+			color: #953800;
+		}
+
+		.hljs-meta {
+			color: #0550ae;
+		}
+
+		.hljs-selector-id,
+		.hljs-selector-class {
+			color: #0550ae;
+		}
+
+		.hljs-emphasis {
+			font-style: italic;
+		}
+
+		.hljs-strong {
+			font-weight: 700;
+		}
+	}
+}
+
+/* GitHub Dark theme for code blocks */
+.dark .tiptap {
+	pre {
+		background: #161b22;
+		color: #e6edf3;
+		border: 1px solid #30363d;
+
+		code {
+			background: none;
+			color: inherit;
+			font-size: 0.8rem;
+			padding: 0;
+		}
+
+		.hljs-comment,
+		.hljs-quote {
+			color: #8b949e;
+			font-style: italic;
+		}
+
+		.hljs-keyword,
+		.hljs-selector-tag {
+			color: #ff7b72;
+		}
+
+		.hljs-tag,
+		.hljs-name {
+			color: #7ee787;
+		}
+
+		.hljs-attribute {
+			color: #79c0ff;
+		}
+
+		.hljs-variable,
+		.hljs-template-variable,
+		.hljs-regexp,
+		.hljs-link {
+			color: #79c0ff;
+		}
+
+		.hljs-number,
+		.hljs-literal {
+			color: #79c0ff;
+		}
+
+		.hljs-string,
+		.hljs-symbol,
+		.hljs-bullet {
+			color: #a5d6ff;
+		}
+
+		.hljs-title,
+		.hljs-section {
+			color: #d2a8ff;
+			font-weight: 600;
+		}
+
+		.hljs-type,
+		.hljs-built_in,
+		.hljs-builtin-name,
+		.hljs-params {
+			color: #ffa657;
+		}
+
+		.hljs-meta {
+			color: #79c0ff;
+		}
+
+		.hljs-selector-id,
+		.hljs-selector-class {
+			color: #79c0ff;
+		}
+
+		.hljs-emphasis {
+			font-style: italic;
+		}
+
+		.hljs-strong {
+			font-weight: 700;
+		}
+	}
+}

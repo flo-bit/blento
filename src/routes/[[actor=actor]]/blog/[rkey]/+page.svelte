@@ -3,6 +3,30 @@
 	import { Avatar as FoxAvatar } from '@foxui/core';
 	import { marked } from 'marked';
 	import { sanitize } from '$lib/sanitize';
+	import { all, createLowlight } from 'lowlight';
+
+	const lowlight = createLowlight(all);
+
+	function hastToHtml(node: any): string {
+		if (node.type === 'text') return escapeHtml(node.value);
+		if (node.type === 'element') {
+			const cls = node.properties?.className?.join(' ');
+			const children = (node.children || []).map(hastToHtml).join('');
+			return cls ? `<span class="${cls}">${children}</span>` : `<span>${children}</span>`;
+		}
+		if (node.type === 'root' || node.children) {
+			return (node.children || []).map(hastToHtml).join('');
+		}
+		return '';
+	}
+
+	function escapeHtml(str: string): string {
+		return str
+			.replace(/&/g, '&amp;')
+			.replace(/</g, '&lt;')
+			.replace(/>/g, '&gt;')
+			.replace(/"/g, '&quot;');
+	}
 
 	let { data } = $props();
 
@@ -54,6 +78,19 @@
 	const renderer = new marked.Renderer();
 	renderer.link = ({ href, title, text }) =>
 		`<a target="_blank" rel="noopener noreferrer" href="${href}" title="${title ?? ''}">${text}</a>`;
+	renderer.code = ({ text, lang }) => {
+		let highlighted: string;
+		try {
+			const tree =
+				lang && lowlight.registered(lang)
+					? lowlight.highlight(lang, text)
+					: lowlight.highlightAuto(text);
+			highlighted = hastToHtml(tree);
+		} catch {
+			highlighted = escapeHtml(text);
+		}
+		return `<pre><code class="hljs${lang ? ` language-${lang}` : ''}">${highlighted}</code></pre>`;
+	};
 </script>
 
 <svelte:head>
@@ -236,3 +273,137 @@
 		</footer>
 	</div>
 </div>
+
+<style>
+	:global(.prose pre) {
+		background: #f6f8fa;
+		border-radius: 1rem;
+		color: #1f2328;
+		font-family: 'JetBrainsMono', monospace;
+		border: 1px solid #d1d9e0;
+	}
+
+	:global(.prose pre code) {
+		background: none;
+		color: inherit;
+		font-size: 0.8rem;
+		padding: 0;
+	}
+
+	:global(.prose pre .hljs-comment),
+	:global(.prose pre .hljs-quote) {
+		color: #59636e;
+		font-style: italic;
+	}
+
+	:global(.prose pre .hljs-keyword),
+	:global(.prose pre .hljs-selector-tag) {
+		color: #cf222e;
+	}
+
+	:global(.prose pre .hljs-tag),
+	:global(.prose pre .hljs-name) {
+		color: #116329;
+	}
+
+	:global(.prose pre .hljs-attribute) {
+		color: #0550ae;
+	}
+
+	:global(.prose pre .hljs-variable),
+	:global(.prose pre .hljs-template-variable),
+	:global(.prose pre .hljs-regexp),
+	:global(.prose pre .hljs-link) {
+		color: #0550ae;
+	}
+
+	:global(.prose pre .hljs-number),
+	:global(.prose pre .hljs-literal) {
+		color: #0550ae;
+	}
+
+	:global(.prose pre .hljs-string),
+	:global(.prose pre .hljs-symbol),
+	:global(.prose pre .hljs-bullet) {
+		color: #0a3069;
+	}
+
+	:global(.prose pre .hljs-title),
+	:global(.prose pre .hljs-section) {
+		color: #0550ae;
+		font-weight: 600;
+	}
+
+	:global(.prose pre .hljs-type),
+	:global(.prose pre .hljs-built_in),
+	:global(.prose pre .hljs-builtin-name),
+	:global(.prose pre .hljs-params) {
+		color: #953800;
+	}
+
+	:global(.prose pre .hljs-meta) {
+		color: #0550ae;
+	}
+
+	/* Dark mode */
+	:global(.dark .prose pre) {
+		background: #161b22;
+		color: #e6edf3;
+		border-color: #30363d;
+	}
+
+	:global(.dark .prose pre .hljs-comment),
+	:global(.dark .prose pre .hljs-quote) {
+		color: #8b949e;
+		font-style: italic;
+	}
+
+	:global(.dark .prose pre .hljs-keyword),
+	:global(.dark .prose pre .hljs-selector-tag) {
+		color: #ff7b72;
+	}
+
+	:global(.dark .prose pre .hljs-tag),
+	:global(.dark .prose pre .hljs-name) {
+		color: #7ee787;
+	}
+
+	:global(.dark .prose pre .hljs-attribute) {
+		color: #79c0ff;
+	}
+
+	:global(.dark .prose pre .hljs-variable),
+	:global(.dark .prose pre .hljs-template-variable),
+	:global(.dark .prose pre .hljs-regexp),
+	:global(.dark .prose pre .hljs-link) {
+		color: #79c0ff;
+	}
+
+	:global(.dark .prose pre .hljs-number),
+	:global(.dark .prose pre .hljs-literal) {
+		color: #79c0ff;
+	}
+
+	:global(.dark .prose pre .hljs-string),
+	:global(.dark .prose pre .hljs-symbol),
+	:global(.dark .prose pre .hljs-bullet) {
+		color: #a5d6ff;
+	}
+
+	:global(.dark .prose pre .hljs-title),
+	:global(.dark .prose pre .hljs-section) {
+		color: #d2a8ff;
+		font-weight: 600;
+	}
+
+	:global(.dark .prose pre .hljs-type),
+	:global(.dark .prose pre .hljs-built_in),
+	:global(.dark .prose pre .hljs-builtin-name),
+	:global(.dark .prose pre .hljs-params) {
+		color: #ffa657;
+	}
+
+	:global(.dark .prose pre .hljs-meta) {
+		color: #79c0ff;
+	}
+</style>

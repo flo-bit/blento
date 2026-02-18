@@ -3,7 +3,7 @@
 	import { loginModalState } from '$lib/atproto/UI/LoginModal.svelte';
 	import { uploadBlob, createTID } from '$lib/atproto/methods';
 	import { compressImage } from '$lib/atproto/image-helper';
-	import { Button } from '@foxui/core';
+	import { Badge, Button } from '@foxui/core';
 	import { goto } from '$app/navigation';
 	import { onMount, onDestroy } from 'svelte';
 	import { SvelteMap } from 'svelte/reactivity';
@@ -25,6 +25,25 @@
 	let draftRestored = $state(false);
 
 	let fileInput: HTMLInputElement | undefined = $state();
+	let titleEl: HTMLTextAreaElement | undefined = $state();
+	let descriptionEl: HTMLTextAreaElement | undefined = $state();
+	let draggingOver = $state(false);
+
+	function handleDrop(e: DragEvent) {
+		e.preventDefault();
+		draggingOver = false;
+		const file = e.dataTransfer?.files?.[0];
+		if (!file || !file.type.startsWith('image/')) return;
+		coverFile = file;
+		if (coverPreview) URL.revokeObjectURL(coverPreview);
+		coverPreview = URL.createObjectURL(file);
+
+		const key = crypto.randomUUID();
+		blobToKeyMap.set(coverPreview, key);
+		keyToBlobMap.set(key, coverPreview);
+		putImage(key, file, file.name);
+		scheduleSaveDraft();
+	}
 
 	// blob URL <-> IndexedDB key mappings
 	const blobToKeyMap = new SvelteMap<string, string>();
@@ -242,8 +261,9 @@
 			let markdown = editorInstance?.getMarkdown() ?? '';
 
 			// Upload all blob:// images and replace with CDN URLs
-			const blobUrlRegex = /!\[([^\]]*)\]\((blob:[^)]+)\)/g;
+			const blobUrlRegex = /!\[([^\]]*)\]\((blob:[^\s)]+)(?:\s+"[^"]*")?\)/g;
 			const matches = [...markdown.matchAll(blobUrlRegex)];
+			const imageBlobs: unknown[] = [];
 
 			for (const match of matches) {
 				const blobUrl = match[2];
@@ -254,6 +274,7 @@
 					const compressed = await compressImage(file);
 					const blobRef = await uploadBlob({ blob: compressed.blob });
 					if (blobRef) {
+						imageBlobs.push(blobRef);
 						const cdnUrl = `https://cdn.bsky.app/img/feed_fullsize/plain/${user.did}/${blobRef.ref.$link}@jpeg`;
 						markdown = markdown.replaceAll(blobUrl, cdnUrl);
 					}
@@ -267,7 +288,11 @@
 			const record: Record<string, unknown> = {
 				$type: 'site.standard.document',
 				title: title.trim(),
-				content: { $type: 'app.blento.markdown', value: markdown },
+				content: {
+					$type: 'app.blento.markdown',
+					value: markdown,
+					images: imageBlobs.length > 0 ? imageBlobs : undefined
+				},
 				site: `at://${user.did}/site.standard.publication/blento.self`,
 				path: `/blog/${rkey}`,
 				publishedAt: new Date().toISOString()
@@ -309,6 +334,15 @@
 		editorContent = content;
 		trackNewImages(content);
 		scheduleSaveDraft();
+	}
+
+	function autoResize(el: HTMLTextAreaElement) {
+		const resize = () => {
+			el.style.height = 'auto';
+			el.style.height = el.scrollHeight + 'px';
+		};
+		resize();
+		return { update: resize };
 	}
 
 	function onTitleInput() {
@@ -354,22 +388,18 @@
 			</div>
 		{:else}
 			<!-- Draft badge -->
-			{#if hasDraft}
-				<div class="mb-6 flex items-center gap-3">
-					<span
-						class="rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-800 dark:bg-amber-900/30 dark:text-amber-300"
-					>
-						Draft
-					</span>
+			<div class="mb-6 flex items-center gap-3">
+				<Badge>Local draft</Badge>
+				{#if hasDraft}
 					<button
 						type="button"
 						onclick={discardDraft}
-						class="text-base-400 dark:text-base-500 text-xs transition-colors hover:text-red-500 dark:hover:text-red-400"
+						class="text-base-400 dark:text-base-500 cursor-pointer text-xs transition-colors hover:text-red-500 dark:hover:text-red-400"
 					>
 						Discard draft
 					</button>
-				</div>
-			{/if}
+				{/if}
+			</div>
 
 			<!-- Cover image — full-width like the blog post view -->
 			<input
@@ -410,7 +440,15 @@
 				<button
 					type="button"
 					onclick={() => fileInput?.click()}
-					class="border-base-300 dark:border-base-700 hover:border-base-400 dark:hover:border-base-600 text-base-400 dark:text-base-500 mb-8 flex aspect-video w-full flex-col items-center justify-center rounded-2xl border-2 border-dashed transition-colors"
+					ondragover={(e) => {
+						e.preventDefault();
+						draggingOver = true;
+					}}
+					ondragleave={() => (draggingOver = false)}
+					ondrop={handleDrop}
+					class="mb-8 flex h-20 w-full cursor-pointer items-center gap-3 rounded-xl border-2 border-dashed px-5 transition-colors {draggingOver
+						? 'border-accent-400 bg-accent-50 dark:border-accent-500 dark:bg-accent-950'
+						: 'border-base-300 dark:border-base-700 hover:border-base-400 dark:hover:border-base-600'}"
 				>
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
@@ -418,7 +456,7 @@
 						viewBox="0 0 24 24"
 						stroke-width="1.5"
 						stroke="currentColor"
-						class="mb-2 size-8"
+						class="text-base-400 dark:text-base-500 size-6 shrink-0"
 					>
 						<path
 							stroke-linecap="round"
@@ -426,31 +464,55 @@
 							d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0 0 22.5 18.75V5.25A2.25 2.25 0 0 0 20.25 3H3.75A2.25 2.25 0 0 0 1.5 5.25v13.5A2.25 2.25 0 0 0 3.75 21Z"
 						/>
 					</svg>
-					<span class="text-sm">Add cover image</span>
+					<span class="text-base-400 dark:text-base-500 text-sm">
+						{draggingOver ? 'Drop image here' : 'Add cover image or drag & drop'}
+					</span>
 				</button>
 			{/if}
 
 			<!-- Title & description — styled like the blog post header -->
 			<header class="mb-8">
-				<input
-					type="text"
-					bind:value={title}
-					oninput={onTitleInput}
-					placeholder="Post title"
-					class="text-base-900 dark:text-base-50 placeholder:text-base-300 dark:placeholder:text-base-700 mb-4 w-full border-none bg-transparent text-3xl leading-tight font-bold outline-none sm:text-4xl"
-				/>
 				<textarea
+					bind:this={titleEl}
+					bind:value={title}
+					oninput={(e) => {
+						onTitleInput();
+						autoResize(e.currentTarget);
+					}}
+					onkeydown={(e) => {
+						if (e.key === 'Enter' && !e.shiftKey) {
+							e.preventDefault();
+							descriptionEl?.focus();
+						}
+					}}
+					use:autoResize
+					placeholder="Post title"
+					rows={1}
+					class="text-base-900 dark:text-base-50 placeholder:text-base-500 mb-4 w-full resize-none border-0 border-none bg-transparent text-3xl leading-tight font-bold outline-none focus:border-0 focus:ring-0 focus:outline-0 sm:text-4xl"
+				></textarea>
+				<textarea
+					bind:this={descriptionEl}
 					bind:value={description}
-					oninput={onDescriptionInput}
+					oninput={(e) => {
+						onDescriptionInput();
+						autoResize(e.currentTarget);
+					}}
+					onkeydown={(e) => {
+						if (e.key === 'Enter' && !e.shiftKey) {
+							e.preventDefault();
+							editorInstance?.commands.focus();
+						}
+					}}
+					use:autoResize
 					placeholder="A short description (optional)"
 					rows={1}
-					class="text-base-500 dark:text-base-400 placeholder:text-base-300 dark:placeholder:text-base-700 w-full resize-none border-none bg-transparent text-sm leading-relaxed outline-none"
+					class="text-base-600 dark:text-base-400 placeholder:text-base-400 dark:placeholder:text-base-600 w-full resize-none border-0 border-none bg-transparent text-sm leading-relaxed outline-none focus:border-0 focus:ring-0 focus:outline-0"
 				></textarea>
 			</header>
 
 			<!-- Rich text editor — styled like the blog post content area -->
 			<article
-				class="prose dark:prose-invert prose-base prose-neutral prose-a:text-accent-600 dark:prose-a:text-accent-400 prose-img:rounded-xl mb-12 max-w-none"
+				class="prose dark:prose-invert prose-base prose-neutral prose-a:text-accent-600 dark:prose-a:text-accent-400 prose-img:rounded-xl mb-12 max-w-none px-4"
 			>
 				<RichTextEditor
 					bind:editor={editorInstance}
