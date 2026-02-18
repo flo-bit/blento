@@ -79,7 +79,7 @@
 
 	let location = $derived(getLocationString(eventData.locations));
 
-	let headerImage = $derived.by(() => {
+	let thumbnailImage = $derived.by(() => {
 		if (!eventData.media || eventData.media.length === 0) return null;
 		const media = eventData.media.find((m) => m.role === 'thumbnail');
 		if (!media?.content) return null;
@@ -87,6 +87,26 @@
 		if (!url) return null;
 		return { url, alt: media.alt || eventData.name };
 	});
+
+	let bannerImage = $derived.by(() => {
+		if (!eventData.media || eventData.media.length === 0) return null;
+		const media = eventData.media.find((m) => m.role === 'header');
+		if (!media?.content) return null;
+		const url = getCDNImageBlobUrl({ did, blob: media.content, type: 'jpeg' });
+		if (!url) return null;
+		return { url, alt: media.alt || eventData.name };
+	});
+
+	// Prefer thumbnail; fall back to header/banner image
+	let displayImage = $derived(thumbnailImage ?? bannerImage);
+	let isBannerOnly = $derived(!thumbnailImage && !!bannerImage);
+
+	let isSameDay = $derived(
+		endDate &&
+			startDate.getFullYear() === endDate.getFullYear() &&
+			startDate.getMonth() === endDate.getMonth() &&
+			startDate.getDate() === endDate.getDate()
+	);
 
 	let smokesignalUrl = $derived(`https://smokesignal.events/${did}/${rkey}`);
 	let eventUri = $derived(`at://${did}/community.lexicon.calendar.event/${rkey}`);
@@ -108,32 +128,43 @@
 
 <div class="bg-base-50 dark:bg-base-950 min-h-screen px-6 py-12 sm:py-12">
 	<div class="mx-auto max-w-4xl">
+		<!-- Banner image (full width, only when no thumbnail) -->
+		{#if isBannerOnly && displayImage}
+			<img
+				src={displayImage.url}
+				alt={displayImage.alt}
+				class="border-base-200 dark:border-base-800 mb-8 aspect-[3/1] w-full rounded-2xl border object-cover"
+			/>
+		{/if}
+
 		<!-- Two-column layout: image left, details right -->
 		<div
 			class="grid grid-cols-1 gap-8 md:grid-cols-[14rem_1fr] md:gap-x-10 md:gap-y-6 lg:grid-cols-[16rem_1fr]"
 		>
-			<!-- Image -->
-			<div class="order-1 max-w-sm md:order-0 md:col-start-1 md:max-w-none">
-				{#if headerImage}
-					<img
-						src={headerImage.url}
-						alt={headerImage.alt}
-						class="border-base-200 dark:border-base-800 aspect-square w-full rounded-2xl border object-cover"
-					/>
-				{:else}
-					<div
-						class="border-base-200 dark:border-base-800 aspect-square w-full overflow-hidden rounded-2xl border [&>svg]:h-full [&>svg]:w-full"
-					>
-						<Avatar
-							size={256}
-							name={data.rkey}
-							variant="marble"
-							colors={['#92A1C6', '#146A7C', '#F0AB3D', '#C271B4', '#C20D90']}
-							square
+			<!-- Thumbnail image (left column) -->
+			{#if !isBannerOnly}
+				<div class="order-1 max-w-sm md:order-0 md:col-start-1 md:max-w-none">
+					{#if displayImage}
+						<img
+							src={displayImage.url}
+							alt={displayImage.alt}
+							class="border-base-200 dark:border-base-800 aspect-square w-full rounded-2xl border object-cover"
 						/>
-					</div>
-				{/if}
-			</div>
+					{:else}
+						<div
+							class="border-base-200 dark:border-base-800 aspect-square w-full overflow-hidden rounded-2xl border [&>svg]:h-full [&>svg]:w-full"
+						>
+							<Avatar
+								size={256}
+								name={data.rkey}
+								variant="marble"
+								colors={['#92A1C6', '#146A7C', '#F0AB3D', '#C271B4', '#C20D90']}
+								square
+							/>
+						</div>
+					{/if}
+				</div>
+			{/if}
 
 			<!-- Right column: event details -->
 			<div class="order-2 min-w-0 md:order-0 md:col-start-2 md:row-span-5 md:row-start-1">
@@ -167,11 +198,15 @@
 					<div>
 						<p class="text-base-900 dark:text-base-50 font-semibold">
 							{formatWeekday(startDate)}, {formatFullDate(startDate)}
+							{#if endDate && !isSameDay}
+								- {formatWeekday(endDate)}, {formatFullDate(endDate)}
+							{/if}
 						</p>
 						<p class="text-base-500 dark:text-base-400 text-sm">
 							{formatTime(startDate)}
-							{#if endDate}
-								- {formatTime(endDate)}{/if}
+							{#if endDate && isSameDay}
+								- {formatTime(endDate)}
+							{/if}
 						</p>
 					</div>
 				</div>

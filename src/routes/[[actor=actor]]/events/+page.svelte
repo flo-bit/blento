@@ -1,7 +1,8 @@
 <script lang="ts">
 	import type { EventData } from '$lib/cards/social/EventCard';
 	import { getCDNImageBlobUrl } from '$lib/atproto';
-	import { Avatar as FoxAvatar, Badge } from '@foxui/core';
+	import { user } from '$lib/atproto/auth.svelte';
+	import { Avatar as FoxAvatar, Badge, Button } from '@foxui/core';
 	import Avatar from 'svelte-boring-avatars';
 
 	let { data } = $props();
@@ -75,6 +76,7 @@
 	}
 
 	let actorPrefix = $derived(data.hostProfile?.handle ? `/${data.hostProfile.handle}` : `/${did}`);
+	let isOwner = $derived(user.isLoggedIn && user.did === did);
 </script>
 
 <svelte:head>
@@ -90,22 +92,27 @@
 <div class="bg-base-50 dark:bg-base-950 min-h-screen px-6 py-12 sm:py-12">
 	<div class="mx-auto max-w-4xl">
 		<!-- Header -->
-		<div class="mb-8">
-			<h1 class="text-base-900 dark:text-base-50 mb-2 text-2xl font-bold sm:text-3xl">
-				Upcoming events
-			</h1>
-			<div class="mt-4 flex items-center gap-2">
-				<span class="text-base-500 dark:text-base-400 text-sm">Hosted by</span>
-				<a
-					href={hostUrl}
-					target={hostProfile?.hasBlento ? undefined : '_blank'}
-					rel={hostProfile?.hasBlento ? undefined : 'noopener noreferrer'}
-					class="flex items-center gap-1.5 hover:underline"
-				>
-					<FoxAvatar src={hostProfile?.avatar} alt={hostName} class="size-5 shrink-0" />
-					<span class="text-base-900 dark:text-base-100 text-sm font-medium">{hostName}</span>
-				</a>
+		<div class="mb-8 flex items-start justify-between">
+			<div>
+				<h1 class="text-base-900 dark:text-base-50 mb-2 text-2xl font-bold sm:text-3xl">
+					Upcoming events
+				</h1>
+				<div class="mt-4 flex items-center gap-2">
+					<span class="text-base-500 dark:text-base-400 text-sm">Hosted by</span>
+					<a
+						href={hostUrl}
+						target={hostProfile?.hasBlento ? undefined : '_blank'}
+						rel={hostProfile?.hasBlento ? undefined : 'noopener noreferrer'}
+						class="flex items-center gap-1.5 hover:underline"
+					>
+						<FoxAvatar src={hostProfile?.avatar} alt={hostName} class="size-5 shrink-0" />
+						<span class="text-base-900 dark:text-base-100 text-sm font-medium">{hostName}</span>
+					</a>
+				</div>
 			</div>
+			{#if isOwner}
+				<Button href="{actorPrefix}/events/new" variant="primary">New event</Button>
+			{/if}
 		</div>
 
 		{#if events.length === 0}
@@ -117,29 +124,31 @@
 					{@const location = getLocationString(event.locations)}
 					{@const rkey = event.rkey}
 					<a
-						href="{actorPrefix}/e/{rkey}"
-						class="border-base-200 dark:border-base-800 hover:border-base-300 dark:hover:border-base-700 group block overflow-hidden rounded-xl border transition-colors"
+						href="{actorPrefix}/events/{rkey}"
+						class="border-base-200 dark:border-base-800 hover:border-base-300 dark:hover:border-base-700 group block overflow-hidden rounded-2xl border transition-colors"
 					>
 						<!-- Thumbnail -->
-						{#if thumbnail}
-							<img
-								src={thumbnail.url}
-								alt={thumbnail.alt}
-								class="aspect-square w-full object-cover"
-							/>
-						{:else}
-							<div
-								class="bg-base-100 dark:bg-base-900 aspect-square w-full [&>svg]:h-full [&>svg]:w-full"
-							>
-								<Avatar
-									size={400}
-									name={rkey}
-									variant="marble"
-									colors={['#92A1C6', '#146A7C', '#F0AB3D', '#C271B4', '#C20D90']}
-									square
+						<div class="p-4">
+							{#if thumbnail}
+								<img
+									src={thumbnail.url}
+									alt={thumbnail.alt}
+									class="aspect-square w-full rounded-2xl object-cover"
 								/>
-							</div>
-						{/if}
+							{:else}
+								<div
+									class="bg-base-100 dark:bg-base-900 aspect-square w-full overflow-hidden rounded-2xl [&>svg]:h-full [&>svg]:w-full"
+								>
+									<Avatar
+										size={400}
+										name={rkey}
+										variant="marble"
+										colors={['#92A1C6', '#146A7C', '#F0AB3D', '#C271B4', '#C20D90']}
+										square
+									/>
+								</div>
+							{/if}
+						</div>
 
 						<!-- Content -->
 						<div class="p-4">

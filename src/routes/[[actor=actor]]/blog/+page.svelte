@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { getCDNImageBlobUrl } from '$lib/atproto';
-	import { Avatar as FoxAvatar } from '@foxui/core';
+	import { user } from '$lib/atproto/auth.svelte';
+	import { Avatar as FoxAvatar, Button } from '@foxui/core';
 
 	let { data } = $props();
 
@@ -22,6 +23,9 @@
 		};
 		return date.toLocaleDateString('en-US', options);
 	}
+
+	let actorPrefix = $derived(hostProfile?.handle ? `/${hostProfile.handle}` : `/${did}`);
+	let isOwner = $derived(user.isLoggedIn && user.did === did);
 
 	function getCoverUrl(
 		coverImage: { $type: 'blob'; ref: { $link: string } } | undefined
@@ -45,7 +49,12 @@
 	<div class="mx-auto max-w-4xl">
 		<!-- Header -->
 		<div class="mb-8">
-			<h1 class="text-base-900 dark:text-base-50 mb-2 text-2xl font-bold sm:text-3xl">Blog</h1>
+			<div class="flex items-center justify-between gap-4">
+				<h1 class="text-base-900 dark:text-base-50 mb-2 text-2xl font-bold sm:text-3xl">Blog</h1>
+				{#if isOwner}
+					<Button href="{actorPrefix}/blog/new">New post</Button>
+				{/if}
+			</div>
 			<div class="mt-4 flex items-center gap-2">
 				<span class="text-base-500 dark:text-base-400 text-sm">Written by</span>
 				<a

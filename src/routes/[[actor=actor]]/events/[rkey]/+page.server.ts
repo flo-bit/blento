@@ -44,6 +44,7 @@ export async function load({ params, platform, request }) {
 		}
 
 		const eventData: EventData = eventRecord.value as EventData;
+		console.log(eventData);
 
 		return {
 			eventData,
