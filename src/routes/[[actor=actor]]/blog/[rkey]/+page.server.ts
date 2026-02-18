@@ -49,7 +49,7 @@ export async function load({ params, platform, request }) {
 		const site = post.site as string | undefined;
 		const path = post.path as string | undefined;
 
-		if (site && path) {
+		if (site && path && site !== `at://${did}/site.standard.publication/blento.self`) {
 			if (site.startsWith('at://')) {
 				const siteParts = parseUri(site);
 				if (siteParts) {
