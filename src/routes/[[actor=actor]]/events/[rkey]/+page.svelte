@@ -5,6 +5,8 @@
 	import Avatar from 'svelte-boring-avatars';
 	import EventRsvp from './EventRsvp.svelte';
 	import { page } from '$app/state';
+	import { segmentize, type Facet } from '@atcute/bluesky-richtext-segmenter';
+	import { sanitize } from '$lib/sanitize';
 
 	let { data } = $props();
 
@@ -108,6 +110,49 @@
 			startDate.getDate() === endDate.getDate()
 	);
 
+	function escapeHtml(str: string): string {
+		return str
+			.replace(/&/g, '&amp;')
+			.replace(/</g, '&lt;')
+			.replace(/>/g, '&gt;')
+			.replace(/"/g, '&quot;')
+			.replace(/'/g, '&#39;');
+	}
+
+	function renderDescription(text: string, facets?: Facet[]): string {
+		const segments = segmentize(text, facets);
+		const html = segments
+			.map((segment) => {
+				const escaped = escapeHtml(segment.text);
+				const feature = segment.features?.[0] as
+					| { $type: string; did?: string; uri?: string; tag?: string }
+					| undefined;
+				if (!feature) return `<span>${escaped}</span>`;
+
+				const link = (href: string) =>
+					`<a target="_blank" rel="noopener noreferrer nofollow" href="${encodeURI(href)}" class="text-accent-600 dark:text-accent-400 hover:underline">${escaped}</a>`;
+
+				switch (feature.$type) {
+					case 'app.bsky.richtext.facet#mention':
+						return link(`https://bsky.app/profile/${feature.did}`);
+					case 'app.bsky.richtext.facet#link':
+						return link(feature.uri!);
+					case 'app.bsky.richtext.facet#tag':
+						return link(`https://bsky.app/hashtag/${feature.tag}`);
+					default:
+						return `<span>${escaped}</span>`;
+				}
+			})
+			.join('');
+		return html.replace(/\n/g, '<br>');
+	}
+
+	let descriptionHtml = $derived(
+		eventData.description
+			? sanitize(renderDescription(eventData.description, eventData.facets as Facet[] | undefined))
+			: null
+	);
+
 	let smokesignalUrl = $derived(`https://smokesignal.events/${did}/${rkey}`);
 	let eventUri = $derived(`at://${did}/community.lexicon.calendar.event/${rkey}`);
 
@@ -133,7 +178,7 @@
 			<img
 				src={displayImage.url}
 				alt={displayImage.alt}
-				class="border-base-200 dark:border-base-800 mb-8 aspect-[3/1] w-full rounded-2xl border object-cover"
+				class="border-base-200 dark:border-base-800 mb-8 aspect-3/1 w-full rounded-2xl border object-cover"
 			/>
 		{/if}
 
@@ -244,15 +289,15 @@
 				<EventRsvp {eventUri} eventCid={data.eventCid} />
 
 				<!-- About Event -->
-				{#if eventData.description}
+				{#if descriptionHtml}
 					<div class="mt-8 mb-8">
 						<p
 							class="text-base-500 dark:text-base-400 mb-3 text-xs font-semibold tracking-wider uppercase"
 						>
 							About
 						</p>
-						<p class="text-base-700 dark:text-base-300 leading-relaxed whitespace-pre-wrap">
-							{eventData.description}
+						<p class="text-base-700 dark:text-base-300 leading-relaxed">
+							{@html descriptionHtml}
 						</p>
 					</div>
 				{/if}

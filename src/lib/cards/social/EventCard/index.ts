@@ -36,6 +36,10 @@ export type EventData = {
 			height: number;
 		};
 	}>;
+	facets?: Array<{
+		index: { byteStart: number; byteEnd: number };
+		features: Array<{ $type: string; [key: string]: unknown }>;
+	}>;
 	uris?: Array<{
 		uri: string;
 		name?: string;
