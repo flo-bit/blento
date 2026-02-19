@@ -20,7 +20,15 @@ function constructScope() {
 		blobScope = 'blob:' + permissions.blobs;
 	}
 
-	const scope = ['atproto', repos, rpcs, blobScope].filter((v) => v?.trim()).join(' ');
+	const scope = [
+		'atproto',
+		repos,
+		rpcs,
+		blobScope,
+		'include:app.bsky.authCreatePosts include:site.standard.authFull'
+	]
+		.filter((v) => v?.trim())
+		.join(' ');
 	return scope;
 }
 
