@@ -1,9 +1,21 @@
 <script lang="ts">
 	import { user } from '$lib/atproto/auth.svelte';
+	import { getRecord, putRecord, deleteRecord, createTID } from '$lib/atproto/methods';
 	import { loginModalState } from '$lib/atproto/UI/LoginModal.svelte';
 	import { Avatar, Button } from '@foxui/core';
+	import type { Did } from '@atcute/lexicons';
 
-	let { eventUri, eventCid }: { eventUri: string; eventCid: string | null } = $props();
+	let {
+		eventUri,
+		eventCid,
+		onrsvp,
+		oncancel
+	}: {
+		eventUri: string;
+		eventCid: string | null;
+		onrsvp?: (status: 'going' | 'interested') => void;
+		oncancel?: () => void;
+	} = $props();
 
 	let rsvpStatus: 'going' | 'interested' | 'notgoing' | null = $state(null);
 	let rsvpRkey: string | null = $state(null);
@@ -20,31 +32,33 @@
 
 		rsvpLoading = true;
 
-		fetch(
-			`https://smokesignal.events/xrpc/community.lexicon.calendar.getRSVP?identity=${encodeURIComponent(userDid)}&event=${encodeURIComponent(eventUri)}`
-		)
+		const url = `https://constellation.microcosm.blue/xrpc/blue.microcosm.links.getBacklinks?subject=${encodeURIComponent(eventUri)}&source=community.lexicon.calendar.rsvp:subject.uri&did=${encodeURIComponent(userDid)}&limit=1`;
+
+		fetch(url)
 			.then((res) => {
-				if (!res.ok) {
-					rsvpStatus = null;
-					rsvpRkey = null;
-					return;
-				}
+				if (!res.ok) throw new Error('Failed to fetch backlinks');
 				return res.json();
 			})
-			.then((data) => {
-				if (!data?.record?.status) {
+			.then(async (data) => {
+				if (!data?.records?.length) {
 					rsvpStatus = null;
 					rsvpRkey = null;
 					return;
 				}
-				if (data.uri) {
-					const parts = data.uri.split('/');
-					rsvpRkey = parts[parts.length - 1];
-				}
-				const status = data.record.status as string;
-				if (status.includes('#going')) rsvpStatus = 'going';
-				else if (status.includes('#interested')) rsvpStatus = 'interested';
-				else if (status.includes('#notgoing')) rsvpStatus = 'notgoing';
+
+				const backlink = data.records[0];
+				rsvpRkey = backlink.rkey;
+
+				const recordData = await getRecord({
+					did: backlink.did as Did,
+					collection: backlink.collection,
+					rkey: backlink.rkey
+				});
+
+				const status = recordData?.value?.status as string;
+				if (status?.includes('#going')) rsvpStatus = 'going';
+				else if (status?.includes('#interested')) rsvpStatus = 'interested';
+				else if (status?.includes('#notgoing')) rsvpStatus = 'notgoing';
 				else rsvpStatus = null;
 			})
 			.catch(() => {
@@ -60,36 +74,26 @@
 		if (!user.client || !user.did) return;
 		rsvpSubmitting = true;
 		try {
-			if (rsvpRkey) {
-				await user.client.post('com.atproto.repo.deleteRecord', {
-					input: {
-						collection: 'community.lexicon.calendar.rsvp',
-						repo: user.did,
-						rkey: rsvpRkey
-					}
-				});
-			}
+			const key = rsvpRkey ?? createTID();
 
-			const response = await user.client.post('com.atproto.repo.createRecord', {
-				input: {
-					collection: 'community.lexicon.calendar.rsvp',
-					repo: user.did,
-					record: {
-						$type: 'community.lexicon.calendar.rsvp',
-						status: `community.lexicon.calendar.rsvp#${status}`,
-						subject: {
-							uri: eventUri,
-							...(eventCid ? { cid: eventCid } : {})
-						},
-						createdAt: new Date().toISOString()
-					}
+			const response = await putRecord({
+				collection: 'community.lexicon.calendar.rsvp',
+				rkey: key,
+				record: {
+					$type: 'community.lexicon.calendar.rsvp',
+					status: `community.lexicon.calendar.rsvp#${status}`,
+					subject: {
+						uri: eventUri,
+						...(eventCid ? { cid: eventCid } : {})
+					},
+					createdAt: new Date().toISOString()
 				}
 			});
 
 			if (response.ok) {
 				rsvpStatus = status;
-				const parts = response.data.uri.split('/');
-				rsvpRkey = parts[parts.length - 1];
+				rsvpRkey = key;
+				onrsvp?.(status);
 			}
 		} catch (e) {
 			console.error('Failed to submit RSVP:', e);
@@ -102,15 +106,13 @@
 		if (!user.client || !user.did || !rsvpRkey) return;
 		rsvpSubmitting = true;
 		try {
-			await user.client.post('com.atproto.repo.deleteRecord', {
-				input: {
-					collection: 'community.lexicon.calendar.rsvp',
-					repo: user.did,
-					rkey: rsvpRkey
-				}
+			await deleteRecord({
+				collection: 'community.lexicon.calendar.rsvp',
+				rkey: rsvpRkey
 			});
 			rsvpStatus = null;
 			rsvpRkey = null;
+			oncancel?.();
 		} catch (e) {
 			console.error('Failed to cancel RSVP:', e);
 		} finally {

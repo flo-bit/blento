@@ -17,7 +17,12 @@
 			localStorage.removeItem('login-redirect');
 
 			const editPath = '/' + getHandleOrDid(user.profile) + '/edit';
-			if (!redirect || redirect === '/' || redirect === 'https://blento.app' || redirect === 'https://blento.app/') {
+			if (
+				!redirect ||
+				redirect === '/' ||
+				redirect === 'https://blento.app' ||
+				redirect === 'https://blento.app/'
+			) {
 				redirect = editPath;
 			}
 

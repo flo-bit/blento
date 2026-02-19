@@ -89,7 +89,7 @@
 </svelte:head>
 
 <div class="min-h-screen px-6 py-12 sm:py-12">
-	<div class="mx-auto max-w-2xl">
+	<div class="mx-auto max-w-3xl">
 		<!-- Header -->
 		<div class="mb-8 flex items-start justify-between">
 			<div>
