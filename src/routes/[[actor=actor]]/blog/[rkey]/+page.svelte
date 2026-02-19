@@ -109,8 +109,8 @@
 	{/if}
 </svelte:head>
 
-<div class="bg-base-50 dark:bg-base-950 min-h-screen px-6 py-12">
-	<div class="mx-auto max-w-3xl">
+<div class="min-h-screen px-6 py-12">
+	<div class="mx-auto max-w-2xl">
 		<!-- Cover image -->
 		{#if coverUrl}
 			<img src={coverUrl} alt={title} class="mb-8 aspect-video w-full rounded-2xl object-cover" />

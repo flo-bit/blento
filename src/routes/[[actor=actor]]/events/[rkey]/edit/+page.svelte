@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { user } from '$lib/atproto/auth.svelte';
 	import { loginModalState } from '$lib/atproto/UI/LoginModal.svelte';
-	import { uploadBlob, resolveHandle } from '$lib/atproto/methods';
+	import { uploadBlob, putRecord, resolveHandle } from '$lib/atproto/methods';
+	import { getCDNImageBlobUrl } from '$lib/atproto';
 	import { compressImage } from '$lib/atproto/image-helper';
 	import { Avatar as FoxAvatar, Badge, Button, ToggleGroup, ToggleGroupItem } from '@foxui/core';
 	import { goto } from '$app/navigation';
@@ -12,7 +13,10 @@
 	import { putImage, getImage, deleteImage } from '$lib/components/image-store';
 	import Modal from '$lib/components/modal/Modal.svelte';
 
-	const DRAFT_KEY = 'blento-event-draft';
+	let { data } = $props();
+
+	let rkey: string = $derived(data.rkey);
+	let DRAFT_KEY = $derived(`blento-event-edit-${rkey}`);
 
 	type EventMode = 'inperson' | 'virtual' | 'hybrid';
 
@@ -31,10 +35,13 @@
 		links: Array<{ uri: string; name: string }>;
 		mode?: EventMode;
 		thumbnailKey?: string;
-		location?: EventLocation;
+		thumbnailChanged?: boolean;
+		location?: EventLocation | null;
+		locationChanged?: boolean;
 	}
 
 	let thumbnailKey: string | null = $state(null);
+	let thumbnailChanged = $state(false);
 
 	let name = $state('');
 	let description = $state('');
@@ -47,6 +54,7 @@
 	let error: string | null = $state(null);
 
 	let location: EventLocation | null = $state(null);
+	let locationChanged = $state(false);
 	let showLocationModal = $state(false);
 	let locationSearch = $state('');
 	let locationSearching = $state(false);
@@ -61,6 +69,60 @@
 	let hasDraft = $state(false);
 	let draftLoaded = $state(false);
 
+	function isoToDatetimeLocal(iso: string): string {
+		const date = new Date(iso);
+		const pad = (n: number) => n.toString().padStart(2, '0');
+		return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+	}
+
+	function stripModePrefix(modeStr: string): EventMode {
+		const stripped = modeStr.replace('community.lexicon.calendar.event#', '');
+		if (stripped === 'virtual' || stripped === 'hybrid' || stripped === 'inperson') return stripped;
+		return 'inperson';
+	}
+
+	function populateFromEventData() {
+		const eventData = data.eventData;
+		name = eventData.name || '';
+		description = eventData.description || '';
+		startsAt = eventData.startsAt ? isoToDatetimeLocal(eventData.startsAt) : '';
+		endsAt = eventData.endsAt ? isoToDatetimeLocal(eventData.endsAt) : '';
+		mode = eventData.mode ? stripModePrefix(eventData.mode) : 'inperson';
+		links = eventData.uris ? eventData.uris.map((l) => ({ uri: l.uri, name: l.name || '' })) : [];
+
+		// Load existing location
+		if (eventData.locations && eventData.locations.length > 0) {
+			const loc = eventData.locations.find((v) => v.$type === 'community.lexicon.location.address');
+			if (loc) {
+				const flat = loc as Record<string, unknown>;
+				const nested = loc.address;
+				const street = (flat.street as string) || undefined;
+				const locality = (flat.locality as string) || nested?.locality;
+				const region = (flat.region as string) || nested?.region;
+				const country = (flat.country as string) || nested?.country;
+				location = {
+					...(street && { street }),
+					...(locality && { locality }),
+					...(region && { region }),
+					...(country && { country })
+				};
+			}
+		}
+		locationChanged = false;
+
+		// Load existing thumbnail from CDN
+		if (eventData.media && eventData.media.length > 0) {
+			const media = eventData.media.find((m) => m.role === 'thumbnail');
+			if (media?.content) {
+				const url = getCDNImageBlobUrl({ did: data.did, blob: media.content, type: 'jpeg' });
+				if (url) {
+					thumbnailPreview = url;
+					thumbnailChanged = false;
+				}
+			}
+		}
+	}
+
 	onMount(async () => {
 		const saved = localStorage.getItem(DRAFT_KEY);
 		if (saved) {
@@ -72,7 +134,11 @@
 				endsAt = draft.endsAt || '';
 				links = draft.links || [];
 				mode = draft.mode || 'inperson';
-				location = draft.location || null;
+				locationChanged = draft.locationChanged || false;
+				if (draft.locationChanged) {
+					location = draft.location || null;
+				}
+				thumbnailChanged = draft.thumbnailChanged || false;
 
 				if (draft.thumbnailKey) {
 					const img = await getImage(draft.thumbnailKey);
@@ -80,13 +146,32 @@
 						thumbnailKey = draft.thumbnailKey;
 						thumbnailFile = new File([img.blob], img.name, { type: img.blob.type });
 						thumbnailPreview = URL.createObjectURL(img.blob);
+						thumbnailChanged = true;
+					}
+				} else if (!thumbnailChanged) {
+					// No new thumbnail in draft, show existing one from event data
+					if (data.eventData.media && data.eventData.media.length > 0) {
+						const media = data.eventData.media.find((m) => m.role === 'thumbnail');
+						if (media?.content) {
+							const url = getCDNImageBlobUrl({
+								did: data.did,
+								blob: media.content,
+								type: 'jpeg'
+							});
+							if (url) {
+								thumbnailPreview = url;
+							}
+						}
 					}
 				}
 
 				hasDraft = true;
 			} catch {
 				localStorage.removeItem(DRAFT_KEY);
+				populateFromEventData();
 			}
+		} else {
+			populateFromEventData();
 		}
 		draftLoaded = true;
 	});
@@ -97,17 +182,20 @@
 		if (!draftLoaded || !browser) return;
 		clearTimeout(saveDraftTimeout);
 		saveDraftTimeout = setTimeout(() => {
-			const draft: EventDraft = { name, description, startsAt, endsAt, links, mode };
+			const draft: EventDraft = {
+				name,
+				description,
+				startsAt,
+				endsAt,
+				links,
+				mode,
+				thumbnailChanged,
+				locationChanged
+			};
+			if (locationChanged) draft.location = location;
 			if (thumbnailKey) draft.thumbnailKey = thumbnailKey;
-			if (location) draft.location = location;
-			const hasContent = name || description || startsAt || endsAt || links.length > 0 || location;
-			if (hasContent) {
-				localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
-				hasDraft = true;
-			} else {
-				localStorage.removeItem(DRAFT_KEY);
-				hasDraft = false;
-			}
+			localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+			hasDraft = true;
 		}, 500);
 	}
 
@@ -128,17 +216,9 @@
 	function deleteDraft() {
 		localStorage.removeItem(DRAFT_KEY);
 		if (thumbnailKey) deleteImage(thumbnailKey);
-		name = '';
-		description = '';
-		startsAt = '';
-		endsAt = '';
-		links = [];
-		mode = 'inperson';
-		location = null;
-		thumbnailFile = null;
-		if (thumbnailPreview) URL.revokeObjectURL(thumbnailPreview);
-		thumbnailPreview = null;
 		thumbnailKey = null;
+		thumbnailChanged = false;
+		populateFromEventData();
 		hasDraft = false;
 	}
 
@@ -183,6 +263,7 @@
 	function confirmLocation() {
 		if (locationResult) {
 			location = locationResult.location;
+			locationChanged = true;
 		}
 		showLocationModal = false;
 		locationSearch = '';
@@ -192,6 +273,7 @@
 
 	function removeLocation() {
 		location = null;
+		locationChanged = true;
 	}
 
 	function getLocationDisplayString(loc: EventLocation): string {
@@ -217,6 +299,7 @@
 
 	async function setThumbnail(file: File) {
 		thumbnailFile = file;
+		thumbnailChanged = true;
 		if (thumbnailPreview) URL.revokeObjectURL(thumbnailPreview);
 		thumbnailPreview = URL.createObjectURL(file);
 
@@ -256,6 +339,7 @@
 
 	function removeThumbnail() {
 		thumbnailFile = null;
+		thumbnailChanged = true;
 		if (thumbnailPreview) {
 			URL.revokeObjectURL(thumbnailPreview);
 			thumbnailPreview = null;
@@ -363,22 +447,34 @@
 		try {
 			let media: Array<Record<string, unknown>> | undefined;
 
-			if (thumbnailFile) {
-				const compressed = await compressImage(thumbnailFile);
-				const blobRef = await uploadBlob({ blob: compressed.blob });
-				if (blobRef) {
-					media = [
-						{
-							role: 'thumbnail',
-							content: blobRef,
-							aspect_ratio: {
-								width: compressed.aspectRatio.width,
-								height: compressed.aspectRatio.height
+			if (thumbnailChanged) {
+				if (thumbnailFile) {
+					const compressed = await compressImage(thumbnailFile);
+					const blobRef = await uploadBlob({ blob: compressed.blob });
+					if (blobRef) {
+						media = [
+							{
+								role: 'thumbnail',
+								content: blobRef,
+								aspect_ratio: {
+									width: compressed.aspectRatio.width,
+									height: compressed.aspectRatio.height
+								}
 							}
-						}
-					];
+						];
+					}
+				}
+				// If thumbnailChanged but no thumbnailFile, media stays undefined (thumbnail removed)
+			} else {
+				// Thumbnail not changed — reuse original media from eventData
+				if (data.eventData.media && data.eventData.media.length > 0) {
+					media = data.eventData.media as Array<Record<string, unknown>>;
 				}
 			}
+
+			// Preserve original createdAt
+			const originalCreatedAt =
+				(data.eventData as Record<string, unknown>).createdAt || new Date().toISOString();
 
 			const record: Record<string, unknown> = {
 				$type: 'community.lexicon.calendar.event',
@@ -386,7 +482,7 @@
 				mode: `community.lexicon.calendar.event#${mode}`,
 				status: 'community.lexicon.calendar.event#scheduled',
 				startsAt: new Date(startsAt).toISOString(),
-				createdAt: new Date().toISOString()
+				createdAt: originalCreatedAt
 			};
 
 			const trimmedDescription = description.trim();
@@ -407,39 +503,40 @@
 			if (links.length > 0) {
 				record.uris = links;
 			}
-			if (location) {
-				record.locations = [
-					{
-						$type: 'community.lexicon.location.address',
-						...location
-					}
-				];
+			if (locationChanged) {
+				if (location) {
+					record.locations = [
+						{
+							$type: 'community.lexicon.location.address',
+							...location
+						}
+					];
+				}
+				// If locationChanged but no location, locations stays undefined (removed)
+			} else if (data.eventData.locations && data.eventData.locations.length > 0) {
+				record.locations = data.eventData.locations;
 			}
 
-			const response = await user.client.post('com.atproto.repo.createRecord', {
-				input: {
-					collection: 'community.lexicon.calendar.event',
-					repo: user.did,
-					record
-				}
+			const response = await putRecord({
+				collection: 'community.lexicon.calendar.event',
+				rkey,
+				record
 			});
 
 			if (response.ok) {
 				localStorage.removeItem(DRAFT_KEY);
 				if (thumbnailKey) deleteImage(thumbnailKey);
-				const parts = response.data.uri.split('/');
-				const rkey = parts[parts.length - 1];
 				const handle =
 					user.profile?.handle && user.profile.handle !== 'handle.invalid'
 						? user.profile.handle
 						: user.did;
 				goto(`/${handle}/events/${rkey}`);
 			} else {
-				error = 'Failed to create event. Please try again.';
+				error = 'Failed to save event. Please try again.';
 			}
 		} catch (e) {
-			console.error('Failed to create event:', e);
-			error = 'Failed to create event. Please try again.';
+			console.error('Failed to save event:', e);
+			error = 'Failed to save event. Please try again.';
 		} finally {
 			submitting = false;
 		}
@@ -447,7 +544,7 @@
 </script>
 
 <svelte:head>
-	<title>Create Event</title>
+	<title>Edit Event</title>
 </svelte:head>
 
 <div class="min-h-screen px-6 py-12 sm:py-12">
@@ -461,19 +558,19 @@
 			<div
 				class="border-base-200 dark:border-base-800 bg-base-100 dark:bg-base-900/50 rounded-2xl border p-8 text-center"
 			>
-				<p class="text-base-600 dark:text-base-400 mb-4">Log in to create an event.</p>
+				<p class="text-base-600 dark:text-base-400 mb-4">Log in to edit this event.</p>
 				<Button onclick={() => loginModalState.show()}>Log in</Button>
 			</div>
 		{:else}
 			<div class="mb-6 flex items-center gap-3">
-				<Badge size="sm">Local draft</Badge>
+				<Badge size="sm">Local edit</Badge>
 				{#if hasDraft}
 					<button
 						type="button"
 						onclick={deleteDraft}
 						class="text-base-500 dark:text-base-400 cursor-pointer text-xs hover:text-red-500 hover:underline"
 					>
-						Delete draft
+						Discard changes
 					</button>
 				{/if}
 			</div>
@@ -756,7 +853,7 @@
 						{/if}
 
 						<Button type="submit" disabled={submitting}>
-							{submitting ? 'Creating...' : 'Create Event'}
+							{submitting ? 'Saving...' : 'Save Changes'}
 						</Button>
 					</div>
 

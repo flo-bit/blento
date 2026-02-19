@@ -120,7 +120,7 @@
 </script>
 
 <div
-	class="border-base-200 dark:border-base-800 bg-base-100 items-between dark:bg-base-900/50 mt-8 mb-2 flex h-25 flex-col justify-center rounded-2xl border p-4"
+	class="border-base-200 dark:border-base-800 bg-base-100 items-between dark:bg-base-950/50 mt-8 mb-2 flex h-25 flex-col justify-center rounded-2xl border p-4"
 >
 	{#if user.isInitializing || rsvpLoading}
 		<div class="flex items-center gap-3">

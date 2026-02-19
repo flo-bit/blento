@@ -1,9 +1,11 @@
 <script lang="ts">
 	import type { EventData } from '$lib/cards/social/EventCard';
 	import { getCDNImageBlobUrl } from '$lib/atproto';
-	import { Avatar as FoxAvatar, Badge } from '@foxui/core';
+	import { user } from '$lib/atproto/auth.svelte';
+	import { Avatar as FoxAvatar, Badge, Button } from '@foxui/core';
 	import Avatar from 'svelte-boring-avatars';
 	import EventRsvp from './EventRsvp.svelte';
+	import EventAttendees from './EventAttendees.svelte';
 	import { page } from '$app/state';
 	import { segmentize, type Facet } from '@atcute/bluesky-richtext-segmenter';
 	import { sanitize } from '$lib/sanitize';
@@ -157,6 +159,8 @@
 	let eventUri = $derived(`at://${did}/community.lexicon.calendar.event/${rkey}`);
 
 	let ogImageUrl = $derived(`${page.url.origin}${page.url.pathname}/og.png`);
+
+	let isOwner = $derived(user.isLoggedIn && user.did === did);
 </script>
 
 <svelte:head>
@@ -171,8 +175,8 @@
 	<meta name="twitter:image" content={ogImageUrl} />
 </svelte:head>
 
-<div class="bg-base-50 dark:bg-base-950 min-h-screen px-6 py-12 sm:py-12">
-	<div class="mx-auto max-w-4xl">
+<div class="min-h-screen px-6 py-12 sm:py-12">
+	<div class="mx-auto max-w-2xl">
 		<!-- Banner image (full width, only when no thumbnail) -->
 		{#if isBannerOnly && displayImage}
 			<img
@@ -213,11 +217,16 @@
 
 			<!-- Right column: event details -->
 			<div class="order-2 min-w-0 md:order-0 md:col-start-2 md:row-span-5 md:row-start-1">
-				<h1
-					class="text-base-900 dark:text-base-50 mb-2 text-4xl leading-tight font-bold sm:text-5xl"
-				>
-					{eventData.name}
-				</h1>
+				<div class="mb-2 flex items-start justify-between gap-4">
+					<h1
+						class="text-base-900 dark:text-base-50 text-4xl leading-tight font-bold sm:text-5xl"
+					>
+						{eventData.name}
+					</h1>
+					{#if isOwner}
+						<Button href="./edit" variant="ghost" size="sm" class="shrink-0">Edit</Button>
+					{/if}
+				</div>
 
 				<!-- Mode badge -->
 				{#if eventData.mode}
@@ -287,6 +296,12 @@
 				{/if}
 
 				<EventRsvp {eventUri} eventCid={data.eventCid} />
+
+				{#if isOwner}
+					<div class="mt-4">
+						<Button href="./edit" variant="secondary" size="sm">Edit event</Button>
+					</div>
+				{/if}
 
 				<!-- About Event -->
 				{#if descriptionHtml}
@@ -363,6 +378,11 @@
 					</div>
 				</div>
 			{/if}
+
+			<!-- Attendees -->
+			<!-- <div class="order-5 md:order-0 md:col-start-1">
+				<EventAttendees {eventUri} {did} />
+			</div> -->
 
 			<!-- View on Smoke Signal link -->
 			<a
