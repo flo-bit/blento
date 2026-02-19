@@ -206,7 +206,9 @@ async function resumeSession(did: Did) {
 			throw Error('session expired');
 		}
 
-		if (session.token.scope !== metadata.scope) {
+		const requestedScopes = metadata.scope.split(' ').filter((s) => !s.startsWith('include:'));
+		const tokenScopes = new Set(session.token.scope?.split(' '));
+		if (!requestedScopes.every((s) => tokenScopes.has(s))) {
 			throw Error('scope changed, signing out!');
 		}
 
