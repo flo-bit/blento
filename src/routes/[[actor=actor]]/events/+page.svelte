@@ -75,7 +75,6 @@
 		return { url, alt: media.alt || event.name };
 	}
 
-	let actorPrefix = $derived(data.hostProfile?.handle ? `/${data.hostProfile.handle}` : `/${did}`);
 	let isOwner = $derived(user.isLoggedIn && user.did === did);
 </script>
 
@@ -111,7 +110,7 @@
 				</div>
 			</div>
 			{#if isOwner}
-				<Button href="{actorPrefix}/events/new" variant="primary">New event</Button>
+				<Button href="./events/new" variant="primary">New event</Button>
 			{/if}
 		</div>
 
@@ -124,7 +123,7 @@
 					{@const location = getLocationString(event.locations)}
 					{@const rkey = event.rkey}
 					<a
-						href="{actorPrefix}/events/{rkey}"
+						href="./events/{rkey}"
 						class="border-base-200 dark:border-base-800 hover:border-base-300 dark:hover:border-base-700 group bg-base-100 dark:bg-base-950 block overflow-hidden rounded-2xl border transition-colors"
 					>
 						<!-- Thumbnail -->
