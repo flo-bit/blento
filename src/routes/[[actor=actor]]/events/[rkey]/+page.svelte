@@ -155,7 +155,7 @@
 			: null
 	);
 
-	let smokesignalUrl = $derived(`https://smokesignal.events/${did}/${rkey}`);
+	// let smokesignalUrl = $derived(`https://smokesignal.events/${did}/${rkey}`);
 	let eventUri = $derived(`at://${did}/community.lexicon.calendar.event/${rkey}`);
 
 	let ogImageUrl = $derived(`${page.url.origin}${page.url.pathname}/og.png`);
@@ -252,10 +252,10 @@
 					</div>
 				{/if}
 
-				<!-- Date row (Luma-style calendar icon) -->
+				<!-- Date row -->
 				<div class="mb-4 flex items-center gap-4">
 					<div
-						class="border-base-200 dark:border-base-700 flex size-12 shrink-0 flex-col items-center justify-center overflow-hidden rounded-xl border"
+						class="border-base-200 dark:border-base-700 bg-base-100 dark:bg-base-950/30 flex size-12 shrink-0 flex-col items-center justify-center overflow-hidden rounded-xl border"
 					>
 						<span class="text-base-500 dark:text-base-400 text-[9px] leading-none font-semibold">
 							{formatMonth(startDate)}

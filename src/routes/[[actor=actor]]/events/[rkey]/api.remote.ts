@@ -133,11 +133,14 @@ export const fetchEventAttendees = query(
 			};
 		}
 
+		const uniqueGoing = [...new Set(going)];
+		const uniqueInterested = [...new Set(interested)];
+
 		return {
-			going: going.map((did) => toAttendeeInfo(did, 'going')),
-			interested: interested.map((did) => toAttendeeInfo(did, 'interested')),
-			goingCount: going.length,
-			interestedCount: interested.length
+			going: uniqueGoing.map((did) => toAttendeeInfo(did, 'going')),
+			interested: uniqueInterested.map((did) => toAttendeeInfo(did, 'interested')),
+			goingCount: uniqueGoing.length,
+			interestedCount: uniqueInterested.length
 		};
 	}
 );

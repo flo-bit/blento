@@ -83,7 +83,7 @@
 		{#if goingCount > 0}
 			<button
 				type="button"
-				class="hover:bg-base-100 dark:hover:bg-base-800/50 -mx-2 cursor-pointer rounded-xl px-2 py-2 text-left transition-colors"
+				class="hover:bg-base-100 dark:hover:bg-base-800/50 -mx-2 block w-full cursor-pointer rounded-xl px-2 py-2 text-left transition-colors"
 				onclick={() => openModal('going')}
 			>
 				<p class="text-base-900 dark:text-base-50 mb-2 text-sm">
@@ -124,7 +124,7 @@
 		{#if interestedCount > 0}
 			<button
 				type="button"
-				class="hover:bg-base-100 dark:hover:bg-base-800/50 -mx-2 mt-4 cursor-pointer rounded-xl px-2 py-2 text-left transition-colors"
+				class="hover:bg-base-100 dark:hover:bg-base-800/50 -mx-2 mt-4 block w-full cursor-pointer rounded-xl px-2 py-2 text-left transition-colors"
 				onclick={() => openModal('interested')}
 			>
 				<p class="text-base-900 dark:text-base-50 mb-2 text-sm">
@@ -164,20 +164,22 @@
 	</div>
 {/if}
 
-<Modal bind:open={modalOpen} closeButton onOpenAutoFocus={(e) => e.preventDefault()}>
-	<p class="text-base-900 dark:text-base-50 text-lg font-semibold">
+<Modal bind:open={modalOpen} closeButton onOpenAutoFocus={(e) => e.preventDefault()} class="p-0">
+	<p class="text-base-900 dark:text-base-50 px-4 pt-4 text-lg font-semibold">
 		{modalTitle}
 		<span class="text-base-500 dark:text-base-400 text-sm font-normal">
 			({modalAttendees.length})
 		</span>
 	</p>
-	<div class="mt-3 max-h-80 space-y-1 overflow-y-auto p-2">
+	<div
+		class="dark:bg-base-900/50 bg-base-200/30 mx-4 mb-4 max-h-80 space-y-1 overflow-y-auto rounded-xl p-2"
+	>
 		{#each modalAttendees as person (person.did)}
 			<a
 				href={person.url}
 				target={person.url?.startsWith('/') ? undefined : '_blank'}
 				rel={person.url?.startsWith('/') ? undefined : 'noopener noreferrer'}
-				class="hover:bg-base-100 dark:hover:bg-base-800 flex items-center gap-3 rounded-xl px-2 py-2 transition-colors"
+				class="hover:bg-base-200 dark:hover:bg-base-900 flex items-center gap-3 rounded-xl px-2 py-2 transition-colors"
 			>
 				<FoxAvatar
 					src={person.avatar}
