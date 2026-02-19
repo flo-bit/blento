@@ -161,6 +161,23 @@
 	let ogImageUrl = $derived(`${page.url.origin}${page.url.pathname}/og.png`);
 
 	let isOwner = $derived(user.isLoggedIn && user.did === did);
+
+	let attendeesRef: EventAttendees | undefined = $state();
+
+	function handleRsvp(status: 'going' | 'interested') {
+		if (!user.did) return;
+		attendeesRef?.addAttendee({
+			did: user.did,
+			status,
+			avatar: user.profile?.avatar,
+			name: user.profile?.displayName || user.profile?.handle || user.did
+		});
+	}
+
+	function handleRsvpCancel() {
+		if (!user.did) return;
+		attendeesRef?.removeAttendee(user.did);
+	}
 </script>
 
 <svelte:head>
@@ -176,7 +193,7 @@
 </svelte:head>
 
 <div class="min-h-screen px-6 py-12 sm:py-12">
-	<div class="mx-auto max-w-2xl">
+	<div class="mx-auto max-w-3xl">
 		<!-- Banner image (full width, only when no thumbnail) -->
 		{#if isBannerOnly && displayImage}
 			<img
@@ -218,13 +235,11 @@
 			<!-- Right column: event details -->
 			<div class="order-2 min-w-0 md:order-0 md:col-start-2 md:row-span-5 md:row-start-1">
 				<div class="mb-2 flex items-start justify-between gap-4">
-					<h1
-						class="text-base-900 dark:text-base-50 text-4xl leading-tight font-bold sm:text-5xl"
-					>
+					<h1 class="text-base-900 dark:text-base-50 text-4xl leading-tight font-bold sm:text-5xl">
 						{eventData.name}
 					</h1>
 					{#if isOwner}
-						<Button href="./edit" variant="ghost" size="sm" class="shrink-0">Edit</Button>
+						<Button href="./edit" size="sm" class="shrink-0">Edit</Button>
 					{/if}
 				</div>
 
@@ -295,13 +310,12 @@
 					</div>
 				{/if}
 
-				<EventRsvp {eventUri} eventCid={data.eventCid} />
-
-				{#if isOwner}
-					<div class="mt-4">
-						<Button href="./edit" variant="secondary" size="sm">Edit event</Button>
-					</div>
-				{/if}
+				<EventRsvp
+					{eventUri}
+					eventCid={data.eventCid}
+					onrsvp={handleRsvp}
+					oncancel={handleRsvpCancel}
+				/>
 
 				<!-- About Event -->
 				{#if descriptionHtml}
@@ -380,12 +394,12 @@
 			{/if}
 
 			<!-- Attendees -->
-			<!-- <div class="order-5 md:order-0 md:col-start-1">
-				<EventAttendees {eventUri} {did} />
-			</div> -->
+			<div class="order-5 md:order-0 md:col-start-1">
+				<EventAttendees bind:this={attendeesRef} {eventUri} />
+			</div>
 
-			<!-- View on Smoke Signal link -->
-			<a
+			<!-- View on Smoke Signal link, currently disabled as some events dont work on smokesignal -->
+			<!-- <a
 				href={smokesignalUrl}
 				target="_blank"
 				rel="noopener noreferrer"
@@ -406,7 +420,7 @@
 						d="m4.5 19.5 15-15m0 0H8.25m11.25 0v11.25"
 					/>
 				</svg>
-			</a>
+			</a> -->
 		</div>
 	</div>
 </div>

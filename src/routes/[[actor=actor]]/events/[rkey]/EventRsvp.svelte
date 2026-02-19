@@ -3,7 +3,17 @@
 	import { loginModalState } from '$lib/atproto/UI/LoginModal.svelte';
 	import { Avatar, Button } from '@foxui/core';
 
-	let { eventUri, eventCid }: { eventUri: string; eventCid: string | null } = $props();
+	let {
+		eventUri,
+		eventCid,
+		onrsvp,
+		oncancel
+	}: {
+		eventUri: string;
+		eventCid: string | null;
+		onrsvp?: (status: 'going' | 'interested') => void;
+		oncancel?: () => void;
+	} = $props();
 
 	let rsvpStatus: 'going' | 'interested' | 'notgoing' | null = $state(null);
 	let rsvpRkey: string | null = $state(null);
@@ -90,6 +100,7 @@
 				rsvpStatus = status;
 				const parts = response.data.uri.split('/');
 				rsvpRkey = parts[parts.length - 1];
+				onrsvp?.(status);
 			}
 		} catch (e) {
 			console.error('Failed to submit RSVP:', e);
@@ -111,6 +122,7 @@
 			});
 			rsvpStatus = null;
 			rsvpRkey = null;
+			oncancel?.();
 		} catch (e) {
 			console.error('Failed to cancel RSVP:', e);
 		} finally {

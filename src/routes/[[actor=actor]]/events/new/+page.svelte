@@ -451,7 +451,7 @@
 </svelte:head>
 
 <div class="min-h-screen px-6 py-12 sm:py-12">
-	<div class="mx-auto max-w-2xl">
+	<div class="mx-auto max-w-3xl">
 		{#if user.isInitializing}
 			<div class="flex items-center gap-3">
 				<div class="bg-base-300 dark:bg-base-700 size-5 animate-pulse rounded-full"></div>
@@ -459,7 +459,7 @@
 			</div>
 		{:else if !user.isLoggedIn}
 			<div
-				class="border-base-200 dark:border-base-800 bg-base-100 dark:bg-base-900/50 rounded-2xl border p-8 text-center"
+				class="border-base-200 dark:border-base-800 bg-base-100 dark:bg-base-950/50 rounded-2xl border p-8 text-center"
 			>
 				<p class="text-base-600 dark:text-base-400 mb-4">Log in to create an event.</p>
 				<Button onclick={() => loginModalState.show()}>Log in</Button>
@@ -565,7 +565,7 @@
 							bind:value={name}
 							required
 							placeholder="Event name"
-							class="text-base-900 dark:text-base-50 placeholder:text-base-300 dark:placeholder:text-base-700 mb-2 w-full border-0 bg-transparent text-4xl leading-tight font-bold focus:border-0 focus:ring-0 focus:outline-none sm:text-5xl"
+							class="text-base-900 dark:text-base-50 placeholder:text-base-500 dark:placeholder:text-base-500 mb-2 w-full border-0 bg-transparent text-4xl leading-tight font-bold focus:border-0 focus:ring-0 focus:outline-none sm:text-5xl"
 						/>
 
 						<!-- Mode toggle -->
@@ -747,7 +747,7 @@
 								bind:value={description}
 								rows={4}
 								placeholder="What's this event about? @mentions, #hashtags and links will be detected automatically."
-								class="text-base-700 dark:text-base-300 placeholder:text-base-300 dark:placeholder:text-base-700 w-full resize-none border-0 bg-transparent leading-relaxed focus:border-0 focus:ring-0 focus:outline-none"
+								class="text-base-700 dark:text-base-300 placeholder:text-base-500 dark:placeholder:text-base-500 w-full resize-none border-0 bg-transparent leading-relaxed focus:border-0 focus:ring-0 focus:outline-none"
 							></textarea>
 						</div>
 

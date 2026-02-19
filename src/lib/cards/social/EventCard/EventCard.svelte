@@ -9,7 +9,6 @@
 	import { browser } from '$app/environment';
 	import { qrOverlay } from '$lib/components/qr/qrOverlay.svelte';
 	import type { Did } from '@atcute/lexicons';
-	import { page } from '$app/state';
 
 	let { item }: ContentComponentProps = $props();
 
@@ -93,8 +92,7 @@
 
 	let eventUrl = $derived(() => {
 		if (parsedUri) {
-			const actorPrefix = page.params.actor ? `/${page.params.actor}` : '';
-			return `${actorPrefix}/events/${parsedUri.rkey}`;
+			return `https://blento.app/${parsedUri.repo}/events/${parsedUri.rkey}`;
 		}
 		return '#';
 	});

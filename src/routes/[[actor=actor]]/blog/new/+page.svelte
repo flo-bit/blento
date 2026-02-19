@@ -373,7 +373,7 @@
 </svelte:head>
 
 <div class="min-h-screen px-6 py-12">
-	<div class="mx-auto max-w-2xl">
+	<div class="mx-auto max-w-3xl">
 		{#if user.isInitializing || !draftRestored}
 			<div class="flex items-center gap-3">
 				<div class="bg-base-300 dark:bg-base-700 size-5 animate-pulse rounded-full"></div>
