@@ -64,6 +64,10 @@
 		}
 	}
 
+	function thumbnail(url: string | undefined) {
+		return url?.replace('/avatar/', '/avatar_thumbnail/');
+	}
+
 	export function removeAttendee(did: string) {
 		const wasGoing = goingAttendees.some((a) => a.did === did);
 		const wasInterested = interestedAttendees.some((a) => a.did === did);
@@ -102,9 +106,8 @@
 								out:scale={{ duration: 200, start: 0.5 }}
 							>
 								<FoxAvatar
-									src={person.avatar}
+									src={thumbnail(person.avatar)}
 									alt={person.name}
-									fallback={person.name}
 									class="border-base-100 dark:border-base-900 size-12 border-2"
 								/>
 							</div>
@@ -143,9 +146,8 @@
 								out:scale={{ duration: 200, start: 0.5 }}
 							>
 								<FoxAvatar
-									src={person.avatar}
+									src={thumbnail(person.avatar)}
 									alt={person.name}
-									fallback={person.name}
 									class="border-base-100 dark:border-base-900 size-12 border-2"
 								/>
 							</div>
@@ -181,12 +183,7 @@
 				rel={person.url?.startsWith('/') ? undefined : 'noopener noreferrer'}
 				class="hover:bg-base-200 dark:hover:bg-base-900 flex items-center gap-3 rounded-xl px-2 py-2 transition-colors"
 			>
-				<FoxAvatar
-					src={person.avatar}
-					alt={person.name}
-					fallback={person.name}
-					class="size-10 shrink-0"
-				/>
+				<FoxAvatar src={thumbnail(person.avatar)} alt={person.name} class="size-10 shrink-0" />
 				<div class="min-w-0">
 					<p class="text-base-900 dark:text-base-50 truncate text-sm font-medium">
 						{person.name}
