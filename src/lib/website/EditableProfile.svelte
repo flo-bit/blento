@@ -43,6 +43,10 @@
 	}
 
 	let profilePosition = $derived(getProfilePosition(data));
+
+	function onTextUpdate() {
+		data = { ...data };
+	}
 </script>
 
 <div
@@ -121,7 +125,12 @@
 		<!-- Editable Name -->
 		{#if data.publication}
 			<div class="text-4xl font-bold wrap-anywhere">
-				<PlainTextEditor bind:contentDict={data.publication} key="name" placeholder="Your name" />
+				<PlainTextEditor
+					bind:contentDict={data.publication}
+					key="name"
+					placeholder="Your name"
+					onupdate={onTextUpdate}
+				/>
 			</div>
 		{/if}
 
@@ -133,6 +142,7 @@
 					key="description"
 					placeholder="Something about me..."
 					class="text-base-600 dark:text-base-400 prose dark:prose-invert prose-a:text-accent-500 prose-a:no-underline"
+					onupdate={onTextUpdate}
 				/>
 			{/if}
 		</div>
