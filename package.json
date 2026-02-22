@@ -58,6 +58,7 @@
 		"@foxui/social": "^0.4.7",
 		"@foxui/time": "^0.4.7",
 		"@foxui/visual": "^0.4.7",
+		"@internationalized/date": "^3.11.0",
 		"@number-flow/svelte": "^0.3.10",
 		"@tailwindcss/typography": "^0.5.19",
 		"@threlte/core": "^8.3.1",
