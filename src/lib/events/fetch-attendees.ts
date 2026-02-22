@@ -1,8 +1,18 @@
-import { getBlentoOrBskyProfile, parseUri } from '$lib/atproto/methods';
+import { getBlentoOrBskyProfile, getRecord, listRecords, parseUri } from '$lib/atproto/methods';
 import type { CacheService, CachedProfile } from '$lib/cache';
+import type { EventData } from '$lib/cards/social/EventCard';
 import type { Did } from '@atcute/lexicons';
 
 export type RsvpStatus = 'going' | 'interested';
+
+export interface ResolvedRsvp {
+	event: EventData;
+	rkey: string;
+	hostDid: string;
+	hostProfile: CachedProfile | null;
+	status: 'going' | 'interested';
+	eventUri: string;
+}
 
 /**
  * Fetch raw RSVP data for an event from Microcosm Constellation backlinks.
@@ -105,4 +115,66 @@ export function getProfileUrl(did: string, profile?: CachedProfile | null): stri
 	}
 	const handle = profile?.handle;
 	return handle ? `https://bsky.app/profile/${handle}` : `https://bsky.app/profile/${did}`;
+}
+
+interface RsvpRecord {
+	$type: string;
+	status: string;
+	subject: { uri: string; cid?: string };
+	createdAt: string;
+}
+
+/**
+ * Fetch a user's RSVPs (going/interested) and resolve each referenced event + host profile.
+ */
+export async function fetchUserRsvps(
+	did: string,
+	cache?: CacheService | null
+): Promise<ResolvedRsvp[]> {
+	const rsvpRecords = await listRecords({
+		did: did as Did,
+		collection: 'community.lexicon.calendar.rsvp',
+		limit: 100
+	});
+
+	const activeRsvps = rsvpRecords.filter((r) => {
+		const rsvp = r.value as unknown as RsvpRecord;
+		return rsvp.status?.endsWith('#going') || rsvp.status?.endsWith('#interested');
+	});
+
+	const results = await Promise.all(
+		activeRsvps.map(async (r) => {
+			const rsvp = r.value as unknown as RsvpRecord;
+			const parsed = parseUri(rsvp.subject.uri);
+			if (!parsed?.rkey || !parsed?.repo) return null;
+
+			try {
+				const [record, hostProfile] = await Promise.all([
+					getRecord({
+						did: parsed.repo as Did,
+						collection: 'community.lexicon.calendar.event',
+						rkey: parsed.rkey
+					}),
+					resolveProfile(parsed.repo, cache).catch(() => null)
+				]);
+
+				if (!record?.value) return null;
+
+				return {
+					event: record.value as EventData,
+					rkey: parsed.rkey,
+					hostDid: parsed.repo,
+					hostProfile,
+					status: (rsvp.status?.endsWith('#going') ? 'going' : 'interested') as
+						| 'going'
+						| 'interested',
+					eventUri: rsvp.subject.uri
+				};
+			} catch {
+				return null;
+			}
+		})
+	);
+
+	return results.filter((r) => r !== null);
 }

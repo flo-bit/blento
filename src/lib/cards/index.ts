@@ -27,6 +27,8 @@ import { PhotoGalleryCardDefinition } from './media/PhotoGalleryCard';
 import { StandardSiteDocumentListCardDefinition } from './content/StandardSiteDocumentListCard';
 import { StatusphereCardDefinition } from './media/StatusphereCard';
 import { EventCardDefinition } from './social/EventCard';
+import { UpcomingEventsCardDefinition } from './social/UpcomingEventsCard';
+import { UpcomingRsvpsCardDefinition } from './social/UpcomingRsvpsCard';
 import { VCardCardDefinition } from './social/VCardCard';
 import { DrawCardDefinition } from './visual/DrawCard';
 import { TimerCardDefinition } from './utilities/TimerCard';
@@ -83,6 +85,8 @@ export const AllCardDefinitions = [
 	StandardSiteDocumentListCardDefinition,
 	StatusphereCardDefinition,
 	EventCardDefinition,
+	UpcomingEventsCardDefinition,
+	UpcomingRsvpsCardDefinition,
 	VCardCardDefinition,
 	DrawCardDefinition,
 	TimerCardDefinition,

@@ -1,23 +1,25 @@
 <script lang="ts">
 	import type { EventData } from '$lib/cards/social/EventCard';
 	import { getCDNImageBlobUrl } from '$lib/atproto';
-	import { user } from '$lib/atproto/auth.svelte';
 	import { Avatar as FoxAvatar, Badge, Button, toast } from '@foxui/core';
 	import { page } from '$app/state';
 	import Avatar from 'svelte-boring-avatars';
-	import * as TID from '@atcute/tid';
-	import { goto } from '$app/navigation';
+	import type { CachedProfile } from '$lib/cache';
 
 	let { data } = $props();
 
-	let events: (EventData & { rkey: string })[] = $derived(data.events);
+	let rsvps: Array<{
+		event: EventData;
+		rkey: string;
+		hostDid: string;
+		hostProfile: CachedProfile | null;
+		status: string;
+		eventUri: string;
+	}> = $derived(data.rsvps);
 	let did: string = $derived(data.did);
-	let hostProfile = $derived(data.hostProfile);
+	let userProfile = $derived(data.userProfile);
 
-	let hostName = $derived(hostProfile?.displayName || hostProfile?.handle || did);
-	let hostUrl = $derived(
-		hostProfile?.url ?? `https://bsky.app/profile/${hostProfile?.handle || did}`
-	);
+	let userName = $derived(userProfile?.displayName || userProfile?.handle || did);
 
 	function formatDate(dateStr: string): string {
 		const date = new Date(dateStr);
@@ -53,38 +55,28 @@
 		return 'secondary';
 	}
 
-	function getLocationString(locations: EventData['locations']): string | undefined {
-		if (!locations || locations.length === 0) return undefined;
-
-		const loc = locations.find((v) => v.$type === 'community.lexicon.location.address');
-		if (!loc) return undefined;
-
-		const flat = loc as Record<string, unknown>;
-		const nested = loc.address;
-
-		const locality = (flat.locality as string) || nested?.locality;
-		const region = (flat.region as string) || nested?.region;
-
-		const parts = [locality, region].filter(Boolean);
-		return parts.length > 0 ? parts.join(', ') : undefined;
-	}
-
-	function getThumbnail(event: EventData): { url: string; alt: string } | null {
+	function getThumbnail(event: EventData, hostDid: string): { url: string; alt: string } | null {
 		if (!event.media || event.media.length === 0) return null;
 		const media = event.media.find((m) => m.role === 'thumbnail');
 		if (!media?.content) return null;
-		const url = getCDNImageBlobUrl({ did, blob: media.content, type: 'jpeg' });
+		const url = getCDNImageBlobUrl({ did: hostDid, blob: media.content, type: 'jpeg' });
 		if (!url) return null;
 		return { url, alt: media.alt || event.name };
 	}
 
-	let isOwner = $derived(user.isLoggedIn && user.did === did);
+	function getStatusLabel(status: string): string {
+		return status === 'going' ? 'Going' : 'Interested';
+	}
+
+	function getStatusColor(status: string): 'green' | 'blue' {
+		return status === 'going' ? 'green' : 'blue';
+	}
 
 	let showPast: boolean = $state(false);
 	let now = $derived(new Date());
-	let filteredEvents = $derived(
-		events.filter((e) => {
-			const endOrStart = e.endsAt || e.startsAt;
+	let filteredRsvps = $derived(
+		rsvps.filter((r) => {
+			const endOrStart = r.event.endsAt || r.event.startsAt;
 			const eventDate = new Date(endOrStart);
 			return showPast ? eventDate < now : eventDate >= now;
 		})
@@ -92,13 +84,13 @@
 </script>
 
 <svelte:head>
-	<title>{hostName} - Events</title>
-	<meta name="description" content="Events hosted by {hostName}" />
-	<meta property="og:title" content="{hostName} - Events" />
-	<meta property="og:description" content="Events hosted by {hostName}" />
+	<title>{userName} - RSVPs</title>
+	<meta name="description" content="Events {userName} is attending" />
+	<meta property="og:title" content="{userName} - RSVPs" />
+	<meta property="og:description" content="Events {userName} is attending" />
 	<meta name="twitter:card" content="summary" />
-	<meta name="twitter:title" content="{hostName} - Events" />
-	<meta name="twitter:description" content="Events hosted by {hostName}" />
+	<meta name="twitter:title" content="{userName} - RSVPs" />
+	<meta name="twitter:description" content="Events {userName} is attending" />
 </svelte:head>
 
 <div class="min-h-screen px-6 py-12 sm:py-12">
@@ -107,44 +99,21 @@
 		<div class="mb-8 flex items-start justify-between">
 			<div>
 				<h1 class="text-base-900 dark:text-base-50 mb-2 text-2xl font-bold sm:text-3xl">
-					{showPast ? 'Past' : 'Upcoming'} events
+					{showPast ? 'Past' : 'Upcoming'} RSVPs
 				</h1>
 				<div class="mt-4 flex items-center gap-2">
-					<span class="text-base-500 dark:text-base-400 text-sm">Hosted by</span>
-					<a
-						href={hostUrl}
-						target={hostProfile?.hasBlento ? undefined : '_blank'}
-						rel={hostProfile?.hasBlento ? undefined : 'noopener noreferrer'}
-						class="flex items-center gap-1.5 hover:underline"
-					>
-						<FoxAvatar src={hostProfile?.avatar} alt={hostName} class="size-5 shrink-0" />
-						<span class="text-base-900 dark:text-base-100 text-sm font-medium">{hostName}</span>
-					</a>
+					<FoxAvatar src={userProfile?.avatar} alt={userName} class="size-5 shrink-0" />
+					<span class="text-base-900 dark:text-base-100 text-sm font-medium">{userName}</span>
 				</div>
 			</div>
-			<div class="flex flex-col items-end gap-2">
-				{#if isOwner}
-					<Button
-						variant="primary"
-						onclick={() => {
-							const rkey = TID.now();
-							const handle =
-								user.profile?.handle && user.profile.handle !== 'handle.invalid'
-									? user.profile.handle
-									: user.did;
-							goto(`/${handle}/events/${rkey}/edit`);
-						}}>New event</Button
-					>
-				{/if}
-				<Button
-					variant="secondary"
-					onclick={async () => {
-						const calendarUrl = `${page.url.origin}${page.url.pathname.replace(/\/$/, '')}/calendar`;
-						await navigator.clipboard.writeText(calendarUrl);
-						toast.success('Subscription link copied to clipboard');
-					}}>Subscribe</Button
-				>
-			</div>
+			<Button
+				variant="secondary"
+				onclick={async () => {
+					const calendarUrl = `${page.url.origin}${page.url.pathname.replace(/\/$/, '')}/calendar`;
+					await navigator.clipboard.writeText(calendarUrl);
+					toast.success('Subscription link copied to clipboard');
+				}}>Subscribe</Button
+			>
 		</div>
 
 		<!-- Toggle -->
@@ -163,18 +132,17 @@
 			>
 		</div>
 
-		{#if filteredEvents.length === 0}
+		{#if filteredRsvps.length === 0}
 			<p class="text-base-500 dark:text-base-400 py-12 text-center">
-				No {showPast ? 'past' : 'upcoming'} events.
+				No {showPast ? 'past' : 'upcoming'} RSVPs.
 			</p>
 		{:else}
 			<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-				{#each filteredEvents as event (event.rkey)}
-					{@const thumbnail = getThumbnail(event)}
-					{@const location = getLocationString(event.locations)}
-					{@const rkey = event.rkey}
+				{#each filteredRsvps as rsvp (rsvp.eventUri)}
+					{@const thumbnail = getThumbnail(rsvp.event, rsvp.hostDid)}
+					{@const hostHandle = rsvp.hostProfile?.handle || rsvp.hostDid}
 					<a
-						href="./events/{rkey}"
+						href="/{hostHandle}/events/{rsvp.rkey}"
 						class="border-base-200 dark:border-base-800 hover:border-base-300 dark:hover:border-base-700 group bg-base-100 dark:bg-base-950 block overflow-hidden rounded-2xl border transition-colors"
 					>
 						<!-- Thumbnail -->
@@ -191,7 +159,7 @@
 								>
 									<Avatar
 										size={400}
-										name={rkey}
+										name={rsvp.rkey}
 										variant="marble"
 										colors={['#92A1C6', '#146A7C', '#F0AB3D', '#C271B4', '#C20D90']}
 										square
@@ -205,23 +173,23 @@
 							<h2
 								class="text-base-900 dark:text-base-50 group-hover:text-base-700 dark:group-hover:text-base-200 mb-1 leading-snug font-semibold"
 							>
-								{event.name}
+								{rsvp.event.name}
 							</h2>
 
 							<p class="text-base-500 dark:text-base-400 mb-2 text-sm">
-								{formatDate(event.startsAt)} &middot; {formatTime(event.startsAt)}
+								{formatDate(rsvp.event.startsAt)} &middot; {formatTime(rsvp.event.startsAt)}
 							</p>
 
 							<div class="flex flex-wrap items-center gap-2">
-								{#if event.mode}
-									<Badge size="sm" variant={getModeColor(event.mode)}
-										>{getModeLabel(event.mode)}</Badge
+								{#if rsvp.event.mode}
+									<Badge size="sm" variant={getModeColor(rsvp.event.mode)}
+										>{getModeLabel(rsvp.event.mode)}</Badge
 									>
 								{/if}
 
-								{#if location}
-									<span class="text-base-500 dark:text-base-400 truncate text-xs">{location}</span>
-								{/if}
+								<Badge size="sm" variant={getStatusColor(rsvp.status)}
+									>{getStatusLabel(rsvp.status)}</Badge
+								>
 							</div>
 						</div>
 					</a>

@@ -4,7 +4,7 @@ import { getCDNImageBlobUrl, listRecords } from '$lib/atproto/methods.js';
 import { createCache } from '$lib/cache';
 import type { Did } from '@atcute/lexicons';
 import { getActor } from '$lib/actor';
-import { generateICalFeed, type ICalEvent } from '$lib/ical';
+import { generateICalFeed, type ICalAttendee, type ICalEvent } from '$lib/ical';
 import { fetchEventRsvps, getProfileUrl, resolveProfile } from '$lib/events/fetch-attendees';
 
 export async function GET({ params, platform, request }) {

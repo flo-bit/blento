@@ -20,7 +20,7 @@
 		<Popover sideOffset={8} bind:open={settingsPopoverOpen} class="bg-base-100 dark:bg-base-900">
 			{#snippet child({ props })}
 				<button {...props}>
-					<Avatar src={user.profile?.avatar} alt="" class="size-15 rounded-full" />
+					<Avatar src={user.profile?.avatar} alt="" class="size-15 cursor-pointer rounded-full" />
 				</button>
 			{/snippet}
 
