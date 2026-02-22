@@ -1,4 +1,3 @@
-import { listRecords } from '$lib/atproto';
 import type { CardDefinition } from '../../types';
 import UpcomingEventsCard from './UpcomingEventsCard.svelte';
 import type { Did } from '@atcute/lexicons';
@@ -19,6 +18,7 @@ export const UpcomingEventsCardDefinition = {
 	minH: 3,
 
 	loadData: async (_items, { did }) => {
+		const { listRecords } = await import('$lib/atproto/methods');
 		const records = await listRecords({
 			did: did as Did,
 			collection: EVENT_COLLECTION,

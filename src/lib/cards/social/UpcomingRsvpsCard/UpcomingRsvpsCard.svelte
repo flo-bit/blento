@@ -3,7 +3,7 @@
 	import { Badge } from '@foxui/core';
 	import { getAdditionalUserData, getDidContext, getHandleContext } from '$lib/website/context';
 	import type { ContentComponentProps } from '../../types';
-	import { CardDefinitionsByType } from '../..';
+	import { UpcomingRsvpsCardDefinition } from '.';
 	import type { ResolvedRsvp } from '$lib/events/fetch-attendees';
 	import { qrOverlay } from '$lib/components/qr/qrOverlay.svelte';
 
@@ -20,7 +20,7 @@
 
 	onMount(async () => {
 		try {
-			const loaded = await CardDefinitionsByType[item.cardType]?.loadData?.([item], {
+			const loaded = await UpcomingRsvpsCardDefinition.loadData?.([item], {
 				did,
 				handle
 			});
