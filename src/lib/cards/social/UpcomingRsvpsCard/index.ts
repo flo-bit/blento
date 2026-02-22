@@ -1,4 +1,3 @@
-import { fetchUserRsvps } from '$lib/events/fetch-attendees';
 import type { CardDefinition } from '../../types';
 import UpcomingRsvpsCard from './UpcomingRsvpsCard.svelte';
 import type { ResolvedRsvp } from '$lib/events/fetch-attendees';
@@ -18,6 +17,7 @@ export const UpcomingRsvpsCardDefinition = {
 	minH: 3,
 
 	loadData: async (_items, { did, cache }) => {
+		const { fetchUserRsvps } = await import('$lib/events/fetch-attendees');
 		const rsvps = await fetchUserRsvps(did, cache);
 
 		const now = new Date();
