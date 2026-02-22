@@ -412,6 +412,7 @@
 			const s = new Date(startsAt);
 			const e = new Date(endsAt);
 			if (s >= e) {
+				// eslint-disable-next-line svelte/prefer-svelte-reactivity -- temporary local, not reactive state
 				const adjusted = new Date(s);
 				adjusted.setHours(adjusted.getHours() + 1);
 				endsAt = isoToDatetimeLocal(adjusted.toISOString());

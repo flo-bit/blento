@@ -14,7 +14,6 @@
 	const did = getDidContext();
 	const handle = getHandleContext();
 
-	// svelte-ignore state_referenced_locally
 	let rsvps = $state<ResolvedRsvp[]>(
 		((data['upcomingRsvps'] as { rsvps?: ResolvedRsvp[] })?.rsvps ?? []) as ResolvedRsvp[]
 	);
@@ -55,20 +54,6 @@
 			hour: 'numeric',
 			minute: '2-digit'
 		});
-	}
-
-	function getModeLabel(mode: string): string {
-		if (mode.includes('virtual')) return 'Virtual';
-		if (mode.includes('hybrid')) return 'Hybrid';
-		if (mode.includes('inperson')) return 'In-Person';
-		return 'Event';
-	}
-
-	function getModeColor(mode: string): string {
-		if (mode.includes('virtual')) return 'blue';
-		if (mode.includes('hybrid')) return 'purple';
-		if (mode.includes('inperson')) return 'green';
-		return 'gray';
 	}
 </script>
 

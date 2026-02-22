@@ -24,7 +24,6 @@
 
 	type EventWithRkey = EventData & { rkey: string };
 
-	// svelte-ignore state_referenced_locally
 	let events = $state<EventWithRkey[]>(
 		((data['upcomingEvents'] as { events?: EventWithRkey[] })?.events ?? []) as EventWithRkey[]
 	);
@@ -164,11 +163,7 @@
 						stroke="currentColor"
 						class="size-4"
 					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							d="M12 4.5v15m7.5-7.5h-15"
-						/>
+						<path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
 					</svg>
 				</a>
 			</div>
