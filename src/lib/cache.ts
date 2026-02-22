@@ -12,6 +12,7 @@ const NAMESPACE_TTL = {
 	lastfm: 60 * 60, // 1 hour (default, overridable per-put)
 	npmx: 60 * 60 * 12, // 12 hours
 	profile: 60 * 60 * 24, // 24 hours
+	ical: 60 * 60 * 2, // 2 hours
 	meta: 0 // no auto-expiry
 } as const;
 
