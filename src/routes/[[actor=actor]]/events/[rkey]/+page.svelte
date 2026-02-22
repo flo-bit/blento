@@ -217,7 +217,7 @@
 
 		<!-- Two-column layout: image left, details right -->
 		<div
-			class="grid grid-cols-1 gap-8 md:grid-cols-[14rem_1fr] md:gap-x-10 md:gap-y-6 lg:grid-cols-[16rem_1fr]"
+			class="grid grid-cols-1 gap-8 md:grid-cols-[14rem_1fr] md:grid-rows-[auto_1fr] md:gap-x-10 md:gap-y-6 lg:grid-cols-[16rem_1fr]"
 		>
 			<!-- Thumbnail image (left column) -->
 			{#if !isBannerOnly}
@@ -245,7 +245,7 @@
 			{/if}
 
 			<!-- Right column: event details -->
-			<div class="order-2 min-w-0 md:order-0 md:col-start-2 md:row-span-5 md:row-start-1">
+			<div class="order-2 min-w-0 md:order-0 md:col-start-2 md:row-span-2 md:row-start-1">
 				<div class="mb-2 flex items-start justify-between gap-4">
 					<h1 class="text-base-900 dark:text-base-50 text-4xl leading-tight font-bold sm:text-5xl">
 						{eventData.name}
@@ -337,76 +337,77 @@
 						>
 							About
 						</p>
-						<p class="text-base-700 dark:text-base-300 leading-relaxed">
+						<p class="text-base-700 dark:text-base-300 leading-relaxed wrap-break-word">
 							{@html descriptionHtml}
 						</p>
 					</div>
 				{/if}
 			</div>
 
-			<!-- Hosted By -->
-			<div class="order-3 md:order-0 md:col-start-1">
-				<p
-					class="text-base-500 dark:text-base-400 mb-3 text-xs font-semibold tracking-wider uppercase"
-				>
-					Hosted By
-				</p>
-				<a
-					href={hostUrl}
-					target={hostProfile?.hasBlento ? undefined : '_blank'}
-					rel={hostProfile?.hasBlento ? undefined : 'noopener noreferrer'}
-					class="text-base-900 dark:text-base-100 flex items-center gap-2.5 font-medium hover:underline"
-				>
-					<FoxAvatar
-						src={hostProfile?.avatar}
-						alt={hostProfile?.displayName || hostProfile?.handle || did}
-						class="size-8 shrink-0"
-					/>
-					<span class="truncate text-sm">
-						{hostProfile?.displayName || hostProfile?.handle || did}
-					</span>
-				</a>
-			</div>
-
-			{#if eventData.uris && eventData.uris.length > 0}
-				<!-- Links -->
-				<div class="order-5 md:order-0 md:col-start-1">
+			<!-- Left column: sidebar info -->
+			<div class="order-3 space-y-6 md:order-0 md:col-start-1">
+				<!-- Hosted By -->
+				<div>
 					<p
-						class="text-base-500 dark:text-base-400 mb-4 text-xs font-semibold tracking-wider uppercase"
+						class="text-base-500 dark:text-base-400 mb-3 text-xs font-semibold tracking-wider uppercase"
 					>
-						Links
+						Hosted By
 					</p>
-					<div class="space-y-3">
-						{#each eventData.uris as link (link.name + link.uri)}
-							<a
-								href={link.uri}
-								target="_blank"
-								rel="noopener noreferrer"
-								class="text-base-700 dark:text-base-300 hover:text-base-900 dark:hover:text-base-100 flex items-center gap-1.5 text-sm transition-colors"
-							>
-								<svg
-									xmlns="http://www.w3.org/2000/svg"
-									fill="none"
-									viewBox="0 0 24 24"
-									stroke-width="1.5"
-									stroke="currentColor"
-									class="size-3.5 shrink-0"
-								>
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244"
-									/>
-								</svg>
-								<span class="truncate">{link.name || link.uri.replace(/^https?:\/\//, '')}</span>
-							</a>
-						{/each}
-					</div>
+					<a
+						href={hostUrl}
+						target={hostProfile?.hasBlento ? undefined : '_blank'}
+						rel={hostProfile?.hasBlento ? undefined : 'noopener noreferrer'}
+						class="text-base-900 dark:text-base-100 flex items-center gap-2.5 font-medium hover:underline"
+					>
+						<FoxAvatar
+							src={hostProfile?.avatar}
+							alt={hostProfile?.displayName || hostProfile?.handle || did}
+							class="size-8 shrink-0"
+						/>
+						<span class="truncate text-sm">
+							{hostProfile?.displayName || hostProfile?.handle || did}
+						</span>
+					</a>
 				</div>
-			{/if}
 
-			<!-- Add to Calendar -->
-			<div class="order-5 md:order-0 md:col-start-1">
+				{#if eventData.uris && eventData.uris.length > 0}
+					<!-- Links -->
+					<div>
+						<p
+							class="text-base-500 dark:text-base-400 mb-4 text-xs font-semibold tracking-wider uppercase"
+						>
+							Links
+						</p>
+						<div class="space-y-3">
+							{#each eventData.uris as link (link.name + link.uri)}
+								<a
+									href={link.uri}
+									target="_blank"
+									rel="noopener noreferrer"
+									class="text-base-700 dark:text-base-300 hover:text-base-900 dark:hover:text-base-100 flex items-center gap-1.5 text-sm transition-colors"
+								>
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										fill="none"
+										viewBox="0 0 24 24"
+										stroke-width="1.5"
+										stroke="currentColor"
+										class="size-3.5 shrink-0"
+									>
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244"
+										/>
+									</svg>
+									<span class="truncate">{link.name || link.uri.replace(/^https?:\/\//, '')}</span>
+								</a>
+							{/each}
+						</div>
+					</div>
+				{/if}
+
+				<!-- Add to Calendar -->
 				<button
 					onclick={downloadIcs}
 					class="text-base-700 dark:text-base-300 hover:text-base-900 dark:hover:text-base-100 flex cursor-pointer items-center gap-2 text-sm font-medium transition-colors"
@@ -427,10 +428,8 @@
 					</svg>
 					Add to Calendar
 				</button>
-			</div>
 
-			<!-- Attendees -->
-			<div class="order-5 md:order-0 md:col-start-1">
+				<!-- Attendees -->
 				<EventAttendees bind:this={attendeesRef} {eventUri} />
 			</div>
 

@@ -166,7 +166,7 @@
 	</div>
 {/if}
 
-<Modal bind:open={modalOpen} closeButton onOpenAutoFocus={(e) => e.preventDefault()} class="p-0">
+<Modal bind:open={modalOpen} closeButton onOpenAutoFocus={(e: Event) => e.preventDefault()} class="p-0">
 	<p class="text-base-900 dark:text-base-50 px-4 pt-4 text-lg font-semibold">
 		{modalTitle}
 		<span class="text-base-500 dark:text-base-400 text-sm font-normal">

@@ -13,6 +13,8 @@ const NAMESPACE_TTL = {
 	npmx: 60 * 60 * 12, // 12 hours
 	profile: 60 * 60 * 24, // 24 hours
 	ical: 60 * 60 * 2, // 2 hours
+	events: 60 * 60, // 1 hour
+	rsvps: 60 * 60, // 1 hour
 	meta: 0 // no auto-expiry
 } as const;
 

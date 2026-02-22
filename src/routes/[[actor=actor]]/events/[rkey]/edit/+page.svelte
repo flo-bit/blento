@@ -564,6 +564,7 @@
 					user.profile?.handle && user.profile.handle !== 'handle.invalid'
 						? user.profile.handle
 						: user.did;
+				fetch(`/${handle}/events/api/refresh`).catch(() => {});
 				goto(`/${handle}/events/${rkey}`);
 			} else {
 				error = `Failed to ${isNew ? 'create' : 'save'} event. Please try again.`;
@@ -592,6 +593,7 @@
 				user.profile?.handle && user.profile.handle !== 'handle.invalid'
 					? user.profile.handle
 					: user.did;
+			fetch(`/${handle}/events/api/refresh`).catch(() => {});
 			goto(`/${handle}/events`);
 		} catch (e) {
 			console.error('Failed to delete event:', e);
@@ -1165,22 +1167,12 @@
 								>
 									Cancel
 								</Button>
-								<Button
-									size="sm"
-									onclick={handleDelete}
-									disabled={deleting}
-									variant="red"
-								>
+								<Button size="sm" onclick={handleDelete} disabled={deleting} variant="red">
 									{deleting ? 'Deleting...' : 'Delete'}
 								</Button>
 							</div>
 						{:else}
-							<Button
-								variant="red"
-								onclick={() => (showDeleteConfirm = true)}
-							>
-								Delete event
-							</Button>
+							<Button variant="red" onclick={() => (showDeleteConfirm = true)}>Delete event</Button>
 						{/if}
 					</div>
 				{/if}

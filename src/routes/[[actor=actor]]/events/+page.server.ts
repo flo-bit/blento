@@ -15,6 +15,16 @@ export async function load({ params, platform, request }) {
 	}
 
 	try {
+		// Try cache first
+		if (cache) {
+			const cached = await cache.getJSON<{
+				events: (EventData & { rkey: string })[];
+				did: string;
+				hostProfile: CachedProfile | null;
+			}>('events', did);
+			if (cached) return cached;
+		}
+
 		const [records, hostProfile] = await Promise.all([
 			listRecords({
 				did: did as Did,
@@ -42,11 +52,18 @@ export async function load({ params, platform, request }) {
 			rkey: r.uri.split('/').pop() as string
 		}));
 
-		return {
+		const result = {
 			events,
 			did,
 			hostProfile: hostProfile ?? null
 		};
+
+		// Cache the result
+		if (cache) {
+			await cache.putJSON('events', did, result).catch(() => {});
+		}
+
+		return result;
 	} catch (e) {
 		if (e && typeof e === 'object' && 'status' in e) throw e;
 		throw error(404, 'Events not found');

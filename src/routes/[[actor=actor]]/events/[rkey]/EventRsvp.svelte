@@ -94,6 +94,7 @@
 				rsvpStatus = status;
 				rsvpRkey = key;
 				onrsvp?.(status);
+				refreshRsvpCache();
 			}
 		} catch (e) {
 			console.error('Failed to submit RSVP:', e);
@@ -113,10 +114,21 @@
 			rsvpStatus = null;
 			rsvpRkey = null;
 			oncancel?.();
+			refreshRsvpCache();
 		} catch (e) {
 			console.error('Failed to cancel RSVP:', e);
 		} finally {
 			rsvpSubmitting = false;
+		}
+	}
+
+	function refreshRsvpCache() {
+		const handle =
+			user.profile?.handle && user.profile.handle !== 'handle.invalid'
+				? user.profile.handle
+				: user.did;
+		if (handle) {
+			fetch(`/${handle}/rsvp/api/refresh`).catch(() => {});
 		}
 	}
 </script>
