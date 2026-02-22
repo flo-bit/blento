@@ -8,7 +8,7 @@
 		getIsMobile
 	} from '$lib/website/context';
 	import type { ContentComponentProps } from '../../types';
-	import { CardDefinitionsByType } from '../..';
+	import { UpcomingEventsCardDefinition } from '.';
 	import type { EventData } from '../EventCard';
 	import { user } from '$lib/atproto';
 	import { qrOverlay } from '$lib/components/qr/qrOverlay.svelte';
@@ -30,7 +30,7 @@
 
 	onMount(async () => {
 		try {
-			const loaded = await CardDefinitionsByType[item.cardType]?.loadData?.([item], {
+			const loaded = await UpcomingEventsCardDefinition.loadData?.([item], {
 				did,
 				handle
 			});
@@ -86,7 +86,7 @@
 	async function refreshEvents() {
 		isRefreshing = true;
 		try {
-			const loaded = await CardDefinitionsByType[item.cardType]?.loadData?.([item], {
+			const loaded = await UpcomingEventsCardDefinition.loadData?.([item], {
 				did,
 				handle
 			});
