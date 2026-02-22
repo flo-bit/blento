@@ -22,7 +22,7 @@ export async function load({ params, platform, request }) {
 				did: did as Did,
 				collection: 'community.lexicon.calendar.event',
 				rkey
-			}),
+			}).catch(() => null),
 			cache
 				? cache.getProfile(did as Did).catch(() => null)
 				: getBlentoOrBskyProfile({ did: did as Did })
@@ -40,7 +40,13 @@ export async function load({ params, platform, request }) {
 		]);
 
 		if (!eventRecord?.value) {
-			throw error(404, 'Event not found');
+			return {
+				eventData: null,
+				did,
+				rkey,
+				hostProfile: hostProfile ?? null,
+				eventCid: null
+			};
 		}
 
 		const eventData: EventData = eventRecord.value as EventData;

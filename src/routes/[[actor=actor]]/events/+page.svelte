@@ -4,6 +4,8 @@
 	import { user } from '$lib/atproto/auth.svelte';
 	import { Avatar as FoxAvatar, Badge, Button } from '@foxui/core';
 	import Avatar from 'svelte-boring-avatars';
+	import * as TID from '@atcute/tid';
+	import { goto } from '$app/navigation';
 
 	let { data } = $props();
 
@@ -110,7 +112,17 @@
 				</div>
 			</div>
 			{#if isOwner}
-				<Button href="./events/new" variant="primary">New event</Button>
+				<Button
+					variant="primary"
+					onclick={() => {
+						const rkey = TID.now();
+						const handle =
+							user.profile?.handle && user.profile.handle !== 'handle.invalid'
+								? user.profile.handle
+								: user.did;
+						goto(`/${handle}/events/${rkey}/edit`);
+					}}>New event</Button
+				>
 			{/if}
 		</div>
 

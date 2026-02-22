@@ -251,7 +251,7 @@
 						{eventData.name}
 					</h1>
 					{#if isOwner}
-						<Button href="./edit" size="sm" class="shrink-0">Edit</Button>
+						<Button href="./{rkey}/edit" size="sm" class="shrink-0">Edit</Button>
 					{/if}
 				</div>
 

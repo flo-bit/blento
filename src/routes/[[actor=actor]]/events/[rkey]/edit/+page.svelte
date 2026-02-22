@@ -1,10 +1,20 @@
 <script lang="ts">
 	import { user } from '$lib/atproto/auth.svelte';
 	import { loginModalState } from '$lib/atproto/UI/LoginModal.svelte';
-	import { uploadBlob, putRecord, resolveHandle } from '$lib/atproto/methods';
+	import { uploadBlob, putRecord, deleteRecord, resolveHandle } from '$lib/atproto/methods';
 	import { getCDNImageBlobUrl } from '$lib/atproto';
 	import { compressImage } from '$lib/atproto/image-helper';
-	import { Avatar as FoxAvatar, Badge, Button, ToggleGroup, ToggleGroupItem } from '@foxui/core';
+	import { validateLink } from '$lib/helper';
+	import {
+		Avatar as FoxAvatar,
+		Button,
+		PopoverRoot,
+		PopoverTrigger,
+		PopoverContent,
+		ToggleGroup,
+		ToggleGroupItem,
+		Input
+	} from '@foxui/core';
 	import { goto } from '$app/navigation';
 	import { tokenize, type Token } from '@atcute/bluesky-richtext-parser';
 	import type { Handle } from '@atcute/lexicons';
@@ -12,10 +22,13 @@
 	import { browser } from '$app/environment';
 	import { putImage, getImage, deleteImage } from '$lib/components/image-store';
 	import Modal from '$lib/components/modal/Modal.svelte';
+	import Avatar from 'svelte-boring-avatars';
+	import DateTimePicker from '$lib/components/DateTimePicker.svelte';
 
 	let { data } = $props();
 
 	let rkey: string = $derived(data.rkey);
+	let isNew = $derived(data.eventData === null);
 	let DRAFT_KEY = $derived(`blento-event-edit-${rkey}`);
 
 	type EventMode = 'inperson' | 'virtual' | 'hybrid';
@@ -52,6 +65,7 @@
 	let thumbnailPreview: string | null = $state(null);
 	let submitting = $state(false);
 	let error: string | null = $state(null);
+	let titleEl: HTMLTextAreaElement | undefined = $state(undefined);
 
 	let location: EventLocation | null = $state(null);
 	let locationChanged = $state(false);
@@ -62,11 +76,12 @@
 	let locationResult: { displayName: string; location: EventLocation } | null = $state(null);
 
 	let links: Array<{ uri: string; name: string }> = $state([]);
+	let editingDates = $state(false);
 	let showLinkPopup = $state(false);
 	let newLinkUri = $state('');
 	let newLinkName = $state('');
+	let linkError = $state('');
 
-	let hasDraft = $state(false);
 	let draftLoaded = $state(false);
 
 	function isoToDatetimeLocal(iso: string): string {
@@ -81,16 +96,9 @@
 		return 'inperson';
 	}
 
-	function populateFromEventData() {
+	function populateLocationFromEventData() {
 		const eventData = data.eventData;
-		name = eventData.name || '';
-		description = eventData.description || '';
-		startsAt = eventData.startsAt ? isoToDatetimeLocal(eventData.startsAt) : '';
-		endsAt = eventData.endsAt ? isoToDatetimeLocal(eventData.endsAt) : '';
-		mode = eventData.mode ? stripModePrefix(eventData.mode) : 'inperson';
-		links = eventData.uris ? eventData.uris.map((l) => ({ uri: l.uri, name: l.name || '' })) : [];
-
-		// Load existing location
+		if (!eventData) return;
 		if (eventData.locations && eventData.locations.length > 0) {
 			const loc = eventData.locations.find((v) => v.$type === 'community.lexicon.location.address');
 			if (loc) {
@@ -109,8 +117,11 @@
 			}
 		}
 		locationChanged = false;
+	}
 
-		// Load existing thumbnail from CDN
+	function populateThumbnailFromEventData() {
+		const eventData = data.eventData;
+		if (!eventData) return;
 		if (eventData.media && eventData.media.length > 0) {
 			const media = eventData.media.find((m) => m.role === 'thumbnail');
 			if (media?.content) {
@@ -123,7 +134,29 @@
 		}
 	}
 
+	function populateFromEventData() {
+		const eventData = data.eventData;
+		if (!eventData) return;
+		name = eventData.name || '';
+		description = eventData.description || '';
+		startsAt = eventData.startsAt ? isoToDatetimeLocal(eventData.startsAt) : '';
+		endsAt = eventData.endsAt ? isoToDatetimeLocal(eventData.endsAt) : '';
+		mode = eventData.mode ? stripModePrefix(eventData.mode) : 'inperson';
+		links = eventData.uris ? eventData.uris.map((l) => ({ uri: l.uri, name: l.name || '' })) : [];
+		populateLocationFromEventData();
+		populateThumbnailFromEventData();
+	}
+
 	onMount(async () => {
+		// Migrate old creation draft if this is a new event
+		if (isNew) {
+			const oldDraft = localStorage.getItem('blento-event-draft');
+			if (oldDraft && !localStorage.getItem(DRAFT_KEY)) {
+				localStorage.setItem(DRAFT_KEY, oldDraft);
+				localStorage.removeItem('blento-event-draft');
+			}
+		}
+
 		const saved = localStorage.getItem(DRAFT_KEY);
 		if (saved) {
 			try {
@@ -137,6 +170,9 @@
 				locationChanged = draft.locationChanged || false;
 				if (draft.locationChanged) {
 					location = draft.location || null;
+				} else if (!isNew) {
+					// For edits without location changes, load from event data
+					populateLocationFromEventData();
 				}
 				thumbnailChanged = draft.thumbnailChanged || false;
 
@@ -148,32 +184,20 @@
 						thumbnailPreview = URL.createObjectURL(img.blob);
 						thumbnailChanged = true;
 					}
-				} else if (!thumbnailChanged) {
+				} else if (!thumbnailChanged && !isNew) {
 					// No new thumbnail in draft, show existing one from event data
-					if (data.eventData.media && data.eventData.media.length > 0) {
-						const media = data.eventData.media.find((m) => m.role === 'thumbnail');
-						if (media?.content) {
-							const url = getCDNImageBlobUrl({
-								did: data.did,
-								blob: media.content,
-								type: 'jpeg'
-							});
-							if (url) {
-								thumbnailPreview = url;
-							}
-						}
-					}
+					populateThumbnailFromEventData();
 				}
-
-				hasDraft = true;
 			} catch {
 				localStorage.removeItem(DRAFT_KEY);
-				populateFromEventData();
+				if (!isNew) populateFromEventData();
 			}
-		} else {
+		} else if (!isNew) {
 			populateFromEventData();
 		}
 		draftLoaded = true;
+		if (!startsAt) editingDates = true;
+		titleEl?.focus();
 	});
 
 	let saveDraftTimeout: ReturnType<typeof setTimeout> | undefined;
@@ -195,7 +219,6 @@
 			if (locationChanged) draft.location = location;
 			if (thumbnailKey) draft.thumbnailKey = thumbnailKey;
 			localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
-			hasDraft = true;
 		}, 500);
 	}
 
@@ -212,15 +235,6 @@
 		];
 		saveDraft();
 	});
-
-	function deleteDraft() {
-		localStorage.removeItem(DRAFT_KEY);
-		if (thumbnailKey) deleteImage(thumbnailKey);
-		thumbnailKey = null;
-		thumbnailChanged = false;
-		populateFromEventData();
-		hasDraft = false;
-	}
 
 	async function searchLocation() {
 		const q = locationSearch.trim();
@@ -281,11 +295,17 @@
 	}
 
 	function addLink() {
-		const uri = newLinkUri.trim();
-		if (!uri) return;
+		const raw = newLinkUri.trim();
+		if (!raw) return;
+		const uri = validateLink(raw);
+		if (!uri) {
+			linkError = 'Please enter a valid URL';
+			return;
+		}
 		links.push({ uri, name: newLinkName.trim() });
 		newLinkUri = '';
 		newLinkName = '';
+		linkError = '';
 		showLinkPopup = false;
 	}
 
@@ -386,6 +406,19 @@
 			startDate.getDate() === endDate.getDate()
 	);
 
+	// Auto-adjust end date if start moves past it
+	$effect(() => {
+		if (startsAt && endsAt) {
+			const s = new Date(startsAt);
+			const e = new Date(endsAt);
+			if (s >= e) {
+				const adjusted = new Date(s);
+				adjusted.setHours(adjusted.getHours() + 1);
+				endsAt = isoToDatetimeLocal(adjusted.toISOString());
+			}
+		}
+	});
+
 	async function tokensToFacets(tokens: Token[]): Promise<Record<string, unknown>[]> {
 		const encoder = new TextEncoder();
 		const facets: Record<string, unknown>[] = [];
@@ -447,7 +480,7 @@
 		try {
 			let media: Array<Record<string, unknown>> | undefined;
 
-			if (thumbnailChanged) {
+			if (isNew || thumbnailChanged) {
 				if (thumbnailFile) {
 					const compressed = await compressImage(thumbnailFile);
 					const blobRef = await uploadBlob({ blob: compressed.blob });
@@ -464,17 +497,18 @@
 						];
 					}
 				}
-				// If thumbnailChanged but no thumbnailFile, media stays undefined (thumbnail removed)
+				// If changed/new but no thumbnailFile, media stays undefined (thumbnail removed/absent)
 			} else {
 				// Thumbnail not changed — reuse original media from eventData
-				if (data.eventData.media && data.eventData.media.length > 0) {
+				if (data.eventData?.media && data.eventData.media.length > 0) {
 					media = data.eventData.media as Array<Record<string, unknown>>;
 				}
 			}
 
-			// Preserve original createdAt
-			const originalCreatedAt =
-				(data.eventData as Record<string, unknown>).createdAt || new Date().toISOString();
+			const createdAt = isNew
+				? new Date().toISOString()
+				: ((data.eventData as Record<string, unknown>)?.createdAt as string) ||
+					new Date().toISOString();
 
 			const record: Record<string, unknown> = {
 				$type: 'community.lexicon.calendar.event',
@@ -482,7 +516,7 @@
 				mode: `community.lexicon.calendar.event#${mode}`,
 				status: 'community.lexicon.calendar.event#scheduled',
 				startsAt: new Date(startsAt).toISOString(),
-				createdAt: originalCreatedAt
+				createdAt
 			};
 
 			const trimmedDescription = description.trim();
@@ -503,7 +537,7 @@
 			if (links.length > 0) {
 				record.uris = links;
 			}
-			if (locationChanged) {
+			if (isNew || locationChanged) {
 				if (location) {
 					record.locations = [
 						{
@@ -512,8 +546,8 @@
 						}
 					];
 				}
-				// If locationChanged but no location, locations stays undefined (removed)
-			} else if (data.eventData.locations && data.eventData.locations.length > 0) {
+				// If changed/new but no location, locations stays undefined (removed/absent)
+			} else if (data.eventData?.locations && data.eventData.locations.length > 0) {
 				record.locations = data.eventData.locations;
 			}
 
@@ -532,19 +566,45 @@
 						: user.did;
 				goto(`/${handle}/events/${rkey}`);
 			} else {
-				error = 'Failed to save event. Please try again.';
+				error = `Failed to ${isNew ? 'create' : 'save'} event. Please try again.`;
 			}
 		} catch (e) {
-			console.error('Failed to save event:', e);
-			error = 'Failed to save event. Please try again.';
+			console.error(`Failed to ${isNew ? 'create' : 'save'} event:`, e);
+			error = `Failed to ${isNew ? 'create' : 'save'} event. Please try again.`;
 		} finally {
 			submitting = false;
+		}
+	}
+
+	let showDeleteConfirm = $state(false);
+	let deleting = $state(false);
+
+	async function handleDelete() {
+		deleting = true;
+		try {
+			await deleteRecord({
+				collection: 'community.lexicon.calendar.event',
+				rkey
+			});
+			localStorage.removeItem(DRAFT_KEY);
+			if (thumbnailKey) deleteImage(thumbnailKey);
+			const handle =
+				user.profile?.handle && user.profile.handle !== 'handle.invalid'
+					? user.profile.handle
+					: user.did;
+			goto(`/${handle}/events`);
+		} catch (e) {
+			console.error('Failed to delete event:', e);
+			error = 'Failed to delete event. Please try again.';
+		} finally {
+			deleting = false;
+			showDeleteConfirm = false;
 		}
 	}
 </script>
 
 <svelte:head>
-	<title>Edit Event</title>
+	<title>{isNew ? 'Create Event' : 'Edit Event'}</title>
 </svelte:head>
 
 <div class="min-h-screen px-6 py-12 sm:py-12">
@@ -558,23 +618,12 @@
 			<div
 				class="border-base-200 dark:border-base-800 bg-base-100 dark:bg-base-900/50 rounded-2xl border p-8 text-center"
 			>
-				<p class="text-base-600 dark:text-base-400 mb-4">Log in to edit this event.</p>
+				<p class="text-base-600 dark:text-base-400 mb-4">
+					Log in to {isNew ? 'create an event' : 'edit this event'}.
+				</p>
 				<Button onclick={() => loginModalState.show()}>Log in</Button>
 			</div>
 		{:else}
-			<div class="mb-6 flex items-center gap-3">
-				<Badge size="sm">Local edit</Badge>
-				{#if hasDraft}
-					<button
-						type="button"
-						onclick={deleteDraft}
-						class="text-base-500 dark:text-base-400 cursor-pointer text-xs hover:text-red-500 hover:underline"
-					>
-						Discard changes
-					</button>
-				{/if}
-			</div>
-
 			<form
 				onsubmit={(e) => {
 					e.preventDefault();
@@ -600,39 +649,32 @@
 							onchange={onFileChange}
 							class="hidden"
 						/>
-						{#if thumbnailPreview}
-							<div class="relative">
-								<button type="button" onclick={() => fileInput?.click()} class="w-full">
-									<img
-										src={thumbnailPreview}
-										alt="Thumbnail preview"
-										class="border-base-200 dark:border-base-800 aspect-square w-full cursor-pointer rounded-2xl border object-cover"
-									/>
-								</button>
-								<button
-									type="button"
-									onclick={removeThumbnail}
-									aria-label="Remove thumbnail"
-									class="bg-base-900/70 absolute top-2 right-2 flex size-7 items-center justify-center rounded-full text-white hover:bg-red-600"
+						<div class="group relative">
+							{#if thumbnailPreview}
+								<img
+									src={thumbnailPreview}
+									alt="Thumbnail preview"
+									class="border-base-200 dark:border-base-800 aspect-square w-full rounded-2xl border object-cover"
+								/>
+							{:else}
+								<div
+									class="bg-base-100 dark:bg-base-900 aspect-square w-full overflow-hidden rounded-2xl [&>svg]:h-full [&>svg]:w-full"
 								>
-									<svg
-										xmlns="http://www.w3.org/2000/svg"
-										viewBox="0 0 20 20"
-										fill="currentColor"
-										class="size-4"
-									>
-										<path
-											d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z"
-										/>
-									</svg>
-								</button>
-							</div>
-						{:else}
+									<Avatar
+										size={400}
+										name={rkey}
+										variant="marble"
+										colors={['#92A1C6', '#146A7C', '#F0AB3D', '#C271B4', '#C20D90']}
+										square
+									/>
+								</div>
+							{/if}
+							<!-- Upload overlay on hover -->
 							<button
 								type="button"
 								onclick={() => fileInput?.click()}
-								class="border-base-300 dark:border-base-700 hover:border-base-400 dark:hover:border-base-600 text-base-500 dark:text-base-400 flex aspect-square w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed transition-colors {isDragOver
-									? 'border-accent-500 bg-accent-50 dark:bg-accent-950 text-accent-500'
+								class="absolute inset-0 flex cursor-pointer flex-col items-center justify-center gap-1.5 rounded-2xl bg-black/0 text-white/0 transition-colors group-hover:bg-black/40 group-hover:text-white/90 {isDragOver
+									? 'bg-black/40 text-white/90'
 									: ''}"
 							>
 								<svg
@@ -641,7 +683,7 @@
 									viewBox="0 0 24 24"
 									stroke-width="1.5"
 									stroke="currentColor"
-									class="mb-1 size-6"
+									class="size-6"
 								>
 									<path
 										stroke-linecap="round"
@@ -649,21 +691,52 @@
 										d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0 0 22.5 18.75V5.25A2.25 2.25 0 0 0 20.25 3H3.75A2.25 2.25 0 0 0 1.5 5.25v13.5A2.25 2.25 0 0 0 3.75 21Z"
 									/>
 								</svg>
-								<span class="text-sm">Add image</span>
+								<span class="text-sm font-medium">Upload thumbnail</span>
 							</button>
-						{/if}
+							{#if thumbnailPreview}
+								<Button
+									variant="ghost"
+									size="iconSm"
+									onclick={removeThumbnail}
+									class="bg-base-900/70 absolute top-2 right-2 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-red-600"
+								>
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										viewBox="0 0 20 20"
+										fill="currentColor"
+										class="size-3.5"
+									>
+										<path
+											d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z"
+										/>
+									</svg>
+								</Button>
+							{/if}
+						</div>
 					</div>
 
 					<!-- Right column: event details -->
 					<div class="order-2 min-w-0 md:order-0 md:col-start-2 md:row-span-5 md:row-start-1">
-						<!-- Name -->
-						<input
-							type="text"
-							bind:value={name}
-							required
-							placeholder="Event name"
-							class="text-base-900 dark:text-base-50 placeholder:text-base-300 dark:placeholder:text-base-700 mb-2 w-full border-0 bg-transparent text-4xl leading-tight font-bold focus:border-0 focus:ring-0 focus:outline-none sm:text-5xl"
-						/>
+						<!-- Name + Save button -->
+						<div class="mb-2 flex items-start justify-between gap-4">
+							<textarea
+								bind:this={titleEl}
+								bind:value={name}
+								required
+								placeholder="Event name"
+								rows={1}
+								class="text-base-900 dark:text-base-50 placeholder:text-base-500 dark:placeholder:text-base-500 w-full min-w-0 resize-none border-0 bg-transparent px-0 text-4xl leading-tight font-bold focus:border-0 focus:ring-0 focus:outline-none sm:text-5xl"
+								style="field-sizing: content;"
+							></textarea>
+							<Button
+								type="submit"
+								size="sm"
+								class="shrink-0"
+								disabled={submitting || !name.trim() || !startsAt}
+							>
+								{submitting ? (isNew ? 'Creating...' : 'Saving...') : isNew ? 'Create' : 'Save'}
+							</Button>
+						</div>
 
 						<!-- Mode toggle -->
 						<div class="mb-8">
@@ -686,9 +759,9 @@
 						</div>
 
 						<!-- Date row -->
-						<div class="mb-4 flex items-center gap-4">
+						<div class="mb-4 flex items-start gap-4">
 							<div
-								class="border-base-200 dark:border-base-700 flex size-12 shrink-0 flex-col items-center justify-center overflow-hidden rounded-xl border"
+								class="border-base-200 dark:border-base-700 bg-base-100 dark:bg-base-950/30 flex size-12 shrink-0 flex-col items-center justify-center overflow-hidden rounded-xl border"
 							>
 								{#if startDate}
 									<span
@@ -706,7 +779,7 @@
 										viewBox="0 0 24 24"
 										stroke-width="1.5"
 										stroke="currentColor"
-										class="text-base-400 dark:text-base-500 size-5"
+										class="text-base-900 dark:text-base-200 size-5"
 									>
 										<path
 											stroke-linecap="round"
@@ -717,39 +790,127 @@
 								{/if}
 							</div>
 							<div class="flex-1">
-								{#if startDate}
-									<p class="text-base-900 dark:text-base-50 font-semibold">
-										{formatWeekday(startDate)}, {formatFullDate(startDate)}
-										{#if endDate && !isSameDay}
-											- {formatWeekday(endDate)}, {formatFullDate(endDate)}
+								{#if startDate && !editingDates}
+									<!-- Display mode: show formatted date, click to edit -->
+									<div class="flex items-start gap-2">
+										<button
+											type="button"
+											onclick={() => (editingDates = true)}
+											class="cursor-pointer text-left"
+										>
+											<p class="text-base-900 dark:text-base-50 font-semibold">
+												{formatWeekday(startDate)}, {formatFullDate(startDate)}
+												{#if endDate && !isSameDay}
+													- {formatWeekday(endDate)}, {formatFullDate(endDate)}
+												{/if}
+											</p>
+											<p class="text-base-500 dark:text-base-400 text-sm">
+												{formatTime(startDate)}
+												{#if endDate && isSameDay}
+													- {formatTime(endDate)}
+												{/if}
+											</p>
+										</button>
+										<Button variant="ghost" size="iconSm" onclick={() => (editingDates = true)}>
+											<svg
+												xmlns="http://www.w3.org/2000/svg"
+												fill="none"
+												viewBox="0 0 24 24"
+												stroke-width="1.5"
+												stroke="currentColor"
+												class="size-3.5"
+											>
+												<path
+													stroke-linecap="round"
+													stroke-linejoin="round"
+													d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125"
+												/>
+											</svg>
+										</Button>
+									</div>
+								{:else}
+									<!-- Edit mode: show pickers -->
+									<div class="flex flex-col gap-2">
+										<div class="flex items-center gap-2">
+											{#if endsAt}
+												<span class="text-base-500 dark:text-base-400 w-9 text-xs">Start</span>
+											{/if}
+											<DateTimePicker bind:value={startsAt} required />
+										</div>
+										{#if endsAt}
+											<div class="flex items-center gap-2">
+												<span class="text-base-500 dark:text-base-400 w-9 text-xs">End</span>
+												<DateTimePicker bind:value={endsAt} minValue={startsAt} />
+												<Button variant="ghost" size="iconSm" onclick={() => (endsAt = '')}>
+													<svg
+														xmlns="http://www.w3.org/2000/svg"
+														fill="none"
+														viewBox="0 0 24 24"
+														stroke-width="1.5"
+														stroke="currentColor"
+														class="size-3.5"
+													>
+														<path
+															stroke-linecap="round"
+															stroke-linejoin="round"
+															d="M6 18 18 6M6 6l12 12"
+														/>
+													</svg>
+												</Button>
+											</div>
+										{:else}
+											<Button
+												variant="ghost"
+												size="sm"
+												class="w-fit"
+												onclick={() => {
+													if (startsAt) {
+														const d = new Date(startsAt);
+														d.setHours(d.getHours() + 1);
+														endsAt = isoToDatetimeLocal(d.toISOString());
+													} else {
+														endsAt = '';
+													}
+												}}
+											>
+												<svg
+													xmlns="http://www.w3.org/2000/svg"
+													fill="none"
+													viewBox="0 0 24 24"
+													stroke-width="1.5"
+													stroke="currentColor"
+													class="size-3.5"
+												>
+													<path
+														stroke-linecap="round"
+														stroke-linejoin="round"
+														d="M12 4.5v15m7.5-7.5h-15"
+													/>
+												</svg>
+												Add end date
+											</Button>
 										{/if}
-									</p>
-									<p class="text-base-500 dark:text-base-400 text-sm">
-										{formatTime(startDate)}
-										{#if endDate && isSameDay}
-											- {formatTime(endDate)}
+										{#if startDate}
+											<Button size="sm" onclick={() => (editingDates = false)} class="mt-1 w-fit">
+												<svg
+													xmlns="http://www.w3.org/2000/svg"
+													fill="none"
+													viewBox="0 0 24 24"
+													stroke-width="2"
+													stroke="currentColor"
+													class="size-3.5"
+												>
+													<path
+														stroke-linecap="round"
+														stroke-linejoin="round"
+														d="m4.5 12.75 6 6 9-13.5"
+													/>
+												</svg>
+												Done
+											</Button>
 										{/if}
-									</p>
+									</div>
 								{/if}
-								<div class="mt-1 flex flex-wrap gap-3">
-									<label class="flex items-center gap-1.5">
-										<span class="text-base-500 dark:text-base-400 text-xs">Start</span>
-										<input
-											type="datetime-local"
-											bind:value={startsAt}
-											required
-											class="text-base-700 dark:text-base-300 bg-transparent text-xs focus:outline-none"
-										/>
-									</label>
-									<label class="flex items-center gap-1.5">
-										<span class="text-base-500 dark:text-base-400 text-xs">End</span>
-										<input
-											type="datetime-local"
-											bind:value={endsAt}
-											class="text-base-700 dark:text-base-300 bg-transparent text-xs focus:outline-none"
-										/>
-									</label>
-								</div>
 							</div>
 						</div>
 
@@ -757,7 +918,7 @@
 						{#if location}
 							<div class="mb-6 flex items-center gap-4">
 								<div
-									class="border-base-200 dark:border-base-700 flex size-12 shrink-0 items-center justify-center rounded-xl border"
+									class="border-base-200 dark:border-base-700 bg-base-100 dark:bg-base-950/30 flex size-12 shrink-0 items-center justify-center rounded-xl border"
 								>
 									<svg
 										xmlns="http://www.w3.org/2000/svg"
@@ -782,40 +943,29 @@
 								<p class="text-base-900 dark:text-base-50 flex-1 font-semibold">
 									{getLocationDisplayString(location)}
 								</p>
-								<button
-									type="button"
-									onclick={removeLocation}
-									class="text-base-400 shrink-0 hover:text-red-500"
-									aria-label="Remove location"
-								>
+								<Button variant="ghost" size="iconSm" onclick={removeLocation} class="shrink-0">
 									<svg
 										xmlns="http://www.w3.org/2000/svg"
 										viewBox="0 0 20 20"
 										fill="currentColor"
-										class="size-4"
+										class="size-3.5"
 									>
 										<path
 											d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z"
 										/>
 									</svg>
-								</button>
+								</Button>
 							</div>
 						{:else}
-							<button
-								type="button"
-								onclick={() => (showLocationModal = true)}
-								class="text-base-500 dark:text-base-400 hover:text-base-700 dark:hover:text-base-200 mb-6 flex items-center gap-4 transition-colors"
-							>
-								<div
-									class="border-base-200 dark:border-base-700 flex size-12 shrink-0 items-center justify-center rounded-xl border"
-								>
+							<div class="mb-6">
+								<Button variant="ghost" onclick={() => (showLocationModal = true)}>
 									<svg
 										xmlns="http://www.w3.org/2000/svg"
 										fill="none"
 										viewBox="0 0 24 24"
 										stroke-width="1.5"
 										stroke="currentColor"
-										class="size-5"
+										class="size-4"
 									>
 										<path
 											stroke-linecap="round"
@@ -828,9 +978,9 @@
 											d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z"
 										/>
 									</svg>
-								</div>
-								<span class="text-sm">Add location</span>
-							</button>
+									Add location
+								</Button>
+							</div>
 						{/if}
 
 						<!-- About Event -->
@@ -844,7 +994,8 @@
 								bind:value={description}
 								rows={4}
 								placeholder="What's this event about? @mentions, #hashtags and links will be detected automatically."
-								class="text-base-700 dark:text-base-300 placeholder:text-base-300 dark:placeholder:text-base-700 w-full resize-none border-0 bg-transparent leading-relaxed focus:border-0 focus:ring-0 focus:outline-none"
+								class="text-base-700 dark:text-base-300 placeholder:text-base-500 dark:placeholder:text-base-500 w-full resize-none border-0 bg-transparent px-0 leading-relaxed focus:border-0 focus:ring-0 focus:outline-none"
+								style="field-sizing: content;"
 							></textarea>
 						</div>
 
@@ -852,8 +1003,14 @@
 							<p class="mb-4 text-sm text-red-600 dark:text-red-400">{error}</p>
 						{/if}
 
-						<Button type="submit" disabled={submitting}>
-							{submitting ? 'Saving...' : 'Save Changes'}
+						<Button type="submit" disabled={submitting || !name.trim() || !startsAt}>
+							{submitting
+								? isNew
+									? 'Creating...'
+									: 'Saving...'
+								: isNew
+									? 'Create Event'
+									: 'Save Changes'}
 						</Button>
 					</div>
 
@@ -899,11 +1056,11 @@
 									<span class="text-base-700 dark:text-base-300 truncate text-sm">
 										{link.name || link.uri.replace(/^https?:\/\//, '')}
 									</span>
-									<button
-										type="button"
+									<Button
+										variant="ghost"
+										size="iconSm"
 										onclick={() => removeLink(i)}
-										class="text-base-400 ml-auto shrink-0 opacity-0 transition-opacity group-hover:opacity-100 hover:text-red-500"
-										aria-label="Remove link"
+										class="ml-auto shrink-0 opacity-0 transition-opacity group-hover:opacity-100"
 									>
 										<svg
 											xmlns="http://www.w3.org/2000/svg"
@@ -915,68 +1072,118 @@
 												d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z"
 											/>
 										</svg>
-									</button>
+									</Button>
 								</div>
 							{/each}
 						</div>
 
-						<div class="relative mt-3">
-							<button
-								type="button"
-								onclick={() => (showLinkPopup = !showLinkPopup)}
-								class="text-base-500 dark:text-base-400 hover:text-base-700 dark:hover:text-base-200 flex items-center gap-1.5 text-sm transition-colors"
-							>
-								<svg
-									xmlns="http://www.w3.org/2000/svg"
-									fill="none"
-									viewBox="0 0 24 24"
-									stroke-width="1.5"
-									stroke="currentColor"
-									class="size-4"
-								>
-									<path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-								</svg>
-								Add link
-							</button>
+						<div class="mt-3">
+							<PopoverRoot bind:open={showLinkPopup}>
+								<PopoverTrigger>
+									<Button size="sm">
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											fill="none"
+											viewBox="0 0 24 24"
+											stroke-width="1.5"
+											stroke="currentColor"
+											class="size-4"
+										>
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												d="M12 4.5v15m7.5-7.5h-15"
+											/>
+										</svg>
 
-							{#if showLinkPopup}
-								<div
-									class="border-base-200 dark:border-base-700 bg-base-50 dark:bg-base-900 absolute top-full left-0 z-10 mt-2 w-64 rounded-xl border p-3 shadow-lg"
-								>
-									<input
+										Add link
+									</Button>
+								</PopoverTrigger>
+								<PopoverContent side="bottom" sideOffset={8} class="w-64 p-3">
+									<Input
 										type="url"
 										bind:value={newLinkUri}
 										placeholder="https://..."
-										class="border-base-300 dark:border-base-700 bg-base-100 dark:bg-base-800 text-base-900 dark:text-base-100 placeholder:text-base-400 dark:placeholder:text-base-600 mb-2 w-full rounded-lg border px-2.5 py-1.5 text-sm focus:outline-none"
+										variant="secondary"
+										class="mb-2"
+										onkeydown={(e) => {
+											if (e.key === 'Enter') {
+												e.preventDefault();
+												addLink();
+											}
+										}}
 									/>
-									<input
+									<Input
 										type="text"
 										bind:value={newLinkName}
 										placeholder="Label (optional)"
-										class="border-base-300 dark:border-base-700 bg-base-100 dark:bg-base-800 text-base-900 dark:text-base-100 placeholder:text-base-400 dark:placeholder:text-base-600 mb-3 w-full rounded-lg border px-2.5 py-1.5 text-sm focus:outline-none"
+										variant="secondary"
+										class="mb-2"
+										onkeydown={(e) => {
+											if (e.key === 'Enter') {
+												e.preventDefault();
+												addLink();
+											}
+										}}
 									/>
+									{#if linkError}
+										<p class="mb-2 text-xs text-red-500">{linkError}</p>
+									{/if}
 									<div class="flex justify-end gap-2">
-										<button
-											type="button"
-											onclick={() => (showLinkPopup = false)}
-											class="text-base-500 dark:text-base-400 text-xs hover:underline"
+										<Button
+											variant="ghost"
+											size="sm"
+											onclick={() => {
+												showLinkPopup = false;
+												linkError = '';
+												newLinkUri = '';
+												newLinkName = '';
+											}}
 										>
 											Cancel
-										</button>
-										<button
-											type="button"
-											onclick={addLink}
-											disabled={!newLinkUri.trim()}
-											class="bg-base-900 dark:bg-base-100 text-base-50 dark:text-base-900 disabled:bg-base-300 dark:disabled:bg-base-700 rounded-lg px-3 py-1 text-xs font-medium disabled:cursor-not-allowed"
-										>
-											Add
-										</button>
+										</Button>
+										<Button onclick={addLink} size="sm" disabled={!newLinkUri.trim()}>Add</Button>
 									</div>
-								</div>
-							{/if}
+								</PopoverContent>
+							</PopoverRoot>
 						</div>
 					</div>
 				</div>
+
+				{#if !isNew}
+					<div class="border-base-200 dark:border-base-800 mt-12 border-t pt-8">
+						{#if showDeleteConfirm}
+							<div class="flex items-center gap-3">
+								<p class="text-sm text-red-600 dark:text-red-400">
+									Are you sure? This cannot be undone.
+								</p>
+								<Button
+									variant="secondary"
+									size="sm"
+									onclick={() => (showDeleteConfirm = false)}
+									disabled={deleting}
+								>
+									Cancel
+								</Button>
+								<Button
+									size="sm"
+									onclick={handleDelete}
+									disabled={deleting}
+									variant="red"
+								>
+									{deleting ? 'Deleting...' : 'Delete'}
+								</Button>
+							</div>
+						{:else}
+							<Button
+								variant="red"
+								onclick={() => (showDeleteConfirm = true)}
+							>
+								Delete event
+							</Button>
+						{/if}
+					</div>
+				{/if}
 			</form>
 		{/if}
 	</div>
@@ -993,12 +1200,7 @@
 		class="mt-2"
 	>
 		<div class="flex gap-2">
-			<input
-				type="text"
-				bind:value={locationSearch}
-				placeholder="Search for a city or address..."
-				class="border-base-300 dark:border-base-700 bg-base-100 dark:bg-base-800 text-base-900 dark:text-base-100 placeholder:text-base-400 dark:placeholder:text-base-600 flex-1 rounded-lg border px-3 py-2 text-sm focus:outline-none"
-			/>
+			<Input type="text" class="flex-1" bind:value={locationSearch} />
 			<Button type="submit" disabled={locationSearching || !locationSearch.trim()}>
 				{locationSearching ? 'Searching...' : 'Search'}
 			</Button>
