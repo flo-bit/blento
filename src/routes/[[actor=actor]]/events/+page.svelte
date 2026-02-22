@@ -2,7 +2,8 @@
 	import type { EventData } from '$lib/cards/social/EventCard';
 	import { getCDNImageBlobUrl } from '$lib/atproto';
 	import { user } from '$lib/atproto/auth.svelte';
-	import { Avatar as FoxAvatar, Badge, Button } from '@foxui/core';
+	import { Avatar as FoxAvatar, Badge, Button, toast } from '@foxui/core';
+	import { page } from '$app/state';
 	import Avatar from 'svelte-boring-avatars';
 	import * as TID from '@atcute/tid';
 	import { goto } from '$app/navigation';
@@ -78,6 +79,16 @@
 	}
 
 	let isOwner = $derived(user.isLoggedIn && user.did === did);
+
+	let showPast: boolean = $state(false);
+	let now = $derived(new Date());
+	let filteredEvents = $derived(
+		events.filter((e) => {
+			const endOrStart = e.endsAt || e.startsAt;
+			const eventDate = new Date(endOrStart);
+			return showPast ? eventDate < now : eventDate >= now;
+		})
+	);
 </script>
 
 <svelte:head>
@@ -96,7 +107,7 @@
 		<div class="mb-8 flex items-start justify-between">
 			<div>
 				<h1 class="text-base-900 dark:text-base-50 mb-2 text-2xl font-bold sm:text-3xl">
-					Upcoming events
+					{showPast ? 'Past' : 'Upcoming'} events
 				</h1>
 				<div class="mt-4 flex items-center gap-2">
 					<span class="text-base-500 dark:text-base-400 text-sm">Hosted by</span>
@@ -111,26 +122,54 @@
 					</a>
 				</div>
 			</div>
-			{#if isOwner}
+			<div class="flex flex-col items-end gap-2">
+				{#if isOwner}
+					<Button
+						variant="primary"
+						onclick={() => {
+							const rkey = TID.now();
+							const handle =
+								user.profile?.handle && user.profile.handle !== 'handle.invalid'
+									? user.profile.handle
+									: user.did;
+							goto(`/${handle}/events/${rkey}/edit`);
+						}}>New event</Button
+					>
+				{/if}
 				<Button
-					variant="primary"
-					onclick={() => {
-						const rkey = TID.now();
-						const handle =
-							user.profile?.handle && user.profile.handle !== 'handle.invalid'
-								? user.profile.handle
-								: user.did;
-						goto(`/${handle}/events/${rkey}/edit`);
-					}}>New event</Button
+					variant="secondary"
+					onclick={async () => {
+						const calendarUrl = `${page.url.origin}${page.url.pathname.replace(/\/$/, '')}/calendar`;
+						await navigator.clipboard.writeText(calendarUrl);
+						toast.success('Subscription link copied to clipboard');
+					}}>Subscribe</Button
 				>
-			{/if}
+			</div>
 		</div>
 
-		{#if events.length === 0}
-			<p class="text-base-500 dark:text-base-400 py-12 text-center">No events found.</p>
+		<!-- Toggle -->
+		<div class="mb-6 flex gap-1">
+			<button
+				class="rounded-xl px-3 py-1.5 text-sm font-medium transition-colors {!showPast
+					? 'bg-base-200 dark:bg-base-800 text-base-900 dark:text-base-50'
+					: 'text-base-500 dark:text-base-400 hover:text-base-700 dark:hover:text-base-200  cursor-pointer'}"
+				onclick={() => (showPast = false)}>Upcoming</button
+			>
+			<button
+				class="rounded-xl px-3 py-1.5 text-sm font-medium transition-colors {showPast
+					? 'bg-base-200 dark:bg-base-800 text-base-900 dark:text-base-50'
+					: 'text-base-500 dark:text-base-400 hover:text-base-700 dark:hover:text-base-200  cursor-pointer'}"
+				onclick={() => (showPast = true)}>Past</button
+			>
+		</div>
+
+		{#if filteredEvents.length === 0}
+			<p class="text-base-500 dark:text-base-400 py-12 text-center">
+				No {showPast ? 'past' : 'upcoming'} events.
+			</p>
 		{:else}
 			<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-				{#each events as event (event.rkey)}
+				{#each filteredEvents as event (event.rkey)}
 					{@const thumbnail = getThumbnail(event)}
 					{@const location = getLocationString(event.locations)}
 					{@const rkey = event.rkey}
