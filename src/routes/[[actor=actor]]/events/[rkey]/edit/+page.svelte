@@ -12,10 +12,12 @@
 	import { browser } from '$app/environment';
 	import { putImage, getImage, deleteImage } from '$lib/components/image-store';
 	import Modal from '$lib/components/modal/Modal.svelte';
+	import Avatar from 'svelte-boring-avatars';
 
 	let { data } = $props();
 
 	let rkey: string = $derived(data.rkey);
+	let isNew = $derived(data.eventData === null);
 	let DRAFT_KEY = $derived(`blento-event-edit-${rkey}`);
 
 	type EventMode = 'inperson' | 'virtual' | 'hybrid';
@@ -81,16 +83,9 @@
 		return 'inperson';
 	}
 
-	function populateFromEventData() {
+	function populateLocationFromEventData() {
 		const eventData = data.eventData;
-		name = eventData.name || '';
-		description = eventData.description || '';
-		startsAt = eventData.startsAt ? isoToDatetimeLocal(eventData.startsAt) : '';
-		endsAt = eventData.endsAt ? isoToDatetimeLocal(eventData.endsAt) : '';
-		mode = eventData.mode ? stripModePrefix(eventData.mode) : 'inperson';
-		links = eventData.uris ? eventData.uris.map((l) => ({ uri: l.uri, name: l.name || '' })) : [];
-
-		// Load existing location
+		if (!eventData) return;
 		if (eventData.locations && eventData.locations.length > 0) {
 			const loc = eventData.locations.find((v) => v.$type === 'community.lexicon.location.address');
 			if (loc) {
@@ -109,8 +104,11 @@
 			}
 		}
 		locationChanged = false;
+	}
 
-		// Load existing thumbnail from CDN
+	function populateThumbnailFromEventData() {
+		const eventData = data.eventData;
+		if (!eventData) return;
 		if (eventData.media && eventData.media.length > 0) {
 			const media = eventData.media.find((m) => m.role === 'thumbnail');
 			if (media?.content) {
@@ -123,7 +121,29 @@
 		}
 	}
 
+	function populateFromEventData() {
+		const eventData = data.eventData;
+		if (!eventData) return;
+		name = eventData.name || '';
+		description = eventData.description || '';
+		startsAt = eventData.startsAt ? isoToDatetimeLocal(eventData.startsAt) : '';
+		endsAt = eventData.endsAt ? isoToDatetimeLocal(eventData.endsAt) : '';
+		mode = eventData.mode ? stripModePrefix(eventData.mode) : 'inperson';
+		links = eventData.uris ? eventData.uris.map((l) => ({ uri: l.uri, name: l.name || '' })) : [];
+		populateLocationFromEventData();
+		populateThumbnailFromEventData();
+	}
+
 	onMount(async () => {
+		// Migrate old creation draft if this is a new event
+		if (isNew) {
+			const oldDraft = localStorage.getItem('blento-event-draft');
+			if (oldDraft && !localStorage.getItem(DRAFT_KEY)) {
+				localStorage.setItem(DRAFT_KEY, oldDraft);
+				localStorage.removeItem('blento-event-draft');
+			}
+		}
+
 		const saved = localStorage.getItem(DRAFT_KEY);
 		if (saved) {
 			try {
@@ -137,6 +157,9 @@
 				locationChanged = draft.locationChanged || false;
 				if (draft.locationChanged) {
 					location = draft.location || null;
+				} else if (!isNew) {
+					// For edits without location changes, load from event data
+					populateLocationFromEventData();
 				}
 				thumbnailChanged = draft.thumbnailChanged || false;
 
@@ -148,29 +171,17 @@
 						thumbnailPreview = URL.createObjectURL(img.blob);
 						thumbnailChanged = true;
 					}
-				} else if (!thumbnailChanged) {
+				} else if (!thumbnailChanged && !isNew) {
 					// No new thumbnail in draft, show existing one from event data
-					if (data.eventData.media && data.eventData.media.length > 0) {
-						const media = data.eventData.media.find((m) => m.role === 'thumbnail');
-						if (media?.content) {
-							const url = getCDNImageBlobUrl({
-								did: data.did,
-								blob: media.content,
-								type: 'jpeg'
-							});
-							if (url) {
-								thumbnailPreview = url;
-							}
-						}
-					}
+					populateThumbnailFromEventData();
 				}
 
 				hasDraft = true;
 			} catch {
 				localStorage.removeItem(DRAFT_KEY);
-				populateFromEventData();
+				if (!isNew) populateFromEventData();
 			}
-		} else {
+		} else if (!isNew) {
 			populateFromEventData();
 		}
 		draftLoaded = true;
@@ -218,7 +229,20 @@
 		if (thumbnailKey) deleteImage(thumbnailKey);
 		thumbnailKey = null;
 		thumbnailChanged = false;
-		populateFromEventData();
+		if (isNew) {
+			name = '';
+			description = '';
+			startsAt = '';
+			endsAt = '';
+			links = [];
+			mode = 'inperson';
+			location = null;
+			thumbnailFile = null;
+			if (thumbnailPreview) URL.revokeObjectURL(thumbnailPreview);
+			thumbnailPreview = null;
+		} else {
+			populateFromEventData();
+		}
 		hasDraft = false;
 	}
 
@@ -447,7 +471,7 @@
 		try {
 			let media: Array<Record<string, unknown>> | undefined;
 
-			if (thumbnailChanged) {
+			if (isNew || thumbnailChanged) {
 				if (thumbnailFile) {
 					const compressed = await compressImage(thumbnailFile);
 					const blobRef = await uploadBlob({ blob: compressed.blob });
@@ -464,17 +488,18 @@
 						];
 					}
 				}
-				// If thumbnailChanged but no thumbnailFile, media stays undefined (thumbnail removed)
+				// If changed/new but no thumbnailFile, media stays undefined (thumbnail removed/absent)
 			} else {
 				// Thumbnail not changed — reuse original media from eventData
-				if (data.eventData.media && data.eventData.media.length > 0) {
+				if (data.eventData?.media && data.eventData.media.length > 0) {
 					media = data.eventData.media as Array<Record<string, unknown>>;
 				}
 			}
 
-			// Preserve original createdAt
-			const originalCreatedAt =
-				(data.eventData as Record<string, unknown>).createdAt || new Date().toISOString();
+			const createdAt = isNew
+				? new Date().toISOString()
+				: ((data.eventData as Record<string, unknown>)?.createdAt as string) ||
+					new Date().toISOString();
 
 			const record: Record<string, unknown> = {
 				$type: 'community.lexicon.calendar.event',
@@ -482,7 +507,7 @@
 				mode: `community.lexicon.calendar.event#${mode}`,
 				status: 'community.lexicon.calendar.event#scheduled',
 				startsAt: new Date(startsAt).toISOString(),
-				createdAt: originalCreatedAt
+				createdAt
 			};
 
 			const trimmedDescription = description.trim();
@@ -503,7 +528,7 @@
 			if (links.length > 0) {
 				record.uris = links;
 			}
-			if (locationChanged) {
+			if (isNew || locationChanged) {
 				if (location) {
 					record.locations = [
 						{
@@ -512,8 +537,8 @@
 						}
 					];
 				}
-				// If locationChanged but no location, locations stays undefined (removed)
-			} else if (data.eventData.locations && data.eventData.locations.length > 0) {
+				// If changed/new but no location, locations stays undefined (removed/absent)
+			} else if (data.eventData?.locations && data.eventData.locations.length > 0) {
 				record.locations = data.eventData.locations;
 			}
 
@@ -532,11 +557,11 @@
 						: user.did;
 				goto(`/${handle}/events/${rkey}`);
 			} else {
-				error = 'Failed to save event. Please try again.';
+				error = `Failed to ${isNew ? 'create' : 'save'} event. Please try again.`;
 			}
 		} catch (e) {
-			console.error('Failed to save event:', e);
-			error = 'Failed to save event. Please try again.';
+			console.error(`Failed to ${isNew ? 'create' : 'save'} event:`, e);
+			error = `Failed to ${isNew ? 'create' : 'save'} event. Please try again.`;
 		} finally {
 			submitting = false;
 		}
@@ -544,7 +569,7 @@
 </script>
 
 <svelte:head>
-	<title>Edit Event</title>
+	<title>{isNew ? 'Create Event' : 'Edit Event'}</title>
 </svelte:head>
 
 <div class="min-h-screen px-6 py-12 sm:py-12">
@@ -558,19 +583,21 @@
 			<div
 				class="border-base-200 dark:border-base-800 bg-base-100 dark:bg-base-900/50 rounded-2xl border p-8 text-center"
 			>
-				<p class="text-base-600 dark:text-base-400 mb-4">Log in to edit this event.</p>
+				<p class="text-base-600 dark:text-base-400 mb-4">
+					Log in to {isNew ? 'create an event' : 'edit this event'}.
+				</p>
 				<Button onclick={() => loginModalState.show()}>Log in</Button>
 			</div>
 		{:else}
 			<div class="mb-6 flex items-center gap-3">
-				<Badge size="sm">Local edit</Badge>
+				<Badge size="sm">{isNew ? 'Local draft' : 'Local edit'}</Badge>
 				{#if hasDraft}
 					<button
 						type="button"
 						onclick={deleteDraft}
 						class="text-base-500 dark:text-base-400 cursor-pointer text-xs hover:text-red-500 hover:underline"
 					>
-						Discard changes
+						{isNew ? 'Delete draft' : 'Discard changes'}
 					</button>
 				{/if}
 			</div>
@@ -600,20 +627,56 @@
 							onchange={onFileChange}
 							class="hidden"
 						/>
-						{#if thumbnailPreview}
-							<div class="relative">
-								<button type="button" onclick={() => fileInput?.click()} class="w-full">
-									<img
-										src={thumbnailPreview}
-										alt="Thumbnail preview"
-										class="border-base-200 dark:border-base-800 aspect-square w-full cursor-pointer rounded-2xl border object-cover"
+						<div class="group relative">
+							{#if thumbnailPreview}
+								<img
+									src={thumbnailPreview}
+									alt="Thumbnail preview"
+									class="border-base-200 dark:border-base-800 aspect-square w-full rounded-2xl border object-cover"
+								/>
+							{:else}
+								<div
+									class="bg-base-100 dark:bg-base-900 aspect-square w-full overflow-hidden rounded-2xl [&>svg]:h-full [&>svg]:w-full"
+								>
+									<Avatar
+										size={400}
+										name={rkey}
+										variant="marble"
+										colors={['#92A1C6', '#146A7C', '#F0AB3D', '#C271B4', '#C20D90']}
+										square
 									/>
-								</button>
+								</div>
+							{/if}
+							<!-- Upload overlay on hover -->
+							<button
+								type="button"
+								onclick={() => fileInput?.click()}
+								class="absolute inset-0 flex cursor-pointer flex-col items-center justify-center gap-1.5 rounded-2xl bg-black/0 text-white/0 transition-colors group-hover:bg-black/40 group-hover:text-white/90 {isDragOver
+									? 'bg-black/40 text-white/90'
+									: ''}"
+							>
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									fill="none"
+									viewBox="0 0 24 24"
+									stroke-width="1.5"
+									stroke="currentColor"
+									class="size-6"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0 0 22.5 18.75V5.25A2.25 2.25 0 0 0 20.25 3H3.75A2.25 2.25 0 0 0 1.5 5.25v13.5A2.25 2.25 0 0 0 3.75 21Z"
+									/>
+								</svg>
+								<span class="text-sm font-medium">Upload thumbnail</span>
+							</button>
+							{#if thumbnailPreview}
 								<button
 									type="button"
 									onclick={removeThumbnail}
 									aria-label="Remove thumbnail"
-									class="bg-base-900/70 absolute top-2 right-2 flex size-7 items-center justify-center rounded-full text-white hover:bg-red-600"
+									class="bg-base-900/70 absolute top-2 right-2 flex size-7 items-center justify-center rounded-full text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-red-600"
 								>
 									<svg
 										xmlns="http://www.w3.org/2000/svg"
@@ -626,32 +689,8 @@
 										/>
 									</svg>
 								</button>
-							</div>
-						{:else}
-							<button
-								type="button"
-								onclick={() => fileInput?.click()}
-								class="border-base-300 dark:border-base-700 hover:border-base-400 dark:hover:border-base-600 text-base-500 dark:text-base-400 flex aspect-square w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed transition-colors {isDragOver
-									? 'border-accent-500 bg-accent-50 dark:bg-accent-950 text-accent-500'
-									: ''}"
-							>
-								<svg
-									xmlns="http://www.w3.org/2000/svg"
-									fill="none"
-									viewBox="0 0 24 24"
-									stroke-width="1.5"
-									stroke="currentColor"
-									class="mb-1 size-6"
-								>
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0 0 22.5 18.75V5.25A2.25 2.25 0 0 0 20.25 3H3.75A2.25 2.25 0 0 0 1.5 5.25v13.5A2.25 2.25 0 0 0 3.75 21Z"
-									/>
-								</svg>
-								<span class="text-sm">Add image</span>
-							</button>
-						{/if}
+							{/if}
+						</div>
 					</div>
 
 					<!-- Right column: event details -->
@@ -662,7 +701,7 @@
 							bind:value={name}
 							required
 							placeholder="Event name"
-							class="text-base-900 dark:text-base-50 placeholder:text-base-300 dark:placeholder:text-base-700 mb-2 w-full border-0 bg-transparent text-4xl leading-tight font-bold focus:border-0 focus:ring-0 focus:outline-none sm:text-5xl"
+							class="text-base-900 dark:text-base-50 placeholder:text-base-500 dark:placeholder:text-base-500 mb-2 w-full border-0 bg-transparent text-4xl leading-tight font-bold focus:border-0 focus:ring-0 focus:outline-none sm:text-5xl"
 						/>
 
 						<!-- Mode toggle -->
@@ -844,7 +883,7 @@
 								bind:value={description}
 								rows={4}
 								placeholder="What's this event about? @mentions, #hashtags and links will be detected automatically."
-								class="text-base-700 dark:text-base-300 placeholder:text-base-300 dark:placeholder:text-base-700 w-full resize-none border-0 bg-transparent leading-relaxed focus:border-0 focus:ring-0 focus:outline-none"
+								class="text-base-700 dark:text-base-300 placeholder:text-base-500 dark:placeholder:text-base-500 w-full resize-none border-0 bg-transparent leading-relaxed focus:border-0 focus:ring-0 focus:outline-none"
 							></textarea>
 						</div>
 
@@ -853,7 +892,13 @@
 						{/if}
 
 						<Button type="submit" disabled={submitting}>
-							{submitting ? 'Saving...' : 'Save Changes'}
+							{submitting
+								? isNew
+									? 'Creating...'
+									: 'Saving...'
+								: isNew
+									? 'Create Event'
+									: 'Save Changes'}
 						</Button>
 					</div>
 
