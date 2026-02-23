@@ -57,7 +57,7 @@
 						class="">Leaflet</Button
 					>
 					or
-					<Button href="https://pckt.pub" target="_blank" rel="noopener noreferrer" class=""
+					<Button href="https://pckt.blog" target="_blank" rel="noopener noreferrer" class=""
 						>Pckt</Button
 					>
 				</span>
