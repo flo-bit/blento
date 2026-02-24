@@ -1,5 +1,5 @@
 <script lang="ts">
-	let { releaseMbId, alt }: { releaseMbId?: string; alt: string } = $props();
+	let { albumArtUrl, alt }: { albumArtUrl?: string; alt: string } = $props();
 
 	let isLoading = $state(true);
 	let hasError = $state(false);
@@ -25,7 +25,7 @@
 	</div>
 {:else}
 	<img
-		src="https://coverartarchive.org/release/{releaseMbId}/front-250"
+		src="{albumArtUrl}"
 		{alt}
 		class="h-10 w-10 rounded-lg object-cover {isLoading && 'hidden'}"
 		onload={() => {

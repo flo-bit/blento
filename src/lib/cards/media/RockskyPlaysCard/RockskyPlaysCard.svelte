@@ -3,19 +3,20 @@
 	import { onMount } from 'svelte';
 	import { getAdditionalUserData, getDidContext, getHandleContext } from '$lib/website/context';
 	import { CardDefinitionsByType } from '../..';
-	// import AlbumArt from './AlbumArt.svelte';
+	import AlbumArt from './AlbumArt.svelte';
 	import { RelativeTime } from '@foxui/time';
 
 	interface Artist {
-		artistName: string;
+		artist: string;
 	}
 
 	interface PlayValue {
-		releaseMbId?: string;
-		trackName: string;
-		playedTime?: string;
+		mbid?: string;
+		title: string;
+		createdAt?: string;
 		artists?: Artist[];
-		originUrl?: string;
+		albumArtUrl?: string;
+		spotifyLink?: string;
 	}
 
 	interface Play {
@@ -52,23 +53,23 @@
 {#snippet musicItem(play: Play)}
 	<div class="flex w-full items-center gap-3">
 		<div class="size-10 shrink-0">
-			<AlbumArt releaseMbId={play.value.releaseMbId} alt="" />
+			<AlbumArt albumArtUrl={play.value.albumArtUrl} alt="" />
 		</div>
 		<div class="min-w-0 flex-1">
 			<div class="inline-flex w-full max-w-full justify-between gap-2">
 				<div
 					class="text-accent-500 accent:text-accent-950 min-w-0 flex-1 shrink truncate font-semibold"
 				>
-					{play.value.trackName}
+					{play.value.title}
 				</div>
 
-				{#if play.value.playedTime}
+				{#if play.value.createdAt}
 					<div class="shrink-0 text-xs">
 						<RelativeTime
 							date={new Date(
-								isNumeric(play.value.playedTime)
-									? parseInt(play.value.playedTime) * 1000
-									: play.value.playedTime
+								isNumeric(play.value.createdAt)
+									? parseInt(play.value.createdAt) * 1000
+									: play.value.createdAt
 							)}
 							locale="en-US"
 						/> ago
@@ -78,7 +79,7 @@
 				{/if}
 			</div>
 			<div class="my-1 min-w-0 gap-2 truncate text-xs whitespace-nowrap">
-				{(play?.value?.artists ?? []).map((a) => a.artistName).join(', ')}
+				{(play?.value?.artists ?? []).map((a) => a.name).join(', ')}
 			</div>
 		</div>
 	</div>
@@ -87,8 +88,10 @@
 <div class="z-10 flex h-full w-full flex-col gap-4 overflow-y-scroll p-4">
 	{#if feed && feed.length > 0}
 		{#each feed as play (play.uri)}
-			{#if play.value.originUrl}
-				<a href={play.value.originUrl} target="_blank" rel="noopener noreferrer" class="w-full">
+			{#if play.uri}
+				<a href="https://rocksky.app/{did}/scrobble/{play.uri.split('/').at(-1)}" target="_blank" rel="noopener noreferrer" class="w-full">
+		<!-- {#if play.value.spotifyLink}
+				<a href={play.value.spotifyLink} target="_blank" rel="noopener noreferrer" class="w-full"> -->
 					{@render musicItem(play)}
 				</a>
 			{:else}
