@@ -52,7 +52,7 @@
 {#snippet musicItem(play: Play)}
 	<div class="flex w-full items-center gap-3">
 		<div class="size-10 shrink-0">
-			<AlbumArt releaseMbId={play.value.releaseMbId} alt="" />
+			<AlbumArt releaseMbid={play.value.releaseMbid} alt="" />
 		</div>
 		<div class="min-w-0 flex-1">
 			<div class="inline-flex w-full max-w-full justify-between gap-2">
