@@ -25,7 +25,7 @@
 	</div>
 {:else}
 	<img
-		src="{albumArtUrl}"
+		src={albumArtUrl}
 		{alt}
 		class="h-10 w-10 rounded-lg object-cover {isLoading && 'hidden'}"
 		onload={() => {

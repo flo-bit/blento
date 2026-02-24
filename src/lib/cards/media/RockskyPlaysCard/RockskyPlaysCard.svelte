@@ -89,8 +89,13 @@
 	{#if feed && feed.length > 0}
 		{#each feed as play (play.uri)}
 			{#if play.uri}
-				<a href="https://rocksky.app/{did}/scrobble/{play.uri.split('/').at(-1)}" target="_blank" rel="noopener noreferrer" class="w-full">
-		<!-- {#if play.value.spotifyLink}
+				<a
+					href="https://rocksky.app/{did}/scrobble/{play.uri.split('/').at(-1)}"
+					target="_blank"
+					rel="noopener noreferrer"
+					class="w-full"
+				>
+					<!-- {#if play.value.spotifyLink}
 				<a href={play.value.spotifyLink} target="_blank" rel="noopener noreferrer" class="w-full"> -->
 					{@render musicItem(play)}
 				</a>
