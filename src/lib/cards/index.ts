@@ -23,6 +23,7 @@ import { FluidTextCardDefinition } from './visual/FluidTextCard';
 import { GifCardDefinition } from './media/GIFCard';
 import { PopfeedReviewsCardDefinition } from './media/PopfeedReviews';
 import { TealFMPlaysCardDefinition } from './media/TealFMPlaysCard';
+import { RockskyPlaysCardDefinition } from './media/RockskyPlaysCard';
 import { PhotoGalleryCardDefinition } from './media/PhotoGalleryCard';
 import { StandardSiteDocumentListCardDefinition } from './content/StandardSiteDocumentListCard';
 import { StatusphereCardDefinition } from './media/StatusphereCard';
@@ -81,6 +82,7 @@ export const AllCardDefinitions = [
 	GifCardDefinition,
 	PopfeedReviewsCardDefinition,
 	TealFMPlaysCardDefinition,
+	RockskyPlaysCardDefinition,
 	PhotoGalleryCardDefinition,
 	StandardSiteDocumentListCardDefinition,
 	StatusphereCardDefinition,
