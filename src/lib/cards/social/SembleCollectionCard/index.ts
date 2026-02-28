@@ -42,9 +42,11 @@ async function loadCollectionData(
 			collection: 'network.cosmik.collection',
 			rkey: collectionRkey
 		}).catch(() => undefined),
-		listRecords({ did, collection: 'network.cosmik.collectionLink' }).catch(() => []),
-		listRecords({ did, collection: 'network.cosmik.card' }).catch(() => [])
+		listRecords({ did, collection: 'network.cosmik.collectionLink', limit: 0 }).catch(() => []),
+		listRecords({ did, collection: 'network.cosmik.card', limit: 0 }).catch(() => [])
 	]);
+
+	console.log(allLinks);
 
 	if (!collection) return undefined;
 
@@ -53,6 +55,8 @@ async function loadCollectionData(
 			.filter((link: any) => link.value.collection?.uri === collectionUri)
 			.map((link: any) => link.value.card?.uri)
 	);
+
+	console.log(linkedCardUris);
 
 	const cards: SembleCard[] = allCards
 		.filter((card: any) => linkedCardUris.has(card.uri))
