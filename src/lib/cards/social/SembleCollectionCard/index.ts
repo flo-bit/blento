@@ -46,8 +46,6 @@ async function loadCollectionData(
 		listRecords({ did, collection: 'network.cosmik.card', limit: 0 }).catch(() => [])
 	]);
 
-	console.log(allLinks);
-
 	if (!collection) return undefined;
 
 	const linkedCardUris = new Set(
@@ -55,8 +53,6 @@ async function loadCollectionData(
 			.filter((link: any) => link.value.collection?.uri === collectionUri)
 			.map((link: any) => link.value.card?.uri)
 	);
-
-	console.log(linkedCardUris);
 
 	const cards: SembleCard[] = allCards
 		.filter((card: any) => linkedCardUris.has(card.uri))

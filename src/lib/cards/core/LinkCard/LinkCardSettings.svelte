@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { validateLink } from '$lib/helper';
 	import type { Item } from '$lib/types';
-	import { Button, Input, toast } from '@foxui/core';
+	import { Button, Checkbox, Input, Label, toast } from '@foxui/core';
 
 	let { item, onclose }: { item: Item; onclose: () => void } = $props();
 
@@ -48,3 +48,21 @@
 		<path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
 	</svg>
 </Button>
+<div class="flex items-center space-x- mt-4">
+	<Checkbox
+		bind:checked={
+			() => Boolean(item.cardData.showBackgroundImage),
+			(val) => (item.cardData.showBackgroundImage = val)
+		}
+		id="show-bg-image"
+		aria-labelledby="show-bg-image-label"
+		variant="secondary"
+	/>
+	<Label
+		id="show-bg-image-label"
+		for="show-bg-image"
+		class="text-sm leading-none ml-2 font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+	>
+		Show background image
+	</Label>
+</div>
