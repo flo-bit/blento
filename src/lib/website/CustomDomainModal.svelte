@@ -13,7 +13,10 @@
 	import Modal from '$lib/components/modal/Modal.svelte';
 	import { launchConfetti } from '@foxui/visual';
 
-	let { publicationUrl }: { publicationUrl?: string } = $props();
+	let {
+		publicationUrl,
+		onurlchange
+	}: { publicationUrl?: string; onurlchange?: (url: string | undefined) => void } = $props();
 
 	let currentDomain = $derived(
 		publicationUrl?.startsWith('https://') && !publicationUrl.includes('blento.app')
@@ -57,6 +60,7 @@
 			}
 
 			step = 'input';
+			onurlchange?.(undefined);
 		} catch (err: unknown) {
 			errorMessage = err instanceof Error ? err.message : String(err);
 			step = 'error';
@@ -124,6 +128,7 @@
 			}
 
 			launchConfetti();
+			onurlchange?.('https://' + domain);
 			step = 'success';
 		} catch (err: unknown) {
 			errorMessage = err instanceof Error ? err.message : String(err);

@@ -47,5 +47,10 @@
 		</Popover>
 	</div>
 
-	<CustomDomainModal publicationUrl={data.publication?.url} />
+	<CustomDomainModal
+		publicationUrl={data.publication?.url}
+		onurlchange={(url) => {
+			if (data.publication) data.publication.url = url;
+		}}
+	/>
 {/if}
