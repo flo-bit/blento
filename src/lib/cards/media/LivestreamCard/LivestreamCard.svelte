@@ -1,12 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import Icon from './Icon.svelte';
-	import {
-		getAdditionalUserData,
-		getDidContext,
-		getHandleContext,
-		getIsMobile
-	} from '$lib/website/context';
+	import { getAdditionalUserData, getDidContext, getHandleContext } from '$lib/website/context';
 	import type { ContentComponentProps } from '../../types';
 	import { RelativeTime } from '@foxui/time';
 	import { Badge } from '@foxui/core';
@@ -14,8 +9,6 @@
 	import { browser } from '$app/environment';
 
 	let { item = $bindable() }: ContentComponentProps = $props();
-
-	let isMobile = getIsMobile();
 
 	let isLoaded = $state(false);
 
@@ -58,7 +51,7 @@
 	});
 </script>
 
-<div class="h-full overflow-y-scroll p-4">
+<div class="livestream-card h-full overflow-y-scroll p-4">
 	{#if latestLivestream}
 		<div class="flex min-h-full flex-col justify-between">
 			<div>
@@ -95,10 +88,10 @@
 				</a>
 			</div>
 
-			{#if browser && ((isMobile() && item.mobileH >= 7) || (!isMobile() && item.h >= 4)) && latestLivestream?.thumb}
+			{#if browser && latestLivestream?.thumb}
 				<a href={latestLivestream?.href} target="_blank" rel="noopener noreferrer">
 					<img
-						class="my-4 max-h-32 w-full rounded-xl object-cover"
+						class="livestream-thumb my-4 max-h-32 w-full rounded-xl object-cover"
 						src={latestLivestream?.thumb}
 						alt=""
 					/>
@@ -112,3 +105,15 @@
 		<div class="flex h-full w-full items-center justify-center">Looking for the latest stream</div>
 	{/if}
 </div>
+
+<style>
+	.livestream-thumb {
+		display: none;
+	}
+
+	@container card (height >= 15rem) {
+		.livestream-thumb {
+			display: block;
+		}
+	}
+</style>

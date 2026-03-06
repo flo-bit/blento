@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import { getImage, compressImage } from '$lib/helper';
-	import { getDidContext, getIsMobile } from '$lib/website/context';
+	import { getDidContext } from '$lib/website/context';
 	import type { ContentComponentProps } from '../../types';
 	import PlainTextEditor from '$lib/components/PlainTextEditor.svelte';
 
@@ -49,8 +49,6 @@
 			console.error('Failed to process image:', error);
 		}
 	}
-
-	let isMobile = getIsMobile();
 
 	let faviconHasError = $state(false);
 	let isFetchingMetadata = $state(false);
@@ -291,10 +289,10 @@
 			</div>
 		</div>
 
-		{#if hasFetched && browser && ((isMobile() && item.mobileH >= 8) || (!isMobile() && item.h >= 4))}
+		{#if hasFetched && browser}
 			<button
 				type="button"
-				class="hover:ring-accent-500 relative mb-2 aspect-2/1 w-full cursor-pointer overflow-hidden rounded-xl transition-all duration-200 hover:ring-2"
+				class="link-preview-editor hover:ring-accent-500 relative mb-2 aspect-2/1 w-full cursor-pointer overflow-hidden rounded-xl transition-all duration-200 hover:ring-2"
 				onclick={() => imageInputRef?.click()}
 				onmouseenter={() => (isHoveringImage = true)}
 				onmouseleave={() => (isHoveringImage = false)}
@@ -357,3 +355,15 @@
 		{/if}
 	</div>
 {/if}
+
+<style>
+	.link-preview-editor {
+		display: none;
+	}
+
+	@container card (height >= 18rem) {
+		.link-preview-editor {
+			display: block;
+		}
+	}
+</style>

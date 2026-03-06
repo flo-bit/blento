@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { siGithub } from 'simple-icons';
-	import { getAdditionalUserData, getIsMobile } from '$lib/website/context';
+	import { getAdditionalUserData } from '$lib/website/context';
 	import type { ContentComponentProps } from '../../types';
 	import type { GithubProfileLoadedData } from '.';
 	import GithubContributionsGraph from './GithubContributionsGraph.svelte';
@@ -34,11 +34,9 @@
 			}
 		}
 	});
-
-	let isMobile = getIsMobile();
 </script>
 
-<div class="h-full overflow-hidden p-4">
+<div class="github-profile-card h-full overflow-hidden p-4">
 	<div class="flex h-full flex-col justify-between">
 		<!-- Header -->
 		<div class="flex justify-between">
@@ -56,22 +54,23 @@
 				</a>
 			</div>
 
-			{#if isMobile() ? item.mobileW > 4 : item.w > 2}
+			<div class="github-follow z-50">
 				<Button
 					href="https://github.com/{item.cardData.user}"
 					target="_blank"
-					rel="noopener noreferrer"
-					class="z-50">Follow</Button
+					rel="noopener noreferrer">Follow</Button
 				>
-			{/if}
+			</div>
 		</div>
 
 		{#if contributionsData && browser}
 			<div class="flex opacity-100 transition-opacity duration-300 starting:opacity-0">
-				<GithubContributionsGraph
-					data={contributionsData}
-					isBig={isMobile() ? item.mobileH > 5 : item.h > 2}
-				/>
+				<div class="github-graph github-graph-compact">
+					<GithubContributionsGraph data={contributionsData} isBig={false} />
+				</div>
+				<div class="github-graph github-graph-expanded">
+					<GithubContributionsGraph data={contributionsData} isBig={true} />
+				</div>
 			</div>
 		{/if}
 	</div>
@@ -94,3 +93,32 @@
 		<span class="sr-only">Show on github</span>
 	</a>
 {/if}
+
+<style>
+	.github-follow,
+	.github-graph-expanded {
+		display: none;
+	}
+
+	.github-graph-compact {
+		display: flex;
+		width: 100%;
+	}
+
+	@container card (width >= 18rem) {
+		.github-follow {
+			display: inline-flex;
+		}
+	}
+
+	@container card (height >= 12rem) {
+		.github-graph-compact {
+			display: none;
+		}
+
+		.github-graph-expanded {
+			display: flex;
+			width: 100%;
+		}
+	}
+</style>

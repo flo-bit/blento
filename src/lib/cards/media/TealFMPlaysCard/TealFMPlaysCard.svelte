@@ -12,6 +12,7 @@
 
 	interface PlayValue {
 		releaseMbId?: string;
+		releaseMbid?: string;
 		trackName: string;
 		playedTime?: string;
 		artists?: Artist[];
@@ -52,7 +53,7 @@
 {#snippet musicItem(play: Play)}
 	<div class="flex w-full items-center gap-3">
 		<div class="size-10 shrink-0">
-			<AlbumArt releaseMbid={play.value.releaseMbid} alt="" />
+			<AlbumArt releaseMbid={play.value.releaseMbid ?? play.value.releaseMbId} alt="" />
 		</div>
 		<div class="min-w-0 flex-1">
 			<div class="inline-flex w-full max-w-full justify-between gap-2">

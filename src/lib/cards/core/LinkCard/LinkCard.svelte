@@ -1,13 +1,10 @@
 <script lang="ts">
-	import { browser } from '$app/environment';
 	import { getImage } from '$lib/helper';
-	import { getDidContext, getIsMobile } from '$lib/website/context';
+	import { getDidContext } from '$lib/website/context';
 	import type { ContentComponentProps } from '../../types';
 	import { qrOverlay } from '$lib/components/qr/qrOverlay.svelte';
 
 	let { item, isEditing }: ContentComponentProps = $props();
-
-	let isMobile = getIsMobile();
 
 	let faviconHasError = $state(false);
 
@@ -15,7 +12,7 @@
 </script>
 
 {#if item.cardData.showBackgroundImage && item.cardData.image}
-	<div class="relative flex h-full flex-col justify-end p-4">
+	<div class="link-card relative flex h-full flex-col justify-end p-4">
 		<img
 			class="absolute inset-0 -z-10 size-full object-cover"
 			src={getImage(item.cardData, did)}
@@ -27,12 +24,7 @@
 		<div class="text-accent-600 dark:text-accent-400 text-xs font-semibold">
 			{item.cardData.domain}
 		</div>
-		<div
-			class={[
-				'text-base-900 dark:text-base-50 text-lg font-bold',
-				(isMobile() && item.mobileH < 8) || (!isMobile() && item.h < 4) ? 'line-clamp-2' : ''
-			]}
-		>
+		<div class="link-title text-base-900 dark:text-base-50 text-lg font-bold">
 			{item.cardData.title}
 		</div>
 		{#if item.cardData.href && !isEditing}
@@ -73,8 +65,8 @@
 		{/if}
 	</div>
 {:else}
-	<div class="flex h-full flex-col justify-between p-4">
-		<div>
+	<div class="link-card flex h-full flex-col p-4">
+		<div class="link-content min-h-0">
 			<div
 				class="bg-base-100 border-base-300 accent:bg-accent-100/50 accent:border-accent-200 dark:border-base-800 dark:bg-base-900 mb-2 inline-flex size-8 items-center justify-center rounded-xl border"
 			>
@@ -102,12 +94,7 @@
 					</svg>
 				{/if}
 			</div>
-			<div
-				class={[
-					'text-base-900 dark:text-base-50 text-lg font-bold',
-					(isMobile() && item.mobileH < 8) || (!isMobile() && item.h < 4) ? 'line-clamp-2' : ''
-				]}
-			>
+			<div class="link-title text-base-900 dark:text-base-50 text-lg font-bold">
 				{item.cardData.title}
 			</div>
 			<!-- <div class="text-base-800 dark:text-base-100 mt-2 text-xs">{item.cardData.description}</div> -->
@@ -118,12 +105,14 @@
 			</div>
 		</div>
 
-		{#if browser && ((isMobile() && item.mobileH >= 8) || (!isMobile() && item.h >= 4)) && item.cardData.image}
-			<img
-				class="mb-2 aspect-2/1 w-full rounded-xl object-cover opacity-100 transition-opacity duration-100 starting:opacity-0"
-				src={getImage(item.cardData, did)}
-				alt=""
-			/>
+		{#if item.cardData.image}
+			<div class="link-preview-wrap mt-auto">
+				<img
+					class="link-preview mb-2 aspect-2/1 w-full rounded-xl object-cover opacity-100 transition-opacity duration-100 starting:opacity-0"
+					src={getImage(item.cardData, did)}
+					alt=""
+				/>
+			</div>
 		{/if}
 		{#if item.cardData.href && !isEditing}
 			<a
@@ -163,3 +152,68 @@
 		{/if}
 	</div>
 {/if}
+
+<style>
+	.link-title {
+		display: -webkit-box;
+		line-clamp: 2;
+		overflow: hidden;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 2;
+	}
+
+	.link-preview {
+		display: none;
+		width: 100%;
+		object-fit: cover;
+	}
+
+	.link-preview-wrap {
+		display: none;
+		padding-top: 1rem;
+	}
+
+	@container card (height >= 18rem) {
+		.link-title {
+			display: block;
+			line-clamp: unset;
+			overflow: visible;
+			-webkit-line-clamp: unset;
+		}
+
+		.link-preview-wrap,
+		.link-preview {
+			display: block;
+		}
+	}
+
+	@container card (height >= 18rem) and (height < 22rem) {
+		.link-content {
+			padding-bottom: 1rem;
+		}
+
+		.link-preview-wrap {
+			padding-top: 0;
+		}
+
+		.link-preview {
+			aspect-ratio: 2.6 / 1;
+			max-height: 4.5rem;
+		}
+	}
+
+	@container card (height >= 22rem) {
+		.link-content {
+			padding-bottom: 0.5rem;
+		}
+
+		.link-preview-wrap {
+			padding-top: 0;
+		}
+
+		.link-preview {
+			aspect-ratio: 2 / 1;
+			max-height: none;
+		}
+	}
+</style>
