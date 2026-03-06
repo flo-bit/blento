@@ -18,6 +18,7 @@
 		isEditing?: boolean;
 		showOutline?: boolean;
 		locked?: boolean;
+		fillPage?: boolean;
 	} & WithElementRef<HTMLAttributes<HTMLDivElement>>;
 
 	let {
@@ -28,6 +29,7 @@
 		controls,
 		showOutline,
 		locked = false,
+		fillPage = false,
 		class: className,
 		...rest
 	}: BaseCardProps = $props();
@@ -38,11 +40,14 @@
 <div
 	id={item.id}
 	data-flip-id={item.id}
+	data-fill-page={fillPage ? 'true' : undefined}
 	bind:this={ref}
 	draggable={false}
 	class={[
-		'card group/card selection:bg-accent-600/50 focus-within:outline-accent-500 @container/card absolute isolate z-0 rounded-3xl outline-offset-2 transition-all duration-200 focus-within:outline-2',
-		color ? (colors[color] ?? colors.accent) : colors.base,
+		fillPage
+			? 'card group/card selection:bg-accent-600/50 focus-within:outline-accent-500 @container/card relative isolate z-0 h-full w-full outline-offset-2 transition-all duration-200 focus-within:outline-2'
+			: 'card group/card selection:bg-accent-600/50 focus-within:outline-accent-500 @container/card absolute isolate z-0 rounded-3xl outline-offset-2 transition-all duration-200 focus-within:outline-2',
+		!fillPage ? (color ? (colors[color] ?? colors.accent) : colors.base) : '',
 		color !== 'accent' && item.color !== 'base' && item.color !== 'transparent' ? color : '',
 		showOutline ? 'outline-2' : '',
 		className
@@ -65,7 +70,8 @@
 >
 	<div
 		class={[
-			'text-base-900 dark:text-base-50 relative isolate h-full w-full overflow-hidden rounded-[23px]',
+			'text-base-900 dark:text-base-50 relative isolate h-full w-full overflow-hidden',
+			!fillPage ? 'rounded-[23px]' : '',
 			color !== 'base' && color != 'transparent' ? 'light' : ''
 		]}
 	>
@@ -84,14 +90,22 @@
 
 <style>
 	.card {
+		container-name: card;
+		container-type: size;
 		translate: calc((var(--mx) / var(--columns)) * 100cqw + var(--mm))
 			calc((var(--my) / var(--columns)) * 100cqw + var(--mm));
 		width: calc((var(--mw) / var(--columns)) * 100cqw - (var(--mm) * 2));
 		height: calc((var(--mh) / var(--columns)) * 100cqw - (var(--mm) * 2));
 	}
 
+	.card[data-fill-page='true'] {
+		translate: none;
+		width: 100%;
+		height: 100%;
+	}
+
 	@container grid (width >= 42rem) {
-		.card {
+		.card:not([data-fill-page='true']) {
 			translate: calc((var(--dx) / var(--columns)) * 100cqw + var(--dm))
 				calc((var(--dy) / var(--columns)) * 100cqw + var(--dm));
 			width: calc((var(--dw) / var(--columns)) * 100cqw - (var(--dm) * 2));

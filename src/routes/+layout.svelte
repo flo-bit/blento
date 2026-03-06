@@ -11,6 +11,9 @@
 	import LoginModal from '$lib/atproto/UI/LoginModal.svelte';
 
 	let { children, data } = $props();
+	let showThemeToggle = $derived(
+		!/(?:\/card\/[^/]+|\/embed\/type\/[^/]+)$/.test(page.url.pathname)
+	);
 
 	const errorMessages: Record<string, (params: URLSearchParams) => string> = {
 		handle_not_found: (p) => `Handle ${p.get('handle') ?? ''} not found!`
@@ -25,7 +28,9 @@
 	{@render children()}
 </Tooltip.Provider>
 
-<ThemeToggle class="fixed top-2 left-2 z-10" />
+{#if showThemeToggle}
+	<ThemeToggle class="fixed top-2 left-2 z-10" />
+{/if}
 
 <Toaster />
 

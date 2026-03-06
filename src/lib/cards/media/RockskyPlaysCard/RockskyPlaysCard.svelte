@@ -8,6 +8,7 @@
 
 	interface Artist {
 		artist: string;
+		name?: string;
 	}
 
 	interface PlayValue {

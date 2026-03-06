@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { Badge, Button } from '@foxui/core';
-	import { getAdditionalUserData, getIsMobile } from '$lib/website/context';
+	import { getAdditionalUserData } from '$lib/website/context';
 	import type { ContentComponentProps } from '../../types';
 	import { CardDefinitionsByType } from '../..';
 	import type { EventData } from '.';
@@ -12,7 +12,6 @@
 
 	let { item }: ContentComponentProps = $props();
 
-	let isMobile = getIsMobile();
 	let isLoaded = $state(false);
 	let fetchedEventData = $state<EventData | undefined>(undefined);
 
@@ -109,12 +108,10 @@
 		};
 	});
 
-	let showImage = $derived(
-		browser && headerImage() && ((isMobile() && item.mobileH >= 8) || (!isMobile() && item.h >= 4))
-	);
+	let showImage = $derived(browser && headerImage());
 </script>
 
-<div class="flex h-full flex-col justify-between overflow-hidden p-4">
+<div class="event-card flex h-full flex-col justify-between overflow-hidden p-4">
 	{#if eventData}
 		<div class="min-w-0 flex-1 overflow-hidden">
 			<div class="mb-2 flex items-center justify-between gap-2">
@@ -142,9 +139,9 @@
 					</Badge>
 				</div>
 
-				{#if isMobile() ? item.mobileW > 4 : item.w > 2}
-					<Button href={eventUrl()} target="_blank" class="z-50">View event</Button>
-				{/if}
+				<div class="event-action z-50">
+					<Button href={eventUrl()} target="_blank">View event</Button>
+				</div>
 			</div>
 
 			<h3 class="text-base-900 dark:text-base-50 mb-2 line-clamp-2 text-lg leading-tight font-bold">
@@ -203,8 +200,10 @@
 				</div>
 			{/if}
 
-			{#if eventData.description && ((isMobile() && item.mobileH >= 5) || (!isMobile() && item.h >= 3))}
-				<p class="text-base-500 dark:text-base-400 accent:text-base-900 mb-3 line-clamp-3 text-sm">
+			{#if eventData.description}
+				<p
+					class="event-description text-base-500 dark:text-base-400 accent:text-base-900 mb-3 line-clamp-3 text-sm"
+				>
 					{eventData.description}
 				</p>
 			{/if}
@@ -213,7 +212,11 @@
 		{#if showImage}
 			{@const img = headerImage()}
 			{#if img}
-				<img src={img.url} alt={img.alt} class="mt-3 aspect-3/1 w-full rounded-xl object-cover" />
+				<img
+					src={img.url}
+					alt={img.alt}
+					class="event-image mt-3 aspect-3/1 w-full rounded-xl object-cover"
+				/>
 			{/if}
 		{/if}
 
@@ -239,3 +242,29 @@
 		</div>
 	{/if}
 </div>
+
+<style>
+	.event-action,
+	.event-description,
+	.event-image {
+		display: none;
+	}
+
+	@container card (width >= 18rem) {
+		.event-action {
+			display: inline-flex;
+		}
+	}
+
+	@container card (height >= 12rem) {
+		.event-description {
+			display: block;
+		}
+	}
+
+	@container card (height >= 15rem) {
+		.event-image {
+			display: block;
+		}
+	}
+</style>

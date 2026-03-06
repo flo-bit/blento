@@ -48,7 +48,7 @@
 		<path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
 	</svg>
 </Button>
-<div class="flex items-center space-x- mt-4">
+<div class="space-x- mt-4 flex items-center">
 	<Checkbox
 		bind:checked={
 			() => Boolean(item.cardData.showBackgroundImage),
@@ -61,7 +61,7 @@
 	<Label
 		id="show-bg-image-label"
 		for="show-bg-image"
-		class="text-sm leading-none ml-2 font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+		class="ml-2 text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
 	>
 		Show background image
 	</Label>

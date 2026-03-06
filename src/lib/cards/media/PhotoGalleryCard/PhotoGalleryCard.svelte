@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Item } from '$lib/types';
 	import { onMount } from 'svelte';
-	import { getAdditionalUserData, getIsMobile } from '$lib/website/context';
+	import { getAdditionalUserData } from '$lib/website/context';
 	import { getCDNImageBlobUrl, parseUri } from '$lib/atproto';
 	import { loadGrainGalleryData } from './helpers';
 
@@ -61,14 +61,29 @@
 			onclick?: () => void;
 		}[]
 	);
-
-	let isMobile = getIsMobile();
 </script>
 
-<div class="z-10 flex h-full w-full flex-col gap-4 overflow-y-scroll p-4">
-	<ImageMasonry
-		images={images ?? []}
-		showNames={false}
-		maxColumns={!isMobile() && item.w > 4 ? 3 : 2}
-	/>
+<div class="photo-gallery-card z-10 flex h-full w-full flex-col gap-4 overflow-y-scroll p-4">
+	<div class="gallery-compact">
+		<ImageMasonry images={images ?? []} showNames={false} maxColumns={2} />
+	</div>
+	<div class="gallery-wide">
+		<ImageMasonry images={images ?? []} showNames={false} maxColumns={3} />
+	</div>
 </div>
+
+<style>
+	.gallery-wide {
+		display: none;
+	}
+
+	@container card (width >= 28rem) {
+		.gallery-compact {
+			display: none;
+		}
+
+		.gallery-wide {
+			display: block;
+		}
+	}
+</style>

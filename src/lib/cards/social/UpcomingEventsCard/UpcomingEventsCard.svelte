@@ -1,12 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { Badge } from '@foxui/core';
-	import {
-		getAdditionalUserData,
-		getDidContext,
-		getHandleContext,
-		getIsMobile
-	} from '$lib/website/context';
+	import { getAdditionalUserData, getDidContext, getHandleContext } from '$lib/website/context';
 	import type { ContentComponentProps } from '../../types';
 	import { UpcomingEventsCardDefinition } from '.';
 	import type { EventData } from '../EventCard';
@@ -16,7 +11,6 @@
 
 	let { item }: ContentComponentProps = $props();
 
-	let isMobile = getIsMobile();
 	let isLoaded = $state(false);
 	const data = getAdditionalUserData();
 	const did = getDidContext();

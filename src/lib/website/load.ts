@@ -1,6 +1,7 @@
 import { getDetailedProfile, listRecords, resolveHandle, parseUri, getRecord } from '$lib/atproto';
 import { CardDefinitionsByType } from '$lib/cards';
 import type { CacheService } from '$lib/cache';
+import { createEmptyCard } from '$lib/helper';
 import type { Item, WebsiteData } from '$lib/types';
 import { error } from '@sveltejs/kit';
 import type { ActorIdentifier, Did } from '@atcute/lexicons';
@@ -85,42 +86,11 @@ export async function loadData(
 		getDetailedProfile({ did })
 	]);
 
-	const cardTypes = new Set(cards.map((v) => v.value.cardType ?? '') as string[]);
-	const cardTypesArray = Array.from(cardTypes);
-
-	const additionDataPromises: Record<string, Promise<unknown>> = {};
-
-	const loadOptions = { did, handle, cache };
-
-	for (const cardType of cardTypesArray) {
-		const cardDef = CardDefinitionsByType[cardType];
-
-		const items = cards.filter((v) => cardType === v.value.cardType).map((v) => v.value) as Item[];
-
-		try {
-			if (cardDef?.loadDataServer) {
-				additionDataPromises[cardType] = cardDef.loadDataServer(items, {
-					...loadOptions,
-					env
-				});
-			} else if (cardDef?.loadData) {
-				additionDataPromises[cardType] = cardDef.loadData(items, loadOptions);
-			}
-		} catch {
-			console.error('error getting additional data for', cardType);
-		}
-	}
-
-	await Promise.all(Object.values(additionDataPromises));
-
-	const additionalData: Record<string, unknown> = {};
-	for (const [key, value] of Object.entries(additionDataPromises)) {
-		try {
-			additionalData[key] = await value;
-		} catch (error) {
-			console.log('error loading', key, error);
-		}
-	}
+	const additionalData = await loadAdditionalData(
+		cards.map((v) => ({ ...v.value })) as Item[],
+		{ did, handle, cache },
+		env
+	);
 
 	const result = {
 		page: 'blento.' + page,
@@ -157,9 +127,148 @@ export async function loadData(
 	return checkData(parsedResult);
 }
 
-function migrateFromV0ToV1(data: WebsiteData): WebsiteData {
-	for (const card of data.cards) {
-		if (card.version) continue;
+export async function loadCardData(
+	handle: ActorIdentifier,
+	rkey: string,
+	cache: CacheService | undefined,
+	env?: Record<string, string | undefined>
+): Promise<WebsiteData> {
+	if (!handle) throw error(404);
+	if (handle === 'favicon.ico') throw error(404);
+
+	let did: Did | undefined = undefined;
+	if (isHandle(handle)) {
+		did = await resolveHandle({ handle });
+	} else if (isDid(handle)) {
+		did = handle;
+	} else {
+		throw error(404);
+	}
+
+	const [cardRecord, profile] = await Promise.all([
+		getRecord({
+			did,
+			collection: 'app.blento.card',
+			rkey
+		}).catch(() => undefined),
+		getDetailedProfile({ did })
+	]);
+
+	if (!cardRecord?.value) {
+		throw error(404, 'Card not found');
+	}
+
+	const card = migrateCard(structuredClone(cardRecord.value) as Item);
+	const page = card.page ?? 'blento.self';
+
+	const publication = await getRecord({
+		did,
+		collection: page === 'blento.self' ? 'site.standard.publication' : 'app.blento.page',
+		rkey: page
+	}).catch(() => undefined);
+
+	const cards = [card];
+	const resolvedHandle = profile?.handle || (isHandle(handle) ? handle : did);
+
+	const additionalData = await loadAdditionalData(
+		cards,
+		{ did, handle: resolvedHandle, cache },
+		env
+	);
+
+	const result = {
+		page,
+		handle: resolvedHandle,
+		did,
+		cards,
+		publication:
+			publication?.value ??
+			({
+				name: profile?.displayName || profile?.handle,
+				description: profile?.description
+			} as WebsiteData['publication']),
+		additionalData,
+		profile,
+		updatedAt: Date.now(),
+		version: CURRENT_CACHE_VERSION
+	};
+
+	return result;
+}
+
+export async function loadCardTypeData(
+	handle: ActorIdentifier,
+	type: string,
+	cardData: Record<string, unknown>,
+	cache: CacheService | undefined,
+	env?: Record<string, string | undefined>
+): Promise<WebsiteData> {
+	if (!handle) throw error(404);
+	if (handle === 'favicon.ico') throw error(404);
+
+	const cardDef = CardDefinitionsByType[type];
+	if (!cardDef) {
+		throw error(404, 'Card type not found');
+	}
+
+	let did: Did | undefined = undefined;
+	if (isHandle(handle)) {
+		did = await resolveHandle({ handle });
+	} else if (isDid(handle)) {
+		did = handle;
+	} else {
+		throw error(404);
+	}
+
+	const [publication, profile] = await Promise.all([
+		getRecord({
+			did,
+			collection: 'site.standard.publication',
+			rkey: 'blento.self'
+		}).catch(() => undefined),
+		getDetailedProfile({ did })
+	]);
+
+	const card = createEmptyCard('blento.self');
+	card.cardType = type;
+
+	cardDef.createNew?.(card);
+	card.cardData = {
+		...card.cardData,
+		...cardData
+	};
+
+	const cards = [card];
+	const resolvedHandle = profile?.handle || (isHandle(handle) ? handle : did);
+
+	const additionalData = await loadAdditionalData(
+		cards,
+		{ did, handle: resolvedHandle, cache },
+		env
+	);
+
+	const result = {
+		page: 'blento.self',
+		handle: resolvedHandle,
+		did,
+		cards,
+		publication:
+			publication?.value ??
+			({
+				name: profile?.displayName || profile?.handle,
+				description: profile?.description
+			} as WebsiteData['publication']),
+		additionalData,
+		profile,
+		updatedAt: Date.now(),
+		version: CURRENT_CACHE_VERSION
+	};
+
+	return checkData(result);
+}
+
+function migrateCard(card: Item): Item {
+	if (!card.version) {
 		card.x *= 2;
 		card.y *= 2;
 		card.h *= 2;
@@ -171,28 +280,58 @@ function migrateFromV0ToV1(data: WebsiteData): WebsiteData {
 		card.version = 1;
 	}
 
-	return data;
+	if (!card.version || card.version < 2) {
+		card.page = 'blento.self';
+		card.version = 2;
+	}
+
+	const cardDef = CardDefinitionsByType[card.cardType];
+	cardDef?.migrate?.(card);
+
+	return card;
 }
 
-function migrateFromV1ToV2(data: WebsiteData): WebsiteData {
-	for (const card of data.cards) {
-		if (!card.version || card.version < 2) {
-			card.page = 'blento.self';
-			card.version = 2;
+async function loadAdditionalData(
+	cards: Item[],
+	{ did, handle, cache }: { did: Did; handle: string; cache?: CacheService },
+	env?: Record<string, string | undefined>
+) {
+	const cardTypes = new Set(cards.map((v) => v.cardType ?? '') as string[]);
+	const cardTypesArray = Array.from(cardTypes);
+	const additionDataPromises: Record<string, Promise<unknown>> = {};
+
+	for (const cardType of cardTypesArray) {
+		const cardDef = CardDefinitionsByType[cardType];
+		const items = cards.filter((v) => cardType === v.cardType);
+
+		try {
+			if (cardDef?.loadDataServer) {
+				additionDataPromises[cardType] = cardDef.loadDataServer(items, {
+					did,
+					handle,
+					cache,
+					env
+				});
+			} else if (cardDef?.loadData) {
+				additionDataPromises[cardType] = cardDef.loadData(items, { did, handle, cache });
+			}
+		} catch {
+			console.error('error getting additional data for', cardType);
 		}
 	}
-	return data;
-}
 
-function migrateCards(data: WebsiteData): WebsiteData {
-	for (const card of data.cards) {
-		const cardDef = CardDefinitionsByType[card.cardType];
+	await Promise.all(Object.values(additionDataPromises));
 
-		if (!cardDef?.migrate) continue;
-
-		cardDef.migrate(card);
+	const additionalData: Record<string, unknown> = {};
+	for (const [key, value] of Object.entries(additionDataPromises)) {
+		try {
+			additionalData[key] = await value;
+		} catch (error) {
+			console.log('error loading', key, error);
+		}
 	}
-	return data;
+
+	return additionalData;
 }
 
 function checkData(data: WebsiteData): WebsiteData {
@@ -214,5 +353,8 @@ function checkData(data: WebsiteData): WebsiteData {
 }
 
 function migrateData(data: WebsiteData): WebsiteData {
-	return migrateCards(migrateFromV1ToV2(migrateFromV0ToV1(data)));
+	for (const card of data.cards) {
+		migrateCard(card);
+	}
+	return data;
 }
