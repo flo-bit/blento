@@ -65,6 +65,9 @@
 	// svelte-ignore state_referenced_locally
 	let savedItemsSnapshot = JSON.stringify(data.cards);
 
+	// svelte-ignore state_referenced_locally
+	let savedPronouns = $state(JSON.stringify(data.pronounsRecord));
+
 	let hasUnsavedChanges = $state(false);
 
 	// Detect card content and publication changes (e.g. sidebar edits)
@@ -75,7 +78,8 @@
 		if (hasUnsavedChanges) return;
 		if (
 			JSON.stringify(items) !== savedItemsSnapshot ||
-			JSON.stringify(data.publication) !== publication
+			JSON.stringify(data.publication) !== publication ||
+			JSON.stringify(data.pronounsRecord) !== savedPronouns
 		) {
 			hasUnsavedChanges = true;
 		}
@@ -226,6 +230,7 @@
 			await savePage(data, items, publication);
 
 			publication = JSON.stringify(data.publication);
+			savedPronouns = JSON.stringify(data.pronounsRecord);
 
 			savedItemsSnapshot = JSON.stringify(items);
 			hasUnsavedChanges = false;

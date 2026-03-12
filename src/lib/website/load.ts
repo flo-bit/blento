@@ -2,7 +2,7 @@ import { getDetailedProfile, listRecords, resolveHandle, parseUri, getRecord } f
 import { CardDefinitionsByType } from '$lib/cards';
 import type { CacheService } from '$lib/cache';
 import { createEmptyCard } from '$lib/helper';
-import type { Item, WebsiteData } from '$lib/types';
+import type { Item, PronounsRecord, WebsiteData } from '$lib/types';
 import { error } from '@sveltejs/kit';
 import type { ActorIdentifier, Did } from '@atcute/lexicons';
 
@@ -10,6 +10,23 @@ import { isDid, isHandle } from '@atcute/lexicons/syntax';
 import { fixAllCollisions, compactItems } from '$lib/layout';
 
 const CURRENT_CACHE_VERSION = 1;
+
+function formatPronouns(
+	record: PronounsRecord | undefined,
+	profile: WebsiteData['profile'] | undefined
+): string | undefined {
+	// nearhorizon.actor.pronouns - https://github.com/skydeval/atproto-pronouns
+	if (record?.value?.sets?.length) {
+		const sets = record.value.sets;
+		const displayMode = record.value.displayMode ?? 'all';
+		const setsToShow = displayMode === 'firstOnly' ? sets.slice(0, 1) : sets;
+		return setsToShow.map((s) => s.forms.join('/')).join(' · ');
+	}
+	// fallback to bsky pronouns
+	const pronouns = (profile as Record<string, unknown>)?.pronouns;
+	if (pronouns && typeof pronouns === 'string') return pronouns;
+	return undefined;
+}
 
 export async function getCache(identifier: ActorIdentifier, page: string, cache?: CacheService) {
 	try {
@@ -66,7 +83,7 @@ export async function loadData(
 		throw error(404);
 	}
 
-	const [cards, mainPublication, pages, profile] = await Promise.all([
+	const [cards, mainPublication, pages, profile, pronounsRecord] = await Promise.all([
 		listRecords({ did, collection: 'app.blento.card', limit: 0 }).catch((e) => {
 			console.error('error getting records for collection app.blento.card', e);
 			return [] as Awaited<ReturnType<typeof listRecords>>;
@@ -83,7 +100,12 @@ export async function loadData(
 			console.error('error getting records for collection app.blento.page');
 			return [] as Awaited<ReturnType<typeof listRecords>>;
 		}),
-		getDetailedProfile({ did })
+		getDetailedProfile({ did }),
+		getRecord({
+			did,
+			collection: 'app.nearhorizon.actor.pronouns',
+			rkey: 'self'
+		}).catch(() => undefined)
 	]);
 
 	const additionalData = await loadAdditionalData(
@@ -102,6 +124,8 @@ export async function loadData(
 		publications: [mainPublication, ...pages].filter((v) => v),
 		additionalData,
 		profile,
+		pronouns: formatPronouns(pronounsRecord, profile),
+		pronounsRecord: pronounsRecord as PronounsRecord | undefined,
 		updatedAt: Date.now(),
 		version: CURRENT_CACHE_VERSION
 	};
@@ -145,13 +169,18 @@ export async function loadCardData(
 		throw error(404);
 	}
 
-	const [cardRecord, profile] = await Promise.all([
+	const [cardRecord, profile, pronounsRecord] = await Promise.all([
 		getRecord({
 			did,
 			collection: 'app.blento.card',
 			rkey
 		}).catch(() => undefined),
-		getDetailedProfile({ did })
+		getDetailedProfile({ did }),
+		getRecord({
+			did,
+			collection: 'app.nearhorizon.actor.pronouns',
+			rkey: 'self'
+		}).catch(() => undefined)
 	]);
 
 	if (!cardRecord?.value) {
@@ -189,6 +218,8 @@ export async function loadCardData(
 			} as WebsiteData['publication']),
 		additionalData,
 		profile,
+		pronouns: formatPronouns(pronounsRecord, profile),
+		pronounsRecord: pronounsRecord as PronounsRecord | undefined,
 		updatedAt: Date.now(),
 		version: CURRENT_CACHE_VERSION
 	};
@@ -220,13 +251,18 @@ export async function loadCardTypeData(
 		throw error(404);
 	}
 
-	const [publication, profile] = await Promise.all([
+	const [publication, profile, pronounsRecord] = await Promise.all([
 		getRecord({
 			did,
 			collection: 'site.standard.publication',
 			rkey: 'blento.self'
 		}).catch(() => undefined),
-		getDetailedProfile({ did })
+		getDetailedProfile({ did }),
+		getRecord({
+			did,
+			collection: 'app.nearhorizon.actor.pronouns',
+			rkey: 'self'
+		}).catch(() => undefined)
 	]);
 
 	const card = createEmptyCard('blento.self');
@@ -260,6 +296,8 @@ export async function loadCardTypeData(
 			} as WebsiteData['publication']),
 		additionalData,
 		profile,
+		pronouns: formatPronouns(pronounsRecord, profile),
+		pronounsRecord: pronounsRecord as PronounsRecord | undefined,
 		updatedAt: Date.now(),
 		version: CURRENT_CACHE_VERSION
 	};

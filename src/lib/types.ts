@@ -27,6 +27,19 @@ export type Item = {
 	page?: string;
 };
 
+export type PronounSet = {
+	forms: string[];
+};
+
+export type PronounsRecord = {
+	value?: {
+		sets?: PronounSet[];
+		displayMode?: string;
+		createdAt?: string;
+		updatedAt?: string;
+	};
+};
+
 export type WebsiteData = {
 	page: string;
 	did: string;
@@ -61,6 +74,8 @@ export type WebsiteData = {
 		};
 	};
 	profile: AppBskyActorDefs.ProfileViewDetailed;
+	pronouns?: string;
+	pronounsRecord?: PronounsRecord;
 
 	additionalData: Record<string, unknown>;
 	updatedAt: number;
