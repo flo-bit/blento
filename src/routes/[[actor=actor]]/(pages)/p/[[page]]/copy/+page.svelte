@@ -10,7 +10,7 @@
 	import { goto } from '$app/navigation';
 	import * as TID from '@atcute/tid';
 	import { Button } from '@foxui/core';
-	import { loginModalState } from '$lib/atproto/UI/LoginModal.svelte';
+	import { atProtoLoginModalState } from '@foxui/social';
 
 	let { data } = $props();
 
@@ -245,7 +245,7 @@
 			</h1>
 
 			<div class="flex w-full justify-center">
-				<Button size="lg" onclick={() => loginModalState.show()}>Login</Button>
+				<Button size="lg" onclick={() => atProtoLoginModalState.show()}>Login</Button>
 			</div>
 		{/if}
 	</div>

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { user } from '$lib/atproto/auth.svelte';
 	import { getRecord, putRecord, deleteRecord, createTID } from '$lib/atproto/methods';
-	import { loginModalState } from '$lib/atproto/UI/LoginModal.svelte';
+	import { atProtoLoginModalState } from '@foxui/social';
 	import { Avatar, Button } from '@foxui/core';
 	import type { Did } from '@atcute/lexicons';
 
@@ -145,7 +145,7 @@
 		<div class="flex items-center justify-between gap-4">
 			<p class="text-base-600 dark:text-base-400 text-sm">Log in to RSVP to this event</p>
 
-			<Button onclick={() => loginModalState.show()}>Log in to RSVP</Button>
+			<Button onclick={() => atProtoLoginModalState.show()}>Log in to RSVP</Button>
 		</div>
 	{:else if rsvpStatus === 'going'}
 		<div class="flex items-center justify-between">

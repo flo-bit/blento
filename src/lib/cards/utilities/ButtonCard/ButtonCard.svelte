@@ -2,7 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { user } from '$lib/atproto';
 	import { getHandleOrDid } from '$lib/atproto/methods';
-	import { loginModalState } from '$lib/atproto/UI/LoginModal.svelte';
+	import { atProtoLoginModalState } from '@foxui/social';
 	import { cn } from '@foxui/core';
 	import type { ContentComponentProps } from '../../types';
 
@@ -28,7 +28,7 @@
 			if (user.isLoggedIn && user.profile) {
 				goto('/' + getHandleOrDid(user.profile) + '/edit', {});
 			} else {
-				loginModalState.show();
+				atProtoLoginModalState.show();
 			}
 		}}
 		class={[

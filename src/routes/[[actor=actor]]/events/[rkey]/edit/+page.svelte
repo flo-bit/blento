@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { user } from '$lib/atproto/auth.svelte';
-	import { loginModalState } from '$lib/atproto/UI/LoginModal.svelte';
+	import { atProtoLoginModalState } from '@foxui/social';
 	import { uploadBlob, putRecord, deleteRecord, resolveHandle } from '$lib/atproto/methods';
 	import { getCDNImageBlobUrl } from '$lib/atproto';
 	import { compressImage } from '$lib/atproto/image-helper';
@@ -624,7 +624,7 @@
 				<p class="text-base-600 dark:text-base-400 mb-4">
 					Log in to {isNew ? 'create an event' : 'edit this event'}.
 				</p>
-				<Button onclick={() => loginModalState.show()}>Log in</Button>
+				<Button onclick={() => atProtoLoginModalState.show()}>Log in</Button>
 			</div>
 		{:else}
 			<form

@@ -1,12 +1,11 @@
 <script lang="ts">
 	import { user, login } from '$lib/atproto';
 	import { Button } from '@foxui/core';
-	import { BlueskyLogin } from '@foxui/social';
 	import { env } from '$env/dynamic/public';
 	import type { WebsiteData } from '$lib/types';
 	import { page } from '$app/state';
 	import type { ActorIdentifier } from '@atcute/lexicons';
-	import { loginModalState } from '$lib/atproto/UI/LoginModal.svelte';
+	import { atProtoLoginModalState } from '@foxui/social';
 	import { getHandleOrDid } from '$lib/atproto/methods';
 
 	let { data }: { data: WebsiteData } = $props();
@@ -70,7 +69,7 @@
 	</div>
 {:else if showLoginOnBlento}
 	<div class="fixed bottom-6 left-6 z-49">
-		<Button size="lg" onclick={() => loginModalState.show()}>Login</Button>
+		<Button size="lg" onclick={() => atProtoLoginModalState.show()}>Login</Button>
 	</div>
 {:else if showEditBlentoButton}
 	<div class="fixed bottom-6 left-6 z-49">
