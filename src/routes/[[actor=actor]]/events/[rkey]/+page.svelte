@@ -7,7 +7,7 @@
 	import EventRsvp from './EventRsvp.svelte';
 	import EventAttendees from './EventAttendees.svelte';
 	import { page } from '$app/state';
-	import { segmentize, type Facet } from '@atcute/bluesky-richtext-segmenter';
+	import { marked } from 'marked';
 	import { sanitize } from '$lib/sanitize';
 	import { generateICalEvent } from '$lib/ical';
 
@@ -113,46 +113,73 @@
 			startDate.getDate() === endDate.getDate()
 	);
 
-	function escapeHtml(str: string): string {
-		return str
-			.replace(/&/g, '&amp;')
-			.replace(/</g, '&lt;')
-			.replace(/>/g, '&gt;')
-			.replace(/"/g, '&quot;')
-			.replace(/'/g, '&#39;');
-	}
+	const renderer = new marked.Renderer();
+	renderer.link = ({ href, text }) =>
+		`<a target="_blank" rel="noopener noreferrer nofollow" href="${href}" class="text-accent-600 dark:text-accent-400 hover:underline">${text}</a>`;
 
-	function renderDescription(text: string, facets?: Facet[]): string {
-		const segments = segmentize(text, facets);
-		const html = segments
-			.map((segment) => {
-				const escaped = escapeHtml(segment.text);
-				const feature = segment.features?.[0] as
-					| { $type: string; did?: string; uri?: string; tag?: string }
-					| undefined;
-				if (!feature) return `<span>${escaped}</span>`;
+	function renderDescription(
+		text: string,
+		facets?: {
+			index: { byteStart: number; byteEnd: number };
+			features: { $type: string; did?: string; uri?: string; tag?: string }[];
+		}[]
+	): string {
+		let result = text;
 
-				const link = (href: string) =>
-					`<a target="_blank" rel="noopener noreferrer nofollow" href="${encodeURI(href)}" class="text-accent-600 dark:text-accent-400 hover:underline">${escaped}</a>`;
+		if (facets && facets.length > 0) {
+			const encoder = new TextEncoder();
+			const encoded = encoder.encode(text);
+			const decoder = new TextDecoder();
 
+			// Sort facets in reverse order by byteStart so replacements don't shift positions
+			const sorted = [...facets].sort((a, b) => b.index.byteStart - a.index.byteStart);
+
+			for (const facet of sorted) {
+				const feature = facet.features?.[0];
+				if (!feature) continue;
+
+				const segmentBytes = encoded.slice(facet.index.byteStart, facet.index.byteEnd);
+				const segmentText = decoder.decode(segmentBytes);
+
+				let mdLink: string | null = null;
 				switch (feature.$type) {
 					case 'app.bsky.richtext.facet#mention':
-						return link(`https://bsky.app/profile/${feature.did}`);
+						mdLink = `[${segmentText}](https://bsky.app/profile/${feature.did})`;
+						break;
 					case 'app.bsky.richtext.facet#link':
-						return link(feature.uri!);
+						mdLink = `[${segmentText}](${feature.uri})`;
+						break;
 					case 'app.bsky.richtext.facet#tag':
-						return link(`https://bsky.app/hashtag/${feature.tag}`);
-					default:
-						return `<span>${escaped}</span>`;
+						mdLink = `[${segmentText}](https://bsky.app/hashtag/${feature.tag})`;
+						break;
 				}
-			})
-			.join('');
-		return html.replace(/\n/g, '<br>');
+
+				if (mdLink) {
+					// Convert byte offsets to character offsets for string replacement
+					const before = decoder.decode(encoded.slice(0, facet.index.byteStart));
+					const after = decoder.decode(encoded.slice(facet.index.byteEnd));
+					result = before + mdLink + after;
+				}
+			}
+		}
+
+		return marked.parse(result, { renderer }) as string;
 	}
 
 	let descriptionHtml = $derived(
 		eventData.description
-			? sanitize(renderDescription(eventData.description, eventData.facets as Facet[] | undefined))
+			? sanitize(
+					renderDescription(
+						eventData.description,
+						eventData.facets as
+							| {
+									index: { byteStart: number; byteEnd: number };
+									features: { $type: string; did?: string; uri?: string; tag?: string }[];
+							  }[]
+							| undefined
+					),
+					{ ADD_ATTR: ['target'] }
+				)
 			: null
 	);
 
@@ -337,9 +364,11 @@
 						>
 							About
 						</p>
-						<p class="text-base-700 dark:text-base-300 leading-relaxed wrap-break-word">
+						<div
+							class="text-base-700 dark:text-base-300 prose dark:prose-invert prose-a:text-accent-600 dark:prose-a:text-accent-400 prose-a:hover:underline prose-a:no-underline max-w-none leading-relaxed wrap-break-word"
+						>
 							{@html descriptionHtml}
-						</p>
+						</div>
 					</div>
 				{/if}
 			</div>
