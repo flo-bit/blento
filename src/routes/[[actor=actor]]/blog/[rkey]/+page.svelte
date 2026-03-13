@@ -2,8 +2,8 @@
 	import { getCDNImageBlobUrl } from '$lib/atproto';
 	import { Avatar as FoxAvatar } from '@foxui/core';
 	import { marked } from 'marked';
-	import { sanitize } from '$lib/sanitize';
 	import { all, createLowlight } from 'lowlight';
+	import BlogContent from '$lib/embeds/BlogContent.svelte';
 
 	const lowlight = createLowlight(all);
 
@@ -157,9 +157,7 @@
 			<article
 				class="prose dark:prose-invert prose-base prose-neutral prose-a:text-accent-600 dark:prose-a:text-accent-400 prose-img:rounded-xl max-w-none"
 			>
-				{@html sanitize(marked.parse(content.value, { renderer }) as string, {
-					ADD_ATTR: ['target']
-				})}
+				<BlogContent content={content.value} {renderer} />
 			</article>
 		{:else}
 			<div class="py-4">

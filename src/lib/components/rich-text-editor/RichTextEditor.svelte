@@ -19,6 +19,7 @@
 	import './code.css';
 	import { cn } from '@foxui/core';
 	import { ImageUploadNode } from './image-upload/ImageUploadNode';
+	import { EmbedNode } from './embed/EmbedNode';
 	import { Transaction } from '@tiptap/pm/state';
 
 	let {
@@ -129,7 +130,8 @@
 						!editor.view.state.selection.empty &&
 						!editor.isActive('codeBlock') &&
 						!editor.isActive('link') &&
-						!editor.isActive('imageUpload')
+						!editor.isActive('imageUpload') &&
+						!editor.isActive('embed')
 					);
 				},
 				pluginKey: 'bubble-menu-marks'
@@ -158,7 +160,8 @@
 			}),
 			Typography.configure(),
 			Markdown.configure(),
-			ImageUploadNode.configure({})
+			ImageUploadNode.configure({}),
+			EmbedNode.configure({})
 		];
 
 		editor = new Editor({
@@ -389,6 +392,13 @@
 		:global(div[data-type='image-upload']) {
 			&.ProseMirror-selectednode {
 				outline: 3px solid var(--color-accent-500);
+			}
+		}
+
+		:global(div[data-type='embed']) {
+			&.ProseMirror-selectednode {
+				outline: 3px solid var(--color-accent-500);
+				border-radius: 0.75rem;
 			}
 		}
 
