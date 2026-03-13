@@ -63,7 +63,7 @@
 
 		<div class="scrollbar -mx-4 grow overflow-x-hidden overflow-y-scroll px-4">
 			<div
-				class="text-base-600 dark:text-base-400 prose dark:prose-invert prose-a:text-accent-500 prose-a:no-underline"
+				class="text-base-600 dark:text-base-400 prose dark:prose-invert prose-a:text-accent-500 prose-a:no-underline whitespace-pre-wrap"
 			>
 				{@html sanitize(
 					marked.parse(getDescription(data), {
