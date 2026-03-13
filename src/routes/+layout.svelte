@@ -8,7 +8,9 @@
 	import YoutubeVideoPlayer, { videoPlayer } from '$lib/components/YoutubeVideoPlayer.svelte';
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
-	import LoginModal from '$lib/atproto/UI/LoginModal.svelte';
+	import { AtprotoLoginModal } from '@foxui/social';
+	import { login, signup } from '$lib/atproto';
+	import type { ActorIdentifier } from '@atcute/lexicons';
 
 	let { children, data } = $props();
 	let showThemeToggle = $derived(
@@ -38,4 +40,13 @@
 	<YoutubeVideoPlayer />
 {/if}
 
-<LoginModal />
+<AtprotoLoginModal
+	login={async (handle) => {
+		await login(handle as ActorIdentifier);
+		return true;
+	}}
+	signup={async () => {
+		await signup();
+		return true;
+	}}
+/>

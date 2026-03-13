@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { user } from '$lib/atproto/auth.svelte';
-	import { loginModalState } from '$lib/atproto/UI/LoginModal.svelte';
+	import { atProtoLoginModalState } from '@foxui/social';
 	import { uploadBlob, createTID } from '$lib/atproto/methods';
 	import { compressImage } from '$lib/atproto/image-helper';
 	import { Badge, Button } from '@foxui/core';
@@ -384,7 +384,7 @@
 				class="border-base-200 dark:border-base-800 bg-base-100 dark:bg-base-900/50 rounded-2xl border p-8 text-center"
 			>
 				<p class="text-base-600 dark:text-base-400 mb-4">Log in to create a blog post.</p>
-				<Button onclick={() => loginModalState.show()}>Log in</Button>
+				<Button onclick={() => atProtoLoginModalState.show()}>Log in</Button>
 			</div>
 		{:else}
 			<!-- Draft badge -->
