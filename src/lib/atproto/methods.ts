@@ -131,7 +131,7 @@ export async function getBlentoOrBskyProfile(data: { did: Did; client?: Client }
 		handle: response?.handle,
 		displayName: blentoProfile?.value?.name || response?.displayName || response?.handle,
 		avatar: avatar as `${string}:${string}`,
-		hasBlento: Boolean(blentoProfile.value),
+		hasBlento: Boolean(blentoProfile?.value),
 		url: blentoProfile?.value?.url as string | undefined
 	};
 }
