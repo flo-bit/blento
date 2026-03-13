@@ -7,6 +7,7 @@
 	import { qrOverlay } from '$lib/components/qr/qrOverlay.svelte';
 	import MadeWithBlento from './MadeWithBlento.svelte';
 	import { Avatar } from '@foxui/core';
+	import Pronouns from './Pronouns.svelte';
 
 	let {
 		data,
@@ -61,10 +62,8 @@
 			{getName(data)}
 		</div>
 
-		{#if data.pronouns}
-			<div class="text-base-500 dark:text-base-400 -mt-2 text-sm">
-				{data.pronouns}
-			</div>
+		{#if data.pronounsRecord?.value?.sets?.length}
+			<Pronouns {data} />
 		{/if}
 
 		<div class="scrollbar -mx-4 grow overflow-x-hidden overflow-y-scroll px-4">
