@@ -49,6 +49,11 @@ import { LastFMRecentTracksCardDefinition } from './media/LastFMCard/LastFMRecen
 import { LastFMTopTracksCardDefinition } from './media/LastFMCard/LastFMTopTracksCard';
 import { LastFMTopAlbumsCardDefinition } from './media/LastFMCard/LastFMTopAlbumsCard';
 import { LastFMProfileCardDefinition } from './media/LastFMCard/LastFMProfileCard';
+import { ListenBrainzRecentListensCardDefinition } from './media/ListenBrainzCard/ListenBrainzRecentListensCard';
+import { ListenBrainzTopArtistsCardDefinition } from './media/ListenBrainzCard/ListenBrainzTopArtistsCard';
+import { ListenBrainzTopAlbumsCardDefinition } from './media/ListenBrainzCard/ListenBrainzTopAlbumsCard';
+import { ListenBrainzTopSongsCardDefinition } from './media/ListenBrainzCard/ListenBrainzTopSongsCard';
+import { ListenBrainzNowPlayingCardDefinition } from './media/ListenBrainzCard/ListenBrainzNowPlayingCard';
 import { PlyrFMCardDefinition, PlyrFMCollectionCardDefinition } from './media/PlyrFMCard';
 import { MarginCardDefinition } from './social/MarginCard';
 import { SembleCollectionCardDefinition } from './social/SembleCollectionCard';
@@ -107,6 +112,11 @@ export const AllCardDefinitions = [
 	LastFMTopTracksCardDefinition,
 	LastFMTopAlbumsCardDefinition,
 	LastFMProfileCardDefinition,
+	ListenBrainzRecentListensCardDefinition,
+	ListenBrainzTopArtistsCardDefinition,
+	ListenBrainzTopAlbumsCardDefinition,
+	ListenBrainzTopSongsCardDefinition,
+	ListenBrainzNowPlayingCardDefinition,
 	PlyrFMCardDefinition,
 	PlyrFMCollectionCardDefinition,
 	MarginCardDefinition,

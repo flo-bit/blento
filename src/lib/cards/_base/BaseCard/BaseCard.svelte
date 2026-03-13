@@ -4,6 +4,7 @@
 	import type { WithElementRef } from 'bits-ui';
 	import type { Snippet } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
+	import { Button } from '@foxui/core';
 	import { getColor } from '../..';
 
 	const colors = {
@@ -37,6 +38,29 @@
 	let color = $derived(getColor(item));
 </script>
 
+{#snippet pending()}
+	<div
+		class="text-base-500 dark:text-base-400 accent:text-white/60 flex h-full items-center justify-center text-center text-sm"
+	>
+		<p>Loading...</p>
+	</div>
+{/snippet}
+
+{#snippet failed(_error: unknown, retry: () => void)}
+	<div
+		class="text-base-500 dark:text-base-400 accent:text-white/60 flex h-full items-center justify-center gap-1 text-center text-sm"
+	>
+		<p>Failed to load,</p>
+		<Button
+			class="border-none bg-transparent p-0"
+			onclick={(event) => {
+				event.stopPropagation();
+				retry();
+			}}>try again?</Button
+		>
+	</div>
+{/snippet}
+
 <div
 	id={item.id}
 	data-flip-id={item.id}
@@ -64,7 +88,7 @@
     --dw: ${item.w};
     --dh: ${item.h};
     --dm: ${margin}px;
-	
+
 	--columns: ${COLUMNS}`}
 	{...rest}
 >
@@ -75,7 +99,13 @@
 			color !== 'base' && color != 'transparent' ? 'light' : ''
 		]}
 	>
-		{@render children?.()}
+		<svelte:boundary {failed} {pending}>
+			{#if $effect.pending()}
+				pending
+			{/if}
+
+			{@render children?.()}
+		</svelte:boundary>
 
 		{#if !isEditing && item.cardData.label}
 			<div

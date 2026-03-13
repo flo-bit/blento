@@ -31,12 +31,13 @@
 		"prettier": "^3.8.1",
 		"prettier-plugin-svelte": "^3.4.1",
 		"prettier-plugin-tailwindcss": "^0.7.2",
-		"svelte": "^5.48.0",
+		"svelte": "^5.53.10",
 		"svelte-check": "^4.3.5",
 		"svelte-maplibre-gl": "^1.0.3",
 		"tailwindcss": "^4.1.18",
 		"typescript": "^5.9.3",
 		"typescript-eslint": "^8.53.1",
+		"valibot": "^1.2.0",
 		"vite": "^7.3.1"
 	},
 	"dependencies": {
