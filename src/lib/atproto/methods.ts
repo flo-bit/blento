@@ -120,7 +120,12 @@ export async function getBlentoOrBskyProfile(data: { did: Did; client?: Client }
 		console.error('error getting blento profile, falling back to bsky profile');
 	}
 
-	const response = await getDetailedProfile(data);
+	let response;
+	try {
+		response = await getDetailedProfile(data);
+	} catch {
+		// public API or PDS unreachable — return minimal profile
+	}
 
 	const avatar = blentoProfile?.value?.icon
 		? getCDNImageBlobUrl({ did: data?.did, blob: blentoProfile?.value?.icon })
@@ -128,7 +133,7 @@ export async function getBlentoOrBskyProfile(data: { did: Did; client?: Client }
 
 	return {
 		did: data.did,
-		handle: response?.handle,
+		handle: response?.handle ?? (data.did as `${string}.${string}`),
 		displayName: blentoProfile?.value?.name || response?.displayName || response?.handle,
 		avatar: avatar as `${string}:${string}`,
 		hasBlento: Boolean(blentoProfile?.value),

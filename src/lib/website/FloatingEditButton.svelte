@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { user, login } from '$lib/atproto';
 	import { Button } from '@foxui/core';
-	import { BlueskyLogin } from '@foxui/social';
 	import { env } from '$env/dynamic/public';
 	import type { WebsiteData } from '$lib/types';
 	import { page } from '$app/state';

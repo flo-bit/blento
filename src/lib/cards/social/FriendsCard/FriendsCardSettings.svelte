@@ -2,7 +2,7 @@
 	import type { Item } from '$lib/types';
 	import type { SettingsComponentProps } from '../../types';
 	import type { AppBskyActorDefs } from '@atcute/bluesky';
-	import HandleInput from '$lib/atproto/UI/HandleInput.svelte';
+	import { AtprotoHandlePopup } from '@foxui/social';
 
 	let { item = $bindable<Item>() }: SettingsComponentProps = $props();
 
@@ -20,4 +20,6 @@
 	}
 </script>
 
-<HandleInput bind:value={handleValue} onselected={addFriend} bind:ref={inputRef} />
+<!-- <HandleInput bind:value={handleValue} onselected={addFriend} bind:ref={inputRef} /> -->
+
+<AtprotoHandlePopup onselected={addFriend} />
