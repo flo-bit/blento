@@ -291,6 +291,28 @@ export async function savePage(
 		console.log('updating or adding publication', data.publication);
 	}
 
+	// check if pronouns edited and save
+	if (data.pronounsRecord?.value?.sets?.length) {
+		const existing = data.pronounsRecord.value;
+		const now = new Date().toISOString();
+		const record: Record<string, unknown> = {
+			$type: 'app.nearhorizon.actor.pronouns',
+			sets: existing.sets,
+			displayMode: existing.displayMode ?? 'all',
+			createdAt: existing.createdAt ?? now
+		};
+		if (existing.createdAt) {
+			record.updatedAt = now;
+		}
+		promises.push(
+			putRecord({
+				collection: 'app.nearhorizon.actor.pronouns',
+				rkey: 'self',
+				record
+			})
+		);
+	}
+
 	await Promise.all(promises);
 }
 

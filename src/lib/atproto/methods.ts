@@ -247,7 +247,8 @@ export async function getRecord({
 		}
 	});
 
-	if (!record.ok) throw new Error((record.data as { message?: string })?.message ?? 'Record not found');
+	if (!record.ok)
+		throw new Error((record.data as { message?: string })?.message ?? 'Record not found');
 
 	return JSON.parse(JSON.stringify(record.data));
 }

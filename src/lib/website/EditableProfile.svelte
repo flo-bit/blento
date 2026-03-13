@@ -5,6 +5,7 @@
 	import MarkdownTextEditor from '$lib/components/MarkdownTextEditor.svelte';
 	import { Avatar } from '@foxui/core';
 	import MadeWithBlento from './MadeWithBlento.svelte';
+	import Pronouns from './Pronouns.svelte';
 
 	let { data = $bindable(), hideBlento = false }: { data: WebsiteData; hideBlento?: boolean } =
 		$props();
@@ -133,6 +134,8 @@
 				/>
 			</div>
 		{/if}
+
+		<Pronouns bind:data editing />
 
 		<!-- Editable Description -->
 		<div class="scrollbar -mx-4 grow overflow-x-hidden overflow-y-scroll px-4">

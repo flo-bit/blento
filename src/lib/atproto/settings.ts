@@ -24,7 +24,8 @@ export const permissions = {
 		'site.standard.document',
 		'xyz.statusphere.status',
 		'community.lexicon.calendar.rsvp',
-		'community.lexicon.calendar.event'
+		'community.lexicon.calendar.event',
+		'app.nearhorizon.actor.pronouns'
 	],
 
 	// what types of authenticated proxied requests you can make to services
