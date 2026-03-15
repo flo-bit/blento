@@ -26,8 +26,13 @@
 		}
 	});
 
-	// Use card-specific emoji if set, otherwise fall back to PDS data
-	let emoji = $derived(item.cardData?.emoji ?? record?.value?.status);
+	let mode = $derived(item.cardData?.mode ?? 'emoji');
+	// Emoji mode: use cardData. Statusphere mode: use latest record or preview.
+	let emoji = $derived(
+		mode === 'statusphere'
+			? (item.cardData?.emoji ?? record?.value?.status)
+			: item.cardData?.emoji
+	);
 
 	let showPopover = $state(false);
 </script>
@@ -36,9 +41,10 @@
 	<PopoverEmojiPicker
 		bind:open={showPopover}
 		onpicked={(picked) => {
-			item.cardData.hasUpdate = true;
+			if (mode === 'statusphere') {
+				item.cardData.hasUpdate = true;
+			}
 			item.cardData.emoji = picked.unicode;
-
 			showPopover = false;
 		}}
 	>
