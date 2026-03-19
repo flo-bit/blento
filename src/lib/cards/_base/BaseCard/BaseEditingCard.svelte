@@ -298,7 +298,7 @@
 
 			<div
 				class={[
-					'absolute -bottom-7 w-full items-center justify-center text-xs lg:group-focus-within:inline-flex lg:group-hover/card:inline-flex',
+					'absolute -bottom-13 w-full items-center justify-center text-xs lg:group-focus-within:inline-flex lg:group-hover/card:inline-flex',
 					colorPopoverOpen || settingsPopoverOpen ? 'inline-flex' : 'hidden'
 				]}
 			>
@@ -434,8 +434,9 @@
 			{#if cardDef.canResize !== false}
 				<!-- Resize handle at bottom right corner -->
 				<div
+					role="separator"
 					onpointerdown={handleResizeStart}
-					class="bg-base-300/70 dark:bg-base-900/70 pointer-events-auto absolute right-0.5 bottom-0.5 hidden cursor-se-resize rounded-md rounded-br-3xl p-1 lg:group-hover/card:block"
+					class="bg-base-300/70 dark:bg-base-900/70 pointer-events-auto absolute right-2 bottom-2 hidden cursor-se-resize rounded-md rounded-br-2xl p-1.5 lg:group-hover/card:block"
 				>
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
@@ -447,21 +448,12 @@
 						stroke-linejoin="round"
 						class=" dark:text-base-400 text-base-600 size-4"
 					>
-						<circle cx="12" cy="5" r="1" /><circle cx="19" cy="5" r="1" /><circle
-							cx="5"
-							cy="5"
-							r="1"
-						/>
-						<circle cx="12" cy="12" r="1" /><circle cx="19" cy="12" r="1" /><circle
-							cx="5"
-							cy="12"
-							r="1"
-						/>
-						<circle cx="12" cy="19" r="1" /><circle cx="19" cy="19" r="1" /><circle
-							cx="5"
-							cy="19"
-							r="1"
-						/>
+						<circle cx="9" cy="12" r="1" />
+						<circle cx="9" cy="5" r="1" />
+						<circle cx="9" cy="19" r="1" />
+						<circle cx="15" cy="12" r="1" />
+						<circle cx="15" cy="5" r="1" />
+						<circle cx="15" cy="19" r="1" />
 					</svg>
 					<span class="sr-only">Resize card</span>
 				</div>
