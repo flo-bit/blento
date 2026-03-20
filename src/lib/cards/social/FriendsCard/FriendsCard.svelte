@@ -22,7 +22,10 @@
 
 	let profiles = $derived.by(() => {
 		return dids
-			.map((did) => clientProfiles.find((p) => p.did === did) ?? serverProfiles.find((p) => p.did === did))
+			.map(
+				(did) =>
+					clientProfiles.find((p) => p.did === did) ?? serverProfiles.find((p) => p.did === did)
+			)
 			.filter((p): p is FriendsProfile => !!p);
 	});
 
