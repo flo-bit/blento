@@ -298,7 +298,7 @@
 
 			<div
 				class={[
-					'absolute -bottom-13 w-full items-center justify-center text-xs lg:group-focus-within:inline-flex lg:group-hover/card:inline-flex',
+					'translate absolute -bottom-12 w-full items-center justify-center pt-1.5 text-xs lg:group-focus-within:inline-flex lg:group-hover/card:inline-flex',
 					colorPopoverOpen || settingsPopoverOpen ? 'inline-flex' : 'hidden'
 				]}
 			>
