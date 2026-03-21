@@ -5,7 +5,6 @@
 	import { CardDefinitionsByType } from '../..';
 	import { getAdditionalUserData } from '$lib/website/context';
 	import type { ContentComponentProps } from '../../types';
-	import KichMascot from '../KichRecipeCard/KichMascot.svelte';
 	import type { KichRecipeCollectionCardData } from '.';
 
 	let { item }: ContentComponentProps = $props();
@@ -85,10 +84,10 @@
 			class="relative block min-h-0 flex-1"
 		>
 			{#if imageUrl}
-				<img src={imageUrl} alt={title} class="rounded-top-xl h-full w-full object-cover" />
+				<img src={imageUrl} alt={title} class="rounded-t-xl h-full w-full object-cover" />
 			{:else}
 				<div
-					class="rounded-top-xl from-base-300 to-base-200 dark:from-base-800 dark:to-base-900 h-full w-full bg-gradient-to-br"
+					class="rounded-t-xl from-base-300 to-base-200 dark:from-base-800 dark:to-base-900 h-full w-full bg-gradient-to-br"
 				></div>
 			{/if}
 
@@ -103,7 +102,7 @@
 					</div>
 				{/if}
 
-				<h3 class="line-clamp-2 text-xl font-semibold text-white">{title}</h3>
+				<h3 class="kich-wordmark line-clamp-2 text-xl font-semibold text-white">{title}</h3>
 				{#if description}
 					<p class="mt-1 line-clamp-2 text-sm text-white/90">{description}</p>
 				{/if}

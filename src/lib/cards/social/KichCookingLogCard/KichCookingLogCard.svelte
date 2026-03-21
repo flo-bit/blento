@@ -19,7 +19,7 @@
 	let isLoaded = $state(false);
 
 	onMount(async () => {
-		if (!logs || logs.length === 0) {
+		if (logs.length === 0) {
 			isLoading = true;
 			const loaded = (await CardDefinitionsByType[item.cardType]?.loadData?.([item], {
 				did,
