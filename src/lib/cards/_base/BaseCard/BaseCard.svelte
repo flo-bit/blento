@@ -64,14 +64,14 @@
     --dw: ${item.w};
     --dh: ${item.h};
     --dm: ${margin}px;
-	
+
 	--columns: ${COLUMNS}`}
 	{...rest}
 >
 	<div
 		class={[
 			'text-base-900 dark:text-base-50 relative isolate h-full w-full overflow-hidden',
-			!fillPage ? 'rounded-[23px]' : '',
+			!fillPage ? 'rounded-3xl' : '',
 			color !== 'base' && color != 'transparent' ? 'light' : ''
 		]}
 	>

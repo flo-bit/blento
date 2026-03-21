@@ -210,7 +210,7 @@
 	{#if cardDef.canHaveLabel}
 		<div
 			class={cn(
-				'bg-base-200/50 dark:bg-base-900/50 absolute top-2 left-2 z-100 w-fit max-w-[calc(100%-1rem)] rounded-xl p-1 px-2 backdrop-blur-md',
+				'bg-base-200/70 dark:bg-base-900/70 absolute top-2 left-2 z-100 w-fit max-w-[calc(100%-1rem)] rounded-md rounded-tl-2xl px-2.25 py-0.75 backdrop-blur-md',
 				!item.cardData.label && 'hidden lg:group-hover/card:block'
 			)}
 		>
@@ -298,7 +298,7 @@
 
 			<div
 				class={[
-					'absolute -bottom-13 w-full items-center justify-center text-xs lg:group-focus-within:inline-flex lg:group-hover/card:inline-flex',
+					'translate absolute -bottom-13 w-full items-center justify-center pt-2.5 text-xs lg:group-focus-within:inline-flex lg:group-hover/card:inline-flex',
 					colorPopoverOpen || settingsPopoverOpen ? 'inline-flex' : 'hidden'
 				]}
 			>
@@ -446,7 +446,7 @@
 						stroke-width="2"
 						stroke-linecap="round"
 						stroke-linejoin="round"
-						class=" dark:text-base-400 text-base-600 size-4"
+						class="dark:text-base-300 text-base-600 size-4"
 					>
 						<circle cx="9" cy="12" r="1" />
 						<circle cx="9" cy="5" r="1" />

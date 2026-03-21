@@ -69,7 +69,7 @@
 {/if}
 
 {#if editing}
-	<Button size="sm" onclick={openModal}>
+	<Button size="iconLg" onclick={openModal}>
 		<svg
 			xmlns="http://www.w3.org/2000/svg"
 			fill="none"

@@ -40,8 +40,8 @@
 	}}
 	placeholder="Enter link"
 />
-<Button onclick={updateLink} size="icon"
-	><svg
+<Button onclick={updateLink} size="icon">
+	<svg
 		xmlns="http://www.w3.org/2000/svg"
 		fill="none"
 		viewBox="0 0 24 24"
