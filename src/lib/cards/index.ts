@@ -53,6 +53,9 @@ import { PlyrFMCardDefinition, PlyrFMCollectionCardDefinition } from './media/Pl
 import { MarginCardDefinition } from './social/MarginCard';
 import { SembleCollectionCardDefinition } from './social/SembleCollectionCard';
 import { GermDMCardDefinition } from './social/GermDMCard';
+import { KichRecipeCardDefinition } from './social/KichRecipeCard';
+import { KichRecipeCollectionCardDefinition } from './social/KichRecipeCollectionCard';
+import { KichCookingLogCardDefinition } from './social/KichCookingLogCard';
 // import { Model3DCardDefinition } from './visual/Model3DCard';
 
 export const AllCardDefinitions = [
@@ -111,7 +114,10 @@ export const AllCardDefinitions = [
 	PlyrFMCollectionCardDefinition,
 	MarginCardDefinition,
 	SembleCollectionCardDefinition,
-	GermDMCardDefinition
+	GermDMCardDefinition,
+	KichRecipeCardDefinition,
+	KichRecipeCollectionCardDefinition,
+	KichCookingLogCardDefinition
 ] as const;
 
 export const CardDefinitionsByType = AllCardDefinitions.reduce(
