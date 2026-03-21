@@ -10,8 +10,13 @@
 
 	let did = getDidContext();
 
-	let mediaList: { fullsize: string; isVideo?: boolean; playlist?: string; thumbnail?: string }[] =
-		$state([]);
+	let mediaList: {
+		id: string;
+		fullsize: string;
+		isVideo?: boolean;
+		playlist?: string;
+		thumbnail?: string;
+	}[] = $state([]);
 
 	let isLoading = $state(true);
 
@@ -24,7 +29,7 @@
 				post.post.embed?.$type === 'app.bsky.embed.images#view' ? post.post.embed : undefined;
 
 			for (let image of images?.images ?? []) {
-				collected.push(image);
+				collected.push({ ...image, id: crypto.randomUUID() });
 			}
 
 			if (
@@ -35,7 +40,8 @@
 				collected.push({
 					...post.post.embed,
 					isVideo: true,
-					fullsize: ''
+					fullsize: '',
+					id: crypto.randomUUID()
 				});
 			}
 		}
@@ -60,7 +66,7 @@
 	<div
 		class="bg-base-200 dark:bg-base-950/30 grid h-[50dvh] grid-cols-2 gap-4 overflow-y-scroll rounded-2xl p-4 lg:grid-cols-3"
 	>
-		{#each mediaList as media (media.fullsize || media.thumbnail || media.playlist)}
+		{#each mediaList as media (media.id)}
 			<button
 				onclick={() => {
 					if (media.isVideo) {
