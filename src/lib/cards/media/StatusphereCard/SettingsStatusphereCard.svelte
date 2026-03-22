@@ -1,21 +1,26 @@
 <script lang="ts">
-	import type { Item } from '$lib/types';
-	import { getAdditionalUserData } from '$lib/website/context';
-	import { EmojiPicker } from '@foxui/social';
+	import type { SettingsComponentProps } from '../../types';
 
-	let { item }: { item: Item } = $props();
+	let { item = $bindable() }: SettingsComponentProps = $props();
 
-	const data = getAdditionalUserData();
-	// svelte-ignore state_referenced_locally
-	let record = $state(data[item.cardType] as any);
+	let mode: 'emoji' | 'statusphere' = $derived(item.cardData.mode ?? 'emoji');
 </script>
 
-<EmojiPicker
-	onpicked={(emoji) => {
-		record.value.status = emoji.unicode;
-		data[item.cardType] = { value: { status: emoji.unicode } };
-
-		item.cardData.hasUpdate = true;
-		item.cardData.emoji = emoji.unicode;
-	}}
-/>
+<div class="flex gap-2">
+	<button
+		class="rounded-full px-3 py-1 text-sm font-medium transition-colors {mode === 'emoji'
+			? 'bg-accent-500 text-white'
+			: 'bg-base-200 dark:bg-base-700 text-base-700 dark:text-base-300'}"
+		onclick={() => (item.cardData.mode = 'emoji')}
+	>
+		Emoji
+	</button>
+	<button
+		class="rounded-full px-3 py-1 text-sm font-medium transition-colors {mode === 'statusphere'
+			? 'bg-accent-500 text-white'
+			: 'bg-base-200 dark:bg-base-700 text-base-700 dark:text-base-300'}"
+		onclick={() => (item.cardData.mode = 'statusphere')}
+	>
+		Statusphere
+	</button>
+</div>

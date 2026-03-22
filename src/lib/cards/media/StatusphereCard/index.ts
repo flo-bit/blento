@@ -5,6 +5,7 @@ import type { CardDefinition } from '../../types';
 import { listRecords, putRecord } from '$lib/atproto';
 import StatusphereCard from './StatusphereCard.svelte';
 import EditStatusphereCard from './EditStatusphereCard.svelte';
+import SettingsStatusphereCard from './SettingsStatusphereCard.svelte';
 import icons from './icons.json';
 import * as TID from '@atcute/tid';
 
@@ -12,16 +13,20 @@ export const StatusphereCardDefinition = {
 	type: 'statusphere',
 	contentComponent: StatusphereCard,
 	editingContentComponent: EditStatusphereCard,
+	settingsComponent: SettingsStatusphereCard,
 
 	createNew: (item) => {},
 
 	loadData: async (items, { did }) => {
-		const data = await listRecords({ did, collection: 'xyz.statusphere.status', limit: 1 });
+		// Only fetch statusphere records if any card uses statusphere mode
+		const needsStatusphere = items.some((i) => i.cardData.mode === 'statusphere');
+		if (!needsStatusphere) return undefined;
 
+		const data = await listRecords({ did, collection: 'xyz.statusphere.status', limit: 1 });
 		return data[0];
 	},
 	upload: async (item) => {
-		if (item.cardData.hasUpdate) {
+		if (item.cardData.mode === 'statusphere' && item.cardData.hasUpdate) {
 			await putRecord({
 				rkey: TID.now(),
 				collection: 'xyz.statusphere.status',
@@ -31,7 +36,7 @@ export const StatusphereCardDefinition = {
 				}
 			});
 			delete item.cardData.hasUpdate;
-			// Keep item.cardData.emoji so each card can have its own status
+			delete item.cardData.emoji;
 		}
 
 		return item;
