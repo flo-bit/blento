@@ -83,7 +83,7 @@
 	<div class="flex-1 overflow-y-auto">
 		{#if rsvps.length > 0}
 			<div class="flex flex-col gap-2">
-				{#each rsvps as rsvp (rsvp.eventUri)}
+				{#each rsvps as rsvp, i (`${rsvp.eventUri}-${i}`)}
 					<a
 						href="https://blento.app/{rsvp.hostDid}/events/{rsvp.rkey}"
 						target="_blank"
