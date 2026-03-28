@@ -76,7 +76,7 @@
 <div class="flex h-full flex-col overflow-x-hidden overflow-y-auto p-3" onscroll={handleScroll}>
 	{#if feed && feed.length > 0}
 		<div class={[item.cardData.label ? 'pt-8' : '']}>
-			{#each feed as feedItem, i (feedItem.post?.uri ?? i)}
+			{#each feed as feedItem, i (`${feedItem.post?.uri ?? 'post'}-${i}`)}
 				<BlueskyPost showAvatar compact feedViewPost={feedItem.post} />
 				{#if i < feed.length - 1}
 					<div
