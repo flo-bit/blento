@@ -494,7 +494,7 @@
 <Head
 	favicon={getImage(data.publication, data.did, 'icon') || data.profile.avatar}
 	title={getName(data)}
-	image={'/' + data.handle + '/og.png'}
+	image={'/' + data.handle + '/og-new.png'}
 	accentColor={data.publication?.preferences?.accentColor}
 	baseColor={data.publication?.preferences?.baseColor}
 />
