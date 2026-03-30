@@ -1,85 +1,88 @@
-import { getCDNImageBlobUrl } from '$lib/atproto/methods.js';
-import { createCache } from '$lib/cache';
-import { loadData } from '$lib/website/load';
 import { env } from '$env/dynamic/private';
 import { env as publicEnv } from '$env/dynamic/public';
-
-import type { ActorIdentifier } from '@atcute/lexicons';
-import { ImageResponse } from '@ethercorps/sveltekit-og';
 import { error } from '@sveltejs/kit';
-
-function escapeHtml(str: string): string {
-	return str
-		.replace(/&/g, '&amp;')
-		.replace(/</g, '&lt;')
-		.replace(/>/g, '&gt;')
-		.replace(/"/g, '&quot;')
-		.replace(/'/g, '&#39;');
-}
+import { getActor } from '$lib/actor';
+import { createCache } from '$lib/cache';
 
 export async function GET({ params, platform, request }) {
-	const cache = createCache(platform);
-
-	const customDomain = request.headers.get('X-Custom-Domain')?.toLowerCase();
-
-	let actor: ActorIdentifier | undefined = params.actor;
-
-	if (!actor) {
-		const kv = platform?.env?.CUSTOM_DOMAINS;
-
-		if (kv && customDomain) {
-			try {
-				const did = await kv.get(customDomain);
-
-				if (did) actor = did as ActorIdentifier;
-			} catch (error) {
-				console.error('failed to get custom domain kv', error);
-			}
-		} else {
-			actor = publicEnv.PUBLIC_HANDLE as ActorIdentifier;
-		}
-	}
+	const actor = await getActor({
+		request,
+		paramActor: params.actor,
+		platform,
+		blockBoth: false
+	});
 
 	if (!actor) {
 		throw error(404, 'Page not found');
 	}
 
-	const data = await loadData(actor, cache, false, 'self', env);
+	const cache = createCache(platform);
+	const cacheKey = actor;
 
-	let image: string | undefined = data.profile.avatar;
-
-	if (data.publication.icon) {
-		image =
-			getCDNImageBlobUrl({ did: data.did, blob: data.publication.icon }) ?? data.profile.avatar;
+	// Check KV cache first
+	const cached = await cache?.getArrayBuffer('og', cacheKey);
+	if (cached) {
+		return new Response(cached, {
+			headers: {
+				'Content-Type': 'image/png',
+				'Cache-Control': 'public, max-age=86400'
+			}
+		});
 	}
 
-	const name = data.publication?.name ?? data.profile.displayName ?? data.profile.handle;
+	const handle = params.actor ?? publicEnv.PUBLIC_HANDLE;
+	const siteUrl = `${publicEnv.PUBLIC_DOMAIN}/${handle}`;
 
-	const htmlString = `
-<div class="flex flex-col p-8 w-full h-full bg-neutral-900">
-    <div class="flex items-center mb-8 mt-16">
-      <img src="${escapeHtml(image ?? '')}" width="128" height="128" class="rounded-full" />
+	const accountId = env.CLOUDFLARE_ACCOUNT_ID;
+	const apiToken = env.CLOUDFLARE_API_TOKEN;
 
-	    <h1 class="text-neutral-50 text-7xl ml-4">${escapeHtml(name)}</h1>
-    </div>
+	if (!accountId || !apiToken) {
+		throw error(500, 'Missing Cloudflare credentials');
+	}
 
-	<p class="mt-8 text-4xl text-neutral-300">Check out my blento</p>
+	const response = await fetch(
+		`https://api.cloudflare.com/client/v4/accounts/${accountId}/browser-rendering/screenshot`,
+		{
+			method: 'POST',
+			headers: {
+				Authorization: `Bearer ${apiToken}`,
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({
+				url: siteUrl,
+				screenshotOptions: {
+					type: 'png',
+					clip: {
+						x: 0,
+						y: 0,
+						width: 1200,
+						height: 630
+					}
+				},
+				viewport: {
+					width: 1200,
+					height: 630,
+					deviceScaleFactor: 2
+				},
+				waitForTimeout: 1000
+			})
+		}
+	);
 
-    <svg class="absolute w-130 h-130 top-50 right-0" viewBox="0 0 900 900" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="100" y="100" width="160" height="340" rx="23" fill="#EF4444"/>
-        <rect x="640" y="280" width="160" height="340" rx="23" fill="#22C55E"/>
-        <rect x="280" y="100" width="340" height="340" rx="23" fill="#F59E0B"/>
-        <rect x="100" y="460" width="340" height="160" rx="23" fill="#0EA5E9"/>
-        <rect x="640" y="100" width="160" height="160" rx="23" fill="#EAB308"/>
-        <rect x="100" y="640" width="160" height="160" rx="23" fill="#6366F1"/>
-        <rect x="460" y="460" width="160" height="160" rx="23" fill="#14B8A6"/>
-        <rect x="280" y="640" width="520" height="160" rx="23" fill="#A855F7"/>
-    </svg>
-</div>
-`;
+	if (!response.ok) {
+		console.error('Cloudflare screenshot API error:', response.status, await response.text());
+		throw error(502, 'Failed to generate OG image');
+	}
 
-	return new ImageResponse(htmlString, {
-		width: 1200,
-		height: 630
+	const imageBuffer = await response.arrayBuffer();
+
+	// Cache in KV (don't await — fire and forget)
+	cache?.putArrayBuffer('og', cacheKey, imageBuffer).catch(() => {});
+
+	return new Response(imageBuffer, {
+		headers: {
+			'Content-Type': 'image/png',
+			'Cache-Control': 'public, max-age=86400'
+		}
 	});
 }
