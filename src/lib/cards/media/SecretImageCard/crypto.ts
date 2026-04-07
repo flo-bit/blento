@@ -1,47 +1,26 @@
 /**
- * AES-GCM encryption/decryption using Web Crypto API with password-derived keys.
+ * AES-GCM encryption/decryption using Web Crypto API with SHA-256 derived keys.
  */
 
-async function deriveKey(password: string, salt: Uint8Array<ArrayBuffer>): Promise<CryptoKey> {
-	const encoder = new TextEncoder();
-	const keyMaterial = await crypto.subtle.importKey(
-		'raw',
-		encoder.encode(password),
-		'PBKDF2',
-		false,
-		['deriveKey']
-	);
-
-	return crypto.subtle.deriveKey(
-		{
-			name: 'PBKDF2',
-			salt,
-			iterations: 10000,
-			hash: 'SHA-256'
-		},
-		keyMaterial,
-		{ name: 'AES-GCM', length: 256 },
-		false,
-		['encrypt', 'decrypt']
-	);
+async function deriveKey(password: string): Promise<CryptoKey> {
+	const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(password));
+	return crypto.subtle.importKey('raw', hash, 'AES-GCM', false, ['encrypt', 'decrypt']);
 }
 
 /**
- * Encrypt a Blob with a password. Returns a Blob containing salt + iv + ciphertext.
+ * Encrypt a Blob with a password. Returns a Blob containing iv + ciphertext.
  */
 export async function encryptBlob(blob: Blob, password: string): Promise<Blob> {
-	const salt = crypto.getRandomValues(new Uint8Array(16));
 	const iv = crypto.getRandomValues(new Uint8Array(12));
-	const key = await deriveKey(password, salt);
+	const key = await deriveKey(password);
 
 	const plaintext = await blob.arrayBuffer();
 	const ciphertext = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, plaintext);
 
-	// Pack: salt (16) + iv (12) + ciphertext
-	const result = new Uint8Array(16 + 12 + ciphertext.byteLength);
-	result.set(salt, 0);
-	result.set(iv, 16);
-	result.set(new Uint8Array(ciphertext), 28);
+	// Pack: iv (12) + ciphertext
+	const result = new Uint8Array(12 + ciphertext.byteLength);
+	result.set(iv, 0);
+	result.set(new Uint8Array(ciphertext), 12);
 
 	return new Blob([result], { type: 'application/octet-stream' });
 }
@@ -53,11 +32,10 @@ export async function encryptBlob(blob: Blob, password: string): Promise<Blob> {
 export async function decryptBlob(encryptedBlob: Blob, password: string): Promise<Blob> {
 	const data = new Uint8Array(await encryptedBlob.arrayBuffer());
 
-	const salt = data.slice(0, 16);
-	const iv = data.slice(16, 28);
-	const ciphertext = data.slice(28);
+	const iv = data.slice(0, 12);
+	const ciphertext = data.slice(12);
 
-	const key = await deriveKey(password, salt);
+	const key = await deriveKey(password);
 	const plaintext = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, ciphertext);
 
 	return new Blob([plaintext]);

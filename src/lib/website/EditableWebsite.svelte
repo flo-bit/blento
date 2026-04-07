@@ -244,7 +244,7 @@
 		} catch (error) {
 			console.error(error);
 			showSaveModal = false;
-			toast.error('Error saving page!');
+			toast.error(error instanceof Error ? error.message : 'Error saving page!');
 		} finally {
 			isSaving = false;
 		}

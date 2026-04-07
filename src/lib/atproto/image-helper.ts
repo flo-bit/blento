@@ -29,17 +29,7 @@ export function compressImage(
 			let width = img.width;
 			let height = img.height;
 
-			// If image is already small enough, return original
-			if (file.size <= maxSize) {
-				console.log('skipping compression+resizing, already small enough');
-				return resolve({
-					blob: file,
-					aspectRatio: {
-						width,
-						height
-					}
-				});
-			}
+			const isSmallEnough = file.size <= maxSize;
 
 			if (width > maxDimension || height > maxDimension) {
 				if (width > height) {
@@ -68,7 +58,7 @@ export function compressImage(
 						if (!blob) {
 							return reject(new Error('Compression failed.'));
 						}
-						if (blob.size <= maxSize || quality < 0.3) {
+						if (isSmallEnough || blob.size <= maxSize || quality < 0.3) {
 							resolve({
 								blob,
 								aspectRatio: {
