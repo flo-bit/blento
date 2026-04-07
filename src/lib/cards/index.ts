@@ -56,7 +56,7 @@ import { GermDMCardDefinition } from './social/GermDMCard';
 import { KichRecipeCardDefinition } from './social/KichRecipeCard';
 import { KichRecipeCollectionCardDefinition } from './social/KichRecipeCollectionCard';
 import { KichCookingLogCardDefinition } from './social/KichCookingLogCard';
-import { SecretImageCardDefinition } from './core/SecretImageCard';
+import { SecretImageCardDefinition } from './media/SecretImageCard';
 // import { Model3DCardDefinition } from './visual/Model3DCard';
 
 export const AllCardDefinitions = [

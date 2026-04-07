@@ -4,6 +4,8 @@
 	import { getBlobURL } from '$lib/atproto';
 	import { decryptBlob } from './crypto';
 	import type { ContentComponentProps } from '../../types';
+	import Modal from '$lib/components/modal/Modal.svelte';
+	import { Button, Input, Subheading } from '@foxui/core';
 
 	let { item = $bindable() }: ContentComponentProps = $props();
 
@@ -11,6 +13,9 @@
 
 	let decryptedUrl = $state<string | null>(null);
 	let decrypting = $state(false);
+	let showPasswordModal = $state(false);
+	let passwordInput = $state('');
+	let wrongPassword = $state(false);
 
 	$effect(() => {
 		const secret = page.url.searchParams.get('secret');
@@ -28,7 +33,7 @@
 		};
 	});
 
-	async function decryptImage(password: string, blob: any) {
+	async function decryptImage(password: string, blob: any): Promise<boolean> {
 		try {
 			const url = await getBlobURL({ did, blob });
 			const response = await fetch(url);
@@ -36,10 +41,32 @@
 			const encryptedBlob = await response.blob();
 			const decrypted = await decryptBlob(encryptedBlob, password);
 			decryptedUrl = URL.createObjectURL(decrypted);
+			return true;
 		} catch {
 			// Wrong password or fetch error - stay pixelated
+			return false;
 		} finally {
 			decrypting = false;
+		}
+	}
+
+	async function handleSubmit(e: SubmitEvent) {
+		e.preventDefault();
+		wrongPassword = false;
+		decrypting = true;
+
+		const blob = item.cardData.encryptedImage;
+		if (!blob || blob.$type !== 'blob') {
+			decrypting = false;
+			return;
+		}
+
+		const success = await decryptImage(passwordInput, blob);
+		if (success) {
+			showPasswordModal = false;
+			passwordInput = '';
+		} else {
+			wrongPassword = true;
 		}
 	}
 </script>
@@ -62,7 +89,16 @@
 {/if}
 
 {#if !decryptedUrl}
-	<div class="absolute inset-0 flex items-center justify-center">
+	<button
+		class="absolute inset-0 flex cursor-pointer items-center justify-center"
+		onclick={() => {
+			if (!decrypting) {
+				wrongPassword = false;
+				showPasswordModal = true;
+			}
+		}}
+		aria-label="Unlock secret image"
+	>
 		<div class="bg-base-900/40 rounded-full p-3 backdrop-blur-sm">
 			{#if decrypting}
 				<svg
@@ -96,5 +132,20 @@
 				</svg>
 			{/if}
 		</div>
-	</div>
+	</button>
 {/if}
+
+<Modal bind:open={showPasswordModal}>
+	<form onsubmit={handleSubmit} class="flex flex-col gap-3">
+		<Subheading>Enter password</Subheading>
+		<Input type="password" bind:value={passwordInput} placeholder="Password" />
+		{#if wrongPassword}
+			<p class="text-sm text-red-500">Wrong password</p>
+		{/if}
+		<div class="flex justify-end">
+			<Button type="submit" disabled={decrypting}>
+				{decrypting ? 'Decrypting...' : 'Unlock'}
+			</Button>
+		</div>
+	</form>
+</Modal>
