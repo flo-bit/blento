@@ -49,7 +49,9 @@ export function compressImage(
 			if (!ctx) return reject(new Error('Failed to get canvas context.'));
 			ctx.drawImage(img, 0, 0, width, height);
 
-			// Use WebP for both compression and transparency support
+			// Use WebP if supported, fall back to JPEG (Safari doesn't support WebP encoding)
+			const supportsWebP = canvas.toDataURL('image/webp').startsWith('data:image/webp');
+			const mimeType = supportsWebP ? 'image/webp' : 'image/jpeg';
 			let quality = 0.9;
 
 			function attemptCompression() {
@@ -71,7 +73,7 @@ export function compressImage(
 							attemptCompression();
 						}
 					},
-					'image/webp',
+					mimeType,
 					quality
 				);
 			}
