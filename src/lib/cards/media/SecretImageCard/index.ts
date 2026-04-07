@@ -22,6 +22,10 @@ export const SecretImageCardDefinition = {
 	},
 
 	upload: async (item) => {
+		if (item.cardData.rawImage?.blob && !item.cardData.password) {
+			throw new Error('Password is required for secret image');
+		}
+
 		// If there's a new raw image + password, encrypt and upload
 		if (item.cardData.rawImage?.blob && item.cardData.password) {
 			const rawBlob = item.cardData.rawImage.blob as Blob;
