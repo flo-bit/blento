@@ -63,7 +63,7 @@ export const SecretImageCardDefinition = {
 	name: 'Secret Image',
 
 	keywords: ['secret', 'encrypted', 'password', 'hidden', 'private', 'locked'],
-	groups: ['Core'],
+	groups: ['Media'],
 
 	icon: `<svg
 		xmlns="http://www.w3.org/2000/svg"
