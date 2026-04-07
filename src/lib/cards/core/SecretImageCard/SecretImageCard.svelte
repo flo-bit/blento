@@ -55,7 +55,7 @@
 
 {#if decryptedUrl}
 	<img
-		class="absolute inset-0 h-full w-full object-cover animate-in fade-in duration-500"
+		class="animate-in fade-in absolute inset-0 h-full w-full object-cover duration-500"
 		src={decryptedUrl}
 		alt=""
 	/>
@@ -71,13 +71,7 @@
 					fill="none"
 					viewBox="0 0 24 24"
 				>
-					<circle
-						class="opacity-25"
-						cx="12"
-						cy="12"
-						r="10"
-						stroke="currentColor"
-						stroke-width="4"
+					<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"
 					></circle>
 					<path
 						class="opacity-75"

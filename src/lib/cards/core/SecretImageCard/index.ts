@@ -1,35 +1,60 @@
 import { uploadBlob } from '$lib/atproto/methods';
 import type { CardDefinition } from '../../types';
-import CreateSecretImageCardModal from './CreateSecretImageCardModal.svelte';
+import { createPixelatedPreview, encryptBlob } from './crypto';
+import EditingSecretImageCard from './EditingSecretImageCard.svelte';
 import SecretImageCard from './SecretImageCard.svelte';
+import SecretImageCardSettings from './SecretImageCardSettings.svelte';
 
 export const SecretImageCardDefinition = {
 	type: 'secretImage',
 	contentComponent: SecretImageCard,
-
-	creationModalComponent: CreateSecretImageCardModal,
+	editingContentComponent: EditingSecretImageCard,
+	settingsComponent: SecretImageCardSettings,
 
 	createNew: (card) => {
 		card.cardType = 'secretImage';
 		card.cardData = {
 			encryptedImage: '',
-			preview: ''
+			preview: '',
+			password: '',
+			rawImage: null
 		};
 	},
 
 	upload: async (item) => {
-		const img = item.cardData.encryptedImage;
-		if (!img) return item;
+		// If there's a new raw image + password, encrypt and upload
+		if (item.cardData.rawImage?.blob && item.cardData.password) {
+			const rawBlob = item.cardData.rawImage.blob as Blob;
+			const password = item.cardData.password as string;
 
-		// Already uploaded
-		if (typeof img === 'object' && img.$type === 'blob') return item;
+			// Generate pixelated preview
+			item.cardData.preview = await createPixelatedPreview(rawBlob);
 
-		// Local blob from creation modal
-		if (img?.blob) {
-			if (img.objectUrl) {
-				URL.revokeObjectURL(img.objectUrl);
+			// Encrypt the image
+			const encrypted = await encryptBlob(rawBlob, password);
+
+			// Upload encrypted blob
+			item.cardData.encryptedImage = await uploadBlob({ blob: encrypted });
+
+			// Clean up local state
+			if (item.cardData.rawImage.objectUrl) {
+				URL.revokeObjectURL(item.cardData.rawImage.objectUrl);
 			}
-			item.cardData.encryptedImage = await uploadBlob({ blob: img.blob });
+			delete item.cardData.rawImage;
+			delete item.cardData.password;
+
+			return item;
+		}
+
+		// Already uploaded encrypted blob - nothing to do
+		if (
+			typeof item.cardData.encryptedImage === 'object' &&
+			item.cardData.encryptedImage?.$type === 'blob'
+		) {
+			// Clean up editing-only fields before save
+			delete item.cardData.rawImage;
+			delete item.cardData.password;
+			return item;
 		}
 
 		return item;

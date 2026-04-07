@@ -2,7 +2,7 @@
  * AES-GCM encryption/decryption using Web Crypto API with password-derived keys.
  */
 
-async function deriveKey(password: string, salt: Uint8Array): Promise<CryptoKey> {
+async function deriveKey(password: string, salt: Uint8Array<ArrayBuffer>): Promise<CryptoKey> {
 	const encoder = new TextEncoder();
 	const keyMaterial = await crypto.subtle.importKey(
 		'raw',
@@ -16,7 +16,7 @@ async function deriveKey(password: string, salt: Uint8Array): Promise<CryptoKey>
 		{
 			name: 'PBKDF2',
 			salt,
-			iterations: 100000,
+			iterations: 10000,
 			hash: 'SHA-256'
 		},
 		keyMaterial,
@@ -66,10 +66,7 @@ export async function decryptBlob(encryptedBlob: Blob, password: string): Promis
 /**
  * Create a tiny pixelated preview of an image (16x16 pixels stored as a base64 data URL).
  */
-export function createPixelatedPreview(
-	file: Blob,
-	size: number = 16
-): Promise<string> {
+export function createPixelatedPreview(file: Blob, size: number = 16): Promise<string> {
 	return new Promise((resolve, reject) => {
 		const img = new Image();
 		const reader = new FileReader();
