@@ -1,13 +1,8 @@
 <script lang="ts">
 	import type { EventData } from '$lib/cards/social/EventCard';
 	import { getCDNImageBlobUrl } from '$lib/atproto';
-	import { user } from '$lib/atproto/auth.svelte';
-	import { Avatar as FoxAvatar, Badge, Button, toast } from '@foxui/core';
-	import { page } from '$app/state';
+	import { Avatar as FoxAvatar, Badge, Button } from '@foxui/core';
 	import Avatar from 'svelte-boring-avatars';
-	import * as TID from '@atcute/tid';
-	import { goto } from '$app/navigation';
-
 	let { data } = $props();
 
 	let events: (EventData & { rkey: string })[] = $derived(data.events);
@@ -78,8 +73,6 @@
 		return { url, alt: media.alt || event.name };
 	}
 
-	let isOwner = $derived(user.isLoggedIn && user.did === did);
-
 	let showPast: boolean = $state(false);
 	let now = $derived(new Date());
 	let filteredEvents = $derived(
@@ -121,29 +114,6 @@
 						<span class="text-base-900 dark:text-base-100 text-sm font-medium">{hostName}</span>
 					</a>
 				</div>
-			</div>
-			<div class="flex flex-col items-end gap-2">
-				{#if isOwner}
-					<Button
-						variant="primary"
-						onclick={() => {
-							const rkey = TID.now();
-							const handle =
-								user.profile?.handle && user.profile.handle !== 'handle.invalid'
-									? user.profile.handle
-									: user.did;
-							goto(`/${handle}/events/${rkey}/edit`);
-						}}>New event</Button
-					>
-				{/if}
-				<Button
-					variant="secondary"
-					onclick={async () => {
-						const calendarUrl = `${page.url.origin}${page.url.pathname.replace(/\/$/, '')}/calendar`;
-						await navigator.clipboard.writeText(calendarUrl);
-						toast.success('Subscription link copied to clipboard');
-					}}>Subscribe</Button
-				>
 			</div>
 		</div>
 

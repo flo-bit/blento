@@ -1,8 +1,7 @@
 <script lang="ts">
 	import type { EventData } from '$lib/cards/social/EventCard';
 	import { getCDNImageBlobUrl } from '$lib/atproto';
-	import { Avatar as FoxAvatar, Badge, Button, toast } from '@foxui/core';
-	import { page } from '$app/state';
+	import { Avatar as FoxAvatar, Badge } from '@foxui/core';
 	import Avatar from 'svelte-boring-avatars';
 	import type { CachedProfile } from '$lib/cache';
 
@@ -106,14 +105,6 @@
 					<span class="text-base-900 dark:text-base-100 text-sm font-medium">{userName}</span>
 				</div>
 			</div>
-			<Button
-				variant="secondary"
-				onclick={async () => {
-					const calendarUrl = `${page.url.origin}${page.url.pathname.replace(/\/$/, '')}/calendar`;
-					await navigator.clipboard.writeText(calendarUrl);
-					toast.success('Subscription link copied to clipboard');
-				}}>Subscribe</Button
-			>
 		</div>
 
 		<!-- Toggle -->
