@@ -9,8 +9,11 @@
 	// svelte-ignore state_referenced_locally
 	let record = $state(data[item.cardType] as any);
 
-	// Use card-specific emoji if set, otherwise fall back to PDS data
-	let emoji = $derived(item.cardData?.emoji ?? record?.value?.status);
+	let mode = $derived(item.cardData?.mode ?? 'emoji');
+	// Emoji mode: use cardData. Statusphere mode: use latest record from PDS.
+	let emoji = $derived(
+		mode === 'statusphere' ? record?.value?.status : item.cardData?.emoji
+	);
 	let animated = $derived(emojiToNotoAnimatedWebp(emoji));
 </script>
 

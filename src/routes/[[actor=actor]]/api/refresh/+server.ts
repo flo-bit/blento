@@ -14,5 +14,8 @@ export async function GET({ params, platform, request }) {
 		throw error(404, 'Page not found');
 	}
 
+	// Invalidate cached OG image so it gets regenerated
+	cache.delete('og', actor).catch(() => {});
+
 	return json(await loadData(actor, cache, true, 'self', env));
 }

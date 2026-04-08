@@ -29,17 +29,7 @@ export function compressImage(
 			let width = img.width;
 			let height = img.height;
 
-			// If image is already small enough, return original
-			if (file.size <= maxSize) {
-				console.log('skipping compression+resizing, already small enough');
-				return resolve({
-					blob: file,
-					aspectRatio: {
-						width,
-						height
-					}
-				});
-			}
+			const isSmallEnough = file.size <= maxSize;
 
 			if (width > maxDimension || height > maxDimension) {
 				if (width > height) {
@@ -59,7 +49,9 @@ export function compressImage(
 			if (!ctx) return reject(new Error('Failed to get canvas context.'));
 			ctx.drawImage(img, 0, 0, width, height);
 
-			// Use WebP for both compression and transparency support
+			// Use WebP if supported, fall back to JPEG (Safari doesn't support WebP encoding)
+			const supportsWebP = canvas.toDataURL('image/webp').startsWith('data:image/webp');
+			const mimeType = supportsWebP ? 'image/webp' : 'image/jpeg';
 			let quality = 0.9;
 
 			function attemptCompression() {
@@ -68,7 +60,7 @@ export function compressImage(
 						if (!blob) {
 							return reject(new Error('Compression failed.'));
 						}
-						if (blob.size <= maxSize || quality < 0.3) {
+						if (isSmallEnough || blob.size <= maxSize || quality < 0.3) {
 							resolve({
 								blob,
 								aspectRatio: {
@@ -81,7 +73,7 @@ export function compressImage(
 							attemptCompression();
 						}
 					},
-					'image/webp',
+					mimeType,
 					quality
 				);
 			}

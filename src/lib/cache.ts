@@ -12,6 +12,7 @@ const NAMESPACE_TTL = {
 	lastfm: 60 * 60, // 1 hour (default, overridable per-put)
 	listenbrainz: 60 * 60, // 1 hour (default, overridable per-put)
 	npmx: 60 * 60 * 12, // 12 hours
+	og: 60 * 60 * 24 * 30, // 30 days
 	profile: 60 * 60 * 24, // 24 hours
 	ical: 60 * 60 * 2, // 2 hours
 	events: 60 * 60, // 1 hour
@@ -65,6 +66,22 @@ export class CacheService {
 		ttlSeconds?: number
 	): Promise<void> {
 		await this.put(namespace, key, JSON.stringify(value), ttlSeconds);
+	}
+
+	// === ArrayBuffer convenience (for binary data like images) ===
+
+	async getArrayBuffer(namespace: CacheNamespace, key: string): Promise<ArrayBuffer | null> {
+		return this.kv.get(`${namespace}:${key}`, 'arrayBuffer');
+	}
+
+	async putArrayBuffer(
+		namespace: CacheNamespace,
+		key: string,
+		value: ArrayBuffer,
+		ttlSeconds?: number
+	): Promise<void> {
+		const ttl = ttlSeconds ?? NAMESPACE_TTL[namespace] ?? 0;
+		await this.kv.put(`${namespace}:${key}`, value, ttl > 0 ? { expirationTtl: ttl } : undefined);
 	}
 
 	// === blento data (keyed by DID, with handle↔did resolution) ===

@@ -105,6 +105,7 @@ import {
 	siLine,
 	siArchiveofourown,
 	siKickstarter,
+	siGumroad,
 	type SimpleIcon
 } from 'simple-icons';
 
@@ -162,6 +163,7 @@ export const platformPatterns: Record<string, RegExp> = {
 	ao3: /(?:archiveofourown\.org)/i,
 
 	kickstarter: /(?:kickstarter\.com)/i,
+	gumroad: /(?:gumroad\.com)/i,
 
 	germ: /(?:ger\.mx)/i,
 
@@ -270,6 +272,7 @@ export const platformsData: Record<string, SimpleIcon> = {
 	ao3: siArchiveofourown,
 
 	kickstarter: siKickstarter,
+	gumroad: siGumroad,
 
 	tangled: {
 		slug: 'tangled',

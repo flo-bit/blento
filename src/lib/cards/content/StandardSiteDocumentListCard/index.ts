@@ -29,11 +29,16 @@ export const StandardSiteDocumentListCardDefinition = {
 
 					if (!siteParts) continue;
 
-					const publicationRecord = await getRecord({
-						did: siteParts.repo as `did:${string}:${string}`,
-						collection: siteParts.collection!,
-						rkey: siteParts.rkey
-					});
+					let publicationRecord;
+					try {
+						publicationRecord = await getRecord({
+							did: siteParts.repo as `did:${string}:${string}`,
+							collection: siteParts.collection!,
+							rkey: siteParts.rkey
+						});
+					} catch {
+						continue;
+					}
 
 					if (!publicationRecord.value) continue;
 					const { url } = publicationRecord.value;
