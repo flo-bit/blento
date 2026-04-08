@@ -10,6 +10,7 @@ const NAMESPACE_TTL = {
 	github: 60 * 60 * 12, // 12 hours
 	'gh-contrib': 60 * 60 * 12, // 12 hours
 	lastfm: 60 * 60, // 1 hour (default, overridable per-put)
+	listenbrainz: 60 * 60, // 1 hour (default, overridable per-put)
 	npmx: 60 * 60 * 12, // 12 hours
 	og: 60 * 60 * 24 * 30, // 30 days
 	profile: 60 * 60 * 24, // 24 hours
