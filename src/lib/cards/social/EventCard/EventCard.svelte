@@ -91,7 +91,7 @@
 
 	let eventUrl = $derived(() => {
 		if (parsedUri) {
-			return `https://blento.app/${parsedUri.repo}/events/${parsedUri.rkey}`;
+			return `https://atmo.rsvp/p/${parsedUri.repo}/e/${parsedUri.rkey}`;
 		}
 		return '#';
 	});

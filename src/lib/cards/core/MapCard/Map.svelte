@@ -5,23 +5,15 @@
 
 	let { item = $bindable(), isEditing = false }: { item: Item; isEditing?: boolean } = $props();
 
-	let center = $state({ lng: parseFloat(item.cardData.lon), lat: parseFloat(item.cardData.lat) });
+	const center = { lng: parseFloat(item.cardData.lon), lat: parseFloat(item.cardData.lat) };
 	let showAttribution = $state(false);
 	let map: maplibregl.Map | undefined = $state();
 
-	const fixedCenter = { lng: parseFloat(item.cardData.lon), lat: parseFloat(item.cardData.lat) };
-
 	function handleZoom() {
-		if (!isEditing && map) {
-			map.setCenter(fixedCenter);
+		if (map) {
+			map.setCenter(center);
 		}
 	}
-
-	$effect(() => {
-		if (!isEditing && map) {
-			map.getCanvas().style.touchAction = 'pan-x pan-y';
-		}
-	});
 </script>
 
 <div
@@ -38,11 +30,11 @@
 			zoom={item.cardData.zoom}
 			{center}
 			attributionControl={false}
-			dragPan={isEditing}
+			dragPan={false}
 			dragRotate={false}
 			keyboard={false}
-			touchZoomRotate={true}
-			scrollZoom={true}
+			touchZoomRotate={isEditing}
+			scrollZoom={isEditing}
 			boxZoom={false}
 			pitchWithRotate={false}
 			touchPitch={false}
@@ -50,7 +42,7 @@
 		>
 			<Projection type="globe" />
 
-			<Marker bind:lnglat={center}>
+			<Marker lnglat={center}>
 				{#snippet content()}
 					<div class="from-accent-400 size-10 rounded-full bg-radial via-transparent p-3">
 						<div class="bg-accent-500 size-4 rounded-full ring-2 ring-white"></div>

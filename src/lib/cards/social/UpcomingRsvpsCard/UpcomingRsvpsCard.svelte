@@ -85,7 +85,7 @@
 			<div class="flex flex-col gap-2">
 				{#each rsvps as rsvp, i (`${rsvp.eventUri}-${i}`)}
 					<a
-						href="https://blento.app/{rsvp.hostDid}/events/{rsvp.rkey}"
+						href="https://atmo.rsvp/p/{rsvp.hostDid}/e/{rsvp.rkey}"
 						target="_blank"
 						class="hover:bg-base-100 dark:hover:bg-base-800 accent:hover:bg-accent-400/20 flex flex-col gap-1 rounded-lg p-2 transition-colors"
 						use:qrOverlay={{ context: { title: rsvp.event.name } }}
