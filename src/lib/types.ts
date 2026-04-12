@@ -71,6 +71,9 @@ export type WebsiteData = {
 
 			// layout mirroring: 0/undefined=never edited, 1=desktop only, 2=mobile only, 3=both
 			editedOn?: number;
+
+			// explicit layout sync mode (overrides editedOn when set)
+			layoutMode?: 'desktop-leads' | 'mobile-leads' | 'independent';
 		};
 	};
 	profile: AppBskyActorDefs.ProfileViewDetailed;
@@ -80,4 +83,7 @@ export type WebsiteData = {
 	additionalData: Record<string, unknown>;
 	updatedAt: number;
 	version?: number;
+
+	/** Set by checkData when overlapping cards are detected before fixing. */
+	hasLayoutIssue?: boolean;
 };

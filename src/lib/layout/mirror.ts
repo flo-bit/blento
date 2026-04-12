@@ -1,14 +1,31 @@
 import { COLUMNS } from '$lib';
 import { CardDefinitionsByType } from '$lib/cards';
 import { clamp } from '$lib/helper';
-import { fixAllCollisions, findValidPosition } from './algorithms';
+import { findValidPosition } from './algorithms';
 import type { Item } from '$lib/types';
 
+export type LayoutMode = 'desktop-leads' | 'mobile-leads' | 'independent';
+
 /**
- * Returns true when mirroring should still happen (i.e. user hasn't edited both layouts).
- * editedOn: 0/undefined = never, 1 = desktop only, 2 = mobile only, 3 = both
+ * Determine whether mirroring should happen and in which direction.
+ * Returns 'desktop' or 'mobile' for the source layout, or false if no mirroring.
+ *
+ * @param editedOn - bitflag: 0=never, 1=desktop, 2=mobile, 3=both
+ * @param layoutMode - explicit override (takes precedence when set)
+ * @param editingMobile - true if the current edit is on mobile
  */
-export function shouldMirror(editedOn: number | undefined): boolean {
+export function shouldMirror(
+	editedOn: number | undefined,
+	layoutMode: LayoutMode | undefined,
+	editingMobile: boolean
+): boolean {
+	if (layoutMode) {
+		if (layoutMode === 'independent') return false;
+		if (layoutMode === 'desktop-leads') return !editingMobile;
+		if (layoutMode === 'mobile-leads') return editingMobile;
+		return false;
+	}
+	// Legacy behavior: mirror as long as both layouts haven't been edited
 	return (editedOn ?? 0) !== 3;
 }
 
@@ -40,7 +57,7 @@ export function mirrorItemSize(item: Item, fromMobile: boolean): void {
 
 /**
  * Mirror the full layout from one view to the other.
- * Copies sizes proportionally and maps positions, then resolves collisions.
+ * Copies sizes proportionally and reflows items in reading order, then resolves collisions.
  * Mutates items in-place.
  */
 export function mirrorLayout(items: Item[], fromMobile: boolean): void {
@@ -50,11 +67,8 @@ export function mirrorLayout(items: Item[], fromMobile: boolean): void {
 	}
 
 	if (fromMobile) {
-		// Mobile → Desktop: reflow items to use the full grid width.
-		// Sort by mobile position so items are placed in reading order.
+		// Mobile → Desktop: reflow items in mobile reading order
 		const sorted = items.toSorted((a, b) => a.mobileY - b.mobileY || a.mobileX - b.mobileX);
-
-		// Place each item into the first available spot on the desktop grid
 		const placed: Item[] = [];
 		for (const item of sorted) {
 			item.x = 0;
@@ -63,11 +77,14 @@ export function mirrorLayout(items: Item[], fromMobile: boolean): void {
 			placed.push(item);
 		}
 	} else {
-		// Desktop → Mobile: proportional positions
-		for (const item of items) {
-			item.mobileX = clamp(Math.floor((item.x * 2) / 2) * 2, 0, COLUMNS - item.mobileW);
-			item.mobileY = Math.max(0, Math.round(item.y * 2));
+		// Desktop → Mobile: reflow items in desktop reading order
+		const sorted = items.toSorted((a, b) => a.y - b.y || a.x - b.x);
+		const placed: Item[] = [];
+		for (const item of sorted) {
+			item.mobileX = 0;
+			item.mobileY = 0;
+			findValidPosition(item, placed, true);
+			placed.push(item);
 		}
-		fixAllCollisions(items, true);
 	}
 }
