@@ -1,4 +1,5 @@
 import { getDetailedProfile, listRecords, resolveHandle, parseUri, getRecord } from '$lib/atproto';
+import { getCDNImageBlobUrl } from '$lib/atproto/methods';
 import { CardDefinitionsByType } from '$lib/cards';
 import type { CacheService } from '$lib/cache';
 import { createEmptyCard } from '$lib/helper';
@@ -6,55 +7,134 @@ import type { Item, PronounsRecord, WebsiteData } from '$lib/types';
 import { error } from '@sveltejs/kit';
 import type { ActorIdentifier, Did } from '@atcute/lexicons';
 
+import type { D1Database } from '@cloudflare/workers-types';
 import { isDid, isHandle } from '@atcute/lexicons/syntax';
 import { fixAllCollisions, compactItems } from '$lib/layout';
-
-const CURRENT_CACHE_VERSION = 1;
+import { getServerClient } from '$lib/contrail';
+import type { AppBskyActorDefs } from '@atcute/bluesky';
 
 function formatPronouns(
 	record: PronounsRecord | undefined,
 	profile: WebsiteData['profile'] | undefined
 ): string | undefined {
-	// nearhorizon.actor.pronouns - https://github.com/skydeval/atproto-pronouns
 	if (record?.value?.sets?.length) {
 		const sets = record.value.sets;
 		const displayMode = record.value.displayMode ?? 'all';
 		const setsToShow = displayMode === 'firstOnly' ? sets.slice(0, 1) : sets;
 		return setsToShow.map((s) => s.forms.join('/')).join(' · ');
 	}
-	// fallback to bsky pronouns
 	const pronouns = (profile as Record<string, unknown>)?.pronouns;
 	if (pronouns && typeof pronouns === 'string') return pronouns;
 	return undefined;
 }
 
-export async function getCache(identifier: ActorIdentifier, page: string, cache?: CacheService) {
-	try {
-		const cachedResult = await cache?.getBlento(identifier);
+function resolveDid(handle: ActorIdentifier): Promise<Did | undefined> {
+	if (isDid(handle)) return Promise.resolve(handle);
+	if (isHandle(handle)) return resolveHandle({ handle });
+	return Promise.resolve(undefined);
+}
 
-		if (!cachedResult) return;
-		const result = JSON.parse(cachedResult);
+type ContrailProfile = {
+	did: string;
+	handle?: string;
+	collection?: string;
+	rkey?: string;
+	record?: unknown;
+};
 
-		if (!result.version || result.version !== CURRENT_CACHE_VERSION) {
-			console.log('skipping cache because of version mismatch');
-			return;
+/**
+ * Extract a bsky-style profile and publication from contrail profile entries.
+ */
+function extractProfileData(
+	did: string,
+	profiles: ContrailProfile[]
+): {
+	profile: AppBskyActorDefs.ProfileViewDetailed;
+	publication: WebsiteData['publication'] | undefined;
+} {
+	let bskyRecord: Record<string, unknown> | undefined;
+	let pubRecord: Record<string, unknown> | undefined;
+	let handle = did;
+
+	for (const p of profiles) {
+		if (p.did !== did) continue;
+		if (p.handle && p.handle !== 'handle.invalid') handle = p.handle;
+
+		const record = p.record as Record<string, unknown> | undefined;
+		if (p.collection === 'app.bsky.actor.profile' && record) {
+			bskyRecord = record;
 		}
+		if (p.collection === 'site.standard.publication' && record) {
+			pubRecord = record;
+		}
+	}
 
-		result.page = 'blento.' + page;
+	const avatar = bskyRecord?.avatar
+		? getCDNImageBlobUrl({
+				did,
+				blob: bskyRecord.avatar as { $type: 'blob'; ref: { $link: string } }
+			})
+		: undefined;
 
-		result.publication = (result.publications as Awaited<ReturnType<typeof listRecords>>).find(
-			(v) => parseUri(v.uri)?.rkey === result.page
-		)?.value;
-		result.publication ??= {
-			name: result.profile?.displayName || result.profile?.handle,
-			description: result.profile?.description
+	const profile = {
+		did: did as Did,
+		handle: handle as `${string}.${string}`,
+		displayName: (bskyRecord?.displayName as string) ?? handle,
+		description: bskyRecord?.description as string | undefined,
+		avatar
+	} as AppBskyActorDefs.ProfileViewDetailed;
+
+	const publication = pubRecord
+		? (pubRecord as WebsiteData['publication'])
+		: undefined;
+
+	return { profile, publication };
+}
+
+/**
+ * Load all data for a user from Contrail in a single call (cards + profiles).
+ */
+async function loadFromContrail(
+	actor: ActorIdentifier,
+	db: D1Database
+): Promise<{
+	cards: Item[];
+	pages: Awaited<ReturnType<typeof listRecords>>;
+	profiles: ContrailProfile[];
+} | null> {
+	try {
+		const client = getServerClient(db);
+		const [cardRes, pageRes] = await Promise.all([
+			client.get('app.blento.card.listRecords', {
+				params: { actor, limit: 200, profiles: true }
+			}),
+			client.get('app.blento.page.listRecords', {
+				params: { actor, limit: 200 }
+			})
+		]);
+
+		if (!cardRes.ok) return null;
+
+		const cards = cardRes.data.records.map((r) => ({ ...(r.record as object) }) as Item);
+
+		const pages = pageRes.ok
+			? pageRes.data.records
+					.filter((r) => r.record)
+					.map((r) => ({
+						uri: r.uri,
+						cid: r.cid ?? '',
+						value: r.record as Record<string, unknown>
+					}))
+			: [];
+
+		return {
+			cards,
+			pages,
+			profiles: (cardRes.data.profiles ?? []) as ContrailProfile[]
 		};
-
-		delete result['publications'];
-
-		return checkData(result);
-	} catch (error) {
-		console.log('getting cached result failed', error);
+	} catch (e) {
+		console.error('Contrail query failed', e);
+		return null;
 	}
 }
 
@@ -63,92 +143,100 @@ export async function loadData(
 	cache: CacheService | undefined,
 	forceUpdate: boolean = false,
 	page: string = 'self',
-	env?: Record<string, string | undefined>
+	env?: Record<string, string | undefined>,
+	platform?: App.Platform
 ): Promise<WebsiteData> {
 	if (!handle) throw error(404);
 	if (handle === 'favicon.ico') throw error(404);
 
-	if (!forceUpdate) {
-		const cachedResult = await getCache(handle, page, cache);
+	const did = await resolveDid(handle);
+	if (!did) throw error(404);
 
-		if (cachedResult) return cachedResult;
-	}
+	const db = platform?.env?.DB;
+	const contrailData = db ? await loadFromContrail(handle, db) : null;
 
-	let did: Did | undefined = undefined;
-	if (isHandle(handle)) {
-		did = await resolveHandle({ handle });
-	} else if (isDid(handle)) {
-		did = handle;
-	} else {
-		throw error(404);
-	}
+	let cards: Item[];
+	let pageRecords: Awaited<ReturnType<typeof listRecords>>;
+	let profile: WebsiteData['profile'];
+	let publication: WebsiteData['publication'] | undefined;
+	let pronounsRecord: PronounsRecord | undefined;
 
-	const [cards, mainPublication, pages, profile, pronounsRecord] = await Promise.all([
-		listRecords({ did, collection: 'app.blento.card', limit: 0 }).catch((e) => {
-			console.error('error getting records for collection app.blento.card', e);
-			return [] as Awaited<ReturnType<typeof listRecords>>;
-		}),
-		getRecord({
-			did,
-			collection: 'site.standard.publication',
-			rkey: 'blento.self'
-		}).catch(() => {
-			console.error('error getting record for collection site.standard.publication');
-			return undefined;
-		}),
-		listRecords({ did, collection: 'app.blento.page' }).catch(() => {
-			console.error('error getting records for collection app.blento.page');
-			return [] as Awaited<ReturnType<typeof listRecords>>;
-		}),
-		getDetailedProfile({ did }),
-		getRecord({
+	if (contrailData) {
+		cards = contrailData.cards;
+		pageRecords = contrailData.pages;
+
+		const extracted = extractProfileData(did, contrailData.profiles);
+		profile = extracted.profile;
+		publication = extracted.publication;
+
+		// Pronouns still from PDS (not in contrail)
+		pronounsRecord = await getRecord({
 			did,
 			collection: 'app.nearhorizon.actor.pronouns',
 			rkey: 'self'
-		}).catch(() => undefined)
-	]);
+		}).catch(() => undefined) as PronounsRecord | undefined;
+	} else {
+		// Fallback: no D1 available (e.g. vite dev) — use PDS directly
+		const [cardRecords, pageRecs, mainPub, prof, pronouns] = await Promise.all([
+			listRecords({ did, collection: 'app.blento.card', limit: 0 }).catch((e) => {
+				console.error('error getting records for collection app.blento.card', e);
+				return [] as Awaited<ReturnType<typeof listRecords>>;
+			}),
+			listRecords({ did, collection: 'app.blento.page' }).catch(() => {
+				return [] as Awaited<ReturnType<typeof listRecords>>;
+			}),
+			getRecord({
+				did,
+				collection: 'site.standard.publication',
+				rkey: 'blento.self'
+			}).catch(() => undefined),
+			getDetailedProfile({ did }),
+			getRecord({
+				did,
+				collection: 'app.nearhorizon.actor.pronouns',
+				rkey: 'self'
+			}).catch(() => undefined)
+		]);
+
+		cards = cardRecords.map((v) => ({ ...v.value }) as Item);
+		pageRecords = pageRecs;
+		profile = prof;
+		publication = mainPub?.value as WebsiteData['publication'] | undefined;
+		pronounsRecord = pronouns as PronounsRecord | undefined;
+	}
+
+	// If no publication found from contrail profiles, check page records
+	if (!publication) {
+		const pubFromPages = pageRecords.find(
+			(v) => parseUri(v.uri)?.rkey === 'blento.' + page
+		);
+		publication = pubFromPages?.value as WebsiteData['publication'] | undefined;
+	}
+
+	publication ??= {
+		name: profile?.displayName || profile?.handle,
+		description: profile?.description
+	} as WebsiteData['publication'];
 
 	const additionalData = await loadAdditionalData(
-		cards.map((v) => ({ ...v.value })) as Item[],
-		{ did, handle, cache },
+		cards,
+		{ did, handle, cache, platform },
 		env
 	);
 
-	const result = {
+	return checkData({
 		page: 'blento.' + page,
 		handle,
 		did,
-		cards: (cards.map((v) => {
-			return { ...v.value };
-		}) ?? []) as Item[],
-		publications: [mainPublication, ...pages].filter((v) => v),
+		cards,
+		publication,
 		additionalData,
 		profile,
 		pronouns: formatPronouns(pronounsRecord, profile),
-		pronounsRecord: pronounsRecord as PronounsRecord | undefined,
+		pronounsRecord,
 		updatedAt: Date.now(),
-		version: CURRENT_CACHE_VERSION
-	};
-
-	// Only cache results that have cards to avoid caching PDS errors
-	if (result.cards.length > 0) {
-		const stringifiedResult = JSON.stringify(result);
-		await cache?.putBlento(did, handle as string, stringifiedResult);
-	}
-
-	const parsedResult = structuredClone(result) as any;
-
-	parsedResult.publication = (
-		parsedResult.publications as Awaited<ReturnType<typeof listRecords>>
-	).find((v) => parseUri(v.uri)?.rkey === parsedResult.page)?.value;
-	parsedResult.publication ??= {
-		name: profile?.displayName || profile?.handle,
-		description: profile?.description
-	};
-
-	delete parsedResult['publications'];
-
-	return checkData(parsedResult);
+		version: 1
+	});
 }
 
 export async function loadCardData(
@@ -160,14 +248,8 @@ export async function loadCardData(
 	if (!handle) throw error(404);
 	if (handle === 'favicon.ico') throw error(404);
 
-	let did: Did | undefined = undefined;
-	if (isHandle(handle)) {
-		did = await resolveHandle({ handle });
-	} else if (isDid(handle)) {
-		did = handle;
-	} else {
-		throw error(404);
-	}
+	const did = await resolveDid(handle);
+	if (!did) throw error(404);
 
 	const [cardRecord, profile, pronounsRecord] = await Promise.all([
 		getRecord({
@@ -205,7 +287,7 @@ export async function loadCardData(
 		env
 	);
 
-	const result = {
+	return {
 		page,
 		handle: resolvedHandle,
 		did,
@@ -221,10 +303,8 @@ export async function loadCardData(
 		pronouns: formatPronouns(pronounsRecord, profile),
 		pronounsRecord: pronounsRecord as PronounsRecord | undefined,
 		updatedAt: Date.now(),
-		version: CURRENT_CACHE_VERSION
+		version: 1
 	};
-
-	return result;
 }
 
 export async function loadCardTypeData(
@@ -242,14 +322,8 @@ export async function loadCardTypeData(
 		throw error(404, 'Card type not found');
 	}
 
-	let did: Did | undefined = undefined;
-	if (isHandle(handle)) {
-		did = await resolveHandle({ handle });
-	} else if (isDid(handle)) {
-		did = handle;
-	} else {
-		throw error(404);
-	}
+	const did = await resolveDid(handle);
+	if (!did) throw error(404);
 
 	const [publication, profile, pronounsRecord] = await Promise.all([
 		getRecord({
@@ -283,7 +357,7 @@ export async function loadCardTypeData(
 		env
 	);
 
-	const result = {
+	return checkData({
 		page: 'blento.self',
 		handle: resolvedHandle,
 		did,
@@ -299,10 +373,8 @@ export async function loadCardTypeData(
 		pronouns: formatPronouns(pronounsRecord, profile),
 		pronounsRecord: pronounsRecord as PronounsRecord | undefined,
 		updatedAt: Date.now(),
-		version: CURRENT_CACHE_VERSION
-	};
-
-	return checkData(result);
+		version: 1
+	});
 }
 
 function migrateCard(card: Item): Item {
@@ -331,7 +403,12 @@ function migrateCard(card: Item): Item {
 
 async function loadAdditionalData(
 	cards: Item[],
-	{ did, handle, cache }: { did: Did; handle: string; cache?: CacheService },
+	{
+		did,
+		handle,
+		cache,
+		platform
+	}: { did: Did; handle: string; cache?: CacheService; platform?: App.Platform },
 	env?: Record<string, string | undefined>
 ) {
 	const cardTypes = new Set(cards.map((v) => v.cardType ?? '') as string[]);
@@ -348,7 +425,8 @@ async function loadAdditionalData(
 					did,
 					handle,
 					cache,
-					env
+					env,
+					platform
 				});
 			} else if (cardDef?.loadData) {
 				additionDataPromises[cardType] = cardDef.loadData(items, { did, handle, cache });

@@ -1,17 +1,9 @@
-import { metadata } from '$lib/atproto';
 import { json } from '@sveltejs/kit';
+import { createOAuthClient } from '$lib/atproto/server/oauth';
 
-export async function GET({ request }) {
+export async function GET({ request, platform }) {
 	const customDomain = request.headers.get('X-Custom-Domain')?.toLowerCase();
+	const oauth = createOAuthClient(platform?.env, customDomain || undefined);
 
-	if (customDomain) {
-		const changedMetadata = metadata;
-		changedMetadata.redirect_uris = changedMetadata.redirect_uris.map((s) =>
-			s.replace('blento.app', customDomain)
-		);
-		changedMetadata.client_id = changedMetadata.client_id.replace('blento.app', customDomain);
-		return json(changedMetadata);
-	}
-
-	return json(metadata);
+	return json(oauth.metadata);
 }

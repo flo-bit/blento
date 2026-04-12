@@ -1,5 +1,8 @@
-export async function load({ request }) {
+export async function load({ request, locals, platform }) {
 	const customDomain = request.headers.get('X-Custom-Domain')?.toLowerCase();
 
-	return { customDomain };
+	return {
+		customDomain,
+		authDid: locals.did
+	};
 }

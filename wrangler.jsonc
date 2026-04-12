@@ -46,12 +46,24 @@
 		{
 			"binding": "CUSTOM_DOMAINS",
 			"id": "f449b3b5c8a349478405e2c04ed265f0"
+		},
+		{
+			"binding": "OAUTH_SESSIONS",
+			"id": "REPLACE_WITH_KV_NAMESPACE_ID"
+		},
+		{
+			"binding": "OAUTH_STATES",
+			"id": "REPLACE_WITH_KV_NAMESPACE_ID"
 		}
-	]
-
-	/**
-	 * Service Bindings (communicate between multiple Workers)
-	 * https://developers.cloudflare.com/workers/wrangler/configuration/#service-bindings
-	 */
-	// "services": [  {   "binding": "MY_SERVICE",   "service": "my-service"  } ]
+	],
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "blento",
+			"database_id": "922639e7-6321-42c8-a4bd-cdf48428fdac"
+		}
+	],
+	"triggers": {
+		"crons": ["*/5 * * * *"]
+	}
 }

@@ -1,12 +1,9 @@
-import type { ActorIdentifier, Did } from '@atcute/lexicons';
-import { isDid } from '@atcute/lexicons/syntax';
+import type { Did } from '@atcute/lexicons';
 import type { KVNamespace } from '@cloudflare/workers-types';
 import { getBlentoOrBskyProfile } from '$lib/atproto/methods';
 
 /** TTL in seconds for each cache namespace */
 const NAMESPACE_TTL = {
-	blento: 60 * 60 * 24, // 24 hours
-	identity: 60 * 60 * 24 * 7, // 7 days
 	github: 60 * 60 * 12, // 12 hours
 	'gh-contrib': 60 * 60 * 12, // 12 hours
 	lastfm: 60 * 60, // 1 hour (default, overridable per-put)
@@ -82,35 +79,6 @@ export class CacheService {
 	): Promise<void> {
 		const ttl = ttlSeconds ?? NAMESPACE_TTL[namespace] ?? 0;
 		await this.kv.put(`${namespace}:${key}`, value, ttl > 0 ? { expirationTtl: ttl } : undefined);
-	}
-
-	// === blento data (keyed by DID, with handle↔did resolution) ===
-	async getBlento(identifier: ActorIdentifier): Promise<string | null> {
-		const did = await this.resolveDid(identifier);
-		if (!did) return null;
-		return this.get('blento', did);
-	}
-
-	async putBlento(did: string, handle: string, data: string): Promise<void> {
-		await Promise.all([
-			this.put('blento', did, data),
-			this.put('identity', `h:${handle}`, did),
-			this.put('identity', `d:${did}`, handle)
-		]);
-	}
-
-	async listBlentos(): Promise<string[]> {
-		return this.list('blento');
-	}
-
-	// === Identity resolution ===
-	async resolveDid(identifier: ActorIdentifier): Promise<string | null> {
-		if (isDid(identifier)) return identifier;
-		return this.get('identity', `h:${identifier}`);
-	}
-
-	async resolveHandle(did: Did): Promise<string | null> {
-		return this.get('identity', `d:${did}`);
 	}
 
 	// === Profile cache (did → profile data) ===

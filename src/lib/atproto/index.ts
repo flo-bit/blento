@@ -1,5 +1,4 @@
-export { user, login, signup, logout, initClient } from './auth.svelte';
-export { metadata } from './metadata';
+export { user, login, signup, logout } from './auth.svelte';
 
 export {
 	parseUri,

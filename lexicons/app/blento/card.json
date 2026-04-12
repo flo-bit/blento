@@ -1,0 +1,31 @@
+{
+	"$type": "com.atproto.lexicon.schema",
+	"lexicon": 1,
+	"id": "app.blento.card",
+	"defs": {
+		"main": {
+			"type": "record",
+			"key": "tid",
+			"record": {
+				"type": "object",
+				"required": ["w", "h", "x", "y", "mobileW", "mobileH", "mobileX", "mobileY", "cardType", "cardData"],
+				"properties": {
+					"w": { "type": "integer" },
+					"h": { "type": "integer" },
+					"x": { "type": "integer" },
+					"y": { "type": "integer" },
+					"mobileW": { "type": "integer" },
+					"mobileH": { "type": "integer" },
+					"mobileX": { "type": "integer" },
+					"mobileY": { "type": "integer" },
+					"cardType": { "type": "string" },
+					"cardData": { "type": "unknown" },
+					"color": { "type": "string" },
+					"page": { "type": "string" },
+					"updatedAt": { "type": "string", "format": "datetime" },
+					"version": { "type": "integer" }
+				}
+			}
+		}
+	}
+}

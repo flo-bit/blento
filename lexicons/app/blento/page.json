@@ -1,0 +1,35 @@
+{
+	"$type": "com.atproto.lexicon.schema",
+	"lexicon": 1,
+	"id": "app.blento.page",
+	"defs": {
+		"main": {
+			"type": "record",
+			"key": "any",
+			"record": {
+				"type": "object",
+				"properties": {
+					"url": { "type": "string", "format": "uri" },
+					"name": { "type": "string" },
+					"description": { "type": "string" },
+					"icon": { "type": "blob", "accept": ["image/*"] },
+					"preferences": {
+						"type": "ref",
+						"ref": "#preferences"
+					}
+				}
+			}
+		},
+		"preferences": {
+			"type": "object",
+			"properties": {
+				"hideProfile": { "type": "boolean" },
+				"hideProfileSection": { "type": "boolean" },
+				"profilePosition": { "type": "string" },
+				"accentColor": { "type": "string" },
+				"baseColor": { "type": "string" },
+				"editedOn": { "type": "integer" }
+			}
+		}
+	}
+}

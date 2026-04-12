@@ -15,5 +15,5 @@ export async function load({ params, platform, request }) {
 		throw error(404, 'Page not found');
 	}
 
-	return await loadData(actor, cache, false, params.page, env);
+	return await loadData(actor, cache, false, params.page, env, platform);
 }

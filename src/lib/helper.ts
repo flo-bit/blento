@@ -49,20 +49,9 @@ export function cardsEqual(a: Item, b: Item) {
 	);
 }
 
-export async function refreshData(data: { updatedAt?: number; handle: string }) {
-	const TEN_MINUTES = 10 * 60 * 1000;
-	const now = Date.now();
-
-	if (now - (data.updatedAt || 0) > TEN_MINUTES) {
-		try {
-			await fetch('/' + data.handle + '/api/refresh');
-			console.log('successfully refreshed data', data.handle);
-		} catch (error) {
-			console.error('error refreshing data', error);
-		}
-	} else {
-		console.log('data still fresh, skipping refreshing', data.handle);
-	}
+/** @deprecated No longer needed — Contrail keeps data fresh via notify() */
+export async function refreshData(_data: { updatedAt?: number; handle: string }) {
+	// no-op: Contrail indexes are updated immediately on writes
 }
 
 export function getName(data: WebsiteData): string {

@@ -1,64 +1,111 @@
 import type { CardDefinition } from '../../types';
 import UpdatedBlentosCard from './UpdatedBlentosCard.svelte';
+import { getCDNImageBlobUrl } from '$lib/atproto/methods';
+import { getServerClient } from '$lib/contrail';
 import type { Did } from '@atcute/lexicons';
-import { getBlentoOrBskyProfile } from '$lib/atproto/methods';
 
-type ProfileWithBlentoFlag = Awaited<ReturnType<typeof getBlentoOrBskyProfile>>;
+type ProfileWithBlentoFlag = {
+	did: Did;
+	handle: `${string}.${string}`;
+	displayName?: string;
+	avatar?: string;
+	hasBlento: boolean;
+	url?: string;
+};
+
+function extractProfiles(
+	profiles: Array<{
+		did: string;
+		handle?: string;
+		collection?: string;
+		rkey?: string;
+		record?: unknown;
+	}>
+): Map<string, ProfileWithBlentoFlag> {
+	const map = new Map<string, ProfileWithBlentoFlag>();
+
+	for (const p of profiles) {
+		const existing = map.get(p.did) ?? {
+			did: p.did as Did,
+			handle: (p.handle ?? p.did) as `${string}.${string}`,
+			hasBlento: false
+		};
+
+		if (p.handle && p.handle !== 'handle.invalid') {
+			existing.handle = p.handle as `${string}.${string}`;
+		}
+
+		const record = p.record as Record<string, unknown> | undefined;
+
+		if (p.collection === 'app.bsky.actor.profile' && record) {
+			existing.displayName ??= record.displayName as string | undefined;
+			if (!existing.avatar && record.avatar) {
+				const cdnUrl = getCDNImageBlobUrl({
+					did: p.did,
+					blob: record.avatar as { $type: 'blob'; ref: { $link: string } }
+				});
+				if (cdnUrl) existing.avatar = cdnUrl;
+			}
+		}
+
+		if (p.collection === 'site.standard.publication' && record) {
+			existing.hasBlento = true;
+			existing.displayName = (record.name as string) ?? existing.displayName;
+			existing.url = record.url as string | undefined;
+			if (record.icon) {
+				const cdnUrl = getCDNImageBlobUrl({
+					did: p.did,
+					blob: record.icon as { $type: 'blob'; ref: { $link: string } }
+				});
+				if (cdnUrl) existing.avatar = cdnUrl;
+			}
+		}
+
+		map.set(p.did, existing);
+	}
+
+	return map;
+}
 
 export const UpdatedBlentosCardDefitition = {
 	type: 'updatedBlentos',
 	contentComponent: UpdatedBlentosCard,
 	keywords: ['feed', 'updates', 'recent', 'activity'],
-	loadData: async (items, { cache }) => {
+	loadDataServer: async (items, { platform }) => {
 		try {
-			const response = await fetch(
-				'https://ufos-api.microcosm.blue/records?collection=app.blento.card'
-			);
-			const recentRecords = await response.json();
-			const existingUsers = await cache?.get('meta', 'updatedBlentos');
-			const existingUsersArray: ProfileWithBlentoFlag[] = existingUsers
-				? JSON.parse(existingUsers)
-				: [];
+			const db = platform?.env?.DB;
+			if (!db) return [];
 
-			const uniqueDids = new Set<Did>(recentRecords.map((v: { did: string }) => v.did as Did));
+			const client = getServerClient(db);
+			const res = await client.get('app.blento.card.listRecords', {
+				params: { limit: 100, profiles: true, sort: 'time_us', order: 'desc' }
+			});
 
-			const profiles: Promise<ProfileWithBlentoFlag | undefined>[] = [];
+			if (!res.ok) return [];
 
-			for (const did of Array.from(uniqueDids)) {
-				profiles.push(getBlentoOrBskyProfile({ did }));
-			}
+			// Build profile map from contrail (includes bsky profile + blento publication)
+			const profileMap = res.data.profiles ? extractProfiles(res.data.profiles) : new Map();
 
-			for (let i = existingUsersArray.length - 1; i >= 0; i--) {
-				// if handle is handle.invalid, remove from existing users and add to profiles to refresh
-				if (
-					(existingUsersArray[i].handle === 'handle.invalid' ||
-						(!existingUsersArray[i].avatar && !existingUsersArray[i].hasBlento)) &&
-					!uniqueDids.has(existingUsersArray[i].did)
-				) {
-					const removed = existingUsersArray.splice(i, 1)[0];
-					profiles.push(getBlentoOrBskyProfile({ did: removed.did }));
-					// if in unique dids, remove from older existing users and keep the newer one
-					// so updated profiles go first
-				} else if (uniqueDids.has(existingUsersArray[i].did)) {
-					existingUsersArray.splice(i, 1);
+			// Extract unique DIDs in order of recency
+			const seen = new Set<string>();
+			const uniqueDids: string[] = [];
+			for (const r of res.data.records) {
+				if (!seen.has(r.did) && !r.did.endsWith('.pds.rip')) {
+					seen.add(r.did);
+					uniqueDids.push(r.did);
 				}
 			}
 
-			let result = [...(await Promise.all(profiles)), ...existingUsersArray];
-
-			result = result.filter(
-				(v) => v && v.handle !== 'handle.invalid' && !v.handle.endsWith('.pds.rip')
-			);
-
-			await cache?.put('meta', 'updatedBlentos', JSON.stringify(result));
-
-			return JSON.parse(JSON.stringify(result.slice(0, 20)));
+			return uniqueDids
+				.slice(0, 20)
+				.map((did) => profileMap.get(did))
+				.filter(
+					(v): v is ProfileWithBlentoFlag =>
+						!!v && v.handle !== 'handle.invalid' && !v.handle.endsWith('.pds.rip')
+				);
 		} catch (error) {
 			console.error('error fetching updated blentos', error);
 			return [];
 		}
 	}
-	// name: 'Updated Blentos',
-	// groups: ['Social'],
-	// icon: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-4"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0ZM12 6c-1.602 0-3.155.474-4.434 1.357L18 16.791A8.959 8.959 0 0 0 21 12h-4.5Z" /></svg>`
 } as CardDefinition & { type: 'updatedBlentos' };

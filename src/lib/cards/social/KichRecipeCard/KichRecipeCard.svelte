@@ -121,7 +121,7 @@
 				<img
 					src={imageUrl}
 					alt={title}
-					class="recipe-image rounded-t-xl aspect-16/9 w-full object-cover"
+					class="recipe-image aspect-16/9 w-full rounded-t-xl object-cover"
 				/>
 				<div class="image-overlay pointer-events-none absolute inset-0"></div>
 				<div class="compact-overlay pointer-events-none absolute right-0 bottom-0 left-0 p-4">

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { user } from '$lib/atproto/auth.svelte';
 	import { atProtoLoginModalState } from '@foxui/social';
-	import { uploadBlob, createTID } from '$lib/atproto/methods';
+	import { uploadBlob, createTID, putRecord } from '$lib/atproto/methods';
 	import { compressImage } from '$lib/atproto/image-helper';
 	import { Badge, Button } from '@foxui/core';
 	import { goto } from '$app/navigation';
@@ -241,7 +241,7 @@
 			error = 'Title is required.';
 			return;
 		}
-		if (!user.client || !user.did) {
+		if (!user.did) {
 			error = 'You must be logged in.';
 			return;
 		}
@@ -301,16 +301,13 @@
 			if (description.trim()) record.description = description.trim();
 			if (coverImageBlob) record.coverImage = coverImageBlob;
 
-			const response = await user.client.post('com.atproto.repo.createRecord', {
-				input: {
-					collection: 'site.standard.document',
-					repo: user.did,
-					rkey,
-					record
-				}
+			const response = await putRecord({
+				collection: 'site.standard.document',
+				rkey,
+				record
 			});
 
-			if (response.ok) {
+			if (response) {
 				clearDraft();
 				const handle =
 					user.profile?.handle && user.profile.handle !== 'handle.invalid'
@@ -374,7 +371,7 @@
 
 <div class="min-h-screen px-6 py-12">
 	<div class="mx-auto max-w-3xl">
-		{#if user.isInitializing || !draftRestored}
+		{#if !draftRestored}
 			<div class="flex items-center gap-3">
 				<div class="bg-base-300 dark:bg-base-700 size-5 animate-pulse rounded-full"></div>
 				<div class="bg-base-300 dark:bg-base-700 h-4 w-48 animate-pulse rounded"></div>

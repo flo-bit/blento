@@ -54,7 +54,7 @@
 	} = $props();
 
 	// Check if floating login button will be visible (to hide MadeWithBlento)
-	const showLoginOnEditPage = $derived(!user.isInitializing && !user.isLoggedIn);
+	const showLoginOnEditPage = $derived(!user.isLoggedIn);
 
 	// svelte-ignore state_referenced_locally
 	let items: Item[] = $state(data.cards);
@@ -239,8 +239,6 @@
 
 			launchConfetti();
 
-			// Refresh cached data
-			await fetch('/' + data.handle + '/api/refresh');
 		} catch (error) {
 			console.error(error);
 			showSaveModal = false;

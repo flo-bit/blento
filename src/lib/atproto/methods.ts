@@ -58,9 +58,6 @@ const didResolver = new CompositeDidDocumentResolver({
 
 /**
  * Gets the PDS (Personal Data Server) URL for a given DID.
- * @param did - The DID to look up
- * @returns The PDS service endpoint URL
- * @throws If no PDS is found in the DID document
  */
 export async function getPDS(did: Did) {
 	const doc = await didResolver.resolve(did as Did<'plc'> | Did<'web'>);
@@ -74,10 +71,6 @@ export async function getPDS(did: Did) {
 
 /**
  * Fetches a detailed Bluesky profile for a user.
- * @param data - Optional object with did and client
- * @param data.did - The DID to fetch the profile for (defaults to current user)
- * @param data.client - The client to use (defaults to public Bluesky API)
- * @returns The profile data or undefined if not found
  */
 export async function getDetailedProfile(data?: { did?: Did; client?: Client }) {
 	data ??= {};
@@ -109,7 +102,6 @@ export async function getBlentoOrBskyProfile(data: { did: Did; client?: Client }
 > {
 	let blentoProfile;
 	try {
-		// try getting blento profile first
 		blentoProfile = await getRecord({
 			collection: 'site.standard.publication',
 			did: data?.did,
@@ -117,7 +109,7 @@ export async function getBlentoOrBskyProfile(data: { did: Did; client?: Client }
 			client: data?.client
 		});
 	} catch {
-		console.error('error getting blento profile, falling back to bsky profile');
+		// User doesn't have a blento publication — expected for most users
 	}
 
 	let response;
@@ -143,9 +135,6 @@ export async function getBlentoOrBskyProfile(data: { did: Did; client?: Client }
 
 /**
  * Creates an AT Protocol client for a user's PDS.
- * @param did - The DID of the user
- * @returns A client configured for the user's PDS
- * @throws If the PDS cannot be found
  */
 export async function getClient({ did }: { did: Did }) {
 	const pds = await getPDS(did);
@@ -160,12 +149,6 @@ export async function getClient({ did }: { did: Did }) {
 
 /**
  * Lists records from a repository collection with pagination support.
- * @param did - The DID of the repository (defaults to current user)
- * @param collection - The collection to list records from
- * @param cursor - Pagination cursor for continuing from a previous request
- * @param limit - Maximum number of records to return (default 100, set to 0 for all records)
- * @param client - The client to use (defaults to user's PDS client)
- * @returns An array of records from the collection
  */
 export async function listRecords({
 	did,
@@ -216,11 +199,6 @@ export async function listRecords({
 
 /**
  * Fetches a single record from a repository.
- * @param did - The DID of the repository (defaults to current user)
- * @param collection - The collection the record belongs to
- * @param rkey - The record key (defaults to "self")
- * @param client - The client to use (defaults to user's PDS client)
- * @returns The record data
  */
 export async function getRecord({
 	did,
@@ -259,13 +237,7 @@ export async function getRecord({
 }
 
 /**
- * Creates or updates a record in the current user's repository.
- * Only accepts collections that are configured in permissions.
- * @param collection - The collection to write to (must be in permissions.collections)
- * @param rkey - The record key (defaults to "self")
- * @param record - The record data to write
- * @returns The response from the PDS
- * @throws If the user is not logged in
+ * Creates or updates a record in the current user's repository via server-side proxy.
  */
 export async function putRecord({
 	collection,
@@ -276,29 +248,12 @@ export async function putRecord({
 	rkey?: string;
 	record: Record<string, unknown>;
 }) {
-	if (!user.client || !user.did) throw new Error('No rpc or did');
-
-	const response = await user.client.post('com.atproto.repo.putRecord', {
-		input: {
-			collection,
-			repo: user.did,
-			rkey,
-			record: {
-				...record
-			}
-		}
-	});
-
-	return response;
+	const { putRecord: serverPutRecord } = await import('./server/repo.remote');
+	return serverPutRecord({ collection, rkey, record });
 }
 
 /**
- * Deletes a record from the current user's repository.
- * Only accepts collections that are configured in permissions.
- * @param collection - The collection the record belongs to (must be in permissions.collections)
- * @param rkey - The record key (defaults to "self")
- * @returns True if the deletion was successful
- * @throws If the user is not logged in
+ * Deletes a record from the current user's repository via server-side proxy.
  */
 export async function deleteRecord({
 	collection,
@@ -307,54 +262,22 @@ export async function deleteRecord({
 	collection: AllowedCollection;
 	rkey: string;
 }) {
-	if (!user.client || !user.did) throw new Error('No profile or rpc or did');
-
-	const response = await user.client.post('com.atproto.repo.deleteRecord', {
-		input: {
-			collection,
-			repo: user.did,
-			rkey
-		}
-	});
-
-	return response.ok;
+	const { deleteRecord: serverDeleteRecord } = await import('./server/repo.remote');
+	const result = await serverDeleteRecord({ collection, rkey });
+	return result.ok;
 }
 
 /**
- * Uploads a blob to the current user's PDS.
- * @param blob - The blob data to upload
- * @returns The blob metadata including ref, mimeType, and size, or undefined on failure
- * @throws If the user is not logged in
+ * Uploads a blob to the current user's PDS via server-side proxy.
  */
 export async function uploadBlob({ blob }: { blob: Blob }) {
-	if (!user.did || !user.client) throw new Error("Can't upload blob: Not logged in");
-
-	const blobResponse = await user.client.post('com.atproto.repo.uploadBlob', {
-		params: {
-			repo: user.did
-		},
-		input: blob
-	});
-
-	if (!blobResponse?.ok) return;
-
-	const blobInfo = blobResponse?.data.blob as {
-		$type: 'blob';
-		ref: {
-			$link: string;
-		};
-		mimeType: string;
-		size: number;
-	};
-
-	return blobInfo;
+	const { uploadBlob: serverUploadBlob } = await import('./server/repo.remote');
+	const bytes = Array.from(new Uint8Array(await blob.arrayBuffer()));
+	return serverUploadBlob({ bytes, mimeType: blob.type });
 }
 
 /**
  * Gets metadata about a repository.
- * @param client - The client to use
- * @param did - The DID of the repository (defaults to current user)
- * @returns Repository metadata or undefined on failure
  */
 export async function describeRepo({ client, did }: { client?: Client; did?: Did }) {
 	did ??= user.did;
@@ -375,9 +298,6 @@ export async function describeRepo({ client, did }: { client?: Client; did?: Did
 
 /**
  * Constructs a URL to fetch a blob directly from a user's PDS.
- * @param did - The DID of the user who owns the blob
- * @param blob - The blob reference object
- * @returns The URL to fetch the blob
  */
 export async function getBlobURL({
 	did,
@@ -397,9 +317,6 @@ export async function getBlobURL({
 
 /**
  * Constructs a Bluesky CDN URL for an image blob.
- * @param did - The DID of the user who owns the blob (defaults to current user)
- * @param blob - The blob reference object
- * @returns The CDN URL for the image in webp format
  */
 export function getCDNImageBlobUrl({
 	did,
@@ -423,10 +340,6 @@ export function getCDNImageBlobUrl({
 
 /**
  * Searches for actors with typeahead/autocomplete functionality.
- * @param q - The search query
- * @param limit - Maximum number of results (default 10)
- * @param host - The API host to use (defaults to public Bluesky API)
- * @returns An object containing matching actors and the original query
  */
 export async function searchActorsTypeahead(
 	q: string,
@@ -453,8 +366,6 @@ export async function searchActorsTypeahead(
 
 /**
  * Return a TID based on current time
- *
- * @returns TID for current time
  */
 export function createTID() {
 	return TID.now();
@@ -492,9 +403,6 @@ export async function getAuthorFeed(data?: {
 
 /**
  * Fetches posts by their AT URIs.
- * @param uris - Array of AT URIs (e.g., "at://did:plc:xyz/app.bsky.feed.post/abc123")
- * @param client - The client to use (defaults to public Bluesky API)
- * @returns Array of posts or undefined on failure
  */
 export async function getPosts(data: { uris: string[]; client?: Client }) {
 	data.client ??= new Client({
@@ -520,10 +428,6 @@ export function getHandleOrDid(profile: AppBskyActorDefs.ProfileViewDetailed): A
 
 /**
  * Fetches a post's thread including replies.
- * @param uri - The AT URI of the post
- * @param depth - How many levels of replies to fetch (default 1)
- * @param client - The client to use (defaults to public Bluesky API)
- * @returns The thread data or undefined on failure
  */
 export async function getPostThread({
 	uri,
@@ -548,11 +452,7 @@ export async function getPostThread({
 }
 
 /**
- * Creates a Bluesky post on the authenticated user's account.
- * @param text - The post text
- * @param facets - Optional rich text facets (links, mentions, etc.)
- * @returns The response containing the post's URI and CID
- * @throws If the user is not logged in
+ * Creates a Bluesky post on the authenticated user's account via server-side proxy.
  */
 export async function createPost({
 	text,
@@ -564,8 +464,6 @@ export async function createPost({
 		features: Array<{ $type: string; uri?: string; did?: string; tag?: string }>;
 	}>;
 }) {
-	if (!user.client || !user.did) throw new Error('No client or did');
-
 	const record: Record<string, unknown> = {
 		$type: 'app.bsky.feed.post',
 		text,
@@ -576,13 +474,6 @@ export async function createPost({
 		record.facets = facets;
 	}
 
-	const response = await user.client.post('com.atproto.repo.createRecord', {
-		input: {
-			collection: 'app.bsky.feed.post',
-			repo: user.did,
-			record
-		}
-	});
-
-	return response;
+	const { createRecord } = await import('./server/repo.remote');
+	return createRecord({ collection: 'app.bsky.feed.post', record });
 }
