@@ -59,6 +59,15 @@
 	// svelte-ignore state_referenced_locally
 	let items: Item[] = $state(data.cards);
 
+	// Flag set by checkData when overlapping cards were detected before fixing
+	// Flag set by checkData when overlapping cards were auto-fixed on load
+	let showLayoutFixModal = $state(data.hasLayoutIssue ?? false);
+
+	function acknowledgeLayoutFix() {
+		hasUnsavedChanges = true;
+		showLayoutFixModal = false;
+	}
+
 	// svelte-ignore state_referenced_locally
 	let publication = $state(JSON.stringify(data.publication));
 
@@ -109,11 +118,13 @@
 	// svelte-ignore state_referenced_locally
 	let editedOn = $state(data.publication.preferences?.editedOn ?? 0);
 
+	let layoutMode = $derived(data.publication.preferences?.layoutMode);
+
 	function onLayoutChanged() {
 		hasUnsavedChanges = true;
 		// Set the bit for the current layout: desktop=1, mobile=2
 		editedOn = editedOn | (isMobile ? 2 : 1);
-		if (shouldMirror(editedOn)) {
+		if (shouldMirror(editedOn, layoutMode, isMobile)) {
 			mirrorLayout(items, isMobile);
 		}
 	}
@@ -499,7 +510,7 @@
 	baseColor={data.publication?.preferences?.baseColor}
 />
 
-<Account {data} />
+<Account bind:data />
 
 <Context {data} isEditing={true}>
 	<ImageViewerProvider />
@@ -555,6 +566,32 @@
 		handle={data.handle}
 		page={data.page}
 	/>
+
+	<Modal open={showLayoutFixModal} closeButton={false}>
+		<div class="flex flex-col items-center gap-4 text-center">
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				fill="none"
+				viewBox="0 0 24 24"
+				stroke-width="1.5"
+				stroke="currentColor"
+				class="size-10 text-amber-500"
+			>
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"
+				/>
+			</svg>
+			<p class="text-base-700 dark:text-base-300 text-xl font-bold">Layout Auto-Fixed</p>
+			<p class="text-base-500 dark:text-base-400 text-sm">
+				Your card layout had overlapping cards from an older version. This has been automatically
+				fixed, but some cards may have moved. Please check your layout and rearrange if needed,
+				then save to keep the changes.
+			</p>
+			<Button class="w-full" onclick={acknowledgeLayoutFix}>Got it</Button>
+		</div>
+	</Modal>
 
 	<Modal open={showMobileWarning} closeButton={false}>
 		<div class="flex flex-col items-center gap-4 text-center">

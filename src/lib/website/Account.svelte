@@ -5,9 +5,10 @@
 	import type { WebsiteData } from '$lib/types';
 	import { Avatar, Button, Popover } from '@foxui/core';
 	import CustomDomainModal, { customDomainModalState } from '$lib/website/CustomDomainModal.svelte';
+	import SettingsModal, { settingsModalState } from '$lib/website/SettingsModal.svelte';
 
 	let {
-		data
+		data = $bindable()
 	}: {
 		data: WebsiteData;
 	} = $props();
@@ -38,6 +39,14 @@
 					variant="ghost"
 					onclick={() => {
 						settingsPopoverOpen = false;
+						settingsModalState.show();
+					}}>Settings</Button
+				>
+
+				<Button
+					variant="ghost"
+					onclick={() => {
+						settingsPopoverOpen = false;
 						customDomainModalState.show();
 					}}>Custom Domain</Button
 				>
@@ -48,4 +57,5 @@
 	</div>
 
 	<CustomDomainModal publicationUrl={data.publication?.url} />
+	<SettingsModal bind:data />
 {/if}

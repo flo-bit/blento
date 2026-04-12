@@ -62,6 +62,16 @@ export function overlaps(a: Item, b: Item, mobile: boolean) {
 	return collides(toLayoutItem(a, mobile), toLayoutItem(b, mobile));
 }
 
+/** Returns true if any two items overlap in the given layout. */
+export function hasOverlaps(items: Item[], mobile: boolean): boolean {
+	for (let i = 0; i < items.length; i++) {
+		for (let j = i + 1; j < items.length; j++) {
+			if (overlaps(items[i], items[j], mobile)) return true;
+		}
+	}
+	return false;
+}
+
 export function fixCollisions(
 	items: Item[],
 	item: Item,
@@ -102,6 +112,16 @@ export function fixAllCollisions(items: Item[], mobile: boolean) {
 	let layout = toLayout(items, mobile);
 	correctBounds(layout as any, { cols: COLUMNS });
 	layout = verticalCompactor.compact(layout, COLUMNS) as LayoutItem[];
+	applyLayout(items, layout, mobile);
+}
+
+/**
+ * Only fix items that are out of grid bounds, without compacting or resolving overlaps.
+ * This is safe to call on load — it won't shift already-valid layouts.
+ */
+export function sanitizeBounds(items: Item[], mobile: boolean) {
+	const layout = toLayout(items, mobile);
+	correctBounds(layout as any, { cols: COLUMNS });
 	applyLayout(items, layout, mobile);
 }
 
