@@ -29,9 +29,7 @@
 	let mode = $derived(item.cardData?.mode ?? 'emoji');
 	// Emoji mode: use cardData. Statusphere mode: use latest record or preview.
 	let emoji = $derived(
-		mode === 'statusphere'
-			? (item.cardData?.emoji ?? record?.value?.status)
-			: item.cardData?.emoji
+		mode === 'statusphere' ? (item.cardData?.emoji ?? record?.value?.status) : item.cardData?.emoji
 	);
 
 	let showPopover = $state(false);

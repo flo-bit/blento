@@ -4,19 +4,21 @@
  *
  * Usage: npx tsx scripts/atproto.ts listRecords <handle> app.blento.card 2>/dev/null | npx tsx scripts/simulate-load.ts
  */
-import {
-	correctBounds,
-	verticalCompactor,
-	type LayoutItem
-} from 'react-grid-layout/core';
+import { correctBounds, verticalCompactor, type LayoutItem } from 'react-grid-layout/core';
 import * as fs from 'fs';
 
 const COLUMNS = 8;
 
 type Item = {
 	id: string;
-	x: number; y: number; w: number; h: number;
-	mobileX: number; mobileY: number; mobileW: number; mobileH: number;
+	x: number;
+	y: number;
+	w: number;
+	h: number;
+	mobileX: number;
+	mobileY: number;
+	mobileW: number;
+	mobileH: number;
 	cardType: string;
 };
 
@@ -33,8 +35,13 @@ function applyLayout(items: Item[], layout: LayoutItem[], mobile: boolean) {
 	for (const l of layout) {
 		const item = map.get(l.i);
 		if (!item) continue;
-		if (mobile) { item.mobileX = l.x; item.mobileY = l.y; }
-		else { item.x = l.x; item.y = l.y; }
+		if (mobile) {
+			item.mobileX = l.x;
+			item.mobileY = l.y;
+		} else {
+			item.x = l.x;
+			item.y = l.y;
+		}
 	}
 }
 
@@ -60,9 +67,14 @@ const cards: Item[] = records
 	.filter((r: any) => r.value.cardType && (!r.value.page || r.value.page === 'blento.self'))
 	.map((r: any) => ({
 		id: r.value.id,
-		x: r.value.x, y: r.value.y, w: r.value.w, h: r.value.h,
-		mobileX: r.value.mobileX, mobileY: r.value.mobileY,
-		mobileW: r.value.mobileW, mobileH: r.value.mobileH,
+		x: r.value.x,
+		y: r.value.y,
+		w: r.value.w,
+		h: r.value.h,
+		mobileX: r.value.mobileX,
+		mobileY: r.value.mobileY,
+		mobileW: r.value.mobileW,
+		mobileH: r.value.mobileH,
 		cardType: r.value.cardType
 	}));
 
@@ -86,7 +98,9 @@ for (const card of cards) {
 		console.log(
 			`${orig.cardType.padEnd(20)} id=${orig.id}` +
 				(dChanged ? `  DESKTOP: (${orig.x},${orig.y}) → (${card.x},${card.y})` : '') +
-				(mChanged ? `  MOBILE: (${orig.mobileX},${orig.mobileY}) → (${card.mobileX},${card.mobileY})` : '')
+				(mChanged
+					? `  MOBILE: (${orig.mobileX},${orig.mobileY}) → (${card.mobileX},${card.mobileY})`
+					: '')
 		);
 		if (dChanged) desktopChanges++;
 		if (mChanged) mobileChanges++;
@@ -101,8 +115,9 @@ if (desktopChanges === 0 && mobileChanges === 0) {
 
 // Check for ORDER changes in mobile layout
 console.log('\n=== Mobile reading order (y, then x) ===');
-const sortByMobile = (items: { id: string; mobileX: number; mobileY: number; cardType: string }[]) =>
-	[...items].sort((a, b) => a.mobileY - b.mobileY || a.mobileX - b.mobileX);
+const sortByMobile = (
+	items: { id: string; mobileX: number; mobileY: number; cardType: string }[]
+) => [...items].sort((a, b) => a.mobileY - b.mobileY || a.mobileX - b.mobileX);
 
 const origOrder = sortByMobile(originals);
 const newOrder = sortByMobile(cards);
@@ -111,13 +126,13 @@ let orderChanges = 0;
 for (let i = 0; i < origOrder.length; i++) {
 	const same = origOrder[i].id === newOrder[i].id;
 	if (!same) orderChanges++;
-	const orig = originals.find(o => o.id === newOrder[i].id)!;
-	const card = cards.find(c => c.id === newOrder[i].id)!;
+	const orig = originals.find((o) => o.id === newOrder[i].id)!;
+	const card = cards.find((c) => c.id === newOrder[i].id)!;
 	console.log(
 		`${i.toString().padStart(2)}: ${same ? '  ' : '!!'} ` +
-		`${card.cardType.padEnd(20)} ` +
-		`was (${orig.mobileX},${orig.mobileY}) → now (${card.mobileX},${card.mobileY})` +
-		(!same ? `  [was #${origOrder.findIndex(o => o.id === newOrder[i].id)}]` : '')
+			`${card.cardType.padEnd(20)} ` +
+			`was (${orig.mobileX},${orig.mobileY}) → now (${card.mobileX},${card.mobileY})` +
+			(!same ? `  [was #${origOrder.findIndex((o) => o.id === newOrder[i].id)}]` : '')
 	);
 }
 console.log(`\n${orderChanges} order changes in mobile layout.`);

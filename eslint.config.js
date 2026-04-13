@@ -44,6 +44,7 @@ export default [
 			'svelte/no-at-html-tags': 'off',
 			'@typescript-eslint/no-explicit-any': 'off',
 			'no-unused-vars': 'off',
+			'no-useless-assignment': 'off',
 			'@typescript-eslint/no-unused-vars': [
 				'warn',
 				{

@@ -84,10 +84,10 @@
 			class="relative block min-h-0 flex-1"
 		>
 			{#if imageUrl}
-				<img src={imageUrl} alt={title} class="rounded-t-xl h-full w-full object-cover" />
+				<img src={imageUrl} alt={title} class="h-full w-full rounded-t-xl object-cover" />
 			{:else}
 				<div
-					class="rounded-t-xl from-base-300 to-base-200 dark:from-base-800 dark:to-base-900 h-full w-full bg-gradient-to-br"
+					class="from-base-300 to-base-200 dark:from-base-800 dark:to-base-900 h-full w-full rounded-t-xl bg-gradient-to-br"
 				></div>
 			{/if}
 
