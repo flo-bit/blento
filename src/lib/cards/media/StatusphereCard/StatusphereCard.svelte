@@ -11,9 +11,7 @@
 
 	let mode = $derived(item.cardData?.mode ?? 'emoji');
 	// Emoji mode: use cardData. Statusphere mode: use latest record from PDS.
-	let emoji = $derived(
-		mode === 'statusphere' ? record?.value?.status : item.cardData?.emoji
-	);
+	let emoji = $derived(mode === 'statusphere' ? record?.value?.status : item.cardData?.emoji);
 	let animated = $derived(emojiToNotoAnimatedWebp(emoji));
 </script>
 

@@ -25,3 +25,5 @@ vite.config.ts.timestamp-*
 references
 
 sveltekit-cloudflare-workers
+
+inlay

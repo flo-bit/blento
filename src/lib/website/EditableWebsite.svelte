@@ -586,8 +586,8 @@
 			<p class="text-base-700 dark:text-base-300 text-xl font-bold">Layout Auto-Fixed</p>
 			<p class="text-base-500 dark:text-base-400 text-sm">
 				Your card layout had overlapping cards from an older version. This has been automatically
-				fixed, but some cards may have moved. Please check your layout and rearrange if needed,
-				then save to keep the changes.
+				fixed, but some cards may have moved. Please check your layout and rearrange if needed, then
+				save to keep the changes.
 			</p>
 			<Button class="w-full" onclick={acknowledgeLayoutFix}>Got it</Button>
 		</div>
