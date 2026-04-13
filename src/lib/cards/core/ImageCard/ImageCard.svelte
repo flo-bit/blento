@@ -16,7 +16,7 @@
 			item.cardData.href ? 'group-hover/card:scale-101' : ''
 		]}
 		src={getImage(item.cardData, did, 'image')}
-		alt=""
+		alt={item.cardData.alt ?? ''}
 	/>
 {/key}
 {#if item.cardData.href && !isEditing}
