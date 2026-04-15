@@ -15,6 +15,7 @@ export const config: ContrailConfig = {
 	},
 	profiles: [
 		'app.bsky.actor.profile',
-		{ collection: 'site.standard.publication', rkey: 'blento.self' }
+		{ collection: 'site.standard.publication', rkey: 'blento.self' },
+		{ collection: 'app.nearhorizon.actor.pronouns', rkey: 'self' }
 	]
 };

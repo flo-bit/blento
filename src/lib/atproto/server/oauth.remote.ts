@@ -15,11 +15,10 @@ function getDomain(): string | undefined {
 export const oauthLogin = command(
 	v.object({
 		handle: v.optional(v.pipe(v.string(), v.minLength(3))),
-		signup: v.optional(v.boolean()),
-		returnTo: v.optional(v.string())
+		signup: v.optional(v.boolean())
 	}),
 	async (input) => {
-		const { platform, cookies } = getRequestEvent();
+		const { platform } = getRequestEvent();
 
 		try {
 			const oauth = createOAuthClient(platform?.env, getDomain());
@@ -33,15 +32,6 @@ export const oauthLogin = command(
 				scope: scopes.join(' '),
 				prompt: input.signup ? 'create' : undefined
 			});
-
-			// Store return path in a cookie so the callback can redirect back
-			if (input.returnTo) {
-				cookies.set('oauth_return_to', encodeURIComponent(input.returnTo), {
-					path: '/',
-					httpOnly: true,
-					maxAge: 600 // 10 minutes
-				});
-			}
 
 			return { url: url.toString() };
 		} catch (e) {

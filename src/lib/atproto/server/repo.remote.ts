@@ -56,16 +56,25 @@ export const deleteRecord = command(
 		rkey: rkeySchema
 	}),
 	async (input) => {
-		const { locals } = getRequestEvent();
+		const { locals, platform } = getRequestEvent();
 		if (!locals.client || !locals.did) error(401, 'Not authenticated');
 
+		const rkey = input.rkey || 'self';
 		const response = await locals.client.post('com.atproto.repo.deleteRecord', {
 			input: {
 				collection: input.collection as `${string}.${string}.${string}`,
 				repo: locals.did,
-				rkey: input.rkey || 'self'
+				rkey
 			}
 		});
+
+		// Tell contrail the record is gone — notify() re-fetches and removes on 404
+		const db = platform?.env?.DB;
+		if (db && response.ok) {
+			await ensureInit(db);
+			const uri = `at://${locals.did}/${input.collection}/${rkey}`;
+			await contrail.notify(uri, db).catch(() => {});
+		}
 
 		return { ok: response.ok };
 	}

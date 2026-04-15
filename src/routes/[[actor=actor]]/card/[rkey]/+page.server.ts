@@ -12,5 +12,5 @@ export async function load({ params, platform, request }) {
 		throw error(404, 'Page not found');
 	}
 
-	return await loadCardData(actor, params.rkey, cache, env);
+	return await loadCardData(actor, params.rkey, cache, env, platform);
 }

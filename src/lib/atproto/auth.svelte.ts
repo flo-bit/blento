@@ -62,8 +62,6 @@ export const user: {
 export async function login(handle: ActorIdentifier) {
 	const { oauthLogin } = await import('./server/oauth.remote');
 
-	const returnTo = location.pathname + location.search;
-
 	if (handle.startsWith('did:')) {
 		if (handle.length < 6) throw new Error('DID must be at least 6 characters');
 	} else if (handle.includes('.') && handle.length > 3) {
@@ -75,15 +73,14 @@ export async function login(handle: ActorIdentifier) {
 		throw new Error('Please provide a valid handle or DID.');
 	}
 
-	const { url } = await oauthLogin({ handle, returnTo });
+	const { url } = await oauthLogin({ handle });
 	window.location.assign(url);
 }
 
 export async function signup() {
 	const { oauthLogin } = await import('./server/oauth.remote');
 
-	const returnTo = location.pathname + location.search;
-	const { url } = await oauthLogin({ signup: true, returnTo });
+	const { url } = await oauthLogin({ signup: true });
 	window.location.assign(url);
 }
 
