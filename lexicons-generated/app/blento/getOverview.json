@@ -1,51 +1,44 @@
 {
-  "lexicon": 1,
-  "id": "app.blento.getOverview",
-  "defs": {
-    "main": {
-      "type": "query",
-      "description": "Get an overview of all indexed collections",
-      "output": {
-        "encoding": "application/json",
-        "schema": {
-          "type": "object",
-          "required": [
-            "total_records",
-            "collections"
-          ],
-          "properties": {
-            "total_records": {
-              "type": "integer"
-            },
-            "collections": {
-              "type": "array",
-              "items": {
-                "type": "ref",
-                "ref": "#collectionStats"
-              }
-            }
-          }
-        }
-      }
-    },
-    "collectionStats": {
-      "type": "object",
-      "required": [
-        "collection",
-        "records",
-        "unique_users"
-      ],
-      "properties": {
-        "collection": {
-          "type": "string"
-        },
-        "records": {
-          "type": "integer"
-        },
-        "unique_users": {
-          "type": "integer"
-        }
-      }
-    }
-  }
+	"lexicon": 1,
+	"id": "app.blento.getOverview",
+	"defs": {
+		"main": {
+			"type": "query",
+			"description": "Get an overview of all indexed collections",
+			"output": {
+				"encoding": "application/json",
+				"schema": {
+					"type": "object",
+					"required": ["total_records", "collections"],
+					"properties": {
+						"total_records": {
+							"type": "integer"
+						},
+						"collections": {
+							"type": "array",
+							"items": {
+								"type": "ref",
+								"ref": "#collectionStats"
+							}
+						}
+					}
+				}
+			}
+		},
+		"collectionStats": {
+			"type": "object",
+			"required": ["collection", "records", "unique_users"],
+			"properties": {
+				"collection": {
+					"type": "string"
+				},
+				"records": {
+					"type": "integer"
+				},
+				"unique_users": {
+					"type": "integer"
+				}
+			}
+		}
+	}
 }

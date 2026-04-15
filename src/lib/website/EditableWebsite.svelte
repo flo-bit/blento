@@ -263,7 +263,6 @@
 			saveSuccess = true;
 
 			launchConfetti();
-
 		} catch (error) {
 			console.error(error);
 			showSaveModal = false;

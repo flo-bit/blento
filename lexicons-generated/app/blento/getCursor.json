@@ -1,27 +1,27 @@
 {
-  "lexicon": 1,
-  "id": "app.blento.getCursor",
-  "defs": {
-    "main": {
-      "type": "query",
-      "description": "Get the current cursor position",
-      "output": {
-        "encoding": "application/json",
-        "schema": {
-          "type": "object",
-          "properties": {
-            "time_us": {
-              "type": "integer"
-            },
-            "date": {
-              "type": "string"
-            },
-            "seconds_ago": {
-              "type": "integer"
-            }
-          }
-        }
-      }
-    }
-  }
+	"lexicon": 1,
+	"id": "app.blento.getCursor",
+	"defs": {
+		"main": {
+			"type": "query",
+			"description": "Get the current cursor position",
+			"output": {
+				"encoding": "application/json",
+				"schema": {
+					"type": "object",
+					"properties": {
+						"time_us": {
+							"type": "integer"
+						},
+						"date": {
+							"type": "string"
+						},
+						"seconds_ago": {
+							"type": "integer"
+						}
+					}
+				}
+			}
+		}
+	}
 }

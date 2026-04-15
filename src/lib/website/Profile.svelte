@@ -24,7 +24,11 @@
 	const profileUrl = $derived.by(() => {
 		if (page.data.customDomain) return `${page.url.origin}/`;
 		const pubUrl = data.publication?.url;
-		if (pubUrl && /^https?:\/\//.test(pubUrl) && !/^https?:\/\/([^/]*\.)?blento\.app/i.test(pubUrl)) {
+		if (
+			pubUrl &&
+			/^https?:\/\//.test(pubUrl) &&
+			!/^https?:\/\/([^/]*\.)?blento\.app/i.test(pubUrl)
+		) {
 			return pubUrl;
 		}
 		const handle = data.profile?.handle;

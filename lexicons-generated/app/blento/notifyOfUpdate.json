@@ -1,59 +1,56 @@
 {
-  "lexicon": 1,
-  "id": "app.blento.notifyOfUpdate",
-  "defs": {
-    "main": {
-      "type": "procedure",
-      "description": "Notify of a record change for immediate indexing. Fetches the record from the user's PDS and indexes (or deletes) it.",
-      "input": {
-        "encoding": "application/json",
-        "schema": {
-          "type": "object",
-          "properties": {
-            "uri": {
-              "type": "string",
-              "format": "at-uri",
-              "description": "Single AT URI to fetch and index"
-            },
-            "uris": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "format": "at-uri"
-              },
-              "maxLength": 25,
-              "description": "Batch of AT URIs to fetch and index (max 25)"
-            }
-          }
-        }
-      },
-      "output": {
-        "encoding": "application/json",
-        "schema": {
-          "type": "object",
-          "required": [
-            "indexed",
-            "deleted"
-          ],
-          "properties": {
-            "indexed": {
-              "type": "integer",
-              "description": "Number of records created or updated"
-            },
-            "deleted": {
-              "type": "integer",
-              "description": "Number of records deleted (not found on PDS)"
-            },
-            "errors": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              },
-              "description": "Errors for individual URIs that could not be processed"
-            }
-          }
-        }
-      }
-    }
-  }
+	"lexicon": 1,
+	"id": "app.blento.notifyOfUpdate",
+	"defs": {
+		"main": {
+			"type": "procedure",
+			"description": "Notify of a record change for immediate indexing. Fetches the record from the user's PDS and indexes (or deletes) it.",
+			"input": {
+				"encoding": "application/json",
+				"schema": {
+					"type": "object",
+					"properties": {
+						"uri": {
+							"type": "string",
+							"format": "at-uri",
+							"description": "Single AT URI to fetch and index"
+						},
+						"uris": {
+							"type": "array",
+							"items": {
+								"type": "string",
+								"format": "at-uri"
+							},
+							"maxLength": 25,
+							"description": "Batch of AT URIs to fetch and index (max 25)"
+						}
+					}
+				}
+			},
+			"output": {
+				"encoding": "application/json",
+				"schema": {
+					"type": "object",
+					"required": ["indexed", "deleted"],
+					"properties": {
+						"indexed": {
+							"type": "integer",
+							"description": "Number of records created or updated"
+						},
+						"deleted": {
+							"type": "integer",
+							"description": "Number of records deleted (not found on PDS)"
+						},
+						"errors": {
+							"type": "array",
+							"items": {
+								"type": "string"
+							},
+							"description": "Errors for individual URIs that could not be processed"
+						}
+					}
+				}
+			}
+		}
+	}
 }

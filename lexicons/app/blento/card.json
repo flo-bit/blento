@@ -8,13 +8,7 @@
 			"key": "tid",
 			"record": {
 				"type": "object",
-				"required": [
-					"w",
-					"h",
-					"x",
-					"y",
-					"cardType"
-				],
+				"required": ["w", "h", "x", "y", "cardType"],
 				"properties": {
 					"w": { "type": "integer" },
 					"h": { "type": "integer" },
