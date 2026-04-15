@@ -56,10 +56,12 @@
 	// Check if floating login button will be visible (to hide MadeWithBlento)
 	const showLoginOnEditPage = $derived(!user.isInitializing && !user.isLoggedIn);
 
+	// Snapshot the original cards so savePage can detect deletions.
+	const originalCards: Item[] = structuredClone(data.cards);
+
 	// svelte-ignore state_referenced_locally
 	let items: Item[] = $state(data.cards);
 
-	// Flag set by checkData when overlapping cards were detected before fixing
 	// Flag set by checkData when overlapping cards were auto-fixed on load
 	let showLayoutFixModal = $state(data.hasLayoutIssue ?? false);
 
@@ -105,6 +107,18 @@
 
 		window.addEventListener('beforeunload', handleBeforeUnload);
 		return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+	});
+
+	// Press Escape to deselect the currently selected card.
+	$effect(() => {
+		function handleKeydown(e: KeyboardEvent) {
+			if (e.key === 'Escape' && selectedCardId) {
+				selectedCardId = null;
+			}
+		}
+
+		window.addEventListener('keydown', handleKeydown);
+		return () => window.removeEventListener('keydown', handleKeydown);
 	});
 
 	let gridContainer: HTMLDivElement | undefined = $state();
@@ -238,7 +252,7 @@
 			data.publication.preferences ??= {};
 			data.publication.preferences.editedOn = editedOn;
 
-			await savePage(data, items, publication);
+			await savePage(data, items, originalCards, publication);
 
 			publication = JSON.stringify(data.publication);
 			savedPronouns = JSON.stringify(data.pronounsRecord);
@@ -621,7 +635,7 @@
 		class={[
 			'@container/wrapper relative w-full',
 			showingMobileView
-				? 'bg-base-50 dark:bg-base-900 my-4 min-h-[calc(100dhv-2em)] rounded-2xl lg:mx-auto lg:w-90'
+				? 'bg-base-50 dark:bg-base-900 my-4 min-h-[calc(100dvh-2em)] rounded-2xl lg:mx-auto lg:w-90'
 				: ''
 		]}
 	>

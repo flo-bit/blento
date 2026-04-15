@@ -45,8 +45,9 @@
 	draggable={false}
 	class={[
 		fillPage
-			? 'card group/card selection:bg-accent-600/50 focus-within:outline-accent-500 @container/card relative isolate z-0 h-full w-full outline-offset-2 transition-[outline] duration-200 focus-within:outline-2'
-			: 'card group/card selection:bg-accent-600/50 focus-within:outline-accent-500 @container/card absolute isolate z-0 rounded-3xl outline-offset-2 transition-[outline] duration-200 focus-within:outline-2',
+			? 'card group/card selection:bg-accent-600/50 @container/card relative isolate z-0 h-full w-full outline-offset-2 transition-[outline] duration-200'
+			: 'card group/card selection:bg-accent-600/50 @container/card absolute isolate z-0 rounded-3xl outline-offset-2 transition-[outline] duration-200',
+		isEditing ? 'transition-all' : '',
 		!fillPage ? (color ? (colors[color] ?? colors.accent) : colors.base) : '',
 		color !== 'accent' && item.color !== 'base' && item.color !== 'transparent' ? color : '',
 		showOutline ? 'outline-2' : '',

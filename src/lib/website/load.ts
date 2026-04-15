@@ -378,49 +378,14 @@ function checkData(data: WebsiteData): WebsiteData {
 	const cards = data.cards.filter((v) => v.page === data.page);
 
 	if (cards.length > 0) {
-		// Detect overlaps before fixing — flag is used by the edit UI
-		const desktopOverlaps = hasOverlaps(cards, false);
-		const mobileOverlaps = hasOverlaps(cards, true);
-		data.hasLayoutIssue = desktopOverlaps || mobileOverlaps;
+		// Detect overlaps before fixing — flag is surfaced by the edit UI
+		// so the user knows their layout was auto-adjusted.
+		data.hasLayoutIssue = hasOverlaps(cards, false) || hasOverlaps(cards, true);
 
-		if (data.hasLayoutIssue) {
-			console.log('[checkData] Layout issues detected:');
-			if (desktopOverlaps) console.log('  - Desktop has overlapping cards');
-			if (mobileOverlaps) console.log('  - Mobile has overlapping cards');
-
-			// Log before positions
-			const before = cards.map((c) => ({
-				id: c.id,
-				type: c.cardType,
-				desktop: `(${c.x},${c.y},${c.w}x${c.h})`,
-				mobile: `(${c.mobileX},${c.mobileY},${c.mobileW}x${c.mobileH})`
-			}));
-
-			fixAllCollisions(cards, false);
-			fixAllCollisions(cards, true);
-			compactItems(cards, false);
-			compactItems(cards, true);
-
-			// Log changes
-			for (let i = 0; i < cards.length; i++) {
-				const c = cards[i];
-				const b = before[i];
-				const newDesktop = `(${c.x},${c.y},${c.w}x${c.h})`;
-				const newMobile = `(${c.mobileX},${c.mobileY},${c.mobileW}x${c.mobileH})`;
-				if (newDesktop !== b.desktop || newMobile !== b.mobile) {
-					console.log(
-						`  ${b.type} ${b.id}: ` +
-							(newDesktop !== b.desktop ? `desktop ${b.desktop} → ${newDesktop} ` : '') +
-							(newMobile !== b.mobile ? `mobile ${b.mobile} → ${newMobile}` : '')
-					);
-				}
-			}
-		} else {
-			fixAllCollisions(cards, false);
-			fixAllCollisions(cards, true);
-			compactItems(cards, false);
-			compactItems(cards, true);
-		}
+		fixAllCollisions(cards, false);
+		fixAllCollisions(cards, true);
+		compactItems(cards, false);
+		compactItems(cards, true);
 	}
 
 	data.cards = cards;
