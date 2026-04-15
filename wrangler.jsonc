@@ -49,18 +49,19 @@
 		},
 		{
 			"binding": "OAUTH_SESSIONS",
-			"id": "REPLACE_WITH_KV_NAMESPACE_ID"
+			"id": "4d872b4630a042d69ecd63f87d6b2094"
 		},
 		{
 			"binding": "OAUTH_STATES",
-			"id": "REPLACE_WITH_KV_NAMESPACE_ID"
+			"id": "c644b498d4af4c5892b3106d52c7760a"
 		}
 	],
 	"d1_databases": [
 		{
 			"binding": "DB",
 			"database_name": "blento",
-			"database_id": "922639e7-6321-42c8-a4bd-cdf48428fdac"
+			"database_id": "922639e7-6321-42c8-a4bd-cdf48428fdac",
+			"remote": true
 		}
 	],
 	"triggers": {
