@@ -4,10 +4,13 @@ export {
 	fixAllCollisions,
 	compactItems,
 	setPositionOfNewItem,
-	findValidPosition
+	findValidPosition,
+	sanitizeBounds,
+	hasOverlaps
 } from './algorithms';
 
 export { shouldMirror, mirrorItemSize, mirrorLayout } from './mirror';
+export type { LayoutMode } from './mirror';
 
 export { getGridPosition, getViewportCenterGridY, pixelToGrid } from './grid';
 export type { GridPosition, DragState } from './grid';

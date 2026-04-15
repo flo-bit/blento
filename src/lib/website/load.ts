@@ -9,7 +9,7 @@ import type { ActorIdentifier, Did } from '@atcute/lexicons';
 
 import type { D1Database } from '@cloudflare/workers-types';
 import { isDid, isHandle } from '@atcute/lexicons/syntax';
-import { fixAllCollisions, compactItems } from '$lib/layout';
+import { fixAllCollisions, compactItems, hasOverlaps } from '$lib/layout';
 import { getServerClient } from '$lib/contrail';
 import type { AppBskyActorDefs } from '@atcute/bluesky';
 
@@ -456,9 +456,12 @@ function checkData(data: WebsiteData): WebsiteData {
 	const cards = data.cards.filter((v) => v.page === data.page);
 
 	if (cards.length > 0) {
+		// Detect overlaps before fixing — flag is surfaced by the edit UI
+		// so the user knows their layout was auto-adjusted.
+		data.hasLayoutIssue = hasOverlaps(cards, false) || hasOverlaps(cards, true);
+
 		fixAllCollisions(cards, false);
 		fixAllCollisions(cards, true);
-
 		compactItems(cards, false);
 		compactItems(cards, true);
 	}

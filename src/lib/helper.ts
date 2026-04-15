@@ -187,48 +187,40 @@ export function compressImage(file: File | Blob, maxSize: number = 900 * 1024): 
 export async function savePage(
 	data: WebsiteData,
 	currentItems: Item[],
+	originalCards: Item[],
 	originalPublication: string
 ) {
 	const promises = [];
 
-	// Build a lookup of original cards by ID for O(1) access
-	const originalCardsById = new Map<string, Item>();
-	for (const card of data.cards) {
-		originalCardsById.set(card.id, card);
-	}
-
-	// find all cards that have been updated (where items differ from originalItems)
+	// Save all current cards. We don't diff against originals because the
+	// server-side load can modify cards (e.g. fixing overlaps), so the
+	// "original" the client sees is already the post-fix version — there's
+	// nothing reliable to diff against.
 	for (let item of currentItems) {
-		const orig = originalCardsById.get(item.id);
-		const originalItem = orig && cardsEqual(orig, item) ? orig : undefined;
+		item.updatedAt = new Date().toISOString();
+		// run optional upload function for this card type
+		const cardDef = CardDefinitionsByType[item.cardType];
 
-		if (!originalItem) {
-			console.log('updated or new item', item);
-			item.updatedAt = new Date().toISOString();
-			// run optional upload function for this card type
-			const cardDef = CardDefinitionsByType[item.cardType];
-
-			if (cardDef?.upload) {
-				item = await cardDef?.upload(item);
-			}
-
-			const parsedItem = JSON.parse(JSON.stringify(item));
-
-			parsedItem.page = data.page;
-			parsedItem.version = 2;
-
-			promises.push(
-				putRecord({
-					collection: 'app.blento.card',
-					rkey: parsedItem.id,
-					record: parsedItem
-				})
-			);
+		if (cardDef?.upload) {
+			item = await cardDef?.upload(item);
 		}
+
+		const parsedItem = JSON.parse(JSON.stringify(item));
+
+		parsedItem.page = data.page;
+		parsedItem.version = 2;
+
+		promises.push(
+			putRecord({
+				collection: 'app.blento.card',
+				rkey: parsedItem.id,
+				record: parsedItem
+			})
+		);
 	}
 
 	// delete items that are in originalItems but not in items
-	for (const originalItem of data.cards) {
+	for (const originalItem of originalCards) {
 		const item = currentItems.find((i) => i.id === originalItem.id);
 		if (!item) {
 			console.log('deleting item', originalItem);

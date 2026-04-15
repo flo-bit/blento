@@ -32,9 +32,13 @@
 		ref = container;
 	});
 
-	const getY = (item: Item) => (isMobile ? (item.mobileY ?? item.y) : item.y);
-	const getH = (item: Item) => (isMobile ? (item.mobileH ?? item.h) : item.h);
-	let maxHeight = $derived(items.reduce((max, item) => Math.max(max, getY(item) + getH(item)), 0));
+	let maxHeight = $derived(
+		items.reduce((max, item) => {
+			const y = isMobile ? (item.mobileY ?? item.y) : item.y;
+			const h = isMobile ? (item.mobileH ?? item.h) : item.h;
+			return Math.max(max, y + h);
+		}, 0)
+	);
 
 	// --- Drag state ---
 	type Phase = 'idle' | 'pending' | 'active';
@@ -387,7 +391,12 @@
 >
 	{@render children()}
 
-	<div style="height: {((maxHeight + 2) / 8) * 100}cqw;"></div>
+	<!--
+		padding-top % is based on the parent's inline size (width), so this grows
+		proportionally with the grid width. Using cqw here caused stale resolution
+		when the grid container resized (e.g. toggling mobile view).
+	-->
+	<div style="padding-top: {((maxHeight + 2) / 8) * 100}%;"></div>
 </div>
 
 <style>

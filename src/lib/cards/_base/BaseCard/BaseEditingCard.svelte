@@ -63,7 +63,21 @@
 	let selectedCardId = getSelectedCardId();
 	let selectCard = getSelectCard();
 	let isSelected = $derived(selectedCardId?.() === item.id);
-	let isDimmed = $derived(isCoarse?.() && selectedCardId?.() != null && !isSelected);
+
+	// Track pointer down position so we only select on click, not on drag
+	let overlayDownX = 0;
+	let overlayDownY = 0;
+	function handleOverlayPointerDown(e: PointerEvent) {
+		overlayDownX = e.clientX;
+		overlayDownY = e.clientY;
+	}
+	function handleOverlayPointerUp(e: PointerEvent) {
+		const dx = Math.abs(e.clientX - overlayDownX);
+		const dy = Math.abs(e.clientY - overlayDownY);
+		if (dx < 5 && dy < 5) {
+			selectCard?.(item.id);
+		}
+	}
 
 	let colorPopoverOpen = $state(false);
 
@@ -184,25 +198,23 @@
 	{item}
 	isEditing={true}
 	bind:ref
-	showOutline={isResizing || (isCoarse?.() && isSelected)}
+	showOutline={isResizing || isSelected}
 	locked={item.cardData?.locked}
 	class={[
 		'scale-100 starting:scale-0 starting:opacity-0',
-		isCoarse?.() && isSelected ? 'ring-accent-500 z-10 ring-2 ring-offset-2' : '',
-		isDimmed ? 'opacity-70' : 'opacity-100'
+		isSelected ? 'outline-accent-500 z-10' : ''
 	]}
 	{...rest}
 >
-	{#if isCoarse?.() && !isSelected}
-		<!-- svelte-ignore a11y_click_events_have_key_events -->
+	{#if !isSelected}
+		<!-- Overlay captures pointer events so dragging cards doesn't accidentally
+			 select text / trigger inner content. Click (no drag) selects the card. -->
 		<div
 			role="button"
 			tabindex="-1"
-			class="absolute inset-0 z-20 cursor-pointer"
-			onclick={(e) => {
-				e.stopPropagation();
-				selectCard?.(item.id);
-			}}
+			class="absolute inset-0 z-20 cursor-pointer focus:outline-none"
+			onpointerdown={handleOverlayPointerDown}
+			onpointerup={handleOverlayPointerUp}
 		></div>
 	{/if}
 	{@render children?.()}
@@ -299,7 +311,7 @@
 			<div
 				class={[
 					'translate absolute -bottom-13 w-full items-center justify-center pt-2.5 text-xs lg:group-focus-within:inline-flex lg:group-hover/card:inline-flex',
-					colorPopoverOpen || settingsPopoverOpen ? 'inline-flex' : 'hidden'
+					colorPopoverOpen || settingsPopoverOpen || isSelected ? 'inline-flex' : 'hidden'
 				]}
 			>
 				<div
