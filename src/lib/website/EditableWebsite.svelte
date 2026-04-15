@@ -54,7 +54,7 @@
 	} = $props();
 
 	// Check if floating login button will be visible (to hide MadeWithBlento)
-	const showLoginOnEditPage = $derived(!user.isInitializing && !user.isLoggedIn);
+	const showLoginOnEditPage = $derived(!user.isLoggedIn);
 
 	// Snapshot the original cards so savePage can detect deletions.
 	const originalCards: Item[] = structuredClone(data.cards);
@@ -263,9 +263,6 @@
 			saveSuccess = true;
 
 			launchConfetti();
-
-			// Refresh cached data
-			await fetch('/' + data.handle + '/api/refresh');
 		} catch (error) {
 			console.error(error);
 			showSaveModal = false;

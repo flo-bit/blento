@@ -7,7 +7,7 @@
 	"name": "blento",
 	"main": ".svelte-kit/cloudflare/_worker.js",
 	"compatibility_date": "2025-12-25",
-	"compatibility_flags": ["nodejs_als"],
+	"compatibility_flags": ["nodejs_als", "nodejs_compat"],
 	"assets": {
 		"binding": "ASSETS",
 		"directory": ".svelte-kit/cloudflare"
@@ -46,12 +46,25 @@
 		{
 			"binding": "CUSTOM_DOMAINS",
 			"id": "f449b3b5c8a349478405e2c04ed265f0"
+		},
+		{
+			"binding": "OAUTH_SESSIONS",
+			"id": "4d872b4630a042d69ecd63f87d6b2094"
+		},
+		{
+			"binding": "OAUTH_STATES",
+			"id": "c644b498d4af4c5892b3106d52c7760a"
 		}
-	]
-
-	/**
-	 * Service Bindings (communicate between multiple Workers)
-	 * https://developers.cloudflare.com/workers/wrangler/configuration/#service-bindings
-	 */
-	// "services": [  {   "binding": "MY_SERVICE",   "service": "my-service"  } ]
+	],
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "blento",
+			"database_id": "922639e7-6321-42c8-a4bd-cdf48428fdac",
+			"remote": true
+		}
+	],
+	"triggers": {
+		"crons": ["*/5 * * * *"]
+	}
 }

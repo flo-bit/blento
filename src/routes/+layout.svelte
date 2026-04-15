@@ -3,8 +3,6 @@
 
 	import { Tooltip } from 'bits-ui';
 	import { ThemeToggle, Toaster, toast } from '@foxui/core';
-	import { onMount } from 'svelte';
-	import { initClient } from '$lib/atproto';
 	import YoutubeVideoPlayer, { videoPlayer } from '$lib/components/YoutubeVideoPlayer.svelte';
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
@@ -20,10 +18,6 @@
 	const errorMessages: Record<string, (params: URLSearchParams) => string> = {
 		handle_not_found: (p) => `Handle ${p.get('handle') ?? ''} not found!`
 	};
-
-	onMount(() => {
-		initClient({ customDomain: data.customDomain });
-	});
 </script>
 
 <Tooltip.Provider delayDuration={300}>

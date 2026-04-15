@@ -9,6 +9,7 @@ const gitignorePath = fileURLToPath(new URL('./.gitignore', import.meta.url));
 
 export default [
 	includeIgnoreFile(gitignorePath),
+	{ ignores: ['src/lexicon-types/**', 'lexicons-generated/**'] },
 	js.configs.recommended,
 	...ts.configs.recommended,
 	...svelte.configs['flat/recommended'],

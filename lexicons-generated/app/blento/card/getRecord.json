@@ -1,0 +1,96 @@
+{
+	"lexicon": 1,
+	"id": "app.blento.card.getRecord",
+	"defs": {
+		"main": {
+			"type": "query",
+			"description": "Get a single app.blento.card record by AT URI",
+			"parameters": {
+				"type": "params",
+				"required": ["uri"],
+				"properties": {
+					"uri": {
+						"type": "string",
+						"format": "at-uri",
+						"description": "AT URI of the record"
+					},
+					"profiles": {
+						"type": "boolean",
+						"description": "Include profile + identity info keyed by DID"
+					}
+				}
+			},
+			"output": {
+				"encoding": "application/json",
+				"schema": {
+					"type": "object",
+					"required": ["uri", "did", "collection", "rkey", "time_us"],
+					"properties": {
+						"uri": {
+							"type": "string",
+							"format": "at-uri"
+						},
+						"did": {
+							"type": "string",
+							"format": "did"
+						},
+						"collection": {
+							"type": "string",
+							"format": "nsid"
+						},
+						"rkey": {
+							"type": "string"
+						},
+						"cid": {
+							"type": "string"
+						},
+						"record": {
+							"type": "ref",
+							"ref": "app.blento.card#main"
+						},
+						"time_us": {
+							"type": "integer"
+						},
+						"profiles": {
+							"type": "array",
+							"items": {
+								"type": "ref",
+								"ref": "#profileEntry"
+							}
+						}
+					}
+				}
+			}
+		},
+		"profileEntry": {
+			"type": "object",
+			"required": ["did"],
+			"properties": {
+				"did": {
+					"type": "string",
+					"format": "did"
+				},
+				"handle": {
+					"type": "string"
+				},
+				"uri": {
+					"type": "string",
+					"format": "at-uri"
+				},
+				"collection": {
+					"type": "string",
+					"format": "nsid"
+				},
+				"rkey": {
+					"type": "string"
+				},
+				"cid": {
+					"type": "string"
+				},
+				"record": {
+					"type": "unknown"
+				}
+			}
+		}
+	}
+}

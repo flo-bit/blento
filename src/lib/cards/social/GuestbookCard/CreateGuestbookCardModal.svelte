@@ -59,13 +59,9 @@
 			const facets = buildFacets(postText, profileUrl);
 			const response = await createPost({ text: postText, facets });
 
-			if (!response.ok) {
-				throw new Error('Failed to create post');
-			}
+			item.cardData.uri = response.uri;
 
-			item.cardData.uri = response.data.uri;
-
-			const rkey = response.data.uri.split('/').pop();
+			const rkey = response.uri.split('/').pop();
 			item.cardData.href = `https://bsky.app/profile/${user.profile?.handle}/post/${rkey}`;
 
 			oncreate();

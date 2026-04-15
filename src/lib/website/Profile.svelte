@@ -21,7 +21,20 @@
 	renderer.link = ({ href, title, text }) =>
 		`<a target="_blank" href="${href}" title="${title ?? ''}">${text}</a>`;
 
-	const profileUrl = $derived(`${page.url.origin}/${data.handle}`);
+	const profileUrl = $derived.by(() => {
+		if (page.data.customDomain) return `${page.url.origin}/`;
+		const pubUrl = data.publication?.url;
+		if (
+			pubUrl &&
+			/^https?:\/\//.test(pubUrl) &&
+			!/^https?:\/\/([^/]*\.)?blento\.app/i.test(pubUrl)
+		) {
+			return pubUrl;
+		}
+		const handle = data.profile?.handle;
+		const actor = handle && handle !== 'handle.invalid' ? handle : data.did;
+		return `${page.url.origin}/${actor}`;
+	});
 	const profilePosition = $derived(getProfilePosition(data));
 </script>
 

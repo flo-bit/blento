@@ -118,11 +118,6 @@
 				return;
 			}
 
-			// Refresh cached profile
-			if (user.profile) {
-				fetch(`/${getHandleOrDid(user.profile)}/api/refresh`).catch(() => {});
-			}
-
 			launchConfetti();
 			step = 'success';
 		} catch (err: unknown) {

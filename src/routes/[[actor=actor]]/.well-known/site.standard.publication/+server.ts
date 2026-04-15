@@ -14,7 +14,7 @@ export async function GET({ params, platform, request }) {
 		throw error(404, 'Page not found');
 	}
 
-	const data = await loadData(actor, cache, false, params.page, env);
+	const data = await loadData(actor, cache, params.page, env, platform);
 
 	if (!data.publication) throw error(300);
 

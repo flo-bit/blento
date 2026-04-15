@@ -54,6 +54,7 @@ export async function load({ params, platform, request, url }) {
 		params.type,
 		getCardDataFromSearchParams(url.searchParams),
 		cache,
-		env
+		env,
+		platform
 	);
 }

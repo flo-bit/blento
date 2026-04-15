@@ -153,9 +153,6 @@
 				}
 			}
 
-			// Refresh the logged-in user's cache
-			await fetch(`/${userHandle}/api/refresh`);
-
 			success = true;
 
 			// Redirect to the logged-in user's destination page edit

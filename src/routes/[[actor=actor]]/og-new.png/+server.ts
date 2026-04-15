@@ -64,7 +64,7 @@ export async function GET({ params, platform, request }) {
 					height: 630,
 					deviceScaleFactor: 2
 				},
-				waitForTimeout: 1000
+				waitForTimeout: 3000
 			})
 		}
 	);

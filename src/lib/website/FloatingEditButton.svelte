@@ -14,9 +14,9 @@
 	const isBlento = $derived(!env.PUBLIC_IS_SELFHOSTED && data.handle === 'blento.app');
 	const isEditPage = $derived(page.url.pathname.endsWith('/edit'));
 	const showLoginOnBlento = $derived(
-		isBlento && !user.isInitializing && !user.isLoggedIn && user.profile?.handle !== data.handle
+		isBlento && !user.isLoggedIn && user.profile?.handle !== data.handle
 	);
-	const showLoginOnEditPage = $derived(isEditPage && !user.isInitializing && !user.isLoggedIn);
+	const showLoginOnEditPage = $derived(isEditPage && !user.isLoggedIn);
 	const showEditBlentoButton = $derived(
 		isBlento && user.isLoggedIn && user.profile?.handle !== data.handle
 	);

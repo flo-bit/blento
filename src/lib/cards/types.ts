@@ -48,12 +48,14 @@ export type CardDefinition = {
 			did,
 			handle,
 			cache,
-			env
+			env,
+			platform
 		}: {
 			did: Did;
 			handle: string;
 			cache?: CacheService;
 			env?: Record<string, string | undefined>;
+			platform?: App.Platform;
 		}
 	) => Promise<unknown>;
 
