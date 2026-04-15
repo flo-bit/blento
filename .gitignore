@@ -25,3 +25,6 @@ vite.config.ts.timestamp-*
 references
 
 sveltekit-cloudflare-workers
+
+
+scripts/backups

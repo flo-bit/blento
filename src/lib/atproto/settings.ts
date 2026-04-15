@@ -14,8 +14,7 @@ export const collections = [
 	'xyz.statusphere.status',
 	'community.lexicon.calendar.rsvp',
 	'community.lexicon.calendar.event',
-	'app.nearhorizon.actor.pronouns',
-	'app.bsky.feed.post'
+	'app.nearhorizon.actor.pronouns'
 ] as const;
 
 export type AllowedCollection = (typeof collections)[number];
