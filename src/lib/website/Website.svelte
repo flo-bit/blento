@@ -47,6 +47,14 @@
 	// svelte-ignore state_referenced_locally
 	setHandleContext(data.handle as Handle);
 
+	const ogImageUrl = $derived.by(() => {
+		const origin = page.url.origin;
+		if (page.data.customDomain) return `${origin}/og-new.png`;
+		const handle = data.profile?.handle;
+		const actor = handle && handle !== 'handle.invalid' ? handle : data.did;
+		return `${origin}/${actor}/og-new.png`;
+	});
+
 	let maxHeight = $derived(
 		data.cards.reduce(
 			(max, item) => Math.max(max, isMobile ? item.mobileY + item.mobileH : item.y + item.h),
@@ -60,7 +68,7 @@
 <Head
 	favicon={getImage(data.publication, data.did, 'icon') || data.profile.avatar}
 	title={getName(data)}
-	image={'/' + data.handle + '/og-new.png'}
+	image={ogImageUrl}
 	description={getDescription(data)}
 	accentColor={data.publication?.preferences?.accentColor}
 	baseColor={data.publication?.preferences?.baseColor}

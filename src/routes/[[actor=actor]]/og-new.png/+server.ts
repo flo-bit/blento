@@ -30,8 +30,7 @@ export async function GET({ params, platform, request }) {
 		});
 	}
 
-	const handle = params.actor ?? publicEnv.PUBLIC_HANDLE;
-	const siteUrl = `${publicEnv.PUBLIC_DOMAIN}/${handle}`;
+	const siteUrl = `${publicEnv.PUBLIC_DOMAIN}/${actor}`;
 
 	const accountId = env.CLOUDFLARE_ACCOUNT_ID;
 	const apiToken = env.CLOUDFLARE_API_TOKEN;
