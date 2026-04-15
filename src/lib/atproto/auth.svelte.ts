@@ -1,9 +1,15 @@
 import { type AppBskyActorDefs } from '@atcute/bluesky';
 import type { ActorIdentifier, Did } from '@atcute/lexicons';
 import { page } from '$app/state';
+import { saveRecentLogin } from '@foxui/social';
 
 let cachedProfile = $state<AppBskyActorDefs.ProfileViewDetailed | null>(null);
 let cachedDid = $state<Did | null>(null);
+
+function rememberProfile(profile: AppBskyActorDefs.ProfileViewDetailed) {
+	cachedProfile = profile;
+	saveRecentLogin(profile);
+}
 
 // Load profile client-side when authDid changes
 $effect.root(() => {
@@ -22,7 +28,7 @@ $effect.root(() => {
 
 		// If the current page already has this user's profile (e.g. viewing own page), use it
 		if (page.data?.profile?.did === did) {
-			cachedProfile = page.data.profile;
+			rememberProfile(page.data.profile);
 			return;
 		}
 
@@ -35,7 +41,7 @@ $effect.root(() => {
 				.get('app.bsky.actor.getProfile', { params: { actor: did } })
 				.then((res) => {
 					if (res.ok && cachedDid === did) {
-						cachedProfile = res.data;
+						rememberProfile(res.data);
 					}
 				})
 				.catch(() => {});

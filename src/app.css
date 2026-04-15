@@ -10,6 +10,14 @@
 @custom-variant dark (&:where(.dark, .dark *):not(:where(.light, .light *)));
 @custom-variant accent (&:where(.accent, .accent *));
 
+/* Hide @foxui/core Avatar fallback (person icon / initials) whenever an image
+   is rendered, so partially transparent avatars don't show the icon behind them.
+   Targets the Avatar root by its distinctive class combo. */
+.not-prose.rounded-full.isolate:has(img) > svg,
+.not-prose.rounded-full.isolate:has(img) > span {
+	display: none;
+}
+
 .body::-webkit-scrollbar-track {
 	background-color: transparent;
 }
