@@ -40,7 +40,6 @@
 		}, 0)
 	);
 
-
 	// --- Drag state ---
 	type Phase = 'idle' | 'pending' | 'active';
 
