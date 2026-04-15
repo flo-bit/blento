@@ -1,19 +1,25 @@
 import { error } from '@sveltejs/kit';
+import { parseSafeUrl } from '$lib/ssrf';
 
-export async function GET({ url }) {
+export async function GET({ url, locals }) {
+	if (!locals.did) {
+		throw error(401, 'Not authenticated');
+	}
+
 	const imageUrl = url.searchParams.get('url');
 	if (!imageUrl) {
 		throw error(400, 'No URL provided');
 	}
 
+	let target: URL;
 	try {
-		new URL(imageUrl);
-	} catch {
-		throw error(400, 'Invalid URL');
+		target = parseSafeUrl(imageUrl);
+	} catch (e) {
+		throw error(400, e instanceof Error ? e.message : 'Invalid URL');
 	}
 
 	try {
-		const response = await fetch(imageUrl);
+		const response = await fetch(target, { redirect: 'follow' });
 
 		if (!response.ok) {
 			throw error(response.status, 'Failed to fetch image');
@@ -21,7 +27,6 @@ export async function GET({ url }) {
 
 		const contentType = response.headers.get('content-type');
 
-		// Only allow image content types
 		if (!contentType?.startsWith('image/')) {
 			throw error(400, 'URL does not point to an image');
 		}

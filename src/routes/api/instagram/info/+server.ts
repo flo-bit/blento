@@ -1,6 +1,10 @@
 import { json } from '@sveltejs/kit';
 
-export async function GET({ url }) {
+export async function GET({ url, locals }) {
+	if (!locals.did) {
+		return json({ error: 'Not authenticated' }, { status: 401 });
+	}
+
 	const username = url.searchParams.get('username');
 	if (!username) {
 		return json({ error: 'No username provided' }, { status: 400 });

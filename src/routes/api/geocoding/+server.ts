@@ -1,7 +1,11 @@
 import { env } from '$env/dynamic/private';
 import { json } from '@sveltejs/kit';
 
-export async function GET({ url }) {
+export async function GET({ url, locals }) {
+	if (!locals.did) {
+		return json({ error: 'Not authenticated' }, { status: 401 });
+	}
+
 	const q = url.searchParams.get('q');
 	if (!q) {
 		return json({ error: 'No search provided' }, { status: 400 });
