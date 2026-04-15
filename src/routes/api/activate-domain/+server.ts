@@ -81,10 +81,7 @@ export async function POST({ request, platform, locals }) {
 	try {
 		const existing = await kv.get(normalizedDomain);
 		if (existing && existing !== did) {
-			return json(
-				{ error: 'Domain is already bound to a different account.' },
-				{ status: 409 }
-			);
+			return json({ error: 'Domain is already bound to a different account.' }, { status: 409 });
 		}
 		await kv.put(normalizedDomain, did);
 	} catch {
