@@ -295,6 +295,10 @@ export async function savePage(
 	}
 
 	await Promise.all(promises);
+
+	// Invalidate cached OG image so the next scrape regenerates it.
+	// Fire-and-forget; server checks auth against the signed-cookie session.
+	fetch(`/${data.did}/og-new.png`, { method: 'DELETE' }).catch(() => {});
 }
 
 export function createEmptyCard(page: string) {

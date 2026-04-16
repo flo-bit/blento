@@ -1,6 +1,6 @@
 import { env } from '$env/dynamic/private';
 import { env as publicEnv } from '$env/dynamic/public';
-import { error } from '@sveltejs/kit';
+import { error, json } from '@sveltejs/kit';
 import { getActor } from '$lib/actor';
 import { createCache } from '$lib/cache';
 
@@ -84,4 +84,30 @@ export async function GET({ params, platform, request }) {
 			'Cache-Control': 'public, max-age=86400'
 		}
 	});
+}
+
+export async function DELETE({ params, platform, request, locals }) {
+	if (!locals.did) {
+		throw error(401, 'Not authenticated');
+	}
+
+	const actor = await getActor({
+		request,
+		paramActor: params.actor,
+		platform,
+		blockBoth: false
+	});
+
+	if (!actor) {
+		throw error(404, 'Page not found');
+	}
+
+	if (actor !== locals.did) {
+		throw error(403, 'Cannot invalidate another user\'s OG image');
+	}
+
+	const cache = createCache(platform);
+	await cache?.delete('og', actor);
+
+	return json({ success: true });
 }
