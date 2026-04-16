@@ -25,6 +25,7 @@ export const StatusphereCardDefinition = {
 		const data = await listRecords({ did, collection: 'xyz.statusphere.status', limit: 1 });
 		return data[0];
 	},
+	cacheLoadData: true,
 	upload: async (item) => {
 		if (item.cardData.mode === 'statusphere' && item.cardData.hasUpdate) {
 			await putRecord({

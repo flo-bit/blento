@@ -14,6 +14,7 @@ const NAMESPACE_TTL = {
 	ical: 60 * 60 * 2, // 2 hours
 	events: 60 * 60, // 1 hour
 	rsvps: 60 * 60, // 1 hour
+	'card-data': 5 * 60, // 5 minutes (fresh window for loadData SWR)
 	meta: 0 // no auto-expiry
 } as const;
 
@@ -81,6 +82,63 @@ export class CacheService {
 		await this.kv.put(`${namespace}:${key}`, value, ttl > 0 ? { expirationTtl: ttl } : undefined);
 	}
 
+	// === Stale-while-revalidate ===
+
+	/**
+	 * Read-through cache with stale-while-revalidate semantics.
+	 *
+	 * - Fresh hit (now < staleAt): returns cached value immediately.
+	 * - Stale hit: returns cached value immediately, kicks off a background refresh via `waitUntil`.
+	 * - Miss: awaits the loader and populates the cache.
+	 *
+	 * The stored entry lives in KV for `ttl + staleWindow` seconds so stale reads can keep
+	 * serving while a refresh runs.
+	 */
+	async swr<T>(
+		namespace: CacheNamespace,
+		key: string,
+		loader: () => Promise<T>,
+		opts?: {
+			ttl?: number;
+			staleWindow?: number;
+			waitUntil?: (p: Promise<unknown>) => void;
+		}
+	): Promise<T> {
+		const ttl = opts?.ttl ?? NAMESPACE_TTL[namespace] ?? 300;
+		const staleWindow = opts?.staleWindow ?? 24 * 60 * 60;
+		const waitUntil = opts?.waitUntil ?? ((p: Promise<unknown>) => void p.catch(() => {}));
+
+		const now = Date.now();
+		const entry = await this.getJSON<SwrEntry<T>>(namespace, key);
+
+		const refresh = async (): Promise<T> => {
+			const value = await loader();
+			const entry: SwrEntry<T> = { staleAt: Date.now() + ttl * 1000, value };
+			await this.putJSON(namespace, key, entry, ttl + staleWindow);
+			return value;
+		};
+
+		if (entry) {
+			if (entry.staleAt > now) return entry.value;
+			const staleFor = Math.round((now - entry.staleAt) / 1000);
+			console.log(`[swr] background refresh ${namespace}:${key} (stale ${staleFor}s)`);
+			const started = Date.now();
+			waitUntil(
+				refresh().then(
+					() => console.log(`[swr] refreshed ${namespace}:${key} in ${Date.now() - started}ms`),
+					(err) =>
+						console.error(
+							`[swr] refresh failed ${namespace}:${key} after ${Date.now() - started}ms`,
+							err
+						)
+				)
+			);
+			return entry.value;
+		}
+
+		return await refresh();
+	}
+
 	// === Profile cache (did → profile data) ===
 	async getProfile(did: Did): Promise<CachedProfile> {
 		const cached = await this.getJSON<CachedProfile>('profile', did);
@@ -100,6 +158,8 @@ export class CacheService {
 		return data;
 	}
 }
+
+type SwrEntry<T> = { staleAt: number; value: T };
 
 export type CachedProfile = {
 	did: string;

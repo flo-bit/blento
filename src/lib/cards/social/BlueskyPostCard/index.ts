@@ -61,6 +61,7 @@ export const BlueskyPostCardDefinition = {
 
 		return postsMap;
 	},
+	cacheLoadData: true,
 	minW: 4,
 	name: 'Bluesky Post',
 

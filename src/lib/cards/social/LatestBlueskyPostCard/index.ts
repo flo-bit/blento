@@ -19,6 +19,7 @@ export const LatestBlueskyPostCardDefinition = {
 
 		return JSON.parse(JSON.stringify(authorFeed));
 	},
+	cacheLoadData: true,
 	minW: 4,
 
 	name: 'Latest Bluesky Post',
