@@ -21,6 +21,7 @@
 	import { tick, type Component } from 'svelte';
 	import type { CardDefinition, CreationModalComponentProps } from '../cards/types';
 	import { dev } from '$app/environment';
+	import { page } from '$app/state';
 	import { setIsCoarse, setIsMobile, setSelectedCardId, setSelectCard } from './context';
 	import BaseEditingCard from '../cards/_base/BaseCard/BaseEditingCard.svelte';
 	import Context from './Context.svelte';
@@ -55,6 +56,14 @@
 
 	// Check if floating login button will be visible (to hide MadeWithBlento)
 	const showLoginOnEditPage = $derived(!user.isLoggedIn);
+
+	const ogImageUrl = $derived.by(() => {
+		const origin = page.url.origin;
+		if (page.data.customDomain) return `${origin}/og-new.png`;
+		const handle = data.profile?.handle;
+		const actor = handle && handle !== 'handle.invalid' ? handle : data.did;
+		return `${origin}/${actor}/og-new.png`;
+	});
 
 	// Snapshot the original cards so savePage can detect deletions.
 	const originalCards: Item[] = structuredClone(data.cards);
@@ -516,7 +525,7 @@
 <Head
 	favicon={getImage(data.publication, data.did, 'icon') || data.profile.avatar}
 	title={getName(data)}
-	image={'/' + data.handle + '/og-new.png'}
+	image={ogImageUrl}
 	accentColor={data.publication?.preferences?.accentColor}
 	baseColor={data.publication?.preferences?.baseColor}
 />
