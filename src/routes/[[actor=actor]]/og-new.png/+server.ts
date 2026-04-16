@@ -103,7 +103,7 @@ export async function DELETE({ params, platform, request, locals }) {
 	}
 
 	if (actor !== locals.did) {
-		throw error(403, 'Cannot invalidate another user\'s OG image');
+		throw error(403, "Cannot invalidate another user's OG image");
 	}
 
 	const cache = createCache(platform);
