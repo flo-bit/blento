@@ -13,6 +13,7 @@ export default defineLexiconConfig({
 				nsids: [
 					'app.blento.card',
 					'app.blento.page',
+					'app.blento.section',
 					'app.bsky.actor.profile',
 					'site.standard.publication'
 				]

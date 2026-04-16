@@ -8,11 +8,13 @@
 	let {
 		open = $bindable(false),
 		onselect,
-		onlink
+		onlink,
+		filter
 	}: {
 		open: boolean;
 		onselect: (cardDef: CardDefinition) => void;
 		onlink?: (url: string, cardDef: CardDefinition) => void;
+		filter?: (cardDef: CardDefinition) => boolean;
 	} = $props();
 
 	let collections = $state<string[]>([]);
@@ -31,8 +33,12 @@
 	});
 
 	let filteredCardDefs = $derived(
-		AllCardDefinitions.filter((d) => !d.canAdd || d.canAdd({ collections }))
+		AllCardDefinitions.filter(
+			(d) => (!d.canAdd || d.canAdd({ collections })) && (!filter || filter(d))
+		)
 	);
+
+	$inspect(filteredCardDefs, 'filteredCardDefs');
 
 	let cardDefGroups = $derived([
 		'Core',

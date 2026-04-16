@@ -1,10 +1,9 @@
 <script lang="ts">
-	import { COLUMNS, margin, mobileMargin } from '$lib';
 	import type { Item } from '$lib/types';
 	import type { WithElementRef } from 'bits-ui';
 	import type { Snippet } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
-	import { getColor } from '../..';
+	import { CardDefinitionsByType, getColor } from '../..';
 
 	const colors = {
 		base: 'bg-base-200/50 dark:bg-base-950/50',
@@ -17,8 +16,6 @@
 		controls?: Snippet<[]>;
 		isEditing?: boolean;
 		showOutline?: boolean;
-		locked?: boolean;
-		fillPage?: boolean;
 	} & WithElementRef<HTMLAttributes<HTMLDivElement>>;
 
 	let {
@@ -28,51 +25,33 @@
 		isEditing = false,
 		controls,
 		showOutline,
-		locked = false,
-		fillPage = false,
 		class: className,
 		...rest
 	}: BaseCardProps = $props();
 
 	let color = $derived(getColor(item));
+	let noOverflow = $derived(CardDefinitionsByType[item.cardType]?.noOverflow ?? false);
 </script>
 
 <div
 	id={item.id}
 	data-flip-id={item.id}
-	data-fill-page={fillPage ? 'true' : undefined}
 	bind:this={ref}
 	draggable={false}
 	class={[
-		fillPage
-			? 'card group/card selection:bg-accent-600/50 @container/card relative isolate z-0 h-full w-full outline-offset-2 transition-[outline] duration-200'
-			: 'card group/card selection:bg-accent-600/50 @container/card absolute isolate z-0 rounded-3xl outline-offset-2 transition-[outline] duration-200',
+		'card group/card selection:bg-accent-600/50 @container/card relative isolate z-0 h-full w-full rounded-3xl outline-offset-2 transition-[outline] duration-200',
 		isEditing ? 'transition-all' : '',
-		!fillPage ? (color ? (colors[color] ?? colors.accent) : colors.base) : '',
+		color ? (colors[color] ?? colors.accent) : colors.base,
 		color !== 'accent' && item.color !== 'base' && item.color !== 'transparent' ? color : '',
 		showOutline ? 'outline-2' : '',
 		className
 	]}
-	style={`
-    --mx: ${item.mobileX};
-    --my: ${item.mobileY};
-    --mw: ${item.mobileW};
-    --mh: ${item.mobileH};
-    --mm: ${mobileMargin}px;
-
-    --dx: ${item.x};
-    --dy: ${item.y};
-    --dw: ${item.w};
-    --dh: ${item.h};
-    --dm: ${margin}px;
-
-	--columns: ${COLUMNS}`}
 	{...rest}
 >
 	<div
 		class={[
-			'text-base-900 dark:text-base-50 relative isolate h-full w-full overflow-hidden',
-			!fillPage ? 'rounded-3xl' : '',
+			'text-base-900 dark:text-base-50 relative isolate h-full w-full rounded-3xl',
+			noOverflow ? 'overflow-visible' : 'overflow-hidden',
 			color !== 'base' && color != 'transparent' ? 'light' : ''
 		]}
 	>
@@ -88,29 +67,3 @@
 	</div>
 	{@render controls?.()}
 </div>
-
-<style>
-	.card {
-		container-name: card;
-		container-type: size;
-		translate: calc((var(--mx) / var(--columns)) * 100cqw + var(--mm))
-			calc((var(--my) / var(--columns)) * 100cqw + var(--mm));
-		width: calc((var(--mw) / var(--columns)) * 100cqw - (var(--mm) * 2));
-		height: calc((var(--mh) / var(--columns)) * 100cqw - (var(--mm) * 2));
-	}
-
-	.card[data-fill-page='true'] {
-		translate: none;
-		width: 100%;
-		height: 100%;
-	}
-
-	@container grid (width >= 42rem) {
-		.card:not([data-fill-page='true']) {
-			translate: calc((var(--dx) / var(--columns)) * 100cqw + var(--dm))
-				calc((var(--dy) / var(--columns)) * 100cqw + var(--dm));
-			width: calc((var(--dw) / var(--columns)) * 100cqw - (var(--dm) * 2));
-			height: calc((var(--dh) / var(--columns)) * 100cqw - (var(--dm) * 2));
-		}
-	}
-</style>

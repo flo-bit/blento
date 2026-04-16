@@ -188,9 +188,35 @@ export async function savePage(
 	data: WebsiteData,
 	currentItems: Item[],
 	originalCards: Item[],
-	originalPublication: string
+	originalPublication: string,
+	originalSections?: import('$lib/types').SectionRecord[]
 ) {
 	const promises = [];
+
+	// Save sections
+	for (const section of data.sections) {
+		section.updatedAt = new Date().toISOString();
+		section.version = 1;
+		const record = JSON.parse(JSON.stringify(section));
+		const rkey = record.id;
+		delete record.id;
+		promises.push(
+			putRecord({
+				collection: 'app.blento.section',
+				rkey,
+				record
+			})
+		);
+	}
+
+	// Delete removed sections
+	if (originalSections) {
+		for (const original of originalSections) {
+			if (!data.sections.find((s) => s.id === original.id)) {
+				promises.push(deleteRecord({ collection: 'app.blento.section', rkey: original.id }));
+			}
+		}
+	}
 
 	// Save all current cards. We don't diff against originals because the
 	// server-side load can modify cards (e.g. fixing overlaps), so the
@@ -301,7 +327,7 @@ export async function savePage(
 	fetch(`/${data.did}/og-new.png`, { method: 'DELETE' }).catch(() => {});
 }
 
-export function createEmptyCard(page: string) {
+export function createEmptyCard(page: string, sectionId?: string) {
 	return {
 		id: TID.now(),
 		x: 0,
@@ -314,7 +340,8 @@ export function createEmptyCard(page: string) {
 		mobileY: 0,
 		cardType: '',
 		cardData: {},
-		page
+		page,
+		sectionId
 	} as Item;
 }
 

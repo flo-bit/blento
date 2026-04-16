@@ -80,6 +80,9 @@ export type CardDefinition = {
 
 	canResize?: boolean;
 
+	// if true, content can render outside the card's bounds (no overflow:hidden on the inner wrapper)
+	noOverflow?: boolean;
+
 	canAdd?: (context: { collections: string[] }) => boolean;
 
 	onUrlHandler?: (url: string, item: Item) => Item | null;

@@ -1,19 +1,17 @@
 <script lang="ts">
-	import Card from '../cards/_base/Card/Card.svelte';
 	import Profile from './Profile.svelte';
 	import {
 		getDescription,
 		getHideProfileSection,
 		getProfilePosition,
 		getName,
-		sortItems,
 		getImage
 	} from '../helper';
 	import { innerWidth } from 'svelte/reactivity/window';
 	import { setDidContext, setHandleContext, setIsMobile } from './context';
-	import BaseCard from '../cards/_base/BaseCard/BaseCard.svelte';
 	import type { WebsiteData } from '$lib/types';
 	import Context from './Context.svelte';
+	import { SectionDefinitionsByType } from '$lib/sections';
 	import MadeWithBlento from './MadeWithBlento.svelte';
 	import Head from './Head.svelte';
 	import type { Did, Handle } from '@atcute/lexicons';
@@ -55,13 +53,6 @@
 		return `${origin}/${actor}/og-new.png`;
 	});
 
-	let maxHeight = $derived(
-		data.cards.reduce(
-			(max, item) => Math.max(max, isMobile ? item.mobileY + item.mobileH : item.y + item.h),
-			0
-		)
-	);
-
 	let container: HTMLDivElement | undefined = $state();
 </script>
 
@@ -77,7 +68,7 @@
 <Context {data}>
 	<QRModalProvider />
 	<ImageViewerProvider />
-	<div class="@container/wrapper relative w-full">
+	<div class="@container/wrapper relative w-full overflow-x-hidden">
 		{#if !getHideProfileSection(data)}
 			<Profile {data} hideBlento={showFloatingButton} />
 		{/if}
@@ -91,16 +82,22 @@
 			]}
 		>
 			<div></div>
-			<div bind:this={container} class="@container/grid relative col-span-3 px-2 py-8 lg:px-8">
+			<div class="@5xl/wrapper:col-start-2 @5xl/wrapper:-col-end-1">
 				{#if data.cards.length === 0 && data.page === 'blento.self'}
-					<EmptyState {data} />
+					<div bind:this={container} class="@container/grid relative px-2 py-8 lg:px-8">
+						<EmptyState {data} />
+					</div>
 				{:else}
-					{#each data.cards.toSorted(sortItems) as item (item.id)}
-						<BaseCard {item}>
-							<Card {item} />
-						</BaseCard>
+					{#each data.sections.toSorted((a, b) => a.index - b.index) as section (section.id)}
+						{@const def = SectionDefinitionsByType[section.sectionType]}
+						{#if def}
+							<def.contentComponent
+								{section}
+								items={data.cards.filter((c) => c.sectionId === section.id)}
+								{isMobile}
+							/>
+						{/if}
 					{/each}
-					<div style="height: {(maxHeight / 8) * 100}cqw;"></div>
 				{/if}
 			</div>
 		</div>

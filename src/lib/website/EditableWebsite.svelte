@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { Button, Modal, toast, Toaster } from '@foxui/core';
-	import { COLUMNS } from '$lib';
 	import {
 		checkAndUploadImage,
 		createEmptyCard,
@@ -16,37 +15,31 @@
 	import EditableProfile from './EditableProfile.svelte';
 	import type { Item, WebsiteData } from '../types';
 	import { innerWidth } from 'svelte/reactivity/window';
-	import EditingCard from '../cards/_base/Card/EditingCard.svelte';
 	import { AllCardDefinitions, CardDefinitionsByType } from '../cards';
 	import { tick, type Component } from 'svelte';
 	import type { CardDefinition, CreationModalComponentProps } from '../cards/types';
-	import { dev } from '$app/environment';
 	import { page } from '$app/state';
 	import { setIsCoarse, setIsMobile, setSelectedCardId, setSelectCard } from './context';
-	import BaseEditingCard from '../cards/_base/BaseCard/BaseEditingCard.svelte';
 	import Context from './Context.svelte';
 	import Head from './Head.svelte';
 	import Account from './Account.svelte';
 	import EditBar from './EditBar.svelte';
 	import SaveModal from './SaveModal.svelte';
 	import FloatingEditButton from './FloatingEditButton.svelte';
-	import { user, resolveHandle, listRecords, getCDNImageBlobUrl } from '$lib/atproto';
+	import { user } from '$lib/atproto';
 	import * as TID from '@atcute/tid';
 	import { launchConfetti } from '@foxui/visual';
 	import Controls from './Controls.svelte';
+	import SectionsModal from './SectionsModal.svelte';
+	import AddSectionButton from './AddSectionButton.svelte';
+	import { createImageCard, createVideoCard } from './file-processing';
 	import CardCommand from '$lib/components/card-command/CardCommand.svelte';
 	import ImageViewerProvider from '$lib/components/image-viewer/ImageViewerProvider.svelte';
 	import { SvelteMap } from 'svelte/reactivity';
-	import {
-		fixCollisions,
-		compactItems,
-		fixAllCollisions,
-		setPositionOfNewItem,
-		shouldMirror,
-		mirrorLayout,
-		getViewportCenterGridY,
-		EditableGrid
-	} from '$lib/layout';
+	import { shouldMirror, mirrorLayout } from '$lib/layout';
+	import { SectionDefinitionsByType } from '$lib/sections';
+	import { SECTIONS_EDITING_ENABLED } from '$lib/sections/feature-flag';
+	import type { SectionRecord } from '$lib/types';
 
 	let {
 		data
@@ -65,19 +58,14 @@
 		return `${origin}/${actor}/og-new.png`;
 	});
 
-	// Snapshot the original cards so savePage can detect deletions.
+	// Snapshot the original cards and sections so savePage can detect deletions.
 	const originalCards: Item[] = structuredClone(data.cards);
+	const originalSections: SectionRecord[] = structuredClone(data.sections);
 
 	// svelte-ignore state_referenced_locally
 	let items: Item[] = $state(data.cards);
-
-	// Flag set by checkData when overlapping cards were auto-fixed on load
-	let showLayoutFixModal = $state(data.hasLayoutIssue ?? false);
-
-	function acknowledgeLayoutFix() {
-		hasUnsavedChanges = true;
-		showLayoutFixModal = false;
-	}
+	// svelte-ignore state_referenced_locally
+	let sections: SectionRecord[] = $state(data.sections);
 
 	// svelte-ignore state_referenced_locally
 	let publication = $state(JSON.stringify(data.publication));
@@ -105,32 +93,7 @@
 		}
 	});
 
-	// Warn user before closing tab if there are unsaved changes
-	$effect(() => {
-		function handleBeforeUnload(e: BeforeUnloadEvent) {
-			if (hasUnsavedChanges) {
-				e.preventDefault();
-				return '';
-			}
-		}
-
-		window.addEventListener('beforeunload', handleBeforeUnload);
-		return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-	});
-
-	// Press Escape to deselect the currently selected card.
-	$effect(() => {
-		function handleKeydown(e: KeyboardEvent) {
-			if (e.key === 'Escape' && selectedCardId) {
-				selectedCardId = null;
-			}
-		}
-
-		window.addEventListener('keydown', handleKeydown);
-		return () => window.removeEventListener('keydown', handleKeydown);
-	});
-
-	let gridContainer: HTMLDivElement | undefined = $state();
+	let gridRefs = new SvelteMap<string, HTMLDivElement>();
 
 	let showingMobileView = $state(false);
 	let isMobile = $derived(showingMobileView || (innerWidth.current ?? 1000) < 1024);
@@ -165,22 +128,28 @@
 		selectedCardId = id;
 	});
 
-	const getY = (item: Item) => (isMobile ? (item.mobileY ?? item.y) : item.y);
-	const getH = (item: Item) => (isMobile ? (item.mobileH ?? item.h) : item.h);
-	let maxHeight = $derived(items.reduce((max, item) => Math.max(max, getY(item) + getH(item)), 0));
+	let activeSectionId = $state(sections[0]?.id);
+	let gridContainer = $derived(
+		activeSectionId ? gridRefs.get(activeSectionId) : gridRefs.values().next().value
+	);
+
+	let pendingExtraData: Record<string, any> | undefined = $state();
+
+	let activeSection = $derived(sections.find((s) => s.id === activeSectionId));
+	let activeSectionDef = $derived(
+		activeSection ? SectionDefinitionsByType[activeSection.sectionType] : undefined
+	);
+
+	function requestAddCard(extraData?: Record<string, any>) {
+		pendingExtraData = extraData;
+		showCardCommand = true;
+	}
 
 	function newCard(type: string = 'link', cardData?: any) {
 		selectedCardId = null;
 
-		// close sidebar if open
-		const popover = document.getElementById('mobile-menu');
-		if (popover) {
-			popover.hidePopover();
-		}
-
-		let item = createEmptyCard(data.page);
+		let item = createEmptyCard(data.page, activeSectionId);
 		item.cardType = type;
-
 		item.cardData = cardData ?? {};
 
 		const cardDef = CardDefinitionsByType[type];
@@ -213,31 +182,45 @@
 		setTimeout(restore, 50);
 	}
 
+	function addItem(item: Item, extraData?: Record<string, any>) {
+		const ref = item.sectionId ? gridRefs.get(item.sectionId) : gridContainer;
+
+		if (activeSectionDef?.addItem) {
+			items = activeSectionDef.addItem(item, items, { gridRef: ref, isMobile, extraData });
+		} else {
+			items = [...items, item];
+		}
+
+		onLayoutChanged();
+		return ref;
+	}
+
+	async function createFileCards(files: File[]): Promise<Item[]> {
+		const cards: Item[] = [];
+		for (const file of files) {
+			if (file.type.startsWith('video/')) {
+				cards.push(createVideoCard(file, data.page));
+			} else {
+				cards.push(await createImageCard(file, data.page));
+			}
+		}
+		return cards;
+	}
+
 	async function saveNewItem() {
 		if (!newItem.item) return;
 		const item = newItem.item;
+		const extraData = pendingExtraData;
+		pendingExtraData = undefined;
 
-		const viewportCenter = gridContainer
-			? getViewportCenterGridY(gridContainer, isMobile)
-			: undefined;
-		setPositionOfNewItem(item, items, viewportCenter);
-
-		items = [...items, item];
-
-		// Push overlapping items down, then compact to fill gaps
-		fixCollisions(items, item, false, true);
-		fixCollisions(items, item, true, true);
-		compactItems(items, false);
-		compactItems(items, true);
-
-		onLayoutChanged();
+		const ref = addItem(item, extraData);
 
 		newItem = {};
 
 		await tick();
 		cleanupDialogArtifacts();
 
-		scrollToItem(item, isMobile, gridContainer);
+		scrollToItem(item, isMobile, ref);
 	}
 
 	let isSaving = $state(false);
@@ -261,7 +244,8 @@
 			data.publication.preferences ??= {};
 			data.publication.preferences.editedOn = editedOn;
 
-			await savePage(data, items, originalCards, publication);
+			data.sections = sections;
+			await savePage(data, items, originalCards, publication, originalSections);
 
 			publication = JSON.stringify(data.publication);
 			savedPronouns = JSON.stringify(data.pronounsRecord);
@@ -281,6 +265,42 @@
 		}
 	}
 
+	let showSectionsModal = $state(false);
+
+	function addSection(sectionType: string, afterIndex?: number) {
+		const sorted = sections.toSorted((a, b) => a.index - b.index);
+		let newIndex: number;
+		if (afterIndex !== undefined && afterIndex < sorted.length) {
+			const curr = sorted[afterIndex].index;
+			const next = afterIndex + 1 < sorted.length ? sorted[afterIndex + 1].index : curr + 200;
+			newIndex = Math.floor((curr + next) / 2);
+		} else {
+			newIndex = (sorted[sorted.length - 1]?.index ?? 0) + 100;
+		}
+
+		const def = SectionDefinitionsByType[sectionType];
+		const section: SectionRecord = {
+			id: TID.now(),
+			sectionType,
+			page: data.page,
+			index: newIndex,
+			sectionData: def?.defaultSectionData?.() ?? {},
+			version: 1
+		};
+		sections = [...sections, section];
+		hasUnsavedChanges = true;
+	}
+
+	function deleteSection(id: string) {
+		if (sections.length <= 1) return;
+		items = items.filter((i) => i.sectionId !== id);
+		sections = sections.filter((s) => s.id !== id);
+		if (activeSectionId === id) {
+			activeSectionId = sections[0]?.id;
+		}
+		hasUnsavedChanges = true;
+	}
+
 	let linkValue = $state('');
 
 	function addLink(url: string, specificCardDef?: CardDefinition) {
@@ -289,7 +309,7 @@
 			toast.error('invalid link');
 			return;
 		}
-		let item = createEmptyCard(data.page);
+		let item = createEmptyCard(data.page, activeSectionId);
 
 		if (specificCardDef?.onUrlHandler?.(link, item)) {
 			item.cardType = specificCardDef.type;
@@ -313,204 +333,40 @@
 		}
 	}
 
-	function getImageDimensions(src: string): Promise<{ width: number; height: number }> {
-		return new Promise((resolve) => {
-			const img = new Image();
-			img.onload = () => resolve({ width: img.naturalWidth, height: img.naturalHeight });
-			img.onerror = () => resolve({ width: 1, height: 1 });
-			img.src = src;
-		});
-	}
-
-	function getBestGridSize(
-		imageWidth: number,
-		imageHeight: number,
-		candidates: [number, number][]
-	): [number, number] {
-		const imageRatio = imageWidth / imageHeight;
-		let best: [number, number] = candidates[0];
-		let bestDiff = Infinity;
-
-		for (const candidate of candidates) {
-			const gridRatio = candidate[0] / candidate[1];
-			const diff = Math.abs(Math.log(imageRatio) - Math.log(gridRatio));
-			if (diff < bestDiff) {
-				bestDiff = diff;
-				best = candidate;
-			}
-		}
-
-		return best;
-	}
-
-	const desktopSizeCandidates: [number, number][] = [
-		[2, 2],
-		[2, 4],
-		[4, 2],
-		[4, 4],
-		[4, 6],
-		[6, 4]
-	];
-	const mobileSizeCandidates: [number, number][] = [
-		[4, 4],
-		[4, 6],
-		[4, 8],
-		[6, 4],
-		[8, 4],
-		[8, 6]
-	];
-
-	async function processImageFile(file: File, gridX?: number, gridY?: number) {
-		const isGif = file.type === 'image/gif';
-
-		// Don't compress GIFs to preserve animation
-		const objectUrl = URL.createObjectURL(file);
-
-		let item = createEmptyCard(data.page);
-
-		item.cardType = isGif ? 'gif' : 'image';
-		item.cardData = {
-			image: { blob: file, objectUrl }
-		};
-
-		// Size card based on image aspect ratio
-		const { width, height } = await getImageDimensions(objectUrl);
-		const [dw, dh] = getBestGridSize(width, height, desktopSizeCandidates);
-		const [mw, mh] = getBestGridSize(width, height, mobileSizeCandidates);
-		item.w = dw;
-		item.h = dh;
-		item.mobileW = mw;
-		item.mobileH = mh;
-
-		// If grid position is provided (image dropped on grid)
-		if (gridX !== undefined && gridY !== undefined) {
-			if (isMobile) {
-				item.mobileX = gridX;
-				item.mobileY = gridY;
-				// Derive desktop Y from mobile
-				item.x = Math.floor((COLUMNS - item.w) / 2);
-				item.x = Math.floor(item.x / 2) * 2;
-				item.y = Math.max(0, Math.round(gridY / 2));
-			} else {
-				item.x = gridX;
-				item.y = gridY;
-				// Derive mobile Y from desktop
-				item.mobileX = Math.floor((COLUMNS - item.mobileW) / 2);
-				item.mobileX = Math.floor(item.mobileX / 2) * 2;
-				item.mobileY = Math.max(0, Math.round(gridY * 2));
-			}
-
-			items = [...items, item];
-			fixCollisions(items, item, isMobile);
-			fixCollisions(items, item, !isMobile);
-		} else {
-			const viewportCenter = gridContainer
-				? getViewportCenterGridY(gridContainer, isMobile)
-				: undefined;
-			setPositionOfNewItem(item, items, viewportCenter);
-			items = [...items, item];
-			fixCollisions(items, item, false, true);
-			fixCollisions(items, item, true, true);
-			compactItems(items, false);
-			compactItems(items, true);
-		}
-
-		onLayoutChanged();
-
-		await tick();
-
-		scrollToItem(item, isMobile, gridContainer);
-	}
-
-	async function handleFileDrop(files: File[], gridX: number, gridY: number) {
-		for (let i = 0; i < files.length; i++) {
-			// First image gets the drop position, rest use normal placement
-			if (i === 0) {
-				await processImageFile(files[i], gridX, gridY);
-			} else {
-				await processImageFile(files[i]);
-			}
-		}
-	}
-
-	async function handleImageInputChange(event: Event) {
+	async function handleFileInputChange(event: Event) {
 		const target = event.target as HTMLInputElement;
 		if (!target.files || target.files.length < 1) return;
 
-		const files = Array.from(target.files);
+		const extraData = pendingExtraData;
+		pendingExtraData = undefined;
 
-		if (files.length === 1) {
-			// Single file: use default positioning
-			await processImageFile(files[0]);
-		} else {
-			// Multiple files: place in grid pattern starting from first available position
-			let gridX = 0;
-			let gridY = maxHeight;
-			const cardW = isMobile ? 4 : 2;
-			const cardH = isMobile ? 4 : 2;
-
-			for (const file of files) {
-				await processImageFile(file, gridX, gridY);
-
-				// Move to next cell position
-				gridX += cardW;
-				if (gridX + cardW > COLUMNS) {
-					gridX = 0;
-					gridY += cardH;
-				}
-			}
+		const cards = await createFileCards(Array.from(target.files));
+		for (const card of cards) {
+			card.sectionId = activeSectionId;
+			addItem(card, extraData);
 		}
 
-		// Reset the input so the same file can be selected again
-		target.value = '';
-	}
-
-	async function processVideoFile(file: File) {
-		const objectUrl = URL.createObjectURL(file);
-
-		let item = createEmptyCard(data.page);
-
-		item.cardType = 'video';
-		item.cardData = {
-			blob: file,
-			objectUrl
-		};
-
-		const viewportCenter = gridContainer
-			? getViewportCenterGridY(gridContainer, isMobile)
-			: undefined;
-		setPositionOfNewItem(item, items, viewportCenter);
-		items = [...items, item];
-		fixCollisions(items, item, false, true);
-		fixCollisions(items, item, true, true);
-		compactItems(items, false);
-		compactItems(items, true);
-
-		onLayoutChanged();
-
-		await tick();
-
-		scrollToItem(item, isMobile, gridContainer);
-	}
-
-	async function handleVideoInputChange(event: Event) {
-		const target = event.target as HTMLInputElement;
-		if (!target.files || target.files.length < 1) return;
-
-		const files = Array.from(target.files);
-
-		for (const file of files) {
-			await processVideoFile(file);
-		}
-
-		// Reset the input so the same file can be selected again
 		target.value = '';
 	}
 
 	let showCardCommand = $state(false);
 </script>
 
+<svelte:window
+	onbeforeunload={(e) => {
+		if (hasUnsavedChanges) {
+			e.preventDefault();
+			return '';
+		}
+	}}
+/>
+
 <svelte:body
+	onkeydown={(e) => {
+		if (e.key === 'Escape' && selectedCardId) {
+			selectedCardId = null;
+		}
+	}}
 	onpaste={(event) => {
 		if (isTyping()) return;
 
@@ -536,22 +392,16 @@
 	<ImageViewerProvider />
 	<CardCommand
 		bind:open={showCardCommand}
+		filter={activeSectionDef?.cardFilter}
 		onselect={(cardDef: CardDefinition) => {
-			if (cardDef.type === 'image') {
-				const input = document.getElementById('image-input') as HTMLInputElement;
+			if (cardDef.type === 'image' || cardDef.type === 'video') {
+				const input = document.getElementById('file-input') as HTMLInputElement;
 				if (input) {
 					input.click();
 					return;
 				}
-			} else if (cardDef.type === 'video') {
-				const input = document.getElementById('video-input') as HTMLInputElement;
-				if (input) {
-					input.click();
-					return;
-				}
-			} else {
-				newCard(cardDef.type);
 			}
+			newCard(cardDef.type);
 		}}
 		onlink={(url, cardDef) => {
 			addLink(url, cardDef);
@@ -583,35 +433,17 @@
 	<SaveModal
 		bind:open={showSaveModal}
 		success={saveSuccess}
-		handle={data.handle}
+		handle={data.profile?.handle ?? data.handle}
+		did={data.did}
 		page={data.page}
 	/>
 
-	<Modal open={showLayoutFixModal} closeButton={false}>
-		<div class="flex flex-col items-center gap-4 text-center">
-			<svg
-				xmlns="http://www.w3.org/2000/svg"
-				fill="none"
-				viewBox="0 0 24 24"
-				stroke-width="1.5"
-				stroke="currentColor"
-				class="size-10 text-amber-500"
-			>
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"
-				/>
-			</svg>
-			<p class="text-base-700 dark:text-base-300 text-xl font-bold">Layout Auto-Fixed</p>
-			<p class="text-base-500 dark:text-base-400 text-sm">
-				Your card layout had overlapping cards from an older version. This has been automatically
-				fixed, but some cards may have moved. Please check your layout and rearrange if needed, then
-				save to keep the changes.
-			</p>
-			<Button class="w-full" onclick={acknowledgeLayoutFix}>Got it</Button>
-		</div>
-	</Modal>
+	<SectionsModal
+		bind:open={showSectionsModal}
+		bind:sections
+		ondelete={deleteSection}
+		onlayoutchange={() => (hasUnsavedChanges = true)}
+	/>
 
 	<Modal open={showMobileWarning} closeButton={false}>
 		<div class="flex flex-col items-center gap-4 text-center">
@@ -639,9 +471,9 @@
 
 	<div
 		class={[
-			'@container/wrapper relative w-full',
+			'group/wrapper @container/wrapper relative w-full overflow-x-hidden',
 			showingMobileView
-				? 'bg-base-50 dark:bg-base-900 my-4 min-h-[calc(100dvh-2em)] rounded-2xl lg:mx-auto lg:w-90'
+				? 'bg-base-50 dark:bg-base-900 my-4 min-h-[calc(100dvh-2em)] overflow-hidden rounded-2xl lg:mx-auto lg:w-90'
 				: ''
 		]}
 	>
@@ -658,44 +490,41 @@
 			]}
 		>
 			<div class="pointer-events-none"></div>
-			<EditableGrid
-				bind:items
-				bind:ref={gridContainer}
-				{isMobile}
-				{selectedCardId}
-				{isCoarse}
-				onlayoutchange={onLayoutChanged}
-				ondeselect={() => {
-					selectedCardId = null;
-				}}
-				onfiledrop={handleFileDrop}
-			>
-				{#each items as item, i (item.id)}
-					<BaseEditingCard
-						bind:item={items[i]}
-						ondelete={() => {
-							items = items.filter((it) => it !== item);
-							compactItems(items, false);
-							compactItems(items, true);
-							onLayoutChanged();
-						}}
-						onsetsize={(newW: number, newH: number) => {
-							if (isMobile) {
-								item.mobileW = newW;
-								item.mobileH = newH;
-							} else {
-								item.w = newW;
-								item.h = newH;
-							}
-
-							fixCollisions(items, item, isMobile);
-							onLayoutChanged();
-						}}
-					>
-						<EditingCard bind:item={items[i]} />
-					</BaseEditingCard>
+			<div class="@5xl/wrapper:col-start-2 @5xl/wrapper:-col-end-1">
+				{#each sections.toSorted((a, b) => a.index - b.index) as section, i (section.id)}
+					{@const def = SectionDefinitionsByType[section.sectionType]}
+					{#if def}
+						<def.editingContentComponent
+							{section}
+							bind:items
+							{isMobile}
+							{selectedCardId}
+							{isCoarse}
+							isActive={activeSectionId === section.id}
+							onrefchange={(el) => {
+								if (el) gridRefs.set(section.id, el);
+								else gridRefs.delete(section.id);
+							}}
+							onlayoutchange={onLayoutChanged}
+							ondeselect={() => {
+								selectedCardId = null;
+							}}
+							onrequestaddcard={(extraData) => {
+								activeSectionId = section.id;
+								requestAddCard(extraData);
+							}}
+							oncreatefilecards={createFileCards}
+							onactivate={() => {
+								activeSectionId = section.id;
+							}}
+						/>
+					{/if}
+					{#if SECTIONS_EDITING_ENABLED}
+						<AddSectionButton onadd={(type) => addSection(type, i)} />
+					{/if}
 				{/each}
-			</EditableGrid>
+				<div class="h-20"></div>
+			</div>
 		</div>
 	</div>
 
@@ -708,10 +537,9 @@
 		{newCard}
 		{addLink}
 		{save}
-		{handleImageInputChange}
-		{handleVideoInputChange}
+		{handleFileInputChange}
 		showCardCommand={() => {
-			showCardCommand = true;
+			requestAddCard();
 		}}
 		{selectedCard}
 		{isMobile}
@@ -721,37 +549,35 @@
 		}}
 		ondelete={() => {
 			if (selectedCard) {
-				items = items.filter((it) => it.id !== selectedCardId);
-				compactItems(items, false);
-				compactItems(items, true);
+				const section = sections.find((s) => s.id === selectedCard!.sectionId);
+				const def = section ? SectionDefinitionsByType[section.sectionType] : undefined;
+				if (def?.deleteItem) {
+					items = def.deleteItem(selectedCardId!, items, selectedCard.sectionId!);
+				} else {
+					items = items.filter((it) => it.id !== selectedCardId);
+				}
 				onLayoutChanged();
 				selectedCardId = null;
 			}
 		}}
 		onsetsize={(w: number, h: number) => {
 			if (selectedCard) {
-				if (isMobile) {
-					selectedCard.mobileW = w;
-					selectedCard.mobileH = h;
-				} else {
-					selectedCard.w = w;
-					selectedCard.h = h;
+				const section = sections.find((s) => s.id === selectedCard!.sectionId);
+				const def = section ? SectionDefinitionsByType[section.sectionType] : undefined;
+				if (def?.resizeItem) {
+					def.resizeItem(selectedCard, items, w, h, isMobile);
 				}
-				fixCollisions(items, selectedCard, isMobile);
 				onLayoutChanged();
 			}
 		}}
+		showSectionsModal={SECTIONS_EDITING_ENABLED
+			? () => {
+					showSectionsModal = true;
+				}
+			: undefined}
 	/>
 
 	<Toaster />
 
 	<FloatingEditButton {data} />
-
-	{#if dev}
-		<div
-			class="bg-base-900/70 text-base-100 fixed top-2 right-2 z-50 flex items-center gap-2 rounded px-2 py-1 font-mono text-xs"
-		>
-			<span>editedOn: {editedOn}</span>
-		</div>
-	{/if}
 </Context>

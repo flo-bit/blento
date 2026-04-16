@@ -22,6 +22,7 @@
 					"cardData": { "type": "unknown" },
 					"color": { "type": "string" },
 					"page": { "type": "string" },
+					"sectionId": { "type": "string" },
 					"updatedAt": { "type": "string", "format": "datetime" },
 					"version": { "type": "integer" }
 				}
