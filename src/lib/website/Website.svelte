@@ -68,7 +68,7 @@
 <Context {data}>
 	<QRModalProvider />
 	<ImageViewerProvider />
-	<div class="@container/wrapper relative w-full">
+	<div class="@container/wrapper relative w-full overflow-x-hidden">
 		{#if !getHideProfileSection(data)}
 			<Profile {data} hideBlento={showFloatingButton} />
 		{/if}

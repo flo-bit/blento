@@ -58,7 +58,7 @@
 	} = $props();
 
 	let linkPopoverOpen = $state(false);
-	let imageInputRef: HTMLInputElement | undefined = $state();
+	let fileInputRef: HTMLInputElement | undefined = $state();
 
 	function getShareUrl() {
 		const base = typeof window !== 'undefined' ? window.location.origin : '';
@@ -130,7 +130,7 @@
 		return w >= minW && w <= maxW && h >= minH && h <= maxH;
 	}
 
-	const showMobileEditControls = $derived(isCoarse && selectedCard);
+	const showEditControls = $derived(!!selectedCard);
 </script>
 
 <input
@@ -140,14 +140,14 @@
 	class="hidden"
 	id="file-input"
 	multiple
-	bind:this={imageInputRef}
+	bind:this={fileInputRef}
 />
 
 {#if dev || (user.isLoggedIn && user.profile?.did === data.did)}
 	<Navbar
 		class="dark:bg-base-900 bg-base-100 top-auto bottom-2 mx-4 mt-3 max-w-3xl rounded-full px-4 md:mx-auto"
 	>
-		{#if showMobileEditControls}
+		{#if showEditControls}
 			<!-- Mobile edit controls: left = color, size, settings; right = delete, deselect -->
 			<div class="flex items-center gap-1">
 				{#if cardDef?.allowSetColor !== false}
@@ -342,7 +342,7 @@
 				</Button>
 			</div>
 		{/if}
-		<div class={['flex items-center gap-2', showMobileEditControls ? 'hidden' : '']}>
+		<div class={['flex items-center gap-2', showEditControls ? 'hidden' : '']}>
 			<Button size="iconLg" variant="ghost" class="backdrop-blur-none" onclick={showSectionsModal}>
 				<svg
 					xmlns="http://www.w3.org/2000/svg"

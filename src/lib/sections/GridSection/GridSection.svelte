@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { SectionContentProps } from '../types';
-	import BaseCard from '$lib/cards/_base/BaseCard/BaseCard.svelte';
+	import GridBaseCard from '$lib/cards/_base/BaseCard/GridBaseCard.svelte';
 	import Card from '$lib/cards/_base/Card/Card.svelte';
 	import { sortItems } from '$lib/helper';
 
@@ -16,9 +16,9 @@
 
 <div class="@container/grid relative col-span-3 px-2 py-8 lg:px-8">
 	{#each items.toSorted(sortItems) as item (item.id)}
-		<BaseCard {item}>
+		<GridBaseCard {item}>
 			<Card {item} />
-		</BaseCard>
+		</GridBaseCard>
 	{/each}
 	<div style="height: {(maxHeight / 8) * 100}cqw;"></div>
 </div>

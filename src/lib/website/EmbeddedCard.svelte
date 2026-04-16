@@ -142,7 +142,7 @@
 				class="embed-content"
 				style={`--embed-ratio: ${cardWidth / cardHeight}; aspect-ratio: ${cardWidth} / ${cardHeight};`}
 			>
-				<BaseCard item={embeddedItem} fillPage>
+				<BaseCard item={embeddedItem}>
 					<Card item={embeddedItem} />
 				</BaseCard>
 			</div>

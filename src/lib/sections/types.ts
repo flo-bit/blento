@@ -1,5 +1,6 @@
 import type { Component } from 'svelte';
 import type { Item, SectionRecord } from '$lib/types';
+import type { CardDefinition } from '$lib/cards/types';
 
 export type SectionContentProps = {
 	section: SectionRecord;
@@ -13,7 +14,7 @@ export type EditingSectionContentProps = SectionContentProps & {
 	isActive: boolean;
 	onlayoutchange: () => void;
 	ondeselect: () => void;
-	onadditem: (item: Item) => void;
+	onrequestaddcard: (extraData?: Record<string, any>) => void;
 	oncreatefilecards: (files: File[]) => Promise<Item[]>;
 	onactivate: () => void;
 	onrefchange: (el: HTMLDivElement | undefined) => void;
@@ -22,12 +23,15 @@ export type EditingSectionContentProps = SectionContentProps & {
 export type AddItemOptions = {
 	gridRef?: HTMLDivElement;
 	isMobile: boolean;
+	extraData?: Record<string, any>;
 };
 
 export type SectionDefinition = {
 	type: string;
 	contentComponent: Component<SectionContentProps>;
 	editingContentComponent: Component<EditingSectionContentProps>;
+	defaultSectionData?: () => Record<string, any>;
+	cardFilter?: (cardDef: CardDefinition) => boolean;
 	addItem: (item: Item, allItems: Item[], options: AddItemOptions) => Item[];
 	deleteItem: (itemId: string, allItems: Item[], sectionId: string) => Item[];
 	resizeItem: (item: Item, allItems: Item[], w: number, h: number, isMobile: boolean) => void;

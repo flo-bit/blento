@@ -1,7 +1,8 @@
 <script lang="ts">
+	import type { Item } from '$lib/types';
 	import type { EditingSectionContentProps } from '../types';
 	import { EditableGrid, fixCollisions, compactItems, setPositionOfNewItem } from '$lib/layout';
-	import BaseEditingCard from '$lib/cards/_base/BaseCard/BaseEditingCard.svelte';
+	import GridBaseEditingCard from '$lib/cards/_base/BaseCard/GridBaseEditingCard.svelte';
 	import EditingCard from '$lib/cards/_base/Card/EditingCard.svelte';
 	import { SectionDefinitionsByType } from '$lib/sections';
 	import { positionItemAtGridPos } from './add-item';
@@ -15,7 +16,7 @@
 		isActive,
 		onlayoutchange,
 		ondeselect,
-		onadditem,
+		onrequestaddcard,
 		oncreatefilecards,
 		onactivate,
 		onrefchange
@@ -106,15 +107,29 @@
 		<div
 			class="border-base-300/50 dark:border-base-700/50 pointer-events-auto relative flex min-h-32 items-center justify-center rounded-3xl border-2 border-dashed"
 		>
-			<p class="text-base-400 dark:text-base-500 text-sm">
-				Click the + button to add cards to this section
-			</p>
+			<button
+				type="button"
+				class="text-base-400 dark:text-base-500 hover:text-accent-500 flex cursor-pointer items-center gap-2 text-sm transition-colors"
+				onclick={() => onrequestaddcard()}
+			>
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					class="size-4"><path d="M12 5v14" /><path d="M5 12h14" /></svg
+				>
+				Add a card
+			</button>
 		</div>
 	{/if}
 
 	{#each sectionItems as item (item.id)}
 		{@const idx = items.indexOf(item)}
-		<BaseEditingCard
+		<GridBaseEditingCard
 			bind:item={items[idx]}
 			ondelete={() => {
 				items = items.filter((it) => it !== item);
@@ -145,6 +160,6 @@
 			}}
 		>
 			<EditingCard bind:item={items[idx]} />
-		</BaseEditingCard>
+		</GridBaseEditingCard>
 	{/each}
 </EditableGrid>

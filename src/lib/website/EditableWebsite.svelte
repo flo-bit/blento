@@ -132,12 +132,23 @@
 		activeSectionId ? gridRefs.get(activeSectionId) : gridRefs.values().next().value
 	);
 
+	let pendingExtraData: Record<string, any> | undefined = $state();
+
+	let activeSection = $derived(sections.find((s) => s.id === activeSectionId));
+	let activeSectionDef = $derived(
+		activeSection ? SectionDefinitionsByType[activeSection.sectionType] : undefined
+	);
+
+	function requestAddCard(extraData?: Record<string, any>) {
+		pendingExtraData = extraData;
+		showCardCommand = true;
+	}
+
 	function newCard(type: string = 'link', cardData?: any) {
 		selectedCardId = null;
 
 		let item = createEmptyCard(data.page, activeSectionId);
 		item.cardType = type;
-
 		item.cardData = cardData ?? {};
 
 		const cardDef = CardDefinitionsByType[type];
@@ -170,14 +181,11 @@
 		setTimeout(restore, 50);
 	}
 
-	function addItem(item: Item) {
-		const sectionId = item.sectionId;
-		const section = sections.find((s) => s.id === sectionId);
-		const def = section ? SectionDefinitionsByType[section.sectionType] : undefined;
-		const ref = sectionId ? gridRefs.get(sectionId) : gridContainer;
+	function addItem(item: Item, extraData?: Record<string, any>) {
+		const ref = item.sectionId ? gridRefs.get(item.sectionId) : gridContainer;
 
-		if (def?.addItem) {
-			items = def.addItem(item, items, { gridRef: ref, isMobile });
+		if (activeSectionDef?.addItem) {
+			items = activeSectionDef.addItem(item, items, { gridRef: ref, isMobile, extraData });
 		} else {
 			items = [...items, item];
 		}
@@ -201,8 +209,10 @@
 	async function saveNewItem() {
 		if (!newItem.item) return;
 		const item = newItem.item;
+		const extraData = pendingExtraData;
+		pendingExtraData = undefined;
 
-		const ref = addItem(item);
+		const ref = addItem(item, extraData);
 
 		newItem = {};
 
@@ -267,12 +277,13 @@
 			newIndex = (sorted[sorted.length - 1]?.index ?? 0) + 100;
 		}
 
+		const def = SectionDefinitionsByType[sectionType];
 		const section: SectionRecord = {
 			id: TID.now(),
 			sectionType,
 			page: data.page,
 			index: newIndex,
-			sectionData: {},
+			sectionData: def?.defaultSectionData?.() ?? {},
 			version: 1
 		};
 		sections = [...sections, section];
@@ -325,10 +336,13 @@
 		const target = event.target as HTMLInputElement;
 		if (!target.files || target.files.length < 1) return;
 
+		const extraData = pendingExtraData;
+		pendingExtraData = undefined;
+
 		const cards = await createFileCards(Array.from(target.files));
 		for (const card of cards) {
 			card.sectionId = activeSectionId;
-			addItem(card);
+			addItem(card, extraData);
 		}
 
 		target.value = '';
@@ -377,6 +391,7 @@
 	<ImageViewerProvider />
 	<CardCommand
 		bind:open={showCardCommand}
+		filter={activeSectionDef?.cardFilter}
 		onselect={(cardDef: CardDefinition) => {
 			if (cardDef.type === 'image' || cardDef.type === 'video') {
 				const input = document.getElementById('file-input') as HTMLInputElement;
@@ -455,7 +470,7 @@
 
 	<div
 		class={[
-			'group/wrapper @container/wrapper relative w-full',
+			'group/wrapper @container/wrapper relative w-full overflow-x-hidden',
 			showingMobileView
 				? 'bg-base-50 dark:bg-base-900 my-4 min-h-[calc(100dvh-2em)] overflow-hidden rounded-2xl lg:mx-auto lg:w-90'
 				: ''
@@ -493,7 +508,10 @@
 							ondeselect={() => {
 								selectedCardId = null;
 							}}
-							onadditem={(item) => addItem(item)}
+							onrequestaddcard={(extraData) => {
+								activeSectionId = section.id;
+								requestAddCard(extraData);
+							}}
 							oncreatefilecards={createFileCards}
 							onactivate={() => {
 								activeSectionId = section.id;
@@ -518,7 +536,7 @@
 		{save}
 		{handleFileInputChange}
 		showCardCommand={() => {
-			showCardCommand = true;
+			requestAddCard();
 		}}
 		{selectedCard}
 		{isMobile}

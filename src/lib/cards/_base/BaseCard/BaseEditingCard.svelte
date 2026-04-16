@@ -42,7 +42,8 @@
 	export type BaseEditingCardProps = {
 		item: Item;
 		ondelete: () => void;
-		onsetsize: (newW: number, newH: number) => void;
+		onsetsize?: (newW: number, newH: number) => void;
+		showGridControls?: boolean;
 	} & WithElementRef<HTMLAttributes<HTMLDivElement>>;
 
 	let {
@@ -51,6 +52,7 @@
 		ref = $bindable(null),
 		onsetsize,
 		ondelete,
+		showGridControls = true,
 		...rest
 	}: BaseEditingCardProps = $props();
 
@@ -199,7 +201,6 @@
 	isEditing={true}
 	bind:ref
 	showOutline={isResizing || isSelected}
-	locked={item.cardData?.locked}
 	class={[
 		'scale-100 starting:scale-0 starting:opacity-0',
 		isSelected ? 'outline-accent-500 z-10' : ''
@@ -358,7 +359,7 @@
 						</Popover>
 					{/if}
 
-					{#if canSetSize(2, 2)}
+					{#if showGridControls && canSetSize(2, 2)}
 						<button
 							onclick={() => {
 								setSize(2, 2);
@@ -371,7 +372,7 @@
 						</button>
 					{/if}
 
-					{#if canSetSize(4, 2)}
+					{#if showGridControls && canSetSize(4, 2)}
 						<button
 							onclick={() => {
 								setSize(4, 2);
@@ -382,7 +383,7 @@
 							<span class="sr-only">set size to 2x1</span>
 						</button>
 					{/if}
-					{#if canSetSize(2, 4)}
+					{#if showGridControls && canSetSize(2, 4)}
 						<button
 							onclick={() => {
 								setSize(2, 4);
@@ -394,7 +395,7 @@
 							<span class="sr-only">set size to 1x2</span>
 						</button>
 					{/if}
-					{#if canSetSize(4, 4)}
+					{#if showGridControls && canSetSize(4, 4)}
 						<button
 							onclick={() => {
 								setSize(4, 4);
@@ -443,7 +444,7 @@
 				</div>
 			</div>
 
-			{#if cardDef.canResize !== false}
+			{#if showGridControls && cardDef.canResize !== false}
 				<!-- Resize handle at bottom right corner -->
 				<div
 					role="separator"

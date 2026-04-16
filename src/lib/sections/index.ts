@@ -1,7 +1,8 @@
 import type { SectionDefinition } from './types';
 import { GridSectionDefinition } from './GridSection';
+import { HeroSectionDefinition } from './HeroSection';
 
-export const AllSectionDefinitions = [GridSectionDefinition] as const;
+export const AllSectionDefinitions = [GridSectionDefinition, HeroSectionDefinition] as const;
 
 export const SectionDefinitionsByType = AllSectionDefinitions.reduce(
 	(acc, def) => {
