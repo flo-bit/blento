@@ -38,6 +38,7 @@
 	import { SvelteMap } from 'svelte/reactivity';
 	import { shouldMirror, mirrorLayout } from '$lib/layout';
 	import { SectionDefinitionsByType } from '$lib/sections';
+	import { SECTIONS_EDITING_ENABLED } from '$lib/sections/feature-flag';
 	import type { SectionRecord } from '$lib/types';
 
 	let {
@@ -518,7 +519,9 @@
 							}}
 						/>
 					{/if}
-					<AddSectionButton onadd={(type) => addSection(type, i)} />
+					{#if SECTIONS_EDITING_ENABLED}
+						<AddSectionButton onadd={(type) => addSection(type, i)} />
+					{/if}
 				{/each}
 				<div class="h-20"></div>
 			</div>
@@ -567,9 +570,11 @@
 				onLayoutChanged();
 			}
 		}}
-		showSectionsModal={() => {
-			showSectionsModal = true;
-		}}
+		showSectionsModal={SECTIONS_EDITING_ENABLED
+			? () => {
+					showSectionsModal = true;
+				}
+			: undefined}
 	/>
 
 	<Toaster />

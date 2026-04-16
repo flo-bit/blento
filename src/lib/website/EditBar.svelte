@@ -54,7 +54,7 @@
 		ondeselect?: () => void;
 		ondelete?: () => void;
 		onsetsize?: (w: number, h: number) => void;
-		showSectionsModal: () => void;
+		showSectionsModal?: () => void;
 	} = $props();
 
 	let linkPopoverOpen = $state(false);
@@ -343,22 +343,29 @@
 			</div>
 		{/if}
 		<div class={['flex items-center gap-2', showEditControls ? 'hidden' : '']}>
-			<Button size="iconLg" variant="ghost" class="backdrop-blur-none" onclick={showSectionsModal}>
-				<svg
-					xmlns="http://www.w3.org/2000/svg"
-					viewBox="0 0 24 24"
-					fill="none"
-					stroke="currentColor"
-					stroke-width="2"
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					class="size-5"
+			{#if showSectionsModal}
+				<Button
+					size="iconLg"
+					variant="ghost"
+					class="backdrop-blur-none"
+					onclick={showSectionsModal}
 				>
-					<rect x="3" y="3" width="18" height="18" rx="2" />
-					<path d="M3 9h18" />
-					<path d="M3 15h18" />
-				</svg>
-			</Button>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						class="size-5"
+					>
+						<rect x="3" y="3" width="18" height="18" rx="2" />
+						<path d="M3 9h18" />
+						<path d="M3 15h18" />
+					</svg>
+				</Button>
+			{/if}
 			<Toggle
 				class="hidden bg-transparent backdrop-blur-none lg:block dark:bg-transparent"
 				bind:pressed={showingMobileView}

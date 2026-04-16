@@ -5,6 +5,7 @@
 	import GridBaseEditingCard from '$lib/cards/_base/BaseCard/GridBaseEditingCard.svelte';
 	import EditingCard from '$lib/cards/_base/Card/EditingCard.svelte';
 	import { SectionDefinitionsByType } from '$lib/sections';
+	import { SECTIONS_EDITING_ENABLED } from '$lib/sections/feature-flag';
 	import { positionItemAtGridPos } from './add-item';
 
 	let {
@@ -84,7 +85,7 @@
 	{ondeselect}
 	onfiledrop={handleFileDrop}
 >
-	{#if hovered || isActive}
+	{#if SECTIONS_EDITING_ENABLED && (hovered || isActive)}
 		<div
 			class="pointer-events-none absolute inset-0 z-30 rounded-3xl border-2 border-dashed transition-colors duration-150 {isActive
 				? 'border-accent-500/50'
