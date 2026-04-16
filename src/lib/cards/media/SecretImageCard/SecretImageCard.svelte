@@ -6,8 +6,9 @@
 	import type { ContentComponentProps } from '../../types';
 	import Modal from '$lib/components/modal/Modal.svelte';
 	import { Button, Input, Subheading } from '@foxui/core';
+	import { openImageViewer } from '$lib/components/image-viewer/imageViewer.svelte';
 
-	let { item = $bindable() }: ContentComponentProps = $props();
+	let { item = $bindable(), isEditing }: ContentComponentProps = $props();
 
 	const did = getDidContext();
 
@@ -81,11 +82,26 @@
 {/if}
 
 {#if decryptedUrl}
-	<img
-		class="animate-in fade-in absolute inset-0 h-full w-full object-cover duration-500"
-		src={decryptedUrl}
-		alt=""
-	/>
+	{#if isEditing}
+		<img
+			class="animate-in fade-in absolute inset-0 h-full w-full object-cover duration-500"
+			src={decryptedUrl}
+			alt=""
+		/>
+	{:else}
+		<button
+			type="button"
+			class="absolute inset-0 h-full w-full cursor-zoom-in"
+			onclick={() => decryptedUrl && openImageViewer(decryptedUrl)}
+			aria-label="View image fullscreen"
+		>
+			<img
+				class="animate-in fade-in absolute inset-0 h-full w-full object-cover duration-500"
+				src={decryptedUrl}
+				alt=""
+			/>
+		</button>
+	{/if}
 {/if}
 
 {#if !decryptedUrl}
