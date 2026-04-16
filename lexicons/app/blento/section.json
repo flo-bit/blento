@@ -1,0 +1,24 @@
+{
+	"$type": "com.atproto.lexicon.schema",
+	"lexicon": 1,
+	"id": "app.blento.section",
+	"defs": {
+		"main": {
+			"type": "record",
+			"key": "tid",
+			"record": {
+				"type": "object",
+				"required": ["sectionType", "page", "index"],
+				"properties": {
+					"sectionType": { "type": "string" },
+					"page": { "type": "string" },
+					"index": { "type": "integer" },
+					"sectionData": { "type": "unknown" },
+					"name": { "type": "string" },
+					"updatedAt": { "type": "string", "format": "datetime" },
+					"version": { "type": "integer" }
+				}
+			}
+		}
+	}
+}

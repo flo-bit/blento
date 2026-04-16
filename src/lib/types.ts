@@ -25,6 +25,8 @@ export type Item = {
 	version?: number;
 
 	page?: string;
+
+	sectionId?: string;
 };
 
 export type PronounSet = {
@@ -38,6 +40,17 @@ export type PronounsRecord = {
 		createdAt?: string;
 		updatedAt?: string;
 	};
+};
+
+export type SectionRecord = {
+	id: string;
+	sectionType: string;
+	page: string;
+	index: number;
+	sectionData: Record<string, any>;
+	name?: string;
+	updatedAt?: string;
+	version?: number;
 };
 
 export type WebsiteData = {
@@ -79,6 +92,8 @@ export type WebsiteData = {
 	profile: AppBskyActorDefs.ProfileViewDetailed;
 	pronouns?: string;
 	pronounsRecord?: PronounsRecord;
+
+	sections: SectionRecord[];
 
 	additionalData: Record<string, unknown>;
 	updatedAt: number;

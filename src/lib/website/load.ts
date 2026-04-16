@@ -3,7 +3,8 @@ import { getCDNImageBlobUrl } from '$lib/atproto/methods';
 import { CardDefinitionsByType } from '$lib/cards';
 import type { CacheService } from '$lib/cache';
 import { createEmptyCard } from '$lib/helper';
-import type { Item, PronounsRecord, WebsiteData } from '$lib/types';
+import type { Item, PronounsRecord, SectionRecord, WebsiteData } from '$lib/types';
+import { ensureSections } from '$lib/sections/migrate';
 import { error } from '@sveltejs/kit';
 import type { ActorIdentifier, Did } from '@atcute/lexicons';
 
@@ -137,15 +138,18 @@ function loadCardFromContrail(did: Did, rkey: string, db: D1Database) {
  * for card types that actually appear on the current page.
  */
 function loadFromContrail(actor: ActorIdentifier, db: D1Database, page: string) {
-	return tryContrail('cards+pages query', async () => {
+	return tryContrail('cards+pages+sections query', async () => {
 		const client = getServerClient(db);
-		const [cardRes, pageRes] = await Promise.all([
+		const [cardRes, pageRes, sectionRes] = await Promise.all([
 			client.get('app.blento.card.listRecords', {
 				params: { actor, limit: 200, profiles: true, page }
 			}),
 			client.get('app.blento.page.listRecords', {
 				params: { actor, limit: 200 }
-			})
+			}),
+			client.get('app.blento.section.listRecords' as any, {
+				params: { actor, limit: 200, page }
+			}) as Promise<any>
 		]);
 
 		if (!cardRes.ok) return null;
@@ -162,9 +166,17 @@ function loadFromContrail(actor: ActorIdentifier, db: D1Database, page: string) 
 					}))
 			: [];
 
+		const sections =
+			sectionRes?.ok && sectionRes.data?.records
+				? (sectionRes.data.records as any[]).map(
+						(r: any) => ({ ...(r.record as object), id: parseUri(r.uri)?.rkey }) as SectionRecord
+					)
+				: [];
+
 		return {
 			cards,
 			pages,
+			sections,
 			profiles: (cardRes.data.profiles ?? []) as ContrailProfile[]
 		};
 	});
@@ -213,6 +225,7 @@ export async function loadData(
 	const contrailData = db ? await loadFromContrail(handle, db, fullPage) : null;
 
 	let cards: Item[];
+	let sectionRecords: SectionRecord[] = [];
 	let pageRecords: Awaited<ReturnType<typeof listRecords>>;
 	let profile: WebsiteData['profile'];
 	let publication: WebsiteData['publication'] | undefined;
@@ -220,6 +233,7 @@ export async function loadData(
 
 	if (contrailData) {
 		cards = contrailData.cards;
+		sectionRecords = contrailData.sections;
 		pageRecords = contrailData.pages;
 
 		const extracted = extractProfileData(did, contrailData.profiles);
@@ -228,12 +242,15 @@ export async function loadData(
 		pronounsRecord = extracted.pronounsRecord;
 	} else {
 		// Fallback: no D1 available (e.g. vite dev) — use PDS directly
-		const [cardRecords, pageRecs, mainPub, prof, pronouns] = await Promise.all([
+		const [cardRecords, pageRecs, sectionRecs, mainPub, prof, pronouns] = await Promise.all([
 			listRecords({ did, collection: 'app.blento.card', limit: 0 }).catch((e) => {
 				console.error('error getting records for collection app.blento.card', e);
 				return [] as Awaited<ReturnType<typeof listRecords>>;
 			}),
 			listRecords({ did, collection: 'app.blento.page' }).catch(
+				() => [] as Awaited<ReturnType<typeof listRecords>>
+			),
+			listRecords({ did, collection: 'app.blento.section' }).catch(
 				() => [] as Awaited<ReturnType<typeof listRecords>>
 			),
 			getSelfPublicationFromPDS(did),
@@ -242,6 +259,9 @@ export async function loadData(
 		]);
 
 		cards = cardRecords.map((v) => ({ ...v.value }) as Item);
+		sectionRecords = sectionRecs
+			.filter((v) => (v.value as any)?.page === fullPage)
+			.map((v) => ({ ...(v.value as object), id: parseUri(v.uri)?.rkey }) as SectionRecord);
 		pageRecords = pageRecs;
 		profile = prof;
 		publication = mainPub?.value as WebsiteData['publication'] | undefined;
@@ -256,13 +276,20 @@ export async function loadData(
 
 	publication ??= defaultPublication(profile);
 
-	const additionalData = await loadAdditionalData(cards, { did, handle, cache, platform }, env);
+	const migrated = ensureSections(sectionRecords, cards, fullPage);
+
+	const additionalData = await loadAdditionalData(
+		migrated.cards,
+		{ did, handle, cache, platform },
+		env
+	);
 
 	return checkData({
-		page: 'blento.' + page,
+		page: fullPage,
 		handle,
 		did,
-		cards,
+		cards: migrated.cards,
+		sections: migrated.sections,
 		publication,
 		additionalData,
 		profile,
@@ -353,6 +380,7 @@ export async function loadCardData(
 		handle: resolvedHandle,
 		did,
 		cards,
+		sections: [],
 		publication: publication ?? defaultPublication(profile),
 		additionalData,
 		profile,
@@ -434,6 +462,7 @@ export async function loadCardTypeData(
 		handle: resolvedHandle,
 		did,
 		cards,
+		sections: [],
 		publication: publication ?? defaultPublication(profile),
 		additionalData,
 		profile,

@@ -17,8 +17,7 @@
 
 		save,
 
-		handleImageInputChange,
-		handleVideoInputChange,
+		handleFileInputChange,
 
 		newCard,
 		addLink,
@@ -30,7 +29,8 @@
 		isCoarse = false,
 		ondeselect,
 		ondelete,
-		onsetsize
+		onsetsize,
+		showSectionsModal
 	}: {
 		data: WebsiteData;
 
@@ -41,8 +41,7 @@
 
 		save: () => Promise<void>;
 
-		handleImageInputChange: (evt: Event) => void;
-		handleVideoInputChange: (evt: Event) => void;
+		handleFileInputChange: (evt: Event) => void;
 
 		newCard: (type?: string, cardData?: any) => void;
 		addLink: (url: string) => void;
@@ -55,11 +54,11 @@
 		ondeselect?: () => void;
 		ondelete?: () => void;
 		onsetsize?: (w: number, h: number) => void;
+		showSectionsModal: () => void;
 	} = $props();
 
 	let linkPopoverOpen = $state(false);
 	let imageInputRef: HTMLInputElement | undefined = $state();
-	let videoInputRef: HTMLInputElement | undefined = $state();
 
 	function getShareUrl() {
 		const base = typeof window !== 'undefined' ? window.location.origin : '';
@@ -136,22 +135,12 @@
 
 <input
 	type="file"
-	accept="image/*"
-	onchange={handleImageInputChange}
+	accept="image/*,video/*"
+	onchange={handleFileInputChange}
 	class="hidden"
-	id="image-input"
+	id="file-input"
 	multiple
 	bind:this={imageInputRef}
-/>
-
-<input
-	type="file"
-	accept="video/*"
-	onchange={handleVideoInputChange}
-	class="hidden"
-	id="video-input"
-	multiple
-	bind:this={videoInputRef}
 />
 
 {#if dev || (user.isLoggedIn && user.profile?.did === data.did)}
@@ -354,6 +343,22 @@
 			</div>
 		{/if}
 		<div class={['flex items-center gap-2', showMobileEditControls ? 'hidden' : '']}>
+			<Button size="iconLg" variant="ghost" class="backdrop-blur-none" onclick={showSectionsModal}>
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					class="size-5"
+				>
+					<rect x="3" y="3" width="18" height="18" rx="2" />
+					<path d="M3 9h18" />
+					<path d="M3 15h18" />
+				</svg>
+			</Button>
 			<Toggle
 				class="hidden bg-transparent backdrop-blur-none lg:block dark:bg-transparent"
 				bind:pressed={showingMobileView}

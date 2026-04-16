@@ -11,6 +11,12 @@ export const config: ContrailConfig = {
 		},
 		'app.blento.page': {
 			queryable: {}
+		},
+		'app.blento.section': {
+			queryable: {
+				page: {},
+				sectionType: {}
+			}
 		}
 	},
 	profiles: [

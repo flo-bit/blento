@@ -6,6 +6,7 @@ export const SITE = env.PUBLIC_DOMAIN;
 export const collections = [
 	'app.blento.card',
 	'app.blento.page',
+	'app.blento.section',
 	'app.blento.settings',
 	'app.blento.comment',
 	'app.blento.guestbook.entry',
