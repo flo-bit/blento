@@ -4,7 +4,7 @@ import { error } from '@sveltejs/kit';
 import { createCache } from '$lib/cache';
 import { getActor } from '$lib/actor.js';
 
-export async function load({ params, platform, request }) {
+export async function load({ params, platform, request, locals, route, setHeaders }) {
 	if (env.PUBLIC_IS_SELFHOSTED) error(404);
 
 	const cache = createCache(platform);
@@ -15,5 +15,18 @@ export async function load({ params, platform, request }) {
 		throw error(404, 'Page not found');
 	}
 
-	return await loadData(actor, cache, params.page, env, platform);
+	const data = await loadData(actor, cache, params.page, env, platform);
+
+	const isInteractiveRoute = route.id?.endsWith('/edit') || route.id?.endsWith('/copy') || false;
+	const isAnonymous = !locals.did;
+
+	if (isAnonymous && !isInteractiveRoute) {
+		setHeaders({
+			'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=600'
+		});
+	} else {
+		setHeaders({ 'Cache-Control': 'private, no-store' });
+	}
+
+	return data;
 }

@@ -497,6 +497,16 @@ function migrateCard(card: Item): Item {
 	return card;
 }
 
+function hashCardData(items: Item[]): string {
+	const str = JSON.stringify(items.map((i) => i.cardData ?? null));
+	let hash = 0x811c9dc5;
+	for (let i = 0; i < str.length; i++) {
+		hash ^= str.charCodeAt(i);
+		hash = Math.imul(hash, 0x01000193);
+	}
+	return (hash >>> 0).toString(36);
+}
+
 async function loadAdditionalData(
 	cards: Item[],
 	{
@@ -525,7 +535,18 @@ async function loadAdditionalData(
 					platform
 				});
 			} else if (cardDef?.loadData) {
-				additionDataPromises[cardType] = cardDef.loadData(items, { did, handle, cache });
+				const loader = () => cardDef.loadData!(items, { did, handle, cache });
+				if (cache && cardDef.cacheLoadData) {
+					const opts = typeof cardDef.cacheLoadData === 'object' ? cardDef.cacheLoadData : {};
+					const key = `${cardType}:${did}:${hashCardData(items)}`;
+					additionDataPromises[cardType] = cache.swr('card-data', key, loader, {
+						ttl: opts.ttl,
+						staleWindow: opts.staleWindow,
+						waitUntil: platform?.context?.waitUntil?.bind(platform.context)
+					});
+				} else {
+					additionDataPromises[cardType] = loader();
+				}
 			}
 		} catch {
 			console.error('error getting additional data for', cardType);

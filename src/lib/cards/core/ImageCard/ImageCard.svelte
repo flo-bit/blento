@@ -3,21 +3,40 @@
 	import type { ContentComponentProps } from '../../types';
 	import { qrOverlay } from '$lib/components/qr/qrOverlay.svelte';
 	import { getImage } from '$lib/helper';
+	import { openImageViewer } from '$lib/components/image-viewer/imageViewer.svelte';
 
 	let { item = $bindable(), isEditing }: ContentComponentProps = $props();
 
 	const did = getDidContext();
+
+	let src = $derived(getImage(item.cardData, did, 'image'));
+	let clickable = $derived(!item.cardData.href && !isEditing && !!src);
 </script>
 
-{#key getImage(item.cardData, did, 'image')}
-	<img
-		class={[
-			'absolute inset-0 h-full w-full object-cover opacity-100 transition-transform duration-300 ease-in-out',
-			item.cardData.href ? 'group-hover/card:scale-101' : ''
-		]}
-		src={getImage(item.cardData, did, 'image')}
-		alt=""
-	/>
+{#key src}
+	{#if clickable}
+		<button
+			type="button"
+			class="absolute inset-0 h-full w-full cursor-zoom-in"
+			onclick={() => src && openImageViewer(src)}
+			aria-label="View image fullscreen"
+		>
+			<img
+				class="absolute inset-0 h-full w-full object-cover opacity-100 transition-transform duration-300 ease-in-out group-hover/card:scale-101"
+				{src}
+				alt=""
+			/>
+		</button>
+	{:else}
+		<img
+			class={[
+				'absolute inset-0 h-full w-full object-cover opacity-100 transition-transform duration-300 ease-in-out',
+				item.cardData.href ? 'group-hover/card:scale-101' : ''
+			]}
+			{src}
+			alt=""
+		/>
+	{/if}
 {/key}
 {#if item.cardData.href && !isEditing}
 	<a

@@ -40,6 +40,11 @@ export type CardDefinition = {
 		{ did, handle, cache }: { did: Did; handle: string; cache?: CacheService }
 	) => Promise<unknown>;
 
+	// Opt into server-side KV caching of `loadData` results, with stale-while-revalidate.
+	// Key = `${type}:${did}:${hash(items.cardData)}`. On SSR, a stale hit is returned
+	// immediately while a background refresh repopulates the cache.
+	cacheLoadData?: boolean | { ttl?: number; staleWindow?: number };
+
 	// server-side version of loadData that calls external APIs directly
 	// instead of going through self-referential /api/ routes (avoids 522 on Cloudflare Workers)
 	loadDataServer?: (
