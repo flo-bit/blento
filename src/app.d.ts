@@ -1,4 +1,9 @@
-import type { KVNamespace, D1Database } from '@cloudflare/workers-types';
+import type {
+	KVNamespace,
+	D1Database,
+	ExecutionContext,
+	CacheStorage
+} from '@cloudflare/workers-types';
 import type { OAuthSession } from '@atcute/oauth-node-client';
 import type { Client } from '@atcute/client';
 import type { Did } from '@atcute/lexicons';
@@ -26,6 +31,8 @@ declare global {
 				COOKIE_SECRET: string;
 				CRON_SECRET: string;
 			};
+			context: ExecutionContext;
+			caches: CacheStorage & { default: Cache };
 		}
 	}
 }

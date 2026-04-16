@@ -16,6 +16,7 @@ export const PopfeedReviewsCardDefinition = {
 
 		return data;
 	},
+	cacheLoadData: true,
 	minH: 3,
 	canHaveLabel: true,
 

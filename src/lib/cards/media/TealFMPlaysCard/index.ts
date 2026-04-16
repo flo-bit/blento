@@ -20,6 +20,7 @@ export const TealFMPlaysCardDefinition = {
 
 		return data;
 	},
+	cacheLoadData: true,
 	minW: 4,
 	canHaveLabel: true,
 	canAdd: ({ collections }) => collections.includes('fm.teal.alpha.feed.play'),

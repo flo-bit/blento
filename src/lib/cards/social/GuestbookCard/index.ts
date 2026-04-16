@@ -59,6 +59,7 @@ export const GuestbookCardDefinition = {
 
 		return results;
 	},
+	cacheLoadData: true,
 	name: 'Guestbook',
 	keywords: ['comments', 'visitors', 'message', 'sign'],
 	groups: ['Social'],
