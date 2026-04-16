@@ -4,7 +4,7 @@
 	import type { WithElementRef } from 'bits-ui';
 	import type { Snippet } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
-	import { getColor } from '../..';
+	import { CardDefinitionsByType, getColor } from '../..';
 
 	const colors = {
 		base: 'bg-base-200/50 dark:bg-base-950/50',
@@ -35,6 +35,7 @@
 	}: BaseCardProps = $props();
 
 	let color = $derived(getColor(item));
+	let noOverflow = $derived(CardDefinitionsByType[item.cardType]?.noOverflow ?? false);
 </script>
 
 <div
@@ -71,7 +72,8 @@
 >
 	<div
 		class={[
-			'text-base-900 dark:text-base-50 relative isolate h-full w-full overflow-hidden',
+			'text-base-900 dark:text-base-50 relative isolate h-full w-full',
+			noOverflow ? 'overflow-visible' : 'overflow-hidden',
 			!fillPage ? 'rounded-3xl' : '',
 			color !== 'base' && color != 'transparent' ? 'light' : ''
 		]}

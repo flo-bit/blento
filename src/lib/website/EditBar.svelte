@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { dev } from '$app/environment';
+	import { page } from '$app/state';
 	import { user } from '$lib/atproto';
 	import { COLUMNS } from '$lib';
 	import type { Item, WebsiteData } from '$lib/types';
@@ -64,7 +65,14 @@
 		const base = typeof window !== 'undefined' ? window.location.origin : '';
 		const pagePath =
 			data.page && data.page !== 'blento.self' ? `/p/${data.page.replace('blento.', '')}` : '';
-		return `${base}/${data.handle}${pagePath}`;
+
+		if (page.data.customDomain) {
+			return `${base}${pagePath || '/'}`;
+		}
+
+		const handle = data.profile?.handle;
+		const actor = handle && handle !== 'handle.invalid' ? handle : data.did;
+		return `${base}/${actor}${pagePath}`;
 	}
 
 	async function copyShareLink() {

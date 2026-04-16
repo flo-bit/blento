@@ -34,6 +34,8 @@
 		AllCardDefinitions.filter((d) => !d.canAdd || d.canAdd({ collections }))
 	);
 
+	$inspect(filteredCardDefs, 'filteredCardDefs');
+
 	let cardDefGroups = $derived([
 		'Core',
 		...Array.from(

@@ -1,22 +1,31 @@
 <script lang="ts">
 	import { Button, Modal, toast } from '@foxui/core';
+	import { page as pageState } from '$app/state';
 
 	let {
 		open = $bindable(),
 		success,
 		handle,
+		did,
 		page
 	}: {
 		open: boolean;
 		success: boolean;
 		handle: string;
+		did?: string;
 		page: string;
 	} = $props();
 
 	function getShareUrl() {
 		const base = typeof window !== 'undefined' ? window.location.origin : '';
 		const pagePath = page && page !== 'blento.self' ? `/p/${page.replace('blento.', '')}` : '';
-		return `${base}/${handle}${pagePath}`;
+
+		if (pageState.data.customDomain) {
+			return `${base}${pagePath || '/'}`;
+		}
+
+		const actor = handle && handle !== 'handle.invalid' ? handle : (did ?? handle);
+		return `${base}/${actor}${pagePath}`;
 	}
 
 	async function copyShareLink() {

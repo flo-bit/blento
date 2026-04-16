@@ -62,6 +62,7 @@ import { KichRecipeCardDefinition } from './social/KichRecipeCard';
 import { KichRecipeCollectionCardDefinition } from './social/KichRecipeCollectionCard';
 import { KichCookingLogCardDefinition } from './social/KichCookingLogCard';
 import { SecretImageCardDefinition } from './media/SecretImageCard';
+import { HeroCardDefinition } from './sections/HeroCard';
 // import { Model3DCardDefinition } from './visual/Model3DCard';
 
 export const AllCardDefinitions = [
@@ -129,7 +130,8 @@ export const AllCardDefinitions = [
 	KichRecipeCardDefinition,
 	KichRecipeCollectionCardDefinition,
 	KichCookingLogCardDefinition,
-	SecretImageCardDefinition
+	SecretImageCardDefinition,
+	HeroCardDefinition
 ] as const;
 
 export const CardDefinitionsByType = AllCardDefinitions.reduce(

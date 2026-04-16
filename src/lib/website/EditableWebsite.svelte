@@ -583,7 +583,8 @@
 	<SaveModal
 		bind:open={showSaveModal}
 		success={saveSuccess}
-		handle={data.handle}
+		handle={data.profile?.handle ?? data.handle}
+		did={data.did}
 		page={data.page}
 	/>
 
@@ -641,7 +642,7 @@
 		class={[
 			'@container/wrapper relative w-full',
 			showingMobileView
-				? 'bg-base-50 dark:bg-base-900 my-4 min-h-[calc(100dvh-2em)] rounded-2xl lg:mx-auto lg:w-90'
+				? 'bg-base-50 dark:bg-base-900 my-4 min-h-[calc(100dvh-2em)] overflow-hidden rounded-2xl lg:mx-auto lg:w-90'
 				: ''
 		]}
 	>
