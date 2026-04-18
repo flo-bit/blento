@@ -60,8 +60,8 @@
 		{
 			"binding": "DB",
 			"database_name": "blento",
-			"database_id": "922639e7-6321-42c8-a4bd-cdf48428fdac"
-			// "remote": true
+			"database_id": "922639e7-6321-42c8-a4bd-cdf48428fdac",
+			"remote": true
 		}
 	],
 	"triggers": {

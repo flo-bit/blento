@@ -4,8 +4,8 @@
 	import { EditableGrid, fixCollisions, compactItems, setPositionOfNewItem } from '$lib/layout';
 	import GridBaseEditingCard from '$lib/cards/_base/BaseCard/GridBaseEditingCard.svelte';
 	import EditingCard from '$lib/cards/_base/Card/EditingCard.svelte';
-	import { SectionDefinitionsByType } from '$lib/sections';
-	import { SECTIONS_EDITING_ENABLED } from '$lib/sections/feature-flag';
+	import SectionChrome from '../SectionChrome.svelte';
+	import { GRID_SECTION_ICON, GRID_SECTION_NAME } from './shared';
 	import { positionItemAtGridPos } from './add-item';
 
 	let {
@@ -28,7 +28,6 @@
 	let sectionItems = $derived(items.filter((i) => i.sectionId === section.id));
 
 	let hovered = $state(false);
-	const def = $derived(SectionDefinitionsByType[section.sectionType]);
 
 	$effect(() => {
 		onrefchange(gridRef);
@@ -85,24 +84,12 @@
 	{ondeselect}
 	onfiledrop={handleFileDrop}
 >
-	{#if SECTIONS_EDITING_ENABLED && (hovered || isActive)}
-		<div
-			class="pointer-events-none absolute inset-0 z-30 rounded-3xl border-2 border-dashed transition-colors duration-150 {isActive
-				? 'border-accent-500/50'
-				: 'border-base-400/30 dark:border-base-500/30'}"
-		>
-			<div
-				class="bg-base-100/80 dark:bg-base-900/80 absolute -top-3 left-4 flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium backdrop-blur-sm {isActive
-					? 'text-accent-600 dark:text-accent-400'
-					: 'text-base-500 dark:text-base-400'}"
-			>
-				{#if def?.icon}
-					<span class="[&_svg]:size-3">{@html def.icon}</span>
-				{/if}
-				{section.name || def?.name || section.sectionType}
-			</div>
-		</div>
-	{/if}
+	<SectionChrome
+		{isActive}
+		{hovered}
+		name={section.name || GRID_SECTION_NAME}
+		icon={GRID_SECTION_ICON}
+	/>
 
 	{#if sectionItems.length === 0}
 		<div

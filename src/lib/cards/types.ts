@@ -80,6 +80,9 @@ export type CardDefinition = {
 
 	canResize?: boolean;
 
+	// allow rotation for this card type (default true — section can also disable)
+	allowRotate?: boolean;
+
 	// if true, content can render outside the card's bounds (no overflow:hidden on the inner wrapper)
 	noOverflow?: boolean;
 

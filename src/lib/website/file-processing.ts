@@ -55,9 +55,12 @@ export async function createImageCard(file: File, page: string, sectionId?: stri
 
 	const item = createEmptyCard(page, sectionId);
 	item.cardType = isGif ? 'gif' : 'image';
-	item.cardData = { image: { blob: file, objectUrl } };
-
 	const { width, height } = await getImageDimensions(objectUrl);
+	item.cardData = {
+		image: { blob: file, objectUrl },
+		aspectRatio: { width, height }
+	};
+
 	const [dw, dh] = getBestGridSize(width, height, desktopSizeCandidates);
 	const [mw, mh] = getBestGridSize(width, height, mobileSizeCandidates);
 	item.w = dw;

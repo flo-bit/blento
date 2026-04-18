@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { DecorationSlot } from '.';
+	import type { DecorationSlot } from './shared';
 	import type { Item } from '$lib/types';
 	import Card from '$lib/cards/_base/Card/Card.svelte';
 	import EditingCard from '$lib/cards/_base/Card/EditingCard.svelte';
@@ -24,10 +24,12 @@
 	const selectedCardId = getSelectedCardId();
 	let isSelected = $derived(!!item && selectedCardId?.() === item.id);
 
+	let rotation = $derived(item?.rotation ?? slot.rotation ?? 0);
+
 	const sideStyle = $derived(
 		slot.side === 'left'
-			? `left: 0; transform: translate(calc(-1 * var(--tx)), -50%) rotate(${slot.rotation ?? 0}deg);`
-			: `right: 0; transform: translate(var(--tx), -50%) rotate(${slot.rotation ?? 0}deg);`
+			? `left: 0; transform: translate(calc(-1 * var(--tx)), -50%) rotate(${rotation}deg);`
+			: `right: 0; transform: translate(var(--tx), -50%) rotate(${rotation}deg);`
 	);
 </script>
 

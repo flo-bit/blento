@@ -27,6 +27,8 @@ export type Item = {
 	page?: string;
 
 	sectionId?: string;
+
+	rotation?: number;
 };
 
 export type PronounSet = {

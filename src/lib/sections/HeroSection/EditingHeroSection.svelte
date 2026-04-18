@@ -15,13 +15,15 @@
 	import type { EditingSectionContentProps } from '../types';
 	import {
 		DEFAULT_DECORATION_SLOTS,
-		canFitInSlot,
 		getSlotAssignments,
 		getSlotItem,
 		heroAlignClasses,
 		heroVerticalAlignClasses
-	} from '.';
+	} from './shared';
 	import Decoration from './Decoration.svelte';
+	import SectionChrome from '../SectionChrome.svelte';
+
+	const heroIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 10h10"/><path d="M7 14h6"/></svg>`;
 
 	let {
 		section,
@@ -142,34 +144,9 @@
 	bind:this={containerRef}
 	class="@container/grid pointer-events-auto relative col-span-3 flex min-h-[calc(100dvh-4rem)] flex-col overflow-visible px-2 py-10 lg:px-8"
 >
-	{#if hovered || isActive}
-		<div
-			class="pointer-events-none absolute inset-0 z-30 rounded-3xl border-2 border-dashed transition-colors duration-150 {isActive
-				? 'border-accent-500/50'
-				: 'border-base-400/30 dark:border-base-500/30'}"
-		>
-			<div
-				class="bg-base-100/80 dark:bg-base-900/80 absolute -top-3 left-4 flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium backdrop-blur-sm {isActive
-					? 'text-accent-600 dark:text-accent-400'
-					: 'text-base-500 dark:text-base-400'}"
-			>
-				<svg
-					xmlns="http://www.w3.org/2000/svg"
-					viewBox="0 0 24 24"
-					fill="none"
-					stroke="currentColor"
-					stroke-width="2"
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					class="size-3"
-					><rect x="3" y="4" width="18" height="16" rx="2" /><path d="M7 10h10" /><path
-						d="M7 14h6"
-					/></svg
-				>
-				Hero
-			</div>
-		</div>
+	<SectionChrome {isActive} {hovered} name={section.name || 'Hero'} icon={heroIcon} />
 
+	{#if hovered || isActive}
 		<div class="pointer-events-auto absolute -top-3 right-4 z-40">
 			<Popover bind:open={settingsOpen}>
 				{#snippet child({ props })}
