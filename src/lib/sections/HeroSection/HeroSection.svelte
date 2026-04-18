@@ -74,7 +74,7 @@
 						}}
 						class={cn(buttonClass, 'pointer-events-auto')}
 					>
-						{d.buttonText}
+						edit website
 					</button>
 				{:else}
 					<a

@@ -54,10 +54,10 @@
 	</div>
 {:else if item}
 	<div
-		class="deco absolute z-0 block w-36 overflow-hidden rounded-3xl shadow-2xl @[42rem]/grid:w-40"
+		class="deco absolute z-0 block w-36 overflow-hidden rounded-3xl @[42rem]/grid:w-40"
 		style="top: {(slot.top ?? 50) + '%'}; {sideStyle}"
 	>
-		<div class="pointer-events-none aspect-square w-full overflow-hidden rounded-3xl">
+		<div class="aspect-square w-full overflow-hidden rounded-3xl">
 			<BaseCard {item}>
 				<Card {item} />
 			</BaseCard>
