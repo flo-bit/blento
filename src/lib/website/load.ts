@@ -622,8 +622,14 @@ function checkData(data: WebsiteData): WebsiteData {
 	const cards = data.cards.filter((v) => v.page === data.page);
 
 	if (cards.length > 0) {
+		const gridSectionIds = new Set(
+			data.sections.filter((s) => s.sectionType === 'grid').map((s) => s.id)
+		);
+
+		const gridCards = cards.filter((c) => !c.sectionId || gridSectionIds.has(c.sectionId));
+
 		const bySection = new Map<string | undefined, Item[]>();
-		for (const card of cards) {
+		for (const card of gridCards) {
 			const key = card.sectionId;
 			const bucket = bySection.get(key);
 			if (bucket) bucket.push(card);
