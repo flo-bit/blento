@@ -2,7 +2,8 @@ import type {
 	KVNamespace,
 	D1Database,
 	ExecutionContext,
-	CacheStorage
+	CacheStorage,
+	AnalyticsEngineDataset
 } from '@cloudflare/workers-types';
 import type { OAuthSession } from '@atcute/oauth-node-client';
 import type { Client } from '@atcute/client';
@@ -27,6 +28,7 @@ declare global {
 				OAUTH_SESSIONS: KVNamespace;
 				OAUTH_STATES: KVNamespace;
 				DB: D1Database;
+				ANALYTICS: AnalyticsEngineDataset;
 				CLIENT_ASSERTION_KEY: string;
 				COOKIE_SECRET: string;
 				CRON_SECRET: string;

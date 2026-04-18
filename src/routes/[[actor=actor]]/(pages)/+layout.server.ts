@@ -3,6 +3,7 @@ import { env } from '$env/dynamic/private';
 import { error } from '@sveltejs/kit';
 import { createCache } from '$lib/cache';
 import { getActor } from '$lib/actor.js';
+import { logPageview } from '$lib/analytics';
 
 export async function load({ params, platform, request, locals, route, setHeaders }) {
 	if (env.PUBLIC_IS_SELFHOSTED) error(404);
@@ -26,6 +27,15 @@ export async function load({ params, platform, request, locals, route, setHeader
 		});
 	} else {
 		setHeaders({ 'Cache-Control': 'private, no-store' });
+	}
+
+	if (!isInteractiveRoute) {
+		logPageview(platform, {
+			did: data.did,
+			handle: data.handle,
+			page: params.page ?? 'self',
+			request
+		});
 	}
 
 	return data;
