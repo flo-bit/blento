@@ -74,7 +74,11 @@
 						}}
 						class={cn(buttonClass, 'pointer-events-auto')}
 					>
-						edit website
+						{#if user.isLoggedIn && user.profile}
+							edit website
+						{:else}
+							create website
+						{/if}
 					</button>
 				{:else}
 					<a

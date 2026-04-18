@@ -39,7 +39,7 @@
 	import { SvelteMap } from 'svelte/reactivity';
 	import { shouldMirror, mirrorLayout } from '$lib/layout';
 	import { SectionDefinitionsByType } from '$lib/sections';
-	import { SECTIONS_EDITING_ENABLED } from '$lib/sections/feature-flag';
+	import { isSectionsEditingEnabled } from '$lib/sections/feature-flag';
 	import type { SectionRecord } from '$lib/types';
 
 	let {
@@ -50,6 +50,8 @@
 
 	// Check if floating login button will be visible (to hide MadeWithBlento)
 	const showLoginOnEditPage = $derived(!user.isLoggedIn);
+
+	const sectionsEditingEnabled = $derived(isSectionsEditingEnabled(data.did));
 
 	const ogImageUrl = $derived.by(() => {
 		const origin = page.url.origin;
@@ -522,7 +524,7 @@
 							}}
 						/>
 					{/if}
-					{#if SECTIONS_EDITING_ENABLED}
+					{#if sectionsEditingEnabled}
 						<AddSectionButton onadd={(type) => addSection(type, i)} />
 					{/if}
 				{/each}
@@ -586,7 +588,7 @@
 				onLayoutChanged();
 			}
 		}}
-		showSectionsModal={SECTIONS_EDITING_ENABLED
+		showSectionsModal={sectionsEditingEnabled
 			? () => {
 					showSectionsModal = true;
 				}
