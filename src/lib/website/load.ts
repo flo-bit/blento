@@ -236,10 +236,31 @@ export async function loadData(
 		sectionRecords = contrailData.sections;
 		pageRecords = contrailData.pages;
 
-		const extracted = extractProfileData(did, contrailData.profiles);
-		profile = extracted.profile;
-		publication = extracted.publication;
-		pronounsRecord = extracted.pronounsRecord;
+		const hasBskyProfile = contrailData.profiles.some(
+			(p) => p.did === did && p.collection === 'app.bsky.actor.profile'
+		);
+
+		if (hasBskyProfile) {
+			const extracted = extractProfileData(did, contrailData.profiles);
+			profile = extracted.profile;
+			publication = extracted.publication;
+			pronounsRecord = extracted.pronounsRecord;
+		} else {
+			// Contrail didn't return profile data (e.g. no card records) — fetch from PDS
+			const [prof, mainPub, pronouns] = await Promise.all([
+				getDetailedProfile({ did }),
+				getSelfPublicationFromPDS(did),
+				getPronounsFromPDS(did)
+			]);
+			profile = prof;
+			publication = mainPub?.value as WebsiteData['publication'] | undefined;
+			pronounsRecord = pronouns;
+
+			// Still extract publication/pronouns from contrail if available
+			const extracted = extractProfileData(did, contrailData.profiles);
+			if (!publication) publication = extracted.publication;
+			if (!pronounsRecord) pronounsRecord = extracted.pronounsRecord;
+		}
 	} else {
 		// Fallback: no D1 available (e.g. vite dev) — use PDS directly
 		const [cardRecords, pageRecs, sectionRecs, mainPub, prof, pronouns] = await Promise.all([
@@ -330,10 +351,29 @@ export async function loadCardData(
 		cardValue = card;
 
 		if (profiles) {
-			const extracted = extractProfileData(did, profiles);
-			profile = extracted.profile;
-			publication = extracted.publication;
-			pronounsRecord = extracted.pronounsRecord;
+			const hasBskyProfile = profiles.some(
+				(p) => p.did === did && p.collection === 'app.bsky.actor.profile'
+			);
+			if (hasBskyProfile) {
+				const extracted = extractProfileData(did, profiles);
+				profile = extracted.profile;
+				publication = extracted.publication;
+				pronounsRecord = extracted.pronounsRecord;
+			} else {
+				// Contrail didn't return bsky profile — fetch from PDS
+				const [prof, mainPub, pronouns] = await Promise.all([
+					getDetailedProfile({ did }),
+					getSelfPublicationFromPDS(did),
+					getPronounsFromPDS(did)
+				]);
+				profile = prof;
+				publication = mainPub?.value as WebsiteData['publication'] | undefined;
+				pronounsRecord = pronouns;
+
+				const extracted = extractProfileData(did, profiles);
+				if (!publication) publication = extracted.publication;
+				if (!pronounsRecord) pronounsRecord = extracted.pronounsRecord;
+			}
 		}
 	}
 
@@ -419,10 +459,19 @@ export async function loadCardTypeData(
 	if (db) {
 		const profiles = await loadProfilesFromContrail(handle, db);
 		if (profiles) {
-			const extracted = extractProfileData(did, profiles);
-			profile = extracted.profile;
-			publication = extracted.publication;
-			pronounsRecord = extracted.pronounsRecord;
+			const hasBskyProfile = profiles.some(
+				(p) => p.did === did && p.collection === 'app.bsky.actor.profile'
+			);
+			if (hasBskyProfile) {
+				const extracted = extractProfileData(did, profiles);
+				profile = extracted.profile;
+				publication = extracted.publication;
+				pronounsRecord = extracted.pronounsRecord;
+			} else {
+				const extracted = extractProfileData(did, profiles);
+				publication = extracted.publication;
+				pronounsRecord = extracted.pronounsRecord;
+			}
 		}
 	}
 
@@ -433,8 +482,8 @@ export async function loadCardTypeData(
 			getPronounsFromPDS(did)
 		]);
 		profile = prof;
-		publication = pubRecord?.value as WebsiteData['publication'] | undefined;
-		pronounsRecord = pronouns;
+		if (!publication) publication = pubRecord?.value as WebsiteData['publication'] | undefined;
+		if (!pronounsRecord) pronounsRecord = pronouns;
 	}
 
 	if (!profile) throw error(404);

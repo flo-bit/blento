@@ -23,6 +23,7 @@
 					"color": { "type": "string" },
 					"page": { "type": "string" },
 					"sectionId": { "type": "string" },
+					"rotation": { "type": "integer" },
 					"updatedAt": { "type": "string", "format": "datetime" },
 					"version": { "type": "integer" }
 				}

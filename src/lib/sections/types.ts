@@ -32,6 +32,7 @@ export type SectionDefinition = {
 	editingContentComponent: Component<EditingSectionContentProps>;
 	defaultSectionData?: () => Record<string, any>;
 	cardFilter?: (cardDef: CardDefinition) => boolean;
+	allowRotate?: boolean;
 	addItem: (item: Item, allItems: Item[], options: AddItemOptions) => Item[];
 	deleteItem: (itemId: string, allItems: Item[], sectionId: string) => Item[];
 	resizeItem: (item: Item, allItems: Item[], w: number, h: number, isMobile: boolean) => void;

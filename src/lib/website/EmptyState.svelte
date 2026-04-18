@@ -1,8 +1,7 @@
 <script lang="ts">
-	import BaseCard from '$lib/cards/_base/BaseCard/BaseCard.svelte';
+	import GridBaseCard from '$lib/cards/_base/BaseCard/GridBaseCard.svelte';
 	import Card from '$lib/cards/_base/Card/Card.svelte';
 	import type { Item, WebsiteData } from '$lib/types';
-	import { text } from '@sveltejs/kit';
 
 	let { data }: { data: WebsiteData } = $props();
 
@@ -89,18 +88,13 @@
 	});
 
 	let maxHeight = $derived(cards.reduce((max, item) => Math.max(max, item.y + item.h), 0));
-
-	let maxMobileHeight = $derived(
-		cards.reduce((max, item) => Math.max(max, item.mobileY + item.mobileH), 0)
-	);
 </script>
 
 {#each cards as item (item.id)}
-	<BaseCard {item}>
+	<GridBaseCard {item}>
 		<Card {item} />
-	</BaseCard>
+	</GridBaseCard>
 {/each}
 
 <!-- Spacer for grid height -->
-<div class="hidden @[42rem]/grid:block" style="height: {(maxHeight / 8) * 100}cqw;"></div>
-<div class="@[42rem]/grid:hidden" style="height: {(maxMobileHeight / 4) * 100}cqw;"></div>
+<div style="height: {(maxHeight / 8) * 100}cqw;"></div>

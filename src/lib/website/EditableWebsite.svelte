@@ -570,6 +570,19 @@
 				onLayoutChanged();
 			}
 		}}
+		allowRotate={(() => {
+			if (!selectedCard) return false;
+			const section = sections.find((s) => s.id === selectedCard.sectionId);
+			const def = section ? SectionDefinitionsByType[section.sectionType] : undefined;
+			const cardDef = CardDefinitionsByType[selectedCard.cardType];
+			return !!def?.allowRotate && cardDef?.allowRotate !== false;
+		})()}
+		onrotate={(delta: number) => {
+			if (selectedCard) {
+				selectedCard.rotation = (selectedCard.rotation ?? 0) + delta;
+				onLayoutChanged();
+			}
+		}}
 		showSectionsModal={SECTIONS_EDITING_ENABLED
 			? () => {
 					showSectionsModal = true;

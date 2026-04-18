@@ -11,7 +11,7 @@
 		getSlotItem,
 		heroAlignClasses,
 		heroVerticalAlignClasses
-	} from '.';
+	} from './shared';
 	import Decoration from './Decoration.svelte';
 
 	let { section, items }: SectionContentProps = $props();
