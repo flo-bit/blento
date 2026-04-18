@@ -47,10 +47,11 @@
 
 	const ogImageUrl = $derived.by(() => {
 		const origin = page.url.origin;
-		if (page.data.customDomain) return `${origin}/og-new.png`;
+		const v = data.updatedAt ? `?v=${data.updatedAt}` : '';
+		if (page.data.customDomain) return `${origin}/og-new.png${v}`;
 		const handle = data.profile?.handle;
 		const actor = handle && handle !== 'handle.invalid' ? handle : data.did;
-		return `${origin}/${actor}/og-new.png`;
+		return `${origin}/${actor}/og-new.png${v}`;
 	});
 
 	let container: HTMLDivElement | undefined = $state();
