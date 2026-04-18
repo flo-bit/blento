@@ -21,7 +21,12 @@
 		onclick?: () => void;
 	} = $props();
 
-	const selectedCardId = getSelectedCardId();
+	let selectedCardId: (() => string | null) | null = null;
+	try {
+		selectedCardId = getSelectedCardId();
+	} catch {
+		// not set in read-only Website context
+	}
 	let isSelected = $derived(!!item && selectedCardId?.() === item.id);
 
 	let rotation = $derived(item?.rotation ?? slot.rotation ?? 0);

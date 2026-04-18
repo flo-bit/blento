@@ -622,14 +622,23 @@ function checkData(data: WebsiteData): WebsiteData {
 	const cards = data.cards.filter((v) => v.page === data.page);
 
 	if (cards.length > 0) {
-		// Detect overlaps before fixing — flag is surfaced by the edit UI
-		// so the user knows their layout was auto-adjusted.
-		data.hasLayoutIssue = hasOverlaps(cards, false) || hasOverlaps(cards, true);
+		const bySection = new Map<string | undefined, Item[]>();
+		for (const card of cards) {
+			const key = card.sectionId;
+			const bucket = bySection.get(key);
+			if (bucket) bucket.push(card);
+			else bySection.set(key, [card]);
+		}
 
-		fixAllCollisions(cards, false);
-		fixAllCollisions(cards, true);
-		compactItems(cards, false);
-		compactItems(cards, true);
+		let hasLayoutIssue = false;
+		for (const sectionCards of bySection.values()) {
+			hasLayoutIssue ||= hasOverlaps(sectionCards, false) || hasOverlaps(sectionCards, true);
+			fixAllCollisions(sectionCards, false);
+			fixAllCollisions(sectionCards, true);
+			compactItems(sectionCards, false);
+			compactItems(sectionCards, true);
+		}
+		data.hasLayoutIssue = hasLayoutIssue;
 	}
 
 	data.cards = cards;
