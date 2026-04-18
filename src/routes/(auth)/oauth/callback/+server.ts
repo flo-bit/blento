@@ -33,5 +33,5 @@ export const GET: RequestHandler = async ({ url, platform, cookies, request }) =
 
 	const profile = await getDetailedProfile({ did }).catch(() => undefined);
 	const actor = profile?.handle && profile.handle !== 'handle.invalid' ? profile.handle : did;
-	redirect(303, `/${actor}`);
+	redirect(303, `/${actor}/edit`);
 };

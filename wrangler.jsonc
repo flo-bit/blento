@@ -64,6 +64,12 @@
 			"remote": true
 		}
 	],
+	"analytics_engine_datasets": [
+		{
+			"binding": "ANALYTICS",
+			"dataset": "blento_pageviews"
+		}
+	],
 	"triggers": {
 		"crons": ["*/5 * * * *"]
 	}

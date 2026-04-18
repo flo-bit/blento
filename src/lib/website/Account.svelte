@@ -4,8 +4,7 @@
 	import { getHandleOrDid } from '$lib/atproto/methods';
 	import type { WebsiteData } from '$lib/types';
 	import { Avatar, Button, Popover } from '@foxui/core';
-	import CustomDomainModal, { customDomainModalState } from '$lib/website/CustomDomainModal.svelte';
-	import SettingsModal, { settingsModalState } from '$lib/website/SettingsModal.svelte';
+	import { settingsOverlayState } from '$lib/website/settings/SettingsOverlay.svelte';
 
 	let {
 		data = $bindable()
@@ -39,23 +38,12 @@
 					variant="ghost"
 					onclick={() => {
 						settingsPopoverOpen = false;
-						settingsModalState.show();
+						settingsOverlayState.show();
 					}}>Settings</Button
-				>
-
-				<Button
-					variant="ghost"
-					onclick={() => {
-						settingsPopoverOpen = false;
-						customDomainModalState.show();
-					}}>Custom Domain</Button
 				>
 
 				<Button variant="ghost" onclick={logout}>Logout</Button>
 			</div>
 		</Popover>
 	</div>
-
-	<CustomDomainModal publicationUrl={data.publication?.url} />
-	<SettingsModal bind:data />
 {/if}

@@ -38,8 +38,6 @@
 		)
 	);
 
-	$inspect(filteredCardDefs, 'filteredCardDefs');
-
 	let cardDefGroups = $derived([
 		'Core',
 		...Array.from(

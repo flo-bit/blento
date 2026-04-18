@@ -23,6 +23,7 @@
 	import Context from './Context.svelte';
 	import Head from './Head.svelte';
 	import Account from './Account.svelte';
+	import SettingsOverlay from './settings/SettingsOverlay.svelte';
 	import EditBar from './EditBar.svelte';
 	import SaveModal from './SaveModal.svelte';
 	import FloatingEditButton from './FloatingEditButton.svelte';
@@ -387,6 +388,7 @@
 />
 
 <Account bind:data />
+<SettingsOverlay bind:data publicationUrl={data.publication?.url} />
 
 <Context {data} isEditing={true}>
 	<ImageViewerProvider />
