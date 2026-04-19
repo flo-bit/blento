@@ -49,8 +49,8 @@
 >
 	<div
 		class={[
-			'flex flex-col gap-4 pt-16 pb-4',
-			profilePosition === 'side' && '@5xl/wrapper:h-screen @5xl/wrapper:pt-24'
+			'flex flex-col gap-4 pt-10 pb-0',
+			profilePosition === 'side' && '@5xl/wrapper:h-screen @5xl/wrapper:pt-12'
 		]}
 	>
 		<a

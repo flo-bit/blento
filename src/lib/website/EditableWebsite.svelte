@@ -30,9 +30,9 @@
 	import { user } from '$lib/atproto';
 	import * as TID from '@atcute/tid';
 	import { launchConfetti } from '@foxui/visual';
-	import Controls from './Controls.svelte';
-	import SectionsModal from './SectionsModal.svelte';
-	import AddSectionButton from './AddSectionButton.svelte';
+
+	import SectionsSidebar from './SectionsSidebar.svelte';
+
 	import { createImageCard, createVideoCard } from './file-processing';
 	import CardCommand from '$lib/components/card-command/CardCommand.svelte';
 	import ImageViewerProvider from '$lib/components/image-viewer/ImageViewerProvider.svelte';
@@ -269,7 +269,7 @@
 		}
 	}
 
-	let showSectionsModal = $state(false);
+	let showSectionsSidebar = $state(false);
 
 	function addSection(sectionType: string, afterIndex?: number) {
 		const sorted = sections.toSorted((a, b) => a.index - b.index);
@@ -391,6 +391,43 @@
 />
 
 <Account bind:data />
+
+{#if sectionsEditingEnabled}
+	<button
+		type="button"
+		class="bg-base-100 dark:bg-base-950 border-base-200 dark:border-base-800 text-base-600 dark:text-base-400 hover:text-base-800 dark:hover:text-base-200 fixed top-3 left-3 z-20 flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium shadow-md transition-colors"
+		onclick={() => (showSectionsSidebar = true)}
+	>
+		<svg
+			xmlns="http://www.w3.org/2000/svg"
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			stroke-width="2"
+			stroke-linecap="round"
+			stroke-linejoin="round"
+			class="size-4"
+		>
+			<rect x="3" y="3" width="18" height="18" rx="2" />
+			<path d="M3 9h18" />
+			<path d="M3 15h18" />
+		</svg>
+		Layout
+		<svg
+			xmlns="http://www.w3.org/2000/svg"
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			stroke-width="2"
+			stroke-linecap="round"
+			stroke-linejoin="round"
+			class="size-3"
+		>
+			<path d="m6 9 6 6 6-6" />
+		</svg>
+	</button>
+{/if}
+
 <SettingsOverlay bind:data publicationUrl={data.publication?.url} />
 
 <Context {data} isEditing={true}>
@@ -412,8 +449,6 @@
 			addLink(url, cardDef);
 		}}
 	/>
-
-	<Controls bind:data />
 
 	{#if showingMobileView}
 		<div
@@ -443,12 +478,17 @@
 		page={data.page}
 	/>
 
-	<SectionsModal
-		bind:open={showSectionsModal}
-		bind:sections
-		ondelete={deleteSection}
-		onlayoutchange={() => (hasUnsavedChanges = true)}
-	/>
+	{#if sectionsEditingEnabled}
+		<SectionsSidebar
+			bind:open={showSectionsSidebar}
+			bind:sections
+			bind:activeSectionId
+			bind:data
+			ondelete={deleteSection}
+			onlayoutchange={() => (hasUnsavedChanges = true)}
+			onadd={(type) => addSection(type)}
+		/>
+	{/if}
 
 	<Modal open={showMobileWarning} closeButton={false}>
 		<div class="flex flex-col items-center gap-4 text-center">
@@ -489,7 +529,8 @@
 		<div
 			class={[
 				'pointer-events-none relative mx-auto max-w-lg',
-				!getHideProfileSection(data) && getProfilePosition(data) === 'side'
+				(!getHideProfileSection(data) && getProfilePosition(data) === 'side') ||
+				(showSectionsSidebar && getHideProfileSection(data))
 					? '@5xl/wrapper:grid @5xl/wrapper:max-w-7xl @5xl/wrapper:grid-cols-4'
 					: '@5xl/wrapper:max-w-4xl'
 			]}
@@ -523,9 +564,6 @@
 								activeSectionId = section.id;
 							}}
 						/>
-					{/if}
-					{#if sectionsEditingEnabled}
-						<AddSectionButton onadd={(type) => addSection(type, i)} />
 					{/if}
 				{/each}
 				<div class="h-20"></div>
@@ -588,11 +626,7 @@
 				onLayoutChanged();
 			}
 		}}
-		showSectionsModal={sectionsEditingEnabled
-			? () => {
-					showSectionsModal = true;
-				}
-			: undefined}
+		sidebarOpen={showSectionsSidebar}
 	/>
 
 	<Toaster />

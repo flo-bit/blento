@@ -4,7 +4,7 @@
 </svelte:head>
 
 <h1>Terms of Service</h1>
-<p><em>Last updated: April 18, 2026</em></p>
+<p><em>Last updated: April 19, 2026</em></p>
 
 <h2>1. Scope and Acceptance</h2>
 <p>
@@ -98,14 +98,66 @@
 	appropriate. Where feasible, we will provide a statement of reasons for any action taken.
 </p>
 
-<h2>8. Disclaimer</h2>
+<h2>8. Copyright Complaints and Counter-Notices</h2>
+<p>
+	If you believe that content rendered via blento infringes your copyright, you can notify us by
+	emailing <a href="mailto:hello@blento.app">hello@blento.app</a>. Please include:
+</p>
+<ul>
+	<li>a description of the copyrighted work you believe has been infringed;</li>
+	<li>the exact URL(s) of the allegedly infringing content on blento;</li>
+	<li>your name, postal address, email, and where available a phone number;</li>
+	<li>
+		a good-faith statement that the use of the material is not authorised by the copyright owner,
+		its agent, or the law;
+	</li>
+	<li>
+		a statement that the information in the notice is accurate and that you are the copyright owner
+		or authorised to act on their behalf;
+	</li>
+	<li>your physical or electronic signature.</li>
+</ul>
+<p>
+	<strong>How removal works on blento.</strong> Because content you create on blento is stored on the
+	user&rsquo;s own PDS on the AT Protocol network and not hosted by us, our remedy is to stop rendering
+	the identified content or site via blento. The underlying record remains under the user&rsquo;s control
+	on atproto and may continue to be available through other applications.
+</p>
+<h3>Counter-notice</h3>
+<p>
+	If your content was removed or access to it was disabled and you believe this was in error or
+	misidentification, you may send a counter-notice to
+	<a href="mailto:hello@blento.app">hello@blento.app</a> containing:
+</p>
+<ul>
+	<li>your contact information (name, address, email);</li>
+	<li>identification of the material removed and the URL(s) at which it appeared;</li>
+	<li>
+		a statement, made in good faith, that the material was removed as a result of mistake or
+		misidentification;
+	</li>
+	<li>your physical or electronic signature.</li>
+</ul>
+<p>
+	We will review counter-notices in good faith and respond by email within a reasonable timeframe.
+	This process operates alongside the internal complaint-handling rights available to you under
+	Article 20 of the EU Digital Services Act.
+</p>
+<h3>Repeat infringers</h3>
+<p>
+	We may, in appropriate circumstances and at our discretion, refuse service to atmosphere accounts
+	(DIDs or handles) that are repeatedly the subject of substantiated infringement notices, as well
+	as to parties who repeatedly submit unfounded, inaccurate, or abusive notices.
+</p>
+
+<h2>9. Disclaimer</h2>
 <p>
 	The Service is provided as is and as available. We do not warrant that the Service will be
 	uninterrupted, error-free, or that cached third-party content will be current or accurate.
 	Statutory warranty rights under German law remain unaffected.
 </p>
 
-<h2>9. Liability</h2>
+<h2>10. Liability</h2>
 <p>
 	We are liable without limitation for damages caused by intent or gross negligence, for injury to
 	life, body, or health, under the German Product Liability Act (ProdHaftG), to the extent of any
@@ -125,7 +177,7 @@
 	law.
 </p>
 
-<h2>10. Termination</h2>
+<h2>11. Termination</h2>
 <p>
 	You may stop using the Service at any time. On request to
 	<a href="mailto:hello@blento.app">hello@blento.app</a> we will delete any data we hold about your account
@@ -133,7 +185,7 @@
 	these Terms, with notice where reasonably possible.
 </p>
 
-<h2>11. Changes to These Terms</h2>
+<h2>12. Changes to These Terms</h2>
 <p>
 	We may update these Terms where necessary, for example to reflect legal changes or new features.
 	We will notify you of material changes at least 30 days before they take effect, by posting the
@@ -143,7 +195,7 @@
 	of the Service during this period if you do not agree.
 </p>
 
-<h2>12. Governing Law and Venue</h2>
+<h2>13. Governing Law and Venue</h2>
 <p>
 	These Terms are governed by the laws of the Federal Republic of Germany, excluding the UN
 	Convention on Contracts for the International Sale of Goods. If you are a consumer with habitual
@@ -157,7 +209,7 @@
 	statutory places of jurisdiction apply.
 </p>
 
-<h2>13. Consumer Dispute Resolution</h2>
+<h2>14. Consumer Dispute Resolution</h2>
 <p>
 	The European Commission provides an online dispute resolution platform (OS):
 	<a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener"
@@ -166,13 +218,13 @@
 	consumer arbitration board (&sect; 36 VSBG).
 </p>
 
-<h2>14. Severability</h2>
+<h2>15. Severability</h2>
 <p>
 	Should any provision of these Terms be or become invalid or unenforceable, the validity of the
 	remaining provisions shall not be affected.
 </p>
 
-<h2>15. Contact</h2>
+<h2>16. Contact</h2>
 <p>Questions about these Terms? Reach out via:</p>
 <ul>
 	<li>Email: <a href="mailto:hello@blento.app">hello@blento.app</a></li>

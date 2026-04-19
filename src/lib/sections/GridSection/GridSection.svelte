@@ -14,7 +14,7 @@
 	);
 </script>
 
-<div class="@container/grid relative col-span-3 px-2 py-8 lg:px-8">
+<div class="@container/grid relative col-span-3 px-2 pt-4 pb-8 lg:px-8 lg:pt-8">
 	{#each items.toSorted(sortItems) as item (item.id)}
 		<GridBaseCard {item}>
 			<Card {item} />

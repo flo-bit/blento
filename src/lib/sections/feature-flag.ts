@@ -6,8 +6,8 @@ import { env } from '$env/dynamic/public';
  * PUBLIC_SECTIONS_ENABLED env flag. Useful for dogfooding with specific users.
  */
 const ALLOWED_DIDS: readonly string[] = [
-    // flo-bit.dev
-    'did:plc:257wekqxg4hyapkq6k47igmp'
+	// flo-bit.dev
+	'did:plc:257wekqxg4hyapkq6k47igmp'
 ];
 
 /**

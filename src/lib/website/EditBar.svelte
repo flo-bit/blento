@@ -32,7 +32,7 @@
 		onsetsize,
 		allowRotate = false,
 		onrotate,
-		showSectionsModal
+		sidebarOpen = false
 	}: {
 		data: WebsiteData;
 
@@ -58,7 +58,7 @@
 		onsetsize?: (w: number, h: number) => void;
 		allowRotate?: boolean;
 		onrotate?: (delta: number) => void;
-		showSectionsModal?: () => void;
+		sidebarOpen?: boolean;
 	} = $props();
 
 	let linkPopoverOpen = $state(false);
@@ -156,7 +156,10 @@
 />
 
 {#if dev || (user.isLoggedIn && user.profile?.did === data.did)}
-	<div class="fixed right-0 bottom-2 left-0 z-50 flex flex-col items-center gap-1.5 px-4">
+	<div
+		class="fixed right-0 bottom-2 z-50 flex flex-col items-center gap-1.5 px-4 transition-[left] duration-200"
+		style="left: {sidebarOpen ? '18rem' : '0'}"
+	>
 		{#if showEditControls}
 			<Navbar
 				class="dark:bg-base-950 bg-base-100 relative top-auto mx-8 mt-0 h-11 w-[calc(100%-4rem)] max-w-2xl rounded-full px-4"
@@ -403,29 +406,6 @@
 				</Button>
 			</div>
 			<div class="flex items-center gap-2">
-				{#if showSectionsModal}
-					<Button
-						size="icon"
-						variant="ghost"
-						class="backdrop-blur-none"
-						onclick={showSectionsModal}
-					>
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							viewBox="0 0 24 24"
-							fill="none"
-							stroke="currentColor"
-							stroke-width="2"
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							class="size-4"
-						>
-							<rect x="3" y="3" width="18" height="18" rx="2" />
-							<path d="M3 9h18" />
-							<path d="M3 15h18" />
-						</svg>
-					</Button>
-				{/if}
 				<Toggle
 					class="hidden bg-transparent backdrop-blur-none lg:block dark:bg-transparent"
 					bind:pressed={showingMobileView}
