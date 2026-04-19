@@ -4,7 +4,7 @@
 </svelte:head>
 
 <h1>Imprint</h1>
-<p><em>Last updated: April 18, 2026</em></p>
+<p><em>Last updated: April 19, 2026</em></p>
 
 <p>
 	Information in accordance with &sect; 5 TMG (German Telemedia Act) and &sect; 18 MStV (German
@@ -91,7 +91,14 @@
 
 <h3>Copyright</h3>
 <p>
-	Content created by the operator of this site is subject to copyright law. Reproduction,
-	processing, distribution, or any form of commercialisation of such material beyond the scope of
-	copyright law requires the prior written consent of its respective author or creator.
+	Content published on this site by the operator (texts, images, and other media) is subject to
+	copyright law. Reproduction, processing, distribution, or any form of commercialisation of such
+	material beyond the scope of copyright law requires the prior written consent of its respective
+	author or creator.
+</p>
+<p>
+	The source code of blento is licensed separately under the MIT License and is available at
+	<a href="https://github.com/flo-bit/blento" target="_blank" rel="noopener"
+		>github.com/flo-bit/blento</a
+	>.
 </p>

@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { SECTIONS_EDITING_ENABLED } from './feature-flag';
+	import { isSectionsEditingEnabled } from './feature-flag';
+	import { getDidContext } from '$lib/website/context';
 
 	let {
 		isActive,
@@ -12,9 +13,12 @@
 		name: string;
 		icon?: string;
 	} = $props();
+
+	const did = getDidContext();
+	const enabled = $derived(isSectionsEditingEnabled(did));
 </script>
 
-{#if SECTIONS_EDITING_ENABLED && (hovered || isActive)}
+{#if enabled && (hovered || isActive)}
 	<div
 		class="pointer-events-none absolute inset-0 z-30 rounded-3xl border-2 border-dashed transition-colors duration-150 {isActive
 			? 'border-accent-500/50'
