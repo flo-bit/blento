@@ -78,7 +78,7 @@ export const UpdatedBlentosCardDefitition = {
 
 			const client = getServerClient(db);
 			const res = await client.get('app.blento.card.listRecords', {
-				params: { limit: 100, profiles: true, sort: 'time_us', order: 'desc' }
+				params: { limit: 200, profiles: true, sort: 'time_us', order: 'desc' }
 			});
 
 			if (!res.ok) return [];
