@@ -5,8 +5,8 @@
 	import type { WebsiteData } from '$lib/types';
 	import { page } from '$app/state';
 	import type { ActorIdentifier } from '@atcute/lexicons';
-	import { atProtoLoginModalState } from '@foxui/social';
 	import { getHandleOrDid } from '$lib/atproto/methods';
+	import { atProtoLoginModalState } from '$lib/atproto/LoginModal.svelte';
 
 	let { data }: { data: WebsiteData } = $props();
 

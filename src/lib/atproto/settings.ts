@@ -20,6 +20,12 @@ export const collections = [
 
 export type AllowedCollection = (typeof collections)[number];
 
+// Collections the server will accept in putRecord/createRecord/deleteRecord.
+// Superset of `collections` — includes collections we can write via the OAuth
+// scope granted by the PDS but don't need to list explicitly in our scope
+// request (e.g. app.bsky.feed.post for cross-posting).
+export const writableCollections = [...collections, 'app.bsky.feed.post'] as const;
+
 // which PDS to use for signup
 const devPDS = 'https://pds.rip/';
 const prodPDS = 'https://selfhosted.social/';

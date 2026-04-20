@@ -10,7 +10,7 @@
 	import { goto } from '$app/navigation';
 	import * as TID from '@atcute/tid';
 	import { Button } from '@foxui/core';
-	import { atProtoLoginModalState } from '@foxui/social';
+	import { atProtoLoginModalState } from '$lib/atproto/LoginModal.svelte';
 
 	let { data } = $props();
 

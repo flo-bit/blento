@@ -9,6 +9,7 @@
 	import { AtprotoLoginModal } from '@foxui/social';
 	import { login, signup } from '$lib/atproto';
 	import type { ActorIdentifier } from '@atcute/lexicons';
+	import LoginModal from '$lib/atproto/LoginModal.svelte';
 
 	let { children, data } = $props();
 	let showThemeToggle = $derived(
@@ -34,13 +35,4 @@
 	<YoutubeVideoPlayer />
 {/if}
 
-<AtprotoLoginModal
-	login={async (handle) => {
-		await login(handle as ActorIdentifier);
-		return true;
-	}}
-	signup={async () => {
-		await signup();
-		return true;
-	}}
-/>
+<LoginModal />
