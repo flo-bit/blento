@@ -2,11 +2,11 @@
 	import { goto } from '$app/navigation';
 	import { user } from '$lib/atproto';
 	import { getHandleOrDid } from '$lib/atproto/methods';
-	import { atProtoLoginModalState } from '@foxui/social';
 	import { Badge, cn } from '@foxui/core';
 	import type { ContentComponentProps } from '../../types';
 	import { getHeroDecorations, heroAlignClasses, heroVerticalAlignClasses } from '.';
 	import Decoration from './Decoration.svelte';
+	import { atProtoLoginModalState } from '$lib/atproto/LoginModal.svelte';
 
 	let { item }: ContentComponentProps = $props();
 

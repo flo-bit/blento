@@ -27,7 +27,11 @@
 		{ class: 'text-stone-500', label: 'stone' },
 		{ class: 'text-zinc-500', label: 'zinc' },
 		{ class: 'text-neutral-500', label: 'neutral' },
-		{ class: 'text-slate-500', label: 'slate' }
+		{ class: 'text-slate-500', label: 'slate' },
+		{ class: 'text-olive-500', label: 'olive' },
+		{ class: 'text-mauve-500', label: 'mauve' },
+		{ class: 'text-mist-500', label: 'mist' },
+		{ class: 'text-taupe-500', label: 'taupe' }
 	];
 
 	let {
@@ -97,5 +101,6 @@
 
 			onchanged?.(accentColor, baseColor);
 		}}
+		class="w-64"
 	/>
 {/if}

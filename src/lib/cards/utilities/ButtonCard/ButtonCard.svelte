@@ -2,9 +2,9 @@
 	import { goto } from '$app/navigation';
 	import { user } from '$lib/atproto';
 	import { getHandleOrDid } from '$lib/atproto/methods';
-	import { atProtoLoginModalState } from '@foxui/social';
 	import { cn } from '@foxui/core';
 	import type { ContentComponentProps } from '../../types';
+	import { atProtoLoginModalState } from '$lib/atproto/LoginModal.svelte';
 
 	let { item }: ContentComponentProps = $props();
 </script>

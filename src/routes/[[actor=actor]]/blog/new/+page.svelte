@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { user } from '$lib/atproto/auth.svelte';
-	import { atProtoLoginModalState } from '@foxui/social';
 	import { uploadBlob, createTID, putRecord } from '$lib/atproto/methods';
 	import { compressImage } from '$lib/atproto/image-helper';
 	import { Badge, Button } from '@foxui/core';
@@ -10,6 +9,7 @@
 	import { RichTextEditor } from '$lib/components/rich-text-editor';
 	import { putImage, getImage, clearImages } from '$lib/components/image-store';
 	import type { Editor, Content } from '@tiptap/core';
+	import { atProtoLoginModalState } from '$lib/atproto/LoginModal.svelte';
 
 	const DRAFT_KEY = 'blog-draft';
 

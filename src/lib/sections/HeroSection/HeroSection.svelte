@@ -2,7 +2,6 @@
 	import { goto } from '$app/navigation';
 	import { user } from '$lib/atproto';
 	import { getHandleOrDid } from '$lib/atproto/methods';
-	import { atProtoLoginModalState } from '@foxui/social';
 	import { Badge, cn } from '@foxui/core';
 	import type { SectionContentProps } from '../types';
 	import {
@@ -13,6 +12,7 @@
 		heroVerticalAlignClasses
 	} from './shared';
 	import Decoration from './Decoration.svelte';
+	import { atProtoLoginModalState } from '$lib/atproto/LoginModal.svelte';
 
 	let { section, items }: SectionContentProps = $props();
 
