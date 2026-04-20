@@ -8,7 +8,6 @@
 @source '../node_modules/@foxui';
 @import '@foxui/core/theme.css';
 
-
 @custom-variant dark (&:where(.dark, .dark *):not(:where(.light, .light *)));
 @custom-variant accent (&:where(.accent, .accent *));
 
