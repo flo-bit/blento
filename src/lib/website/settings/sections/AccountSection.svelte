@@ -31,9 +31,11 @@
 				});
 				for (const record of records) {
 					const parsed = parseUri(record.uri);
-					if (parsed) {
-						await deleteRecord({ collection, rkey: parsed.rkey! });
+					if (!parsed?.rkey) continue;
+					if (collection === 'site.standard.publication' && !parsed.rkey.startsWith('blento.')) {
+						continue;
 					}
+					await deleteRecord({ collection, rkey: parsed.rkey });
 				}
 			}
 
