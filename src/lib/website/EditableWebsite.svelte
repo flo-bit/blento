@@ -18,7 +18,7 @@
 	import { AllCardDefinitions, CardDefinitionsByType } from '../cards';
 	import { tick, type Component } from 'svelte';
 	import type { CardDefinition, CreationModalComponentProps } from '../cards/types';
-	import { page } from '$app/state';
+	import { env } from '$env/dynamic/public';
 	import { setIsCoarse, setIsMobile, setSelectedCardId, setSelectCard } from './context';
 	import Context from './Context.svelte';
 	import Head from './Head.svelte';
@@ -54,12 +54,8 @@
 	const sectionsEditingEnabled = $derived(isSectionsEditingEnabled(data.did));
 
 	const ogImageUrl = $derived.by(() => {
-		const origin = page.url.origin;
 		const v = data.updatedAt ? `?v=${data.updatedAt}` : '';
-		if (page.data.customDomain) return `${origin}/og-new.png${v}`;
-		const handle = data.profile?.handle;
-		const actor = handle && handle !== 'handle.invalid' ? handle : data.did;
-		return `${origin}/${actor}/og-new.png${v}`;
+		return `${env.PUBLIC_DOMAIN}/${data.did}/og-new.png${v}`;
 	});
 
 	// Snapshot the original cards and sections so savePage can detect deletions.
