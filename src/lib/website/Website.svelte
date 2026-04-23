@@ -18,7 +18,6 @@
 	import QRModalProvider from '$lib/components/qr/QRModalProvider.svelte';
 	import ImageViewerProvider from '$lib/components/image-viewer/ImageViewerProvider.svelte';
 	import EmptyState from './EmptyState.svelte';
-	import FloatingEditButton from './FloatingEditButton.svelte';
 	import { user } from '$lib/atproto';
 	import { env } from '$env/dynamic/public';
 	import { page } from '$app/state';
@@ -67,7 +66,7 @@
 	<ImageViewerProvider />
 	<div class="@container/wrapper relative w-full overflow-x-hidden">
 		{#if !getHideProfileSection(data)}
-			<Profile {data} hideBlento={showFloatingButton} />
+			<Profile {data} />
 		{/if}
 
 		<div
@@ -101,6 +100,4 @@
 
 		<MadeWithBlento class="mx-auto block pb-8 text-center @5xl/wrapper:hidden" />
 	</div>
-
-	<FloatingEditButton {data} />
 </Context>

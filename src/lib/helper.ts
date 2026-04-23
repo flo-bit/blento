@@ -49,11 +49,6 @@ export function cardsEqual(a: Item, b: Item) {
 	);
 }
 
-/** @deprecated No longer needed — Contrail keeps data fresh via notify() */
-export async function refreshData(_data: { updatedAt?: number; handle: string }) {
-	// no-op: Contrail indexes are updated immediately on writes
-}
-
 export function getName(data: WebsiteData): string {
 	return data.publication?.name || data.profile.displayName || data.handle;
 }

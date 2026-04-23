@@ -18,15 +18,17 @@
 	import { AllCardDefinitions, CardDefinitionsByType } from '../cards';
 	import { tick, type Component } from 'svelte';
 	import type { CardDefinition, CreationModalComponentProps } from '../cards/types';
+	import { dev } from '$app/environment';
 	import { env } from '$env/dynamic/public';
 	import { setIsCoarse, setIsMobile, setSelectedCardId, setSelectCard } from './context';
 	import Context from './Context.svelte';
 	import Head from './Head.svelte';
-	import Account from './Account.svelte';
 	import SettingsOverlay from './settings/SettingsOverlay.svelte';
-	import EditBar from './EditBar.svelte';
+	import CardSettingsSidebar from './CardSettingsSidebar.svelte';
+	import EditTopBar from './EditTopBar.svelte';
+	import MobileSelectionBar from './MobileSelectionBar.svelte';
+	import PageSwitcherBar from './PageSwitcherBar.svelte';
 	import SaveModal from './SaveModal.svelte';
-	import FloatingEditButton from './FloatingEditButton.svelte';
 	import { user } from '$lib/atproto';
 	import * as TID from '@atcute/tid';
 	import { launchConfetti } from '@foxui/visual';
@@ -41,6 +43,7 @@
 	import { SectionDefinitionsByType } from '$lib/sections';
 	import { isSectionsEditingEnabled } from '$lib/sections/feature-flag';
 	import type { SectionRecord } from '$lib/types';
+	import MobileWarningModal from '$lib/components/modals/MobileWarningModal.svelte';
 
 	let {
 		data
@@ -128,6 +131,26 @@
 		selectedCardId = id;
 	});
 
+	let cardSettingsOpen = $state(false);
+	$effect(() => {
+		if (!selectedCard) {
+			cardSettingsOpen = false;
+		} else if (!isMobile) {
+			cardSettingsOpen = true;
+		}
+	});
+
+	function resizeSelectedCard(w: number, h: number) {
+		if (!selectedCard) return;
+		const section = sections.find((s) => s.id === selectedCard!.sectionId);
+		const def = section ? SectionDefinitionsByType[section.sectionType] : undefined;
+		if (def?.resizeItem) {
+			def.resizeItem(selectedCard, items, w, h, isMobile);
+		}
+		onLayoutChanged();
+	}
+
+	// svelte-ignore state_referenced_locally
 	let activeSectionId = $state(sections[0]?.id);
 	let gridContainer = $derived(
 		activeSectionId ? gridRefs.get(activeSectionId) : gridRefs.values().next().value
@@ -301,8 +324,6 @@
 		hasUnsavedChanges = true;
 	}
 
-	let linkValue = $state('');
-
 	function addLink(url: string, specificCardDef?: CardDefinition) {
 		let link = validateLink(url);
 		if (!link) {
@@ -386,13 +407,15 @@
 	baseColor={data.publication?.preferences?.baseColor}
 />
 
-<Account bind:data />
+<EditTopBar {data} bind:showingMobileView bind:isSaving {hasUnsavedChanges} {save} />
+
+<PageSwitcherBar {data} />
 
 {#if sectionsEditingEnabled}
 	<button
 		type="button"
-		class="bg-base-100 dark:bg-base-950 border-base-200 dark:border-base-800 text-base-600 dark:text-base-400 hover:text-base-800 dark:hover:text-base-200 fixed top-3 left-3 z-20 flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium shadow-md transition-colors"
-		onclick={() => (showSectionsSidebar = true)}
+		class="bg-base-100 dark:bg-base-950 border-base-200 dark:border-base-800 text-base-600 dark:text-base-400 hover:text-base-800 dark:hover:text-base-200 fixed bottom-3 left-3 z-20 flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium shadow-md transition-colors"
+		onclick={() => (showSectionsSidebar = !showSectionsSidebar)}
 	>
 		<svg
 			xmlns="http://www.w3.org/2000/svg"
@@ -474,52 +497,43 @@
 		page={data.page}
 	/>
 
+	<CardSettingsSidebar
+		open={cardSettingsOpen}
+		item={selectedCard}
+		{isMobile}
+		onResize={resizeSelectedCard}
+		onclose={() => {
+			if (isMobile) {
+				cardSettingsOpen = false;
+			} else {
+				selectedCardId = null;
+			}
+		}}
+	/>
+
+	<MobileSelectionBar
+		{data}
+		visible={isMobile && selectedCard !== null && !cardSettingsOpen}
+		onopensettings={() => (cardSettingsOpen = true)}
+		ondeselect={() => (selectedCardId = null)}
+	/>
+
 	{#if sectionsEditingEnabled}
-		<SectionsSidebar
-			bind:open={showSectionsSidebar}
-			bind:sections
-			bind:activeSectionId
-			bind:data
-			ondelete={deleteSection}
-			onlayoutchange={() => (hasUnsavedChanges = true)}
-			onadd={(type) => addSection(type)}
-		/>
+		<SectionsSidebar bind:open={showSectionsSidebar} bind:sections bind:activeSectionId bind:data />
 	{/if}
 
-	<Modal open={showMobileWarning} closeButton={false}>
-		<div class="flex flex-col items-center gap-4 text-center">
-			<svg
-				xmlns="http://www.w3.org/2000/svg"
-				fill="none"
-				viewBox="0 0 24 24"
-				stroke-width="1.5"
-				stroke="currentColor"
-				class="text-accent-500 size-10"
-			>
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					d="M10.5 1.5H8.25A2.25 2.25 0 0 0 6 3.75v16.5a2.25 2.25 0 0 0 2.25 2.25h7.5A2.25 2.25 0 0 0 18 20.25V3.75a2.25 2.25 0 0 0-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3"
-				/>
-			</svg>
-			<p class="text-base-700 dark:text-base-300 text-xl font-bold">Mobile Editing</p>
-			<p class="text-base-500 dark:text-base-400 text-sm">
-				Mobile editing is currently experimental. For the best experience, use a desktop browser.
-			</p>
-			<Button class="mt-2 w-full" onclick={() => (showMobileWarning = false)}>Continue</Button>
-		</div>
-	</Modal>
+	<MobileWarningModal bind:showMobileWarning />
 
 	<div
 		class={[
-			'group/wrapper @container/wrapper relative w-full overflow-x-hidden',
+			'group/wrapper @container/wrapper relative w-full overflow-x-hidden pt-27',
 			showingMobileView
 				? 'bg-base-50 dark:bg-base-900 my-4 min-h-[calc(100dvh-2em)] overflow-hidden rounded-2xl lg:mx-auto lg:w-90'
 				: ''
 		]}
 	>
 		{#if !getHideProfileSection(data)}
-			<EditableProfile bind:data hideBlento={showLoginOnEditPage} />
+			<EditableProfile bind:data />
 		{/if}
 
 		<div
@@ -567,65 +581,36 @@
 		</div>
 	</div>
 
-	<EditBar
-		{data}
-		bind:linkValue
-		bind:isSaving
-		bind:showingMobileView
-		{hasUnsavedChanges}
-		{newCard}
-		{addLink}
-		{save}
-		{handleFileInputChange}
-		showCardCommand={() => {
-			requestAddCard();
-		}}
-		{selectedCard}
-		{isMobile}
-		{isCoarse}
-		ondeselect={() => {
-			selectedCardId = null;
-		}}
-		ondelete={() => {
-			if (selectedCard) {
-				const section = sections.find((s) => s.id === selectedCard!.sectionId);
-				const def = section ? SectionDefinitionsByType[section.sectionType] : undefined;
-				if (def?.deleteItem) {
-					items = def.deleteItem(selectedCardId!, items, selectedCard.sectionId!);
-				} else {
-					items = items.filter((it) => it.id !== selectedCardId);
-				}
-				onLayoutChanged();
-				selectedCardId = null;
-			}
-		}}
-		onsetsize={(w: number, h: number) => {
-			if (selectedCard) {
-				const section = sections.find((s) => s.id === selectedCard!.sectionId);
-				const def = section ? SectionDefinitionsByType[section.sectionType] : undefined;
-				if (def?.resizeItem) {
-					def.resizeItem(selectedCard, items, w, h, isMobile);
-				}
-				onLayoutChanged();
-			}
-		}}
-		allowRotate={(() => {
-			if (!selectedCard) return false;
-			const section = sections.find((s) => s.id === selectedCard.sectionId);
-			const def = section ? SectionDefinitionsByType[section.sectionType] : undefined;
-			const cardDef = CardDefinitionsByType[selectedCard.cardType];
-			return !!def?.allowRotate && cardDef?.allowRotate !== false;
-		})()}
-		onrotate={(delta: number) => {
-			if (selectedCard) {
-				selectedCard.rotation = (selectedCard.rotation ?? 0) + delta;
-				onLayoutChanged();
-			}
-		}}
-		sidebarOpen={showSectionsSidebar}
+	<input
+		type="file"
+		accept="image/*,video/*"
+		onchange={handleFileInputChange}
+		class="hidden"
+		id="file-input"
+		multiple
 	/>
 
-	<Toaster />
+	{#if dev || (user.isLoggedIn && user.profile?.did === data.did)}
+		<button
+			type="button"
+			onclick={() => requestAddCard()}
+			class="bg-accent-500 hover:bg-accent-600 focus-visible:outline-accent-500 fixed bottom-4 z-40 flex cursor-pointer items-center gap-2 rounded-full px-5 py-3 text-sm font-semibold text-white shadow-lg transition-[right] duration-200 focus-visible:outline-2 focus-visible:outline-offset-2"
+			style="right: {cardSettingsOpen ? '17rem' : '1rem'}"
+			aria-label="Add card"
+		>
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				fill="none"
+				viewBox="0 0 24 24"
+				stroke-width="2.5"
+				stroke="currentColor"
+				class="size-5"
+			>
+				<path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+			</svg>
+			Add Card
+		</button>
+	{/if}
 
-	<FloatingEditButton {data} />
+	<Toaster />
 </Context>

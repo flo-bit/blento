@@ -35,7 +35,7 @@
 </script>
 
 {#if settingsOverlayState.visible}
-	<div class="bg-base-50 dark:bg-base-950 fixed inset-0 z-[100] flex flex-col overflow-hidden">
+	<div class="bg-base-50 dark:bg-base-950 fixed inset-0 z-100 flex flex-col overflow-hidden">
 		<!-- Header with tabs and close button -->
 		<div class="border-base-200 dark:border-base-800 border-b px-6 pt-4">
 			<div class="flex items-center justify-between">

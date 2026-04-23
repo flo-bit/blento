@@ -7,14 +7,12 @@
 	import { qrOverlay } from '$lib/components/qr/qrOverlay.svelte';
 	import MadeWithBlento from './MadeWithBlento.svelte';
 	import { Avatar } from '@foxui/core';
-	import Pronouns from './Pronouns.svelte';
+	import Pronouns from '../components/Pronouns.svelte';
 
 	let {
-		data,
-		hideBlento = false
+		data
 	}: {
 		data: WebsiteData;
-		hideBlento?: boolean;
 	} = $props();
 
 	const renderer = new marked.Renderer();
@@ -92,8 +90,6 @@
 			</div>
 		</div>
 
-		{#if !hideBlento}
-			<MadeWithBlento class="hidden {profilePosition === 'side' && '@5xl/wrapper:block'}" />
-		{/if}
+		<MadeWithBlento class="hidden {profilePosition === 'side' && '@5xl/wrapper:block'}" />
 	</div>
 </div>

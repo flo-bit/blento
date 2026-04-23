@@ -5,7 +5,7 @@
 	import MarkdownTextEditor from '$lib/components/MarkdownTextEditor.svelte';
 	import { Avatar } from '@foxui/core';
 	import MadeWithBlento from './MadeWithBlento.svelte';
-	import Pronouns from './Pronouns.svelte';
+	import Pronouns from '../components/Pronouns.svelte';
 
 	let { data = $bindable(), hideBlento = false }: { data: WebsiteData; hideBlento?: boolean } =
 		$props();
