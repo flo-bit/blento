@@ -61,7 +61,7 @@
 			"binding": "DB",
 			"database_name": "blento-2",
 			"database_id": "5ccd30a3-c8d8-446a-b675-6a96a8f08263",
-			"remote": true
+			"remote": false
 		}
 	],
 	"analytics_engine_datasets": [
