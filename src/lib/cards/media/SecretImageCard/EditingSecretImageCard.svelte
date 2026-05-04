@@ -1,15 +1,56 @@
 <script lang="ts">
+	import { page } from '$app/state';
+	import { getDidContext } from '$lib/website/context';
+	import { getBlobURL } from '$lib/atproto';
+	import { decryptBlob } from './crypto';
 	import type { ContentComponentProps } from '../../types';
 	import { compressImage } from '$lib/atproto/image-helper';
 
 	let { item = $bindable() }: ContentComponentProps = $props();
 
+	const did = getDidContext();
+
 	let fileInput = $state<HTMLInputElement | undefined>(undefined);
 	let dragOver = $state(false);
+	let decryptedUrl = $state<string | null>(null);
 
-	const hasImage = $derived(item.cardData.rawImage?.objectUrl || item.cardData.preview);
+	const imageUrl = $derived(
+		item.cardData.rawImage?.objectUrl || decryptedUrl || item.cardData.preview
+	);
+	const hasImage = $derived(!!imageUrl);
+	const showPixelated = $derived(
+		!item.cardData.rawImage?.objectUrl && !decryptedUrl && !!item.cardData.preview
+	);
 
-	const imageUrl = $derived(item.cardData.rawImage?.objectUrl || item.cardData.preview);
+	$effect(() => {
+		const secret = page.url.searchParams.get('secret');
+		const blob = item.cardData.encryptedImage;
+		if (!secret || !blob || typeof blob !== 'object' || blob.$type !== 'blob') return;
+		if (item.cardData.rawImage?.objectUrl) return;
+
+		decryptImage(secret, blob);
+
+		return () => {
+			if (decryptedUrl) {
+				URL.revokeObjectURL(decryptedUrl);
+				decryptedUrl = null;
+			}
+		};
+	});
+
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	async function decryptImage(password: string, blob: any) {
+		try {
+			const url = await getBlobURL({ did, blob });
+			const response = await fetch(url);
+			if (!response.ok) throw new Error('Failed to fetch blob');
+			const encryptedBlob = await response.blob();
+			const decrypted = await decryptBlob(encryptedBlob, password);
+			decryptedUrl = URL.createObjectURL(decrypted);
+		} catch {
+			// wrong password or fetch error - stay pixelated
+		}
+	}
 
 	async function handleFile(file: File) {
 		const { blob } = await compressImage(file);
@@ -68,7 +109,12 @@
 		onclick={() => fileInput?.click()}
 	>
 		{#if hasImage}
-			<img class="absolute inset-0 h-full w-full object-cover" src={imageUrl} alt="" />
+			<img
+				class="absolute inset-0 h-full w-full object-cover"
+				style={showPixelated ? 'image-rendering: pixelated;' : ''}
+				src={imageUrl}
+				alt=""
+			/>
 			<div
 				class="absolute inset-0 flex items-center justify-center bg-black/0 transition-colors hover:bg-black/30"
 			>
