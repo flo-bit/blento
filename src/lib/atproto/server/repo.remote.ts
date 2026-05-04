@@ -27,16 +27,29 @@ export const putRecord = command(
 		const { locals } = getRequestEvent();
 		if (!locals.client || !locals.did) error(401, 'Not authenticated');
 
+		const record =
+			input.record.$type === input.collection
+				? input.record
+				: { ...input.record, $type: input.collection };
+
 		const response = await locals.client.post('com.atproto.repo.putRecord', {
 			input: {
 				collection: input.collection as `${string}.${string}.${string}`,
 				repo: locals.did,
 				rkey: input.rkey || 'self',
-				record: input.record
+				record
 			}
 		});
 
-		if (!response.ok) error(500, 'Failed to put record');
+		if (!response.ok) {
+			console.error('putRecord failed', {
+				collection: input.collection,
+				rkey: input.rkey || 'self',
+				status: response.status,
+				data: response.data
+			});
+			error(500, 'Failed to put record');
+		}
 
 		// Immediately index in contrail
 		const { platform } = getRequestEvent();
