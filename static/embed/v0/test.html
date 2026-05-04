@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Blento Embed SDK · v0 test harness</title>
+		<style>
+			* {
+				box-sizing: border-box;
+			}
+			body {
+				margin: 0;
+				padding: 1rem;
+				font:
+					14px/1.5 system-ui,
+					sans-serif;
+				color: #111;
+				background: #fafafa;
+			}
+			html.dark body {
+				color: #f5f5f5;
+				background: #18181b;
+			}
+			h1 {
+				font-size: 1rem;
+				margin: 0 0 1rem;
+			}
+			.row {
+				display: flex;
+				gap: 0.5rem;
+				flex-wrap: wrap;
+				margin-bottom: 0.75rem;
+			}
+			button {
+				padding: 0.4rem 0.8rem;
+				border: 1px solid currentColor;
+				background: transparent;
+				color: inherit;
+				border-radius: 6px;
+				cursor: pointer;
+				font: inherit;
+			}
+			button:hover {
+				background: rgba(0, 0, 0, 0.05);
+			}
+			html.dark button:hover {
+				background: rgba(255, 255, 255, 0.08);
+			}
+			pre {
+				background: rgba(0, 0, 0, 0.06);
+				padding: 0.5rem 0.75rem;
+				border-radius: 6px;
+				white-space: pre-wrap;
+				word-break: break-word;
+				max-height: 220px;
+				overflow: auto;
+				font-size: 12px;
+			}
+			html.dark pre {
+				background: rgba(255, 255, 255, 0.08);
+			}
+			.field {
+				display: flex;
+				flex-direction: column;
+				gap: 0.25rem;
+				margin-bottom: 0.5rem;
+			}
+			.field label {
+				font-size: 12px;
+				opacity: 0.7;
+			}
+			input,
+			textarea {
+				font: inherit;
+				padding: 0.35rem 0.5rem;
+				border-radius: 4px;
+				border: 1px solid rgba(0, 0, 0, 0.2);
+				background: white;
+				color: inherit;
+			}
+			html.dark input,
+			html.dark textarea {
+				background: #27272a;
+				border-color: rgba(255, 255, 255, 0.2);
+			}
+			.muted {
+				opacity: 0.6;
+				font-size: 12px;
+			}
+		</style>
+	</head>
+	<body>
+		<h1>Blento Embed SDK · v0 test harness</h1>
+
+		<div class="muted">Theme: <span id="theme-out">…</span></div>
+		<div class="muted">
+			Ready: <span id="ready-out">pending</span> · Session: <span id="session-out">…</span>
+		</div>
+
+		<hr style="margin: 1rem 0; opacity: 0.2" />
+
+		<div class="field">
+			<label>Collection</label>
+			<input id="collection" value="community.lexicon.calendar.rsvp" />
+		</div>
+		<div class="field">
+			<label>rkey (optional for create)</label>
+			<input id="rkey" placeholder="auto-generated if blank" />
+		</div>
+		<div class="field">
+			<label>Record JSON</label>
+			<textarea id="record" rows="4">
+{ "status": "going", "subject": { "uri": "at://did:plc:test/community.lexicon.calendar.event/abc", "cid": "bafy" } }</textarea
+			>
+		</div>
+
+		<div class="row">
+			<button id="btn-create">createRecord</button>
+			<button id="btn-put">putRecord</button>
+			<button id="btn-delete">deleteRecord</button>
+			<button id="btn-applywrites">applyWrites (create)</button>
+		</div>
+
+		<div class="field">
+			<label>Upload blob</label>
+			<input id="file" type="file" />
+			<button id="btn-upload" style="align-self: start">uploadBlob</button>
+		</div>
+
+		<div class="row">
+			<button id="btn-resize">notifyResize(800)</button>
+			<button id="btn-navigate">notifyNavigate('/')</button>
+		</div>
+
+		<div class="field">
+			<label>Last result</label>
+			<pre id="out">—</pre>
+		</div>
+
+		<script src="/embed/v0/sdk.js"></script>
+		<script>
+			const $ = (id) => document.getElementById(id);
+			const out = $('out');
+
+			function show(label, value) {
+				out.textContent = label + '\n' + JSON.stringify(value, null, 2);
+			}
+			function showError(label, err) {
+				out.textContent =
+					label + ' [' + (err && err.code) + ']\n' + (err && err.message ? err.message : err);
+			}
+
+			function refreshSession() {
+				const s = window.Blento.getSession();
+				$('session-out').textContent = s ? s.handle || s.did : 'null';
+			}
+
+			$('theme-out').textContent = JSON.stringify(window.Blento.getTheme());
+
+			window.Blento.ready.then(
+				() => {
+					$('ready-out').textContent = 'ready';
+					refreshSession();
+				},
+				(err) => {
+					$('ready-out').textContent = 'failed: ' + (err && err.message);
+				}
+			);
+
+			window.Blento.on('session', () => refreshSession());
+
+			function readInputs() {
+				const collection = $('collection').value.trim();
+				const rkey = $('rkey').value.trim() || undefined;
+				let record;
+				try {
+					record = JSON.parse($('record').value);
+				} catch (e) {
+					throw new Error('Invalid JSON in record field');
+				}
+				return { collection, rkey, record };
+			}
+
+			$('btn-create').onclick = async () => {
+				try {
+					const { collection, rkey, record } = readInputs();
+					const r = await window.Blento.createRecord({ collection, rkey, record });
+					show('createRecord ok', r);
+				} catch (e) {
+					showError('createRecord error', e);
+				}
+			};
+
+			$('btn-put').onclick = async () => {
+				try {
+					const { collection, rkey, record } = readInputs();
+					if (!rkey) throw new Error('rkey required for putRecord');
+					const r = await window.Blento.putRecord({ collection, rkey, record });
+					show('putRecord ok', r);
+				} catch (e) {
+					showError('putRecord error', e);
+				}
+			};
+
+			$('btn-delete').onclick = async () => {
+				try {
+					const { collection, rkey } = readInputs();
+					if (!rkey) throw new Error('rkey required for deleteRecord');
+					const r = await window.Blento.deleteRecord({ collection, rkey });
+					show('deleteRecord ok', r);
+				} catch (e) {
+					showError('deleteRecord error', e);
+				}
+			};
+
+			$('btn-applywrites').onclick = async () => {
+				try {
+					const { collection, record } = readInputs();
+					const r = await window.Blento.applyWrites({
+						writes: [{ $type: 'create', collection, value: record }]
+					});
+					show('applyWrites ok', r);
+				} catch (e) {
+					showError('applyWrites error', e);
+				}
+			};
+
+			$('btn-upload').onclick = async () => {
+				const file = $('file').files[0];
+				if (!file) {
+					showError('uploadBlob error', new Error('Pick a file first'));
+					return;
+				}
+				try {
+					const r = await window.Blento.uploadBlob(file, { mimeType: file.type });
+					show('uploadBlob ok', r);
+				} catch (e) {
+					showError('uploadBlob error', e);
+				}
+			};
+
+			$('btn-resize').onclick = () => {
+				window.Blento.notifyResize(800);
+				show('notifyResize(800) sent', null);
+			};
+
+			$('btn-navigate').onclick = () => {
+				window.Blento.notifyNavigate('/');
+				show('notifyNavigate(/) sent', null);
+			};
+
+			if (window.Blento.getTheme().dark) {
+				document.documentElement.classList.add('dark');
+			}
+		</script>
+	</body>
+</html>
