@@ -25,13 +25,13 @@ importers:
         version: 4.2.1
       '@atcute/identity-resolver':
         specifier: ^1.2.2
-        version: 1.2.2(@atcute/identity@1.1.3)
+        version: 1.2.2(@atcute/identity@1.1.4)
       '@atcute/lexicons':
-        specifier: ^1.2.9
-        version: 1.2.9
+        specifier: ^1.3.0
+        version: 1.3.0
       '@atcute/oauth-browser-client':
         specifier: ^3.0.0
-        version: 3.0.0(@atcute/identity@1.1.3)
+        version: 3.0.0(@atcute/identity@1.1.4)
       '@atcute/oauth-node-client':
         specifier: ^1.1.0
         version: 1.1.0
@@ -42,8 +42,8 @@ importers:
         specifier: ^1.1.2
         version: 1.1.2
       '@atmo-dev/contrail':
-        specifier: ^0.0.8
-        version: 0.0.8(@atcute/identity@1.1.3)(react@19.2.4)
+        specifier: ^0.5.0
+        version: 0.5.0(react@19.2.4)(wrangler@4.73.0(@cloudflare/workers-types@4.20260313.1))
       '@cloudflare/workers-types':
         specifier: ^4.20260313.1
         version: 4.20260313.1
@@ -208,11 +208,14 @@ importers:
         version: 4.73.0(@cloudflare/workers-types@4.20260313.1)
     devDependencies:
       '@atcute/lex-cli':
-        specifier: ^2.6.1
-        version: 2.8.0
+        specifier: ^2.8.1
+        version: 2.8.1
       '@atcute/lexicon-doc':
         specifier: ^2.1.2
         version: 2.2.0
+      '@atmo-dev/contrail-lexicons':
+        specifier: ^0.4.5
+        version: 0.4.5(react@19.2.4)(wrangler@4.73.0(@cloudflare/workers-types@4.20260313.1))
       '@eslint/compat':
         specifier: ^2.0.3
         version: 2.0.3(eslint@10.0.3(jiti@2.6.1))
@@ -332,8 +335,8 @@ packages:
   '@atcute/jetstream@1.1.2':
     resolution: {integrity: sha512-u6p/h2xppp7LE6W/9xErAJ6frfN60s8adZuCKtfAaaBBiiYbb1CfpzN8Uc+2qtJZNorqGvuuDb5572Jmh7yHBQ==}
 
-  '@atcute/lex-cli@2.8.0':
-    resolution: {integrity: sha512-eNPO0hhGhrCXQ7vEgVhqAaSHSsT3me1Jcc99rHaPgne1xP7fBfprf+E02M6BUqwrBz95YpnyuLPmVKNEk1jLwA==}
+  '@atcute/lex-cli@2.8.1':
+    resolution: {integrity: sha512-ab+NpnwvW7gXMjZYYqK3zqhcAPOEYnAaNAXHp28gmL3M33zHgz4IjNQpDnRAjTitCpaJ3KoA3KXlnXNjsV6USg==}
     hasBin: true
 
   '@atcute/lexicon-doc@2.2.0':
@@ -344,9 +347,6 @@ packages:
     peerDependencies:
       '@atcute/identity': ^1.1.0
       '@atcute/identity-resolver': ^1.1.3
-
-  '@atcute/lexicons@1.2.9':
-    resolution: {integrity: sha512-/RRHm2Cw9o8Mcsrq0eo8fjS9okKYLGfuFwrQ0YoP/6sdSDsXshaTLJsvLlcUcaDaSJ1YFOuHIo3zr2Om2F/16g==}
 
   '@atcute/lexicons@1.3.0':
     resolution: {integrity: sha512-Eq5y+9onnCXNVUlNiMf31beSXHKqptB7lUo/68YbhlmxdaR7ooywHmahya9goP5AsmlYEA1z+dRPXIDAa9O7cg==}
@@ -393,21 +393,32 @@ packages:
   '@atcute/util-fetch@1.0.5':
     resolution: {integrity: sha512-qjHj01BGxjSjIFdPiAjSARnodJIIyKxnCMMEcXMESo9TAyND6XZQqrie5fia+LlYWVXdpsTds8uFQwc9jdKTig==}
 
-  '@atcute/util-text@1.1.1':
-    resolution: {integrity: sha512-JH0SxzUQJAmbOBTYyhxQbkkI6M33YpjlVLEcbP5GYt43xgFArzV0FJVmEpvIj0kjsmphHB45b6IitdvxPdec9w==}
-
   '@atcute/util-text@1.2.0':
     resolution: {integrity: sha512-b8WSh+Z7K601eUFFmTFj8QPKDO8Ic0VDDj63sdKzpkm+ySQKsYT5nXekViGqFVKbyKj1V5FyvZvgXad6/aI4QQ==}
+
+  '@atcute/util-text@1.3.1':
+    resolution: {integrity: sha512-MRgJXkx67znuBXuoAYCJkBZyd3OApL7zZlNf5kXhuoCXcdiu1nblRDycYTADSkym4epBSQWxh26kmI9sewaq6A==}
 
   '@atcute/varint@2.0.0':
     resolution: {integrity: sha512-CEY/oVK/nVpL4e5y3sdenLETDL6/Xu5xsE/0TupK+f0Yv8jcD60t2gD8SHROWSvUwYLdkjczLCSA7YrtnjCzWw==}
 
-  '@atmo-dev/contrail@0.0.8':
-    resolution: {integrity: sha512-sXtdd3Z8VNVoSinrX3ww978ctxtHBl0bX5tP51XOY0IWKJ4xl9zqkPOIIBMzbVE3IyU2Vq2B9Whi3VAhyd2Qdg==}
+  '@atcute/xrpc-server@0.1.12':
+    resolution: {integrity: sha512-70KIerQlljp5+s6t0u6YNN9klEboQUZa2hhoi/hmXIO1cIKEORettTMctnyjfcCJaSfAuj42dxPu51GTZBlm8w==}
+
+  '@atmo-dev/contrail-lexicons@0.4.5':
+    resolution: {integrity: sha512-gd3k8tFbcokjsgTpC9gKitYgImI6M+iipFCUYy60nCHomDCYMxkgrvhjJlii61ol9LEbcVDSPdMKKcKJGwm3gA==}
+    hasBin: true
+
+  '@atmo-dev/contrail@0.5.0':
+    resolution: {integrity: sha512-PeeA3Q6NDwaho2dgaW4QANPRvhjKBml17MMxjcq6DwQG7p0MTUqoa2RM1G7DpA8CAIPrRXTVcosb6ybqshlWtQ==}
+    hasBin: true
     peerDependencies:
       pg: ^8.0.0
+      wrangler: ^4.0.0
     peerDependenciesMeta:
       pg:
+        optional: true
+      wrangler:
         optional: true
 
   '@badrap/valita@0.4.6':
@@ -986,12 +997,12 @@ packages:
     peerDependencies:
       svelte: ^4 || ^5
 
-  '@optique/core@0.10.7':
-    resolution: {integrity: sha512-FwSX8ILFqzcCqZi6Xetsa4flJp/yyqFG4d4eFD98BtqdzxxuylzdrKvsXj/ow8mcoVjYkTuaIkqHSBxonqMcQg==}
+  '@optique/core@1.0.2':
+    resolution: {integrity: sha512-znsqMmjAdeOgSJzdJlpZpgAscojwQmeQYXzYnuEKllz5VCj6WyEkdzU4QuvJQtWQY3ve2taXwudEBRur0VHBOQ==}
     engines: {bun: '>=1.2.0', deno: '>=2.3.0', node: '>=20.0.0'}
 
-  '@optique/run@0.10.7':
-    resolution: {integrity: sha512-1CVdH8uyptj1nFGS2MLacSmZceRClez4LD/G/Gm38wrAVnJq6I+9Fvyh2bVHErsZLQzR0a12CYMUWIgDKY3X1w==}
+  '@optique/run@1.0.2':
+    resolution: {integrity: sha512-0Wc+zC8SLGV8zXQX+pk+o0c6wE/ddx/36CHZ0toTh5lApsjruUuGhqbxvljerAAG5un1xQbOLxzksBVC6UPgSg==}
     engines: {bun: '>=1.2.0', deno: '>=2.3.0', node: '>=20.0.0'}
 
   '@oxc-project/runtime@0.115.0':
@@ -1741,6 +1752,10 @@ packages:
     resolution: {integrity: sha512-h+DEnpVvxmfVefa4jFbCf5HdH5YMDXRsmKflpf1pILZWRFlTbJpxeU55nJl4Smt5HQaGzg1o6RHFPJaOqnmBDg==}
     engines: {node: 18 || 20 || >=22}
 
+  cac@7.0.0:
+    resolution: {integrity: sha512-tixWYgm5ZoOD+3g6UTea91eow5z6AAHaho3g0V9CNSNb45gM8SmflpAc+GRd1InC4AqN/07Unrgp56Y94N9hJQ==}
+    engines: {node: '>=20.19.0'}
+
   camelize@1.0.1:
     resolution: {integrity: sha512-dU+Tx2fsypxTgtLoE36npi3UqcjSSMNYfkqgmoEhtZrraP5VWq0K7FkWVTYa8eMPtnU/G2txVsfdCJTn9uzpuQ==}
 
@@ -2444,6 +2459,11 @@ packages:
   nanoid@3.3.11:
     resolution: {integrity: sha512-N8SpfPUnUp1bK+PMYW8qSWdl9U+wwNWI4QKxOYDy9JAro3WMX7p2OeVRF9v+347pnakNevPmiHhNmZ2HbFA76w==}
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
+    hasBin: true
+
+  nanoid@5.1.11:
+    resolution: {integrity: sha512-v+KEsUv2ps74PaSKv0gHTxTCgMXOIfBEbaqa6w6ISIGC7ZsvHN4N9oJ8d4cmf0n5oTzQz2SLmThbQWhjd/8eKg==}
+    engines: {node: ^18 || >=20}
     hasBin: true
 
   nanoid@5.1.6:
@@ -3353,7 +3373,7 @@ snapshots:
 
   '@atcute/atproto@3.1.10':
     dependencies:
-      '@atcute/lexicons': 1.2.9
+      '@atcute/lexicons': 1.3.0
 
   '@atcute/bluesky-richtext-parser@2.1.1': {}
 
@@ -3362,7 +3382,7 @@ snapshots:
   '@atcute/bluesky@3.3.0':
     dependencies:
       '@atcute/atproto': 3.1.10
-      '@atcute/lexicons': 1.2.9
+      '@atcute/lexicons': 1.3.0
 
   '@atcute/car@5.1.1':
     dependencies:
@@ -3374,7 +3394,7 @@ snapshots:
   '@atcute/cbor@2.3.2':
     dependencies:
       '@atcute/cid': 2.4.1
-      '@atcute/multibase': 1.1.8
+      '@atcute/multibase': 1.2.0
       '@atcute/uint8array': 1.1.1
 
   '@atcute/cid@2.4.1':
@@ -3385,7 +3405,7 @@ snapshots:
   '@atcute/client@4.2.1':
     dependencies:
       '@atcute/identity': 1.1.3
-      '@atcute/lexicons': 1.2.9
+      '@atcute/lexicons': 1.3.0
 
   '@atcute/crypto@2.4.1':
     dependencies:
@@ -3396,20 +3416,20 @@ snapshots:
   '@atcute/identity-resolver@1.2.2(@atcute/identity@1.1.3)':
     dependencies:
       '@atcute/identity': 1.1.3
-      '@atcute/lexicons': 1.2.9
+      '@atcute/lexicons': 1.3.0
       '@atcute/util-fetch': 1.0.5
       '@badrap/valita': 0.4.6
 
   '@atcute/identity-resolver@1.2.2(@atcute/identity@1.1.4)':
     dependencies:
       '@atcute/identity': 1.1.4
-      '@atcute/lexicons': 1.2.9
+      '@atcute/lexicons': 1.3.0
       '@atcute/util-fetch': 1.0.5
       '@badrap/valita': 0.4.6
 
   '@atcute/identity@1.1.3':
     dependencies:
-      '@atcute/lexicons': 1.2.9
+      '@atcute/lexicons': 1.3.0
       '@badrap/valita': 0.4.6
 
   '@atcute/identity@1.1.4':
@@ -3419,7 +3439,7 @@ snapshots:
 
   '@atcute/jetstream@1.1.2(react@19.2.4)':
     dependencies:
-      '@atcute/lexicons': 1.2.9
+      '@atcute/lexicons': 1.3.0
       '@badrap/valita': 0.4.6
       '@mary-ext/event-iterator': 1.0.0
       '@mary-ext/simple-event-emitter': 1.0.1
@@ -3429,16 +3449,16 @@ snapshots:
     transitivePeerDependencies:
       - react
 
-  '@atcute/lex-cli@2.8.0':
+  '@atcute/lex-cli@2.8.1':
     dependencies:
       '@atcute/identity': 1.1.4
       '@atcute/identity-resolver': 1.2.2(@atcute/identity@1.1.4)
       '@atcute/lexicon-doc': 2.2.0
-      '@atcute/lexicon-resolver': 0.1.6(@atcute/identity-resolver@1.2.2(@atcute/identity@1.1.3))(@atcute/identity@1.1.4)
+      '@atcute/lexicon-resolver': 0.1.6(@atcute/identity-resolver@1.2.2(@atcute/identity@1.1.4))(@atcute/identity@1.1.4)
       '@atcute/lexicons': 1.3.0
       '@badrap/valita': 0.4.6
-      '@optique/core': 0.10.7
-      '@optique/run': 0.10.7
+      '@optique/core': 1.0.2
+      '@optique/run': 1.0.2
       picocolors: 1.1.1
       prettier: 3.8.3
 
@@ -3450,28 +3470,21 @@ snapshots:
       '@atcute/util-text': 1.2.0
       '@badrap/valita': 0.4.6
 
-  '@atcute/lexicon-resolver@0.1.6(@atcute/identity-resolver@1.2.2(@atcute/identity@1.1.3))(@atcute/identity@1.1.4)':
+  '@atcute/lexicon-resolver@0.1.6(@atcute/identity-resolver@1.2.2(@atcute/identity@1.1.4))(@atcute/identity@1.1.4)':
     dependencies:
       '@atcute/crypto': 2.4.1
       '@atcute/identity': 1.1.4
-      '@atcute/identity-resolver': 1.2.2(@atcute/identity@1.1.3)
+      '@atcute/identity-resolver': 1.2.2(@atcute/identity@1.1.4)
       '@atcute/lexicon-doc': 2.2.0
       '@atcute/lexicons': 1.3.0
       '@atcute/repo': 0.1.4
       '@atcute/util-fetch': 1.0.5
       '@badrap/valita': 0.4.6
 
-  '@atcute/lexicons@1.2.9':
-    dependencies:
-      '@atcute/uint8array': 1.1.1
-      '@atcute/util-text': 1.1.1
-      '@standard-schema/spec': 1.1.0
-      esm-env: 1.2.2
-
   '@atcute/lexicons@1.3.0':
     dependencies:
       '@atcute/uint8array': 1.1.1
-      '@atcute/util-text': 1.2.0
+      '@atcute/util-text': 1.3.1
       '@standard-schema/spec': 1.1.0
       esm-env: 1.2.2
 
@@ -3489,11 +3502,11 @@ snapshots:
     dependencies:
       '@atcute/uint8array': 1.1.1
 
-  '@atcute/oauth-browser-client@3.0.0(@atcute/identity@1.1.3)':
+  '@atcute/oauth-browser-client@3.0.0(@atcute/identity@1.1.4)':
     dependencies:
       '@atcute/client': 4.2.1
-      '@atcute/identity-resolver': 1.2.2(@atcute/identity@1.1.3)
-      '@atcute/lexicons': 1.2.9
+      '@atcute/identity-resolver': 1.2.2(@atcute/identity@1.1.4)
+      '@atcute/lexicons': 1.3.0
       '@atcute/multibase': 1.1.8
       '@atcute/oauth-crypto': 0.1.0
       '@atcute/oauth-types': 0.1.1
@@ -3517,7 +3530,7 @@ snapshots:
       '@atcute/client': 4.2.1
       '@atcute/identity': 1.1.3
       '@atcute/identity-resolver': 1.2.2(@atcute/identity@1.1.3)
-      '@atcute/lexicons': 1.2.9
+      '@atcute/lexicons': 1.3.0
       '@atcute/oauth-crypto': 0.1.0
       '@atcute/oauth-keyset': 0.1.0
       '@atcute/oauth-types': 0.1.1
@@ -3528,7 +3541,7 @@ snapshots:
   '@atcute/oauth-types@0.1.1':
     dependencies:
       '@atcute/identity': 1.1.3
-      '@atcute/lexicons': 1.2.9
+      '@atcute/lexicons': 1.3.0
       '@atcute/oauth-keyset': 0.1.0
       '@badrap/valita': 0.4.6
 
@@ -3545,7 +3558,7 @@ snapshots:
   '@atcute/standard-site@1.0.1':
     dependencies:
       '@atcute/atproto': 3.1.10
-      '@atcute/lexicons': 1.2.9
+      '@atcute/lexicons': 1.3.0
 
   '@atcute/tid@1.1.2':
     dependencies:
@@ -3559,26 +3572,54 @@ snapshots:
     dependencies:
       '@badrap/valita': 0.4.6
 
-  '@atcute/util-text@1.1.1':
+  '@atcute/util-text@1.2.0':
     dependencies:
       unicode-segmenter: 0.14.5
 
-  '@atcute/util-text@1.2.0':
+  '@atcute/util-text@1.3.1':
     dependencies:
       unicode-segmenter: 0.14.5
 
   '@atcute/varint@2.0.0': {}
 
-  '@atmo-dev/contrail@0.0.8(@atcute/identity@1.1.3)(react@19.2.4)':
+  '@atcute/xrpc-server@0.1.12':
+    dependencies:
+      '@atcute/cbor': 2.3.2
+      '@atcute/crypto': 2.4.1
+      '@atcute/identity': 1.1.4
+      '@atcute/identity-resolver': 1.2.2(@atcute/identity@1.1.4)
+      '@atcute/lexicons': 1.3.0
+      '@atcute/multibase': 1.2.0
+      '@atcute/uint8array': 1.1.1
+      '@badrap/valita': 0.4.6
+      nanoid: 5.1.11
+
+  '@atmo-dev/contrail-lexicons@0.4.5(react@19.2.4)(wrangler@4.73.0(@cloudflare/workers-types@4.20260313.1))':
+    dependencies:
+      '@atcute/lex-cli': 2.8.1
+      '@atmo-dev/contrail': 0.5.0(react@19.2.4)(wrangler@4.73.0(@cloudflare/workers-types@4.20260313.1))
+    transitivePeerDependencies:
+      - pg
+      - react
+      - wrangler
+
+  '@atmo-dev/contrail@0.5.0(react@19.2.4)(wrangler@4.73.0(@cloudflare/workers-types@4.20260313.1))':
     dependencies:
       '@atcute/atproto': 3.1.10
+      '@atcute/cbor': 2.3.2
+      '@atcute/cid': 2.4.1
       '@atcute/client': 4.2.1
-      '@atcute/identity-resolver': 1.2.2(@atcute/identity@1.1.3)
+      '@atcute/identity': 1.1.4
+      '@atcute/identity-resolver': 1.2.2(@atcute/identity@1.1.4)
       '@atcute/jetstream': 1.1.2(react@19.2.4)
-      '@atcute/lexicons': 1.2.9
+      '@atcute/lexicons': 1.3.0
+      '@atcute/xrpc-server': 0.1.12
+      cac: 7.0.0
       hono: 4.12.14
+      jiti: 2.6.1
+    optionalDependencies:
+      wrangler: 4.73.0(@cloudflare/workers-types@4.20260313.1)
     transitivePeerDependencies:
-      - '@atcute/identity'
       - react
 
   '@badrap/valita@0.4.6': {}
@@ -4143,11 +4184,11 @@ snapshots:
       number-flow: 0.6.0
       svelte: 5.53.11
 
-  '@optique/core@0.10.7': {}
+  '@optique/core@1.0.2': {}
 
-  '@optique/run@0.10.7':
+  '@optique/run@1.0.2':
     dependencies:
-      '@optique/core': 0.10.7
+      '@optique/core': 1.0.2
 
   '@oxc-project/runtime@0.115.0': {}
 
@@ -4879,6 +4920,8 @@ snapshots:
     dependencies:
       balanced-match: 4.0.4
 
+  cac@7.0.0: {}
+
   camelize@1.0.1: {}
 
   camera-controls@3.1.2(three@0.183.2):
@@ -5557,6 +5600,8 @@ snapshots:
   murmurhash-js@1.0.0: {}
 
   nanoid@3.3.11: {}
+
+  nanoid@5.1.11: {}
 
   nanoid@5.1.6: {}
 

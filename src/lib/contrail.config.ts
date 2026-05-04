@@ -3,16 +3,18 @@ import type { ContrailConfig } from '@atmo-dev/contrail';
 export const config: ContrailConfig = {
 	namespace: 'app.blento',
 	collections: {
-		'app.blento.card': {
+		card: {
+			collection: 'app.blento.card',
 			queryable: {
 				page: {},
 				cardType: {}
 			}
 		},
-		'app.blento.page': {
-			queryable: {}
+		page: {
+			collection: 'app.blento.page'
 		},
-		'app.blento.section': {
+		section: {
+			collection: 'app.blento.section',
 			queryable: {
 				page: {},
 				sectionType: {}

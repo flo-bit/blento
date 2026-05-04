@@ -1,9 +1,9 @@
 import type {} from '@atcute/lexicons';
 import * as v from '@atcute/lexicons/validations';
 import type {} from '@atcute/lexicons/ambient';
-import * as AppBlentoCard from '../card.js';
+import * as AppBlentoSection from '../section.js';
 
-const _mainSchema = /*#__PURE__*/ v.query('app.blento.card.getRecord', {
+const _mainSchema = /*#__PURE__*/ v.query('app.blento.section.getRecord', {
 	params: /*#__PURE__*/ v.object({
 		/**
 		 * Include profile + identity info keyed by DID
@@ -27,14 +27,14 @@ const _mainSchema = /*#__PURE__*/ v.query('app.blento.card.getRecord', {
 			time_us: /*#__PURE__*/ v.integer(),
 			uri: /*#__PURE__*/ v.resourceUriString(),
 			get value() {
-				return AppBlentoCard.mainSchema;
+				return AppBlentoSection.mainSchema;
 			}
 		})
 	}
 });
 const _profileEntrySchema = /*#__PURE__*/ v.object({
 	$type: /*#__PURE__*/ v.optional(
-		/*#__PURE__*/ v.literal('app.blento.card.getRecord#profileEntry')
+		/*#__PURE__*/ v.literal('app.blento.section.getRecord#profileEntry')
 	),
 	cid: /*#__PURE__*/ v.optional(/*#__PURE__*/ v.cidString()),
 	collection: /*#__PURE__*/ v.optional(/*#__PURE__*/ v.nsidString()),
@@ -61,6 +61,6 @@ export interface $output extends v.InferXRPCBodyInput<mainSchema['output']> {}
 
 declare module '@atcute/lexicons/ambient' {
 	interface XRPCQueries {
-		'app.blento.card.getRecord': mainSchema;
+		'app.blento.section.getRecord': mainSchema;
 	}
 }

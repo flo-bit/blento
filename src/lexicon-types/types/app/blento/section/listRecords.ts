@@ -1,18 +1,14 @@
 import type {} from '@atcute/lexicons';
 import * as v from '@atcute/lexicons/validations';
 import type {} from '@atcute/lexicons/ambient';
-import * as AppBlentoCard from '../card.js';
+import * as AppBlentoSection from '../section.js';
 
-const _mainSchema = /*#__PURE__*/ v.query('app.blento.card.listRecords', {
+const _mainSchema = /*#__PURE__*/ v.query('app.blento.section.listRecords', {
 	params: /*#__PURE__*/ v.object({
 		/**
 		 * Filter by DID or handle (triggers on-demand backfill)
 		 */
 		actor: /*#__PURE__*/ v.optional(/*#__PURE__*/ v.actorIdentifierString()),
-		/**
-		 * Filter by cardType
-		 */
-		cardType: /*#__PURE__*/ v.optional(/*#__PURE__*/ v.string()),
 		cursor: /*#__PURE__*/ v.optional(/*#__PURE__*/ v.string()),
 		/**
 		 * @minimum 1
@@ -36,9 +32,13 @@ const _mainSchema = /*#__PURE__*/ v.query('app.blento.card.listRecords', {
 		 */
 		profiles: /*#__PURE__*/ v.optional(/*#__PURE__*/ v.boolean()),
 		/**
+		 * Filter by sectionType
+		 */
+		sectionType: /*#__PURE__*/ v.optional(/*#__PURE__*/ v.string()),
+		/**
 		 * Field to sort by (default: time_us)
 		 */
-		sort: /*#__PURE__*/ v.optional(/*#__PURE__*/ v.string<'cardType' | 'page' | (string & {})>())
+		sort: /*#__PURE__*/ v.optional(/*#__PURE__*/ v.string<'page' | 'sectionType' | (string & {})>())
 	}),
 	output: {
 		type: 'lex',
@@ -55,7 +55,7 @@ const _mainSchema = /*#__PURE__*/ v.query('app.blento.card.listRecords', {
 });
 const _profileEntrySchema = /*#__PURE__*/ v.object({
 	$type: /*#__PURE__*/ v.optional(
-		/*#__PURE__*/ v.literal('app.blento.card.listRecords#profileEntry')
+		/*#__PURE__*/ v.literal('app.blento.section.listRecords#profileEntry')
 	),
 	cid: /*#__PURE__*/ v.optional(/*#__PURE__*/ v.cidString()),
 	collection: /*#__PURE__*/ v.optional(/*#__PURE__*/ v.nsidString()),
@@ -66,7 +66,7 @@ const _profileEntrySchema = /*#__PURE__*/ v.object({
 	value: /*#__PURE__*/ v.optional(/*#__PURE__*/ v.unknown())
 });
 const _recordSchema = /*#__PURE__*/ v.object({
-	$type: /*#__PURE__*/ v.optional(/*#__PURE__*/ v.literal('app.blento.card.listRecords#record')),
+	$type: /*#__PURE__*/ v.optional(/*#__PURE__*/ v.literal('app.blento.section.listRecords#record')),
 	cid: /*#__PURE__*/ v.cidString(),
 	collection: /*#__PURE__*/ v.nsidString(),
 	did: /*#__PURE__*/ v.didString(),
@@ -74,7 +74,7 @@ const _recordSchema = /*#__PURE__*/ v.object({
 	time_us: /*#__PURE__*/ v.integer(),
 	uri: /*#__PURE__*/ v.resourceUriString(),
 	get value() {
-		return AppBlentoCard.mainSchema;
+		return AppBlentoSection.mainSchema;
 	}
 });
 
@@ -98,6 +98,6 @@ export interface $output extends v.InferXRPCBodyInput<mainSchema['output']> {}
 
 declare module '@atcute/lexicons/ambient' {
 	interface XRPCQueries {
-		'app.blento.card.listRecords': mainSchema;
+		'app.blento.section.listRecords': mainSchema;
 	}
 }

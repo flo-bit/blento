@@ -8,3 +8,6 @@ export * as AppBlentoNotifyOfUpdate from './types/app/blento/notifyOfUpdate.js';
 export * as AppBlentoPage from './types/app/blento/page.js';
 export * as AppBlentoPageGetRecord from './types/app/blento/page/getRecord.js';
 export * as AppBlentoPageListRecords from './types/app/blento/page/listRecords.js';
+export * as AppBlentoSection from './types/app/blento/section.js';
+export * as AppBlentoSectionGetRecord from './types/app/blento/section/getRecord.js';
+export * as AppBlentoSectionListRecords from './types/app/blento/section/listRecords.js';

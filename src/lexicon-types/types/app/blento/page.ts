@@ -10,7 +10,9 @@ const _mainSchema = /*#__PURE__*/ v.record(
 		/**
 		 * @accept image/*
 		 */
-		icon: /*#__PURE__*/ v.optional(/*#__PURE__*/ v.blob()),
+		icon: /*#__PURE__*/ v.optional(
+			/*#__PURE__*/ v.constrain(/*#__PURE__*/ v.blob(), [/*#__PURE__*/ v.blobAccept(['image/*'])])
+		),
 		name: /*#__PURE__*/ v.optional(/*#__PURE__*/ v.string()),
 		get preferences() {
 			return /*#__PURE__*/ v.optional(preferencesSchema);

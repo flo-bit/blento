@@ -19,7 +19,7 @@ function extractProfiles(
 		handle?: string;
 		collection?: string;
 		rkey?: string;
-		record?: unknown;
+		value?: unknown;
 	}>
 ): Map<string, ProfileWithBlentoFlag> {
 	const map = new Map<string, ProfileWithBlentoFlag>();
@@ -35,27 +35,27 @@ function extractProfiles(
 			existing.handle = p.handle as `${string}.${string}`;
 		}
 
-		const record = p.record as Record<string, unknown> | undefined;
+		const value = p.value as Record<string, unknown> | undefined;
 
-		if (p.collection === 'app.bsky.actor.profile' && record) {
-			existing.displayName ??= record.displayName as string | undefined;
-			if (!existing.avatar && record.avatar) {
+		if (p.collection === 'app.bsky.actor.profile' && value) {
+			existing.displayName ??= value.displayName as string | undefined;
+			if (!existing.avatar && value.avatar) {
 				const cdnUrl = getCDNImageBlobUrl({
 					did: p.did,
-					blob: record.avatar as { $type: 'blob'; ref: { $link: string } }
+					blob: value.avatar as { $type: 'blob'; ref: { $link: string } }
 				});
 				if (cdnUrl) existing.avatar = cdnUrl;
 			}
 		}
 
-		if (p.collection === 'site.standard.publication' && record) {
+		if (p.collection === 'site.standard.publication' && value) {
 			existing.hasBlento = true;
-			existing.displayName = (record.name as string) ?? existing.displayName;
-			existing.url = record.url as string | undefined;
-			if (record.icon) {
+			existing.displayName = (value.name as string) ?? existing.displayName;
+			existing.url = value.url as string | undefined;
+			if (value.icon) {
 				const cdnUrl = getCDNImageBlobUrl({
 					did: p.did,
-					blob: record.icon as { $type: 'blob'; ref: { $link: string } }
+					blob: value.icon as { $type: 'blob'; ref: { $link: string } }
 				});
 				if (cdnUrl) existing.avatar = cdnUrl;
 			}

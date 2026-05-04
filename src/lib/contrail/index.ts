@@ -1,8 +1,7 @@
 import type { D1Database } from '@cloudflare/workers-types';
 import { Contrail } from '@atmo-dev/contrail';
-import { createHandler } from '@atmo-dev/contrail/server';
-import { Client } from '@atcute/client';
-import { config } from './config';
+import { createHandler, createServerClient } from '@atmo-dev/contrail/server';
+import { config } from '../contrail.config';
 
 export const contrail = new Contrail(config);
 
@@ -19,14 +18,11 @@ const handle = createHandler(contrail);
 
 /**
  * Server-side: fully typed @atcute/client that routes through contrail in-process.
- * No HTTP roundtrip — calls createHandler directly.
+ * No HTTP roundtrip — calls the handler directly with the per-request DB.
  */
 export function getServerClient(db: D1Database) {
-	return new Client({
-		handler: async (pathname, init) => {
-			await ensureInit(db);
-			const url = new URL(pathname, 'http://localhost');
-			return handle(new Request(url, init), db) as Promise<Response>;
-		}
+	return createServerClient(async (req) => {
+		await ensureInit(db);
+		return handle(req, db);
 	});
 }

@@ -1,10 +1,10 @@
 {
 	"lexicon": 1,
-	"id": "app.blento.page.listRecords",
+	"id": "app.blento.card.listRecords",
 	"defs": {
 		"main": {
 			"type": "query",
-			"description": "Query app.blento.page records with filters",
+			"description": "Query app.blento.card records with filters",
 			"parameters": {
 				"type": "params",
 				"properties": {
@@ -26,17 +26,17 @@
 						"type": "boolean",
 						"description": "Include profile + identity info keyed by DID"
 					},
-					"name": {
+					"page": {
 						"type": "string",
-						"description": "Filter by name"
+						"description": "Filter by page"
 					},
-					"description": {
+					"cardType": {
 						"type": "string",
-						"description": "Filter by description"
+						"description": "Filter by cardType"
 					},
 					"sort": {
 						"type": "string",
-						"knownValues": ["name", "description"],
+						"knownValues": ["page", "cardType"],
 						"description": "Field to sort by (default: time_us)"
 					},
 					"order": {
@@ -75,11 +75,19 @@
 		},
 		"record": {
 			"type": "object",
-			"required": ["uri", "did", "collection", "rkey", "time_us"],
+			"required": ["uri", "cid", "value", "did", "collection", "rkey", "time_us"],
 			"properties": {
 				"uri": {
 					"type": "string",
 					"format": "at-uri"
+				},
+				"cid": {
+					"type": "string",
+					"format": "cid"
+				},
+				"value": {
+					"type": "ref",
+					"ref": "app.blento.card#main"
 				},
 				"did": {
 					"type": "string",
@@ -91,13 +99,6 @@
 				},
 				"rkey": {
 					"type": "string"
-				},
-				"cid": {
-					"type": "string"
-				},
-				"record": {
-					"type": "ref",
-					"ref": "app.blento.page#main"
 				},
 				"time_us": {
 					"type": "integer"
@@ -119,18 +120,19 @@
 					"type": "string",
 					"format": "at-uri"
 				},
+				"cid": {
+					"type": "string",
+					"format": "cid"
+				},
+				"value": {
+					"type": "unknown"
+				},
 				"collection": {
 					"type": "string",
 					"format": "nsid"
 				},
 				"rkey": {
 					"type": "string"
-				},
-				"cid": {
-					"type": "string"
-				},
-				"record": {
-					"type": "unknown"
 				}
 			}
 		}

@@ -40,7 +40,7 @@ type ContrailProfile = {
 	handle?: string;
 	collection?: string;
 	rkey?: string;
-	record?: unknown;
+	value?: unknown;
 };
 
 /**
@@ -63,15 +63,15 @@ function extractProfileData(
 		if (p.did !== did) continue;
 		if (p.handle && p.handle !== 'handle.invalid') handle = p.handle;
 
-		const record = p.record as Record<string, unknown> | undefined;
-		if (p.collection === 'app.bsky.actor.profile' && record) {
-			bskyRecord = record;
+		const value = p.value as Record<string, unknown> | undefined;
+		if (p.collection === 'app.bsky.actor.profile' && value) {
+			bskyRecord = value;
 		}
-		if (p.collection === 'site.standard.publication' && record) {
-			pubRecord = record;
+		if (p.collection === 'site.standard.publication' && value) {
+			pubRecord = value;
 		}
-		if (p.collection === 'app.nearhorizon.actor.pronouns' && record) {
-			pronounsValue = record;
+		if (p.collection === 'app.nearhorizon.actor.pronouns' && value) {
+			pronounsValue = value;
 		}
 	}
 
@@ -128,7 +128,7 @@ function loadCardFromContrail(did: Did, rkey: string, db: D1Database) {
 			params: { uri }
 		});
 		if (!res.ok) return null;
-		return { ...(res.data.record as object) } as Item;
+		return { ...(res.data.value as object) } as Item;
 	});
 }
 
@@ -154,22 +154,22 @@ function loadFromContrail(actor: ActorIdentifier, db: D1Database, page: string) 
 
 		if (!cardRes.ok) return null;
 
-		const cards = cardRes.data.records.map((r) => ({ ...(r.record as object) }) as Item);
+		const cards = cardRes.data.records.map((r) => ({ ...(r.value as object) }) as Item);
 
 		const pages = pageRes.ok
 			? pageRes.data.records
-					.filter((r) => r.record)
+					.filter((r) => r.value)
 					.map((r) => ({
 						uri: r.uri,
 						cid: r.cid ?? '',
-						value: r.record as Record<string, unknown>
+						value: r.value as Record<string, unknown>
 					}))
 			: [];
 
 		const sections =
 			sectionRes?.ok && sectionRes.data?.records
 				? (sectionRes.data.records as any[]).map(
-						(r: any) => ({ ...(r.record as object), id: parseUri(r.uri)?.rkey }) as SectionRecord
+						(r: any) => ({ ...(r.value as object), id: parseUri(r.uri)?.rkey }) as SectionRecord
 					)
 				: [];
 

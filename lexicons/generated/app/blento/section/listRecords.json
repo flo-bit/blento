@@ -1,0 +1,140 @@
+{
+	"lexicon": 1,
+	"id": "app.blento.section.listRecords",
+	"defs": {
+		"main": {
+			"type": "query",
+			"description": "Query app.blento.section records with filters",
+			"parameters": {
+				"type": "params",
+				"properties": {
+					"limit": {
+						"type": "integer",
+						"minimum": 1,
+						"maximum": 200,
+						"default": 50
+					},
+					"cursor": {
+						"type": "string"
+					},
+					"actor": {
+						"type": "string",
+						"format": "at-identifier",
+						"description": "Filter by DID or handle (triggers on-demand backfill)"
+					},
+					"profiles": {
+						"type": "boolean",
+						"description": "Include profile + identity info keyed by DID"
+					},
+					"page": {
+						"type": "string",
+						"description": "Filter by page"
+					},
+					"sectionType": {
+						"type": "string",
+						"description": "Filter by sectionType"
+					},
+					"sort": {
+						"type": "string",
+						"knownValues": ["page", "sectionType"],
+						"description": "Field to sort by (default: time_us)"
+					},
+					"order": {
+						"type": "string",
+						"knownValues": ["asc", "desc"],
+						"description": "Sort direction (default: desc for dates/numbers/counts, asc for strings)"
+					}
+				}
+			},
+			"output": {
+				"encoding": "application/json",
+				"schema": {
+					"type": "object",
+					"required": ["records"],
+					"properties": {
+						"records": {
+							"type": "array",
+							"items": {
+								"type": "ref",
+								"ref": "#record"
+							}
+						},
+						"cursor": {
+							"type": "string"
+						},
+						"profiles": {
+							"type": "array",
+							"items": {
+								"type": "ref",
+								"ref": "#profileEntry"
+							}
+						}
+					}
+				}
+			}
+		},
+		"record": {
+			"type": "object",
+			"required": ["uri", "cid", "value", "did", "collection", "rkey", "time_us"],
+			"properties": {
+				"uri": {
+					"type": "string",
+					"format": "at-uri"
+				},
+				"cid": {
+					"type": "string",
+					"format": "cid"
+				},
+				"value": {
+					"type": "ref",
+					"ref": "app.blento.section#main"
+				},
+				"did": {
+					"type": "string",
+					"format": "did"
+				},
+				"collection": {
+					"type": "string",
+					"format": "nsid"
+				},
+				"rkey": {
+					"type": "string"
+				},
+				"time_us": {
+					"type": "integer"
+				}
+			}
+		},
+		"profileEntry": {
+			"type": "object",
+			"required": ["did"],
+			"properties": {
+				"did": {
+					"type": "string",
+					"format": "did"
+				},
+				"handle": {
+					"type": "string"
+				},
+				"uri": {
+					"type": "string",
+					"format": "at-uri"
+				},
+				"cid": {
+					"type": "string",
+					"format": "cid"
+				},
+				"value": {
+					"type": "unknown"
+				},
+				"collection": {
+					"type": "string",
+					"format": "nsid"
+				},
+				"rkey": {
+					"type": "string"
+				}
+			}
+		}
+	}
+}

@@ -1,0 +1,35 @@
+{
+	"lexicon": 1,
+	"id": "app.blento.authFull",
+	"defs": {
+		"main": {
+			"type": "permission-set",
+			"title": "app.blento",
+			"description": "Full access to the app.blento service",
+			"permissions": [
+				{
+					"type": "permission",
+					"resource": "rpc",
+					"aud": "*",
+					"lxm": [
+						"app.blento.card.getRecord",
+						"app.blento.card.listRecords",
+						"app.blento.getCursor",
+						"app.blento.getOverview",
+						"app.blento.getProfile",
+						"app.blento.notifyOfUpdate",
+						"app.blento.page.getRecord",
+						"app.blento.page.listRecords",
+						"app.blento.section.getRecord",
+						"app.blento.section.listRecords"
+					]
+				},
+				{
+					"type": "permission",
+					"resource": "repo",
+					"collection": ["app.blento.card", "app.blento.page", "app.blento.section"]
+				}
+			]
+		}
+	}
+}

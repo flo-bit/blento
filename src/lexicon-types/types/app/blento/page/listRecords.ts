@@ -11,10 +11,6 @@ const _mainSchema = /*#__PURE__*/ v.query('app.blento.page.listRecords', {
 		actor: /*#__PURE__*/ v.optional(/*#__PURE__*/ v.actorIdentifierString()),
 		cursor: /*#__PURE__*/ v.optional(/*#__PURE__*/ v.string()),
 		/**
-		 * Filter by description
-		 */
-		description: /*#__PURE__*/ v.optional(/*#__PURE__*/ v.string()),
-		/**
 		 * @minimum 1
 		 * @maximum 200
 		 * @default 50
@@ -24,21 +20,9 @@ const _mainSchema = /*#__PURE__*/ v.query('app.blento.page.listRecords', {
 			50
 		),
 		/**
-		 * Filter by name
-		 */
-		name: /*#__PURE__*/ v.optional(/*#__PURE__*/ v.string()),
-		/**
-		 * Sort direction (default: desc for dates/numbers/counts, asc for strings)
-		 */
-		order: /*#__PURE__*/ v.optional(/*#__PURE__*/ v.string<'asc' | 'desc' | (string & {})>()),
-		/**
 		 * Include profile + identity info keyed by DID
 		 */
-		profiles: /*#__PURE__*/ v.optional(/*#__PURE__*/ v.boolean()),
-		/**
-		 * Field to sort by (default: time_us)
-		 */
-		sort: /*#__PURE__*/ v.optional(/*#__PURE__*/ v.string<'description' | 'name' | (string & {})>())
+		profiles: /*#__PURE__*/ v.optional(/*#__PURE__*/ v.boolean())
 	}),
 	output: {
 		type: 'lex',
@@ -57,25 +41,25 @@ const _profileEntrySchema = /*#__PURE__*/ v.object({
 	$type: /*#__PURE__*/ v.optional(
 		/*#__PURE__*/ v.literal('app.blento.page.listRecords#profileEntry')
 	),
-	cid: /*#__PURE__*/ v.optional(/*#__PURE__*/ v.string()),
+	cid: /*#__PURE__*/ v.optional(/*#__PURE__*/ v.cidString()),
 	collection: /*#__PURE__*/ v.optional(/*#__PURE__*/ v.nsidString()),
 	did: /*#__PURE__*/ v.didString(),
 	handle: /*#__PURE__*/ v.optional(/*#__PURE__*/ v.string()),
-	record: /*#__PURE__*/ v.optional(/*#__PURE__*/ v.unknown()),
 	rkey: /*#__PURE__*/ v.optional(/*#__PURE__*/ v.string()),
-	uri: /*#__PURE__*/ v.optional(/*#__PURE__*/ v.resourceUriString())
+	uri: /*#__PURE__*/ v.optional(/*#__PURE__*/ v.resourceUriString()),
+	value: /*#__PURE__*/ v.optional(/*#__PURE__*/ v.unknown())
 });
 const _recordSchema = /*#__PURE__*/ v.object({
 	$type: /*#__PURE__*/ v.optional(/*#__PURE__*/ v.literal('app.blento.page.listRecords#record')),
-	cid: /*#__PURE__*/ v.optional(/*#__PURE__*/ v.string()),
+	cid: /*#__PURE__*/ v.cidString(),
 	collection: /*#__PURE__*/ v.nsidString(),
 	did: /*#__PURE__*/ v.didString(),
-	get record() {
-		return /*#__PURE__*/ v.optional(AppBlentoPage.mainSchema);
-	},
 	rkey: /*#__PURE__*/ v.string(),
 	time_us: /*#__PURE__*/ v.integer(),
-	uri: /*#__PURE__*/ v.resourceUriString()
+	uri: /*#__PURE__*/ v.resourceUriString(),
+	get value() {
+		return AppBlentoPage.mainSchema;
+	}
 });
 
 type main$schematype = typeof _mainSchema;

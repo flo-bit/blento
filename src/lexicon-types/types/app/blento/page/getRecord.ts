@@ -17,18 +17,18 @@ const _mainSchema = /*#__PURE__*/ v.query('app.blento.page.getRecord', {
 	output: {
 		type: 'lex',
 		schema: /*#__PURE__*/ v.object({
-			cid: /*#__PURE__*/ v.optional(/*#__PURE__*/ v.string()),
+			cid: /*#__PURE__*/ v.optional(/*#__PURE__*/ v.cidString()),
 			collection: /*#__PURE__*/ v.nsidString(),
 			did: /*#__PURE__*/ v.didString(),
 			get profiles() {
 				return /*#__PURE__*/ v.optional(/*#__PURE__*/ v.array(profileEntrySchema));
 			},
-			get record() {
-				return /*#__PURE__*/ v.optional(AppBlentoPage.mainSchema);
-			},
 			rkey: /*#__PURE__*/ v.string(),
 			time_us: /*#__PURE__*/ v.integer(),
-			uri: /*#__PURE__*/ v.resourceUriString()
+			uri: /*#__PURE__*/ v.resourceUriString(),
+			get value() {
+				return AppBlentoPage.mainSchema;
+			}
 		})
 	}
 });
@@ -36,13 +36,13 @@ const _profileEntrySchema = /*#__PURE__*/ v.object({
 	$type: /*#__PURE__*/ v.optional(
 		/*#__PURE__*/ v.literal('app.blento.page.getRecord#profileEntry')
 	),
-	cid: /*#__PURE__*/ v.optional(/*#__PURE__*/ v.string()),
+	cid: /*#__PURE__*/ v.optional(/*#__PURE__*/ v.cidString()),
 	collection: /*#__PURE__*/ v.optional(/*#__PURE__*/ v.nsidString()),
 	did: /*#__PURE__*/ v.didString(),
 	handle: /*#__PURE__*/ v.optional(/*#__PURE__*/ v.string()),
-	record: /*#__PURE__*/ v.optional(/*#__PURE__*/ v.unknown()),
 	rkey: /*#__PURE__*/ v.optional(/*#__PURE__*/ v.string()),
-	uri: /*#__PURE__*/ v.optional(/*#__PURE__*/ v.resourceUriString())
+	uri: /*#__PURE__*/ v.optional(/*#__PURE__*/ v.resourceUriString()),
+	value: /*#__PURE__*/ v.optional(/*#__PURE__*/ v.unknown())
 });
 
 type main$schematype = typeof _mainSchema;
