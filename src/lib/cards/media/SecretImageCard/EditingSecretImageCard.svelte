@@ -38,7 +38,6 @@
 		};
 	});
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	async function decryptImage(password: string, blob: any) {
 		try {
 			const url = await getBlobURL({ did, blob });

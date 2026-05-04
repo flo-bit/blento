@@ -1,6 +1,7 @@
 import { loadData } from '$lib/website/load';
 import { env } from '$env/dynamic/private';
-import { error } from '@sveltejs/kit';
+import { env as publicEnv } from '$env/dynamic/public';
+import { error, redirect } from '@sveltejs/kit';
 import { createCache } from '$lib/cache';
 import { getActor } from '$lib/actor.js';
 import { logPageview } from '$lib/analytics';
@@ -18,8 +19,15 @@ export async function load({ params, platform, request, locals, route, setHeader
 
 	const data = await loadData(actor, cache, params.page, env, platform);
 
-	const isInteractiveRoute = route.id?.endsWith('/edit') || route.id?.endsWith('/copy') || false;
+	const isEditRoute = route.id?.endsWith('/edit') || false;
+	const isInteractiveRoute = isEditRoute || route.id?.endsWith('/copy') || false;
 	const isAnonymous = !locals.did;
+
+	if (isEditRoute && locals.did !== data.did) {
+		const customDomain = request.headers.get('X-Custom-Domain');
+		const canonical = publicEnv.PUBLIC_DOMAIN || 'https://blento.app';
+		redirect(303, customDomain ? `${canonical}/login` : '/login');
+	}
 
 	if (isAnonymous && !isInteractiveRoute) {
 		setHeaders({

@@ -4,6 +4,7 @@ import { setSignedCookie } from '$lib/atproto/server/signed-cookie';
 import { scopes } from '$lib/atproto/server/scopes';
 import { getDetailedProfile } from '$lib/atproto/methods';
 import { dev } from '$app/environment';
+import { env as publicEnv } from '$env/dynamic/public';
 import type { Did } from '@atcute/lexicons';
 import type { RequestHandler } from './$types';
 
@@ -33,5 +34,6 @@ export const GET: RequestHandler = async ({ url, platform, cookies, request }) =
 
 	const profile = await getDetailedProfile({ did }).catch(() => undefined);
 	const actor = profile?.handle && profile.handle !== 'handle.invalid' ? profile.handle : did;
-	redirect(303, `/${actor}/edit`);
+	const canonical = publicEnv.PUBLIC_DOMAIN || 'https://blento.app';
+	redirect(303, customDomain ? `${canonical}/${actor}/edit` : `/${actor}/edit`);
 };
