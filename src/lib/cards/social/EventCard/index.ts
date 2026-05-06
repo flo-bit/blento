@@ -1,3 +1,6 @@
+import { parseUri } from '$lib/atproto';
+import { listRecords } from '$lib/atproto/methods';
+import type { Did } from '@atcute/lexicons';
 import type { CardDefinition } from '../../types';
 import CreateEventCardModal from './CreateEventCardModal.svelte';
 import EventCard from './EventCard.svelte';
@@ -54,6 +57,47 @@ export const EventCardDefinition = {
 		card.h = 4;
 		card.mobileW = 8;
 		card.mobileH = 6;
+	},
+
+	loadData: async (items) => {
+		const eventDataMap: Record<string, EventData> = {};
+
+		// Group items by repo so we can fetch each repo's events in one listRecords call.
+		const itemsByRepo = new Map<string, { item: (typeof items)[number]; rkey: string }[]>();
+		for (const item of items) {
+			const uri = item.cardData?.uri;
+			if (!uri) continue;
+			const parsed = parseUri(uri);
+			if (!parsed?.repo || !parsed.rkey) continue;
+			const list = itemsByRepo.get(parsed.repo) ?? [];
+			list.push({ item, rkey: parsed.rkey });
+			itemsByRepo.set(parsed.repo, list);
+		}
+
+		await Promise.all(
+			Array.from(itemsByRepo.entries()).map(async ([repo, entries]) => {
+				try {
+					const records = await listRecords({
+						did: repo as Did,
+						collection: EVENT_COLLECTION,
+						limit: 100
+					});
+					const byRkey = new Map<string, EventData>();
+					for (const record of records) {
+						const rkey = (record.uri as string).split('/').pop();
+						if (rkey) byRkey.set(rkey, record.value as EventData);
+					}
+					for (const { item, rkey } of entries) {
+						const value = byRkey.get(rkey);
+						if (value) eventDataMap[item.id] = value;
+					}
+				} catch (error) {
+					console.error('Failed to fetch events for', repo, error);
+				}
+			})
+		);
+
+		return eventDataMap;
 	},
 
 	onUrlHandler: (url, item) => {
