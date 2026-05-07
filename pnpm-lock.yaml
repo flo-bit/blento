@@ -44,6 +44,9 @@ importers:
       '@atmo-dev/contrail':
         specifier: ^0.5.0
         version: 0.5.0(react@19.2.4)(wrangler@4.73.0(@cloudflare/workers-types@4.20260313.1))
+      '@atmo-dev/events-ui':
+        specifier: link:../../atmo-events/packages/ui
+        version: link:../../atmo-events/packages/ui
       '@cloudflare/workers-types':
         specifier: ^4.20260313.1
         version: 4.20260313.1

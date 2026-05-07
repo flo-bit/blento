@@ -66,6 +66,7 @@
 		"@atcute/standard-site": "^1.0.1",
 		"@atcute/tid": "^1.1.2",
 		"@atmo-dev/contrail": "^0.5.0",
+		"@atmo-dev/events-ui": "link:../../atmo-events/packages/ui",
 		"@cloudflare/workers-types": "^4.20260313.1",
 		"@ethercorps/sveltekit-og": "^4.2.1",
 		"@floating-ui/dom": "^1.7.6",

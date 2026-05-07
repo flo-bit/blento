@@ -9,6 +9,9 @@ const config = {
 
 	kit: {
 		adapter: adapter(),
+		alias: {
+			'@atmo-dev/events-ui': '../../atmo-events/packages/ui/src'
+		},
 		paths: {
 			base: ''
 		},

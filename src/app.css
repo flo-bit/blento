@@ -6,6 +6,7 @@
 @plugin 'tailwindcss-animate';
 
 @source '../node_modules/@foxui';
+@source '../../../atmo-events/packages/ui/src';
 @import '@foxui/core/theme.css';
 
 @custom-variant dark (&:where(.dark, .dark *):not(:where(.light, .light *)));
