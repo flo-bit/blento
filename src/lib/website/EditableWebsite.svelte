@@ -552,6 +552,102 @@
 	>
 		{#if !getHideProfileSection(data)}
 			<EditableProfile bind:data />
+		{:else}
+			{@const profilePos = getProfilePosition(data)}
+			<!-- Top reveal: shown on small screens, or when profile position is "top" -->
+			<button
+				type="button"
+				aria-label="Show profile"
+				title="Show profile"
+				onclick={() => {
+					data.publication.preferences ??= {};
+					data.publication.preferences.hideProfileSection = false;
+					data = { ...data };
+				}}
+				class={[
+					'group absolute left-1/2 z-30 -translate-x-1/2 cursor-pointer',
+					showingMobileView ? 'top-8' : 'top-12',
+					'bg-base-200/90 dark:bg-base-800/90 border-base-300 dark:border-base-700 backdrop-blur',
+					'text-base-600 dark:text-base-300 hover:text-base-900 dark:hover:text-base-50',
+					'flex items-center gap-1.5 rounded-b-xl border border-t-0 px-3 py-1.5 shadow-sm',
+					'pointer-coarse:gap-2 pointer-coarse:px-5 pointer-coarse:py-2.5',
+					'transition-transform duration-200',
+					'pointer-fine:-translate-y-1/3 pointer-fine:hover:translate-y-0',
+					profilePos === 'side' ? '@5xl/wrapper:hidden' : ''
+				]}
+			>
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					fill="none"
+					viewBox="0 0 24 24"
+					stroke-width="2"
+					stroke="currentColor"
+					class="size-4 pointer-coarse:size-5"
+				>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"
+					/>
+				</svg>
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					fill="none"
+					viewBox="0 0 24 24"
+					stroke-width="2.5"
+					stroke="currentColor"
+					class="size-3.5 pointer-coarse:size-4"
+				>
+					<path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+				</svg>
+			</button>
+
+			{#if profilePos === 'side'}
+				<!-- Side reveal: only on large screens with side profile -->
+				<button
+					type="button"
+					aria-label="Show profile"
+					title="Show profile"
+					onclick={() => {
+						data.publication.preferences ??= {};
+						data.publication.preferences.hideProfileSection = false;
+						data = { ...data };
+					}}
+					class={[
+						'group fixed top-32 left-0 z-30 hidden cursor-pointer',
+						'bg-base-200/90 dark:bg-base-800/90 border-base-300 dark:border-base-700 backdrop-blur',
+						'text-base-600 dark:text-base-300 hover:text-base-900 dark:hover:text-base-50',
+						'flex-col items-center gap-1.5 rounded-r-xl border border-l-0 px-1.5 py-3 shadow-sm',
+						'transition-transform duration-200 @5xl/wrapper:flex',
+						'pointer-fine:-translate-x-1/3 pointer-fine:hover:translate-x-0'
+					]}
+				>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						fill="none"
+						viewBox="0 0 24 24"
+						stroke-width="2"
+						stroke="currentColor"
+						class="size-4"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"
+						/>
+					</svg>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						fill="none"
+						viewBox="0 0 24 24"
+						stroke-width="2.5"
+						stroke="currentColor"
+						class="size-3.5"
+					>
+						<path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+					</svg>
+				</button>
+			{/if}
 		{/if}
 
 		<div

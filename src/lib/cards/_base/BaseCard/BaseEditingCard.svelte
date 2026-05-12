@@ -343,12 +343,12 @@
 
 			<div
 				class={[
-					'translate absolute -bottom-9 w-full items-center justify-center pt-2.5 text-xs lg:group-focus-within:inline-flex lg:group-hover/card:inline-flex',
+					'translate absolute -bottom-7 w-full items-center justify-center pt-1.5 text-xs lg:group-focus-within:inline-flex lg:group-hover/card:inline-flex',
 					isRealMobile() ? 'hidden' : colorPopoverOpen || isSelected ? 'inline-flex' : 'hidden'
 				]}
 			>
 				<div
-					class="bg-base-100 border-base-200 dark:bg-base-800 dark:border-base-700 z-100 inline-flex items-center gap-0.5 rounded-2xl border p-1 px-2 shadow-lg"
+					class="bg-base-100 border-base-200 dark:bg-base-800 dark:border-base-700 z-100 inline-flex items-center gap-0.5 rounded-xl border p-0.5 px-1.5 shadow-md"
 				>
 					{#if cardDef.allowSetColor !== false}
 						<Popover bind:open={colorPopoverOpen}>
@@ -356,7 +356,7 @@
 								<button
 									{...props}
 									class={[
-										'm-2 size-4 cursor-pointer rounded-full',
+										'm-1.5 size-3 cursor-pointer rounded-full',
 										!item.color || item.color === 'base' || item.color === 'transparent'
 											? 'text-base-800 dark:text-base-200'
 											: 'text-accent-500'
@@ -364,14 +364,16 @@
 								>
 									<svg
 										xmlns="http://www.w3.org/2000/svg"
+										fill="none"
 										viewBox="0 0 24 24"
-										fill="currentColor"
-										class="size-4"
+										stroke-width="2.25"
+										stroke="currentColor"
+										class="size-3"
 									>
 										<path
-											fill-rule="evenodd"
-											d="M20.599 1.5c-.376 0-.743.111-1.055.32l-5.08 3.385a18.747 18.747 0 0 0-3.471 2.987 10.04 10.04 0 0 1 4.815 4.815 18.748 18.748 0 0 0 2.987-3.472l3.386-5.079A1.902 1.902 0 0 0 20.599 1.5Zm-8.3 14.025a18.76 18.76 0 0 0 1.896-1.207 8.026 8.026 0 0 0-4.513-4.513A18.75 18.75 0 0 0 8.475 11.7l-.278.5a5.26 5.26 0 0 1 3.601 3.602l.502-.278ZM6.75 13.5A3.75 3.75 0 0 0 3 17.25a1.5 1.5 0 0 1-1.601 1.497.75.75 0 0 0-.7 1.123 5.25 5.25 0 0 0 9.8-2.62 3.75 3.75 0 0 0-3.75-3.75Z"
-											clip-rule="evenodd"
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											d="M9.53 16.122a3 3 0 0 0-5.78 1.128 2.25 2.25 0 0 1-2.4 2.245 4.5 4.5 0 0 0 8.4-2.245c0-.399-.078-.78-.22-1.128Zm0 0a15.998 15.998 0 0 0 3.388-1.62m-5.043-.025a15.994 15.994 0 0 1 1.622-3.395m3.42 3.42a15.995 15.995 0 0 0 4.764-4.648l3.876-5.814a1.151 1.151 0 0 0-1.597-1.597L14.146 6.32a15.996 15.996 0 0 0-4.649 4.763m3.42 3.42a6.776 6.776 0 0 0-3.42-3.42"
 										/>
 									</svg>
 								</button>
@@ -447,9 +449,9 @@
 							onclick={() => {
 								setSize(2, 2);
 							}}
-							class="hover:bg-accent-500/10 cursor-pointer rounded-xl p-2"
+							class="hover:bg-accent-500/10 cursor-pointer rounded-lg p-1.5"
 						>
-							<div class="border-base-900 dark:border-base-50 size-3 rounded-sm border-2"></div>
+							<div class="border-base-900 dark:border-base-50 size-2 rounded-xs border"></div>
 
 							<span class="sr-only">set size to 1x1</span>
 						</button>
@@ -460,9 +462,9 @@
 							onclick={() => {
 								setSize(4, 2);
 							}}
-							class="hover:bg-accent-500/10 cursor-pointer rounded-xl p-2"
+							class="hover:bg-accent-500/10 cursor-pointer rounded-lg p-1.5"
 						>
-							<div class="border-base-900 dark:border-base-50 h-3 w-5 rounded-sm border-2"></div>
+							<div class="border-base-900 dark:border-base-50 h-2 w-3.5 rounded-xs border"></div>
 							<span class="sr-only">set size to 2x1</span>
 						</button>
 					{/if}
@@ -471,9 +473,9 @@
 							onclick={() => {
 								setSize(2, 4);
 							}}
-							class="hover:bg-accent-500/10 cursor-pointer rounded-xl p-2"
+							class="hover:bg-accent-500/10 cursor-pointer rounded-lg p-1.5"
 						>
-							<div class="border-base-900 dark:border-base-50 h-5 w-3 rounded-sm border-2"></div>
+							<div class="border-base-900 dark:border-base-50 h-3.5 w-2 rounded-xs border"></div>
 
 							<span class="sr-only">set size to 1x2</span>
 						</button>
@@ -483,9 +485,9 @@
 							onclick={() => {
 								setSize(4, 4);
 							}}
-							class="hover:bg-accent-500/10 cursor-pointer rounded-xl p-2"
+							class="hover:bg-accent-500/10 cursor-pointer rounded-lg p-1.5"
 						>
-							<div class="border-base-900 dark:border-base-50 h-5 w-5 rounded-sm border-2"></div>
+							<div class="border-base-900 dark:border-base-50 size-3.5 rounded-xs border"></div>
 
 							<span class="sr-only">set size to 2x2</span>
 						</button>
@@ -493,7 +495,7 @@
 
 					<button
 						onclick={() => toggleCardSettings?.(item.id)}
-						class="hover:bg-accent-500/10 cursor-pointer rounded-xl p-2"
+						class="hover:bg-accent-500/10 cursor-pointer rounded-lg p-1.5"
 					>
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
@@ -501,7 +503,7 @@
 							viewBox="0 0 24 24"
 							stroke-width="2"
 							stroke="currentColor"
-							class="size-5"
+							class="size-3.5"
 						>
 							<path
 								stroke-linecap="round"
