@@ -10,6 +10,7 @@
 	import { login, signup } from '$lib/atproto';
 	import type { ActorIdentifier } from '@atcute/lexicons';
 	import LoginModal from '$lib/atproto/LoginModal.svelte';
+	import ThemeSwitcher from '$lib/themes/ThemeSwitcher.svelte';
 
 	let { children, data } = $props();
 	let showThemeToggle = $derived(
@@ -36,3 +37,5 @@
 {/if}
 
 <LoginModal />
+
+<ThemeSwitcher />

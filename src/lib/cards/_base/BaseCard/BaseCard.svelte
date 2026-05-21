@@ -4,10 +4,12 @@
 	import type { Snippet } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { CardDefinitionsByType, getColor } from '../..';
+	import { themeState } from '$lib/themes/state.svelte';
+	import { THEMES } from '$lib/themes/themes';
 
 	const colors = {
 		base: 'bg-base-200/50 dark:bg-base-950/50',
-		accent: 'bg-accent-400 dark:bg-accent-500 accent',
+		accent: 'bg-accent-400 dark:bg-accent-500',
 		transparent: ''
 	} as Record<string, string>;
 
@@ -31,6 +33,36 @@
 
 	let color = $derived(getColor(item));
 	let noOverflow = $derived(CardDefinitionsByType[item.cardType]?.noOverflow ?? false);
+	let variantId = $derived<'base' | 'accent' | 'transparent' | 'colored'>(
+		!color || color === 'base'
+			? 'base'
+			: color === 'accent'
+				? 'accent'
+				: color === 'transparent'
+					? 'transparent'
+					: 'colored'
+	);
+	let variantClass = $derived(`variant-${variantId}`);
+
+	let activeTheme = $derived(THEMES.find((t) => t.id === themeState.id));
+	// Per-variant wrapper class for the inner content div. Default behavior:
+	// accent/colored cards have a saturated bg, so `.light` suppresses dark
+	// utilities (keep text dark). Themes can override (e.g. Terminal's
+	// border-only treatment doesn't fill the card, so `.light` shouldn't apply).
+	let wrapperClass = $derived.by(() => {
+		const themeOverride = activeTheme?.cardVariants?.[variantId]?.wrapperClass;
+		if (themeOverride !== undefined) return themeOverride;
+		return variantId === 'accent' || variantId === 'colored' ? 'light' : '';
+	});
+	// Per-variant extra class on the outer card. Default `.accent` for
+	// accent/colored fires card-internal `accent:` utilities (designed for
+	// saturated accent bg). Themes whose accent variant isn't a solid fill
+	// should override to `''`.
+	let outerClass = $derived.by(() => {
+		const themeOverride = activeTheme?.cardVariants?.[variantId]?.outerClass;
+		if (themeOverride !== undefined) return themeOverride;
+		return variantId === 'accent' || variantId === 'colored' ? 'accent' : '';
+	});
 </script>
 
 <div
@@ -42,6 +74,9 @@
 		'card group/card selection:bg-accent-600/50 @container/card relative isolate z-0 h-full w-full rounded-3xl outline-offset-2 transition-[outline] duration-200',
 		isEditing ? 'transition-all' : '',
 		color ? (colors[color] ?? colors.accent) : colors.base,
+		outerClass,
+		'themed-card',
+		variantClass,
 		color !== 'accent' && item.color !== 'base' && item.color !== 'transparent' ? color : '',
 		showOutline ? 'outline-2' : '',
 		className
@@ -52,7 +87,7 @@
 		class={[
 			'text-base-900 dark:text-base-50 relative isolate h-full w-full rounded-3xl',
 			noOverflow ? 'overflow-visible' : 'overflow-hidden',
-			color !== 'base' && color != 'transparent' ? 'light' : ''
+			wrapperClass
 		]}
 	>
 		{@render children?.()}

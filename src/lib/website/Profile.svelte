@@ -69,7 +69,7 @@
 			/>
 		</a>
 
-		<div class="text-4xl font-bold wrap-anywhere">
+		<div class="themed-display text-4xl font-bold wrap-anywhere">
 			{getName(data)}
 		</div>
 
