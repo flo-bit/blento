@@ -34,6 +34,7 @@
 		"@sveltejs/vite-plugin-svelte": "^7.0.0",
 		"@tailwindcss/forms": "^0.5.11",
 		"@tailwindcss/vite": "^4.2.1",
+		"@types/node": "^25.9.1",
 		"@types/turndown": "^5.0.6",
 		"eslint": "^10.0.3",
 		"eslint-config-prettier": "^10.1.8",
@@ -66,7 +67,7 @@
 		"@atcute/standard-site": "^1.0.1",
 		"@atcute/tid": "^1.1.2",
 		"@atmo-dev/contrail": "^0.5.0",
-		"@atmo-dev/events-ui": "link:../../atmo-events/packages/ui",
+		"@atmo-dev/events-ui": "^0.1.0",
 		"@cloudflare/workers-types": "^4.20260313.1",
 		"@ethercorps/sveltekit-og": "^4.2.1",
 		"@floating-ui/dom": "^1.7.6",
@@ -74,6 +75,7 @@
 		"@foxui/colors": "^0.8.5",
 		"@foxui/core": "^0.9.1",
 		"@foxui/social": "^0.8.9",
+		"@foxui/text": "^0.8.5",
 		"@foxui/time": "^0.8.5",
 		"@foxui/visual": "^0.8.7",
 		"@internationalized/date": "^3.12.0",
@@ -122,6 +124,6 @@
 		"turndown": "^7.2.2",
 		"wrangler": "^4.73.0"
 	},
-	"packageManager": "pnpm@9.15.0",
+	"packageManager": "pnpm@11.2.2",
 	"license": "MIT"
 }
