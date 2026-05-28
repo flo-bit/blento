@@ -3,7 +3,6 @@
 	import { onMount } from 'svelte';
 	import { getAdditionalUserData, getDidContext, getHandleContext } from '$lib/website/context';
 	import { CardDefinitionsByType } from '../..';
-	import DerakkumaAvatar from './DerakkumaAvatar.svelte';
 	import { blobUrl, type DerakkumaProfileValue, type RepoRecord } from './shared';
 
 	let { item }: { item: Item } = $props();
@@ -28,13 +27,29 @@
 	let partner = $derived(blobUrl(did, value?.partnerImage));
 	let course = $derived(blobUrl(did, value?.courseImage));
 	let classImage = $derived(blobUrl(did, value?.classImage));
+	let profileImageHasError = $state(false);
 </script>
 
 <div class="flex h-full w-full flex-col gap-3 overflow-hidden p-4">
 	{#if value}
 		<div class="flex min-h-0 flex-1 gap-3">
 			<div class="size-20 shrink-0">
-				<DerakkumaAvatar src={profileImage} alt={value.playerName ?? ''} />
+				{#if profileImage && !profileImageHasError}
+					<img
+						src={profileImage}
+						alt={value.playerName ?? ''}
+						class="h-full w-full rounded-xl object-cover"
+						onerror={() => {
+							profileImageHasError = true;
+						}}
+					/>
+				{:else}
+					<div
+						class="bg-base-200 dark:bg-base-800 accent:bg-accent-700/40 flex h-full w-full items-center justify-center rounded-xl text-lg"
+					>
+						🐻
+					</div>
+				{/if}
 			</div>
 			<div class="min-w-0 flex-1">
 				<div class="text-accent-500 accent:text-accent-950 truncate text-lg font-bold">
