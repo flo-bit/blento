@@ -38,6 +38,7 @@ import { CountdownCardDefinition } from './utilities/CountdownCard';
 import { SpotifyCardDefinition } from './media/SpotifyCard';
 import { AppleMusicCardDefinition } from './media/AppleMusicCard';
 import { SoundCloudCardDefinition } from './media/SoundCloudCard';
+import { BandcampCardDefinition } from './media/BandcampCard';
 import { ButtonCardDefinition } from './utilities/ButtonCard';
 import { GuestbookCardDefinition } from './social/GuestbookCard';
 import { FriendsCardDefinition } from './social/FriendsCard';
@@ -109,6 +110,7 @@ export const AllCardDefinitions = [
 	SpotifyCardDefinition,
 	AppleMusicCardDefinition,
 	SoundCloudCardDefinition,
+	BandcampCardDefinition,
 	// Model3DCardDefinition
 	FriendsCardDefinition,
 	GitHubContributorsCardDefinition,
