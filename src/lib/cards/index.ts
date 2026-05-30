@@ -136,7 +136,7 @@ export const AllCardDefinitions = [
 	KichCookingLogCardDefinition,
 	SecretImageCardDefinition,
 	RPGActorCardDefinition,
-	ButtondownCardDefinition
+	ButtondownCardDefinition,
 	BufoStatusCardDefinition
 ] as const;
 
