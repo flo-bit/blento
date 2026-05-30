@@ -1,6 +1,6 @@
 import type { Item, WebsiteData, SectionRecord } from '../types';
 import { CardDefinitionsByType } from '../cards';
-import { deleteRecord, putRecord } from '$lib/atproto';
+import { deleteRecord, getRecord, putRecord } from '$lib/atproto';
 import { getName, getDescription, getHideProfileSection } from './website';
 
 export async function savePage(
@@ -73,49 +73,7 @@ export async function savePage(
 		}
 	}
 
-	if (
-		data.publication?.preferences?.hideProfile !== undefined &&
-		data.publication?.preferences?.hideProfileSection === undefined
-	) {
-		data.publication.preferences.hideProfileSection = data.publication?.preferences?.hideProfile;
-	}
-
-	if (!originalPublication || originalPublication !== JSON.stringify(data.publication)) {
-		data.publication ??= {
-			name: getName(data),
-			description: getDescription(data),
-			preferences: {
-				hideProfileSection: getHideProfileSection(data)
-			}
-		};
-
-		if (!data.publication.url) {
-			data.publication.url = 'https://blento.app/' + data.handle;
-
-			if (data.page !== 'blento.self') {
-				data.publication.url += '/' + data.page.replace('blento.', '');
-			}
-		}
-		if (data.page !== 'blento.self') {
-			promises.push(
-				putRecord({
-					collection: 'app.blento.page',
-					rkey: data.page,
-					record: data.publication
-				})
-			);
-		} else {
-			promises.push(
-				putRecord({
-					collection: 'site.standard.publication',
-					rkey: data.page,
-					record: data.publication
-				})
-			);
-		}
-
-		console.log('updating or adding publication', data.publication);
-	}
+	promises.push(savePublication(data, originalPublication));
 
 	// check if pronouns edited and save
 	if (data.pronounsRecord?.value?.sets?.length) {
@@ -144,4 +102,61 @@ export async function savePage(
 	// Invalidate cached OG image so the next scrape regenerates it.
 	// Fire-and-forget; server checks auth against the signed-cookie session.
 	fetch(`/${data.did}/og-new.png`, { method: 'DELETE' }).catch(() => {});
+}
+
+// Page settings now live in the `app.blento.page` collection. Older sites stored
+// the self page in `site.standard.publication` — migrate those by writing the new
+// record first and deleting the legacy one only once that write succeeds.
+async function savePublication(data: WebsiteData, originalPublication: string) {
+	const isSelf = data.page === 'blento.self';
+
+	// Normalize the legacy hideProfile preference into hideProfileSection.
+	if (
+		data.publication?.preferences?.hideProfile !== undefined &&
+		data.publication?.preferences?.hideProfileSection === undefined
+	) {
+		data.publication.preferences.hideProfileSection = data.publication?.preferences?.hideProfile;
+	}
+
+	// Detect a legacy self-page record so we can clean it up after migrating.
+	// A read failure just means we skip cleanup this time (retried on next save).
+	let legacyExists = false;
+	if (isSelf) {
+		const legacy = await getRecord({
+			collection: 'site.standard.publication',
+			rkey: 'blento.self'
+		}).catch(() => undefined);
+		legacyExists = Boolean(legacy?.value);
+	}
+
+	const changed = !originalPublication || originalPublication !== JSON.stringify(data.publication);
+
+	// Nothing changed and nothing to migrate — leave the record untouched.
+	if (!changed && !legacyExists) return;
+
+	data.publication ??= {
+		name: getName(data),
+		description: getDescription(data),
+		preferences: {
+			hideProfileSection: getHideProfileSection(data)
+		}
+	};
+
+	if (!data.publication.url) {
+		data.publication.url = 'https://blento.app/' + data.handle;
+		if (!isSelf) {
+			data.publication.url += '/' + data.page.replace('blento.', '');
+		}
+	}
+
+	// Write the canonical record first; only remove the legacy one if it succeeds.
+	await putRecord({
+		collection: 'app.blento.page',
+		rkey: data.page,
+		record: data.publication
+	});
+
+	if (isSelf && legacyExists) {
+		await deleteRecord({ collection: 'site.standard.publication', rkey: 'blento.self' });
+	}
 }

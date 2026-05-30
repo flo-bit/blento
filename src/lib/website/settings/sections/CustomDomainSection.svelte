@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { putRecord, getRecord } from '$lib/atproto/methods';
+	import { putRecord, deleteRecord, getPagePublication } from '$lib/atproto/methods';
 	import { user } from '$lib/atproto';
 	import { Button, Input } from '@foxui/core';
 	import { launchConfetti } from '@foxui/visual';
@@ -29,18 +29,18 @@
 	async function removeDomain() {
 		step = 'removing';
 		try {
-			const existing = await getRecord({
-				collection: 'site.standard.publication',
-				rkey: 'blento.self'
-			});
+			const existing = await getPagePublication({});
 
 			if (existing?.value) {
 				const { url: _url, ...rest } = existing.value as Record<string, unknown>;
 				await putRecord({
-					collection: 'site.standard.publication',
+					collection: 'app.blento.page',
 					rkey: 'blento.self',
 					record: rest
 				});
+				if (existing.legacy) {
+					await deleteRecord({ collection: 'site.standard.publication', rkey: 'blento.self' });
+				}
 			}
 
 			step = 'input';
@@ -73,19 +73,19 @@
 				return;
 			}
 
-			const existing = await getRecord({
-				collection: 'site.standard.publication',
-				rkey: 'blento.self'
-			});
+			const existing = await getPagePublication({});
 
 			await putRecord({
-				collection: 'site.standard.publication',
+				collection: 'app.blento.page',
 				rkey: 'blento.self',
 				record: {
 					...(existing?.value || {}),
 					url: 'https://' + domain
 				}
 			});
+			if (existing?.legacy) {
+				await deleteRecord({ collection: 'site.standard.publication', rkey: 'blento.self' });
+			}
 
 			const activateRes = await fetch('/api/activate-domain', {
 				method: 'POST',

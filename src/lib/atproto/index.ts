@@ -8,6 +8,7 @@ export {
 	getClient,
 	listRecords,
 	getRecord,
+	getPagePublication,
 	putRecord,
 	deleteRecord,
 	uploadBlob,

@@ -1,4 +1,11 @@
-import { getDetailedProfile, listRecords, resolveHandle, parseUri, getRecord } from '$lib/atproto';
+import {
+	getDetailedProfile,
+	listRecords,
+	resolveHandle,
+	parseUri,
+	getRecord,
+	getPagePublication
+} from '$lib/atproto';
 import { getCDNImageBlobUrl } from '$lib/atproto/methods';
 import { CardDefinitionsByType } from '$lib/cards';
 import type { CacheService } from '$lib/helpers/cache';
@@ -55,7 +62,8 @@ function extractProfileData(
 	pronounsRecord: PronounsRecord | undefined;
 } {
 	let bskyRecord: Record<string, unknown> | undefined;
-	let pubRecord: Record<string, unknown> | undefined;
+	let pagePubRecord: Record<string, unknown> | undefined;
+	let legacyPubRecord: Record<string, unknown> | undefined;
 	let pronounsValue: Record<string, unknown> | undefined;
 	let handle = did;
 
@@ -67,8 +75,13 @@ function extractProfileData(
 		if (p.collection === 'app.bsky.actor.profile' && value) {
 			bskyRecord = value;
 		}
+		// Canonical page settings live in app.blento.page; site.standard.publication
+		// is the legacy location for the self page.
+		if (p.collection === 'app.blento.page' && p.rkey === 'blento.self' && value) {
+			pagePubRecord = value;
+		}
 		if (p.collection === 'site.standard.publication' && value) {
-			pubRecord = value;
+			legacyPubRecord = value;
 		}
 		if (p.collection === 'app.nearhorizon.actor.pronouns' && value) {
 			pronounsValue = value;
@@ -90,7 +103,8 @@ function extractProfileData(
 		avatar
 	} as AppBskyActorDefs.ProfileViewDetailed;
 
-	const publication = pubRecord ? (pubRecord as WebsiteData['publication']) : undefined;
+	const pub = pagePubRecord ?? legacyPubRecord;
+	const publication = pub ? (pub as WebsiteData['publication']) : undefined;
 
 	const pronounsRecord = pronounsValue ? ({ value: pronounsValue } as PronounsRecord) : undefined;
 
@@ -199,12 +213,10 @@ function getPronounsFromPDS(did: Did) {
 	}).catch(() => undefined) as Promise<PronounsRecord | undefined>;
 }
 
+// Prefer the canonical app.blento.page record, falling back to the legacy
+// site.standard.publication record (self page only).
 function getSelfPublicationFromPDS(did: Did) {
-	return getRecord({
-		did,
-		collection: 'site.standard.publication',
-		rkey: 'blento.self'
-	}).catch(() => undefined);
+	return getPagePublication({ did }).catch(() => undefined);
 }
 
 export async function loadData(
@@ -289,10 +301,11 @@ export async function loadData(
 		pronounsRecord = pronouns;
 	}
 
-	// If no publication found from contrail profiles, check page records
-	if (!publication) {
-		const pubFromPages = pageRecords.find((v) => parseUri(v.uri)?.rkey === 'blento.' + page);
-		publication = pubFromPages?.value as WebsiteData['publication'] | undefined;
+	// app.blento.page is the canonical store for page settings — prefer it over the
+	// legacy site.standard.publication value resolved above (covers self + sub-pages).
+	const pubFromPages = pageRecords.find((v) => parseUri(v.uri)?.rkey === fullPage);
+	if (pubFromPages?.value) {
+		publication = pubFromPages.value as WebsiteData['publication'];
 	}
 
 	publication ??= defaultPublication(profile);
@@ -396,14 +409,12 @@ export async function loadCardData(
 	const card = migrateCard(structuredClone(cardValue));
 	const page = card.page ?? 'blento.self';
 
-	// For non-self pages, publication comes from app.blento.page (not in contrail profiles).
+	// Publication for this page: prefer app.blento.page, fall back to the legacy
+	// site.standard.publication (self page only). Always re-resolve for non-self
+	// pages since contrail profiles only carry the self-page publication.
 	if (!publication || page !== 'blento.self') {
-		const pubRecord = await getRecord({
-			did,
-			collection: page === 'blento.self' ? 'site.standard.publication' : 'app.blento.page',
-			rkey: page
-		}).catch(() => undefined);
-		if (pubRecord?.value) publication = pubRecord.value as WebsiteData['publication'];
+		const pub = await getPagePublication({ did, page });
+		if (pub?.value) publication = pub.value as WebsiteData['publication'];
 	}
 
 	const cards = [card];

@@ -94,23 +94,50 @@ export async function getDetailedProfile(data?: { did?: Did; client?: Client }) 
 	return response.data;
 }
 
+/**
+ * Reads a page's publication record, preferring the canonical `app.blento.page`
+ * collection and falling back to the legacy `site.standard.publication` record
+ * (only the self page was ever stored there). Returns the record value plus a
+ * `legacy` flag indicating which collection it came from.
+ */
+export async function getPagePublication({
+	did,
+	page = 'blento.self',
+	client
+}: {
+	did?: Did;
+	page?: string;
+	client?: Client;
+}) {
+	const fromPage = await getRecord({
+		did,
+		collection: 'app.blento.page',
+		rkey: page,
+		client
+	}).catch(() => undefined);
+	if (fromPage?.value) return { value: fromPage.value, legacy: false };
+
+	if (page === 'blento.self') {
+		const legacy = await getRecord({
+			did,
+			collection: 'site.standard.publication',
+			rkey: 'blento.self',
+			client
+		}).catch(() => undefined);
+		if (legacy?.value) return { value: legacy.value, legacy: true };
+	}
+
+	return undefined;
+}
+
 export async function getBlentoOrBskyProfile(data: { did: Did; client?: Client }): Promise<
 	Awaited<ReturnType<typeof getDetailedProfile>> & {
 		hasBlento: boolean;
 		url?: string;
 	}
 > {
-	let blentoProfile;
-	try {
-		blentoProfile = await getRecord({
-			collection: 'site.standard.publication',
-			did: data?.did,
-			rkey: 'blento.self',
-			client: data?.client
-		});
-	} catch {
-		// User doesn't have a blento publication — expected for most users
-	}
+	// Page settings live in app.blento.page (legacy: site.standard.publication).
+	const blentoProfile = await getPagePublication({ did: data?.did, client: data?.client });
 
 	let response;
 	try {

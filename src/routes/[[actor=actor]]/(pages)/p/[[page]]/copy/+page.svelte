@@ -137,19 +137,19 @@
 					publicationCopy.url += '/' + targetPage.replace('blento.', '');
 				}
 
-				// Save to appropriate collection based on destination page type
+				// Page settings live in app.blento.page for all pages now.
+				await putRecord({
+					collection: 'app.blento.page',
+					rkey: targetPage,
+					record: publicationCopy
+				});
+
+				// Clean up any legacy self-page record so it doesn't shadow the new one.
 				if (targetPage === 'blento.self') {
-					await putRecord({
+					await deleteRecord({
 						collection: 'site.standard.publication',
-						rkey: targetPage,
-						record: publicationCopy
-					});
-				} else {
-					await putRecord({
-						collection: 'app.blento.page',
-						rkey: targetPage,
-						record: publicationCopy
-					});
+						rkey: 'blento.self'
+					}).catch(() => {});
 				}
 			}
 

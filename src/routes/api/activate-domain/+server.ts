@@ -1,6 +1,6 @@
 import { json } from '@sveltejs/kit';
 import { isDid } from '@atcute/lexicons/syntax';
-import { getRecord } from '$lib/atproto/methods';
+import { getPagePublication } from '$lib/atproto/methods';
 import { verifyDomainDns } from '$lib/helpers/dns';
 import type { Did } from '@atcute/lexicons';
 
@@ -44,11 +44,7 @@ export async function POST({ request, platform, locals }) {
 
 	// Verify the user's ATProto profile has this domain set
 	try {
-		const record = await getRecord({
-			did: did as Did,
-			collection: 'site.standard.publication',
-			rkey: 'blento.self'
-		});
+		const record = await getPagePublication({ did: did as Did });
 
 		const url = (record?.value as Record<string, unknown>)?.url;
 		if (url !== `https://${domain}`) {

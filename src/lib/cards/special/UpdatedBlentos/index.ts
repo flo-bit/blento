@@ -23,6 +23,9 @@ function extractProfiles(
 	}>
 ): Map<string, ProfileWithBlentoFlag> {
 	const map = new Map<string, ProfileWithBlentoFlag>();
+	// DIDs whose blento info came from the canonical app.blento.page record, so the
+	// legacy site.standard.publication record never overrides it.
+	const fromPage = new Set<string>();
 
 	for (const p of profiles) {
 		const existing = map.get(p.did) ?? {
@@ -48,7 +51,12 @@ function extractProfiles(
 			}
 		}
 
-		if (p.collection === 'site.standard.publication' && value) {
+		// Canonical (app.blento.page) wins over legacy (site.standard.publication)
+		// regardless of iteration order.
+		const isPagePub = p.collection === 'app.blento.page' && p.rkey === 'blento.self';
+		const isLegacyPub = p.collection === 'site.standard.publication';
+		if (value && (isPagePub || (isLegacyPub && !fromPage.has(p.did)))) {
+			if (isPagePub) fromPage.add(p.did);
 			existing.hasBlento = true;
 			existing.displayName = (value.name as string) ?? existing.displayName;
 			existing.url = value.url as string | undefined;
