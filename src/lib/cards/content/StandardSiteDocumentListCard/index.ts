@@ -17,7 +17,7 @@ export const StandardSiteDocumentListCardDefinition = {
 
 	loadData: async (_, { did }) => {
 		const records = await listRecords({ did, collection: 'site.standard.document' });
-		const items: BlogItem[] = [];
+		const itemsByHref = new Map<string, BlogItem>();
 
 		const publications: Record<string, SiteStandardDocument.Main['site']> = {};
 		for (const record of records) {
@@ -52,15 +52,20 @@ export const StandardSiteDocumentListCardDefinition = {
 				if (!record.value.site) continue;
 			}
 
-			items.push({
-				href: `${record.value.site}${record.value.path}`,
+			const href = `${record.value.site}${record.value.path}`;
+			const candidate: BlogItem = {
+				href,
 				title: record.value.title,
 				description: record.value.description,
 				date: record.value.publishedAt
-			});
+			};
+			const existing = itemsByHref.get(href);
+			if (!existing || Date.parse(candidate.date) > Date.parse(existing.date)) {
+				itemsByHref.set(href, candidate);
+			}
 		}
 
-		return items.toSorted((a, b) => Date.parse(b.date) - Date.parse(a.date));
+		return [...itemsByHref.values()].toSorted((a, b) => Date.parse(b.date) - Date.parse(a.date));
 	},
 
 	name: 'Blog Posts',
