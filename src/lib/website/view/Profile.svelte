@@ -91,6 +91,6 @@
 			</div>
 		</div>
 
-		<MadeWithBlento class="hidden {profilePosition === 'side' && '@5xl/wrapper:block'}" />
+		<MadeWithBlento class="hidden pb-8 {profilePosition === 'side' && '@5xl/wrapper:block'}" />
 	</div>
 </div>

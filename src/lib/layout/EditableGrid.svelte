@@ -295,18 +295,20 @@
 
 	// --- File drop handlers ---
 
-	function hasImageFile(dt: DataTransfer): boolean {
+	const isMediaFile = (type: string) => type.startsWith('image/') || type.startsWith('video/');
+
+	function hasMediaFile(dt: DataTransfer): boolean {
 		if (dt.items) {
 			for (let i = 0; i < dt.items.length; i++) {
 				const item = dt.items[i];
-				if (item && item.kind === 'file' && item.type.startsWith('image/')) {
+				if (item && item.kind === 'file' && isMediaFile(item.type)) {
 					return true;
 				}
 			}
 		} else if (dt.files) {
 			for (let i = 0; i < dt.files.length; i++) {
 				const file = dt.files[i];
-				if (file?.type.startsWith('image/')) {
+				if (file && isMediaFile(file.type)) {
 					return true;
 				}
 			}
@@ -318,7 +320,7 @@
 		const dt = event.dataTransfer;
 		if (!dt) return;
 
-		if (hasImageFile(dt)) {
+		if (hasMediaFile(dt)) {
 			event.preventDefault();
 			event.stopPropagation();
 			fileDragOver = true;
@@ -338,15 +340,13 @@
 
 		if (!event.dataTransfer?.files?.length || !onfiledrop || !container) return;
 
-		const imageFiles = Array.from(event.dataTransfer.files).filter((f) =>
-			f?.type.startsWith('image/')
-		);
-		if (imageFiles.length === 0) return;
+		const mediaFiles = Array.from(event.dataTransfer.files).filter((f) => f && isMediaFile(f.type));
+		if (mediaFiles.length === 0) return;
 
 		const cardW = isMobile ? 4 : 2;
 		const { gridX, gridY } = pixelToGrid(event.clientX, event.clientY, container, isMobile, cardW);
 
-		onfiledrop(imageFiles, gridX, gridY);
+		onfiledrop(mediaFiles, gridX, gridY);
 	}
 </script>
 

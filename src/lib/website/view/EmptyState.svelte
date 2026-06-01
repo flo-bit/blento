@@ -87,7 +87,10 @@
 		return items;
 	});
 
-	let maxHeight = $derived(cards.reduce((max, item) => Math.max(max, item.y + item.h), 0));
+	let desktopMaxHeight = $derived(cards.reduce((max, item) => Math.max(max, item.y + item.h), 0));
+	let mobileMaxHeight = $derived(
+		cards.reduce((max, item) => Math.max(max, item.mobileY + item.mobileH), 0)
+	);
 </script>
 
 {#each cards as item (item.id)}
@@ -96,5 +99,20 @@
 	</GridBaseCard>
 {/each}
 
-<!-- Spacer for grid height -->
-<div style="height: {(maxHeight / 8) * 100}cqw;"></div>
+<!-- Spacer for grid height (matches GridBaseCard's mobile/desktop breakpoint) -->
+<div
+	class="grid-spacer"
+	style="--mh: {(mobileMaxHeight / 8) * 100}; --dh: {(desktopMaxHeight / 8) * 100};"
+></div>
+
+<style>
+	.grid-spacer {
+		height: calc(var(--mh) * 1cqw);
+	}
+
+	@container grid (width >= 42rem) {
+		.grid-spacer {
+			height: calc(var(--dh) * 1cqw);
+		}
+	}
+</style>

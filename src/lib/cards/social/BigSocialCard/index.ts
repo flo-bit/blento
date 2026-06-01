@@ -125,7 +125,7 @@ export const platformPatterns: Record<string, RegExp> = {
 	tiktok: /(?:tiktok\.com)/i,
 	linkedin: /(?:linkedin\.com)/i,
 	bluesky: /(?:bsky\.app|bsky\.social)/i,
-	threads: /(?:threads\.net)/i,
+	threads: /(?:threads\.com|threads\.net)/i,
 	snapchat: /(?:snapchat\.com)/i,
 	pinterest: /(?:pinterest\.com|pin\.it)/i,
 	twitch: /(?:twitch\.tv)/i,
