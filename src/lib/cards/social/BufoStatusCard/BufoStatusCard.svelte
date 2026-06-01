@@ -6,8 +6,7 @@
 		getHandleContext
 	} from '$lib/website/data/context';
 	import { onMount } from 'svelte';
-	import { CardDefinitionsByType } from '../..';
-	import type { BufoStatusData } from '.';
+	import { BufoStatusCardDefinition, type BufoStatusData } from '.';
 
 	let { item }: ContentComponentProps = $props();
 
@@ -22,7 +21,7 @@
 
 	onMount(async () => {
 		if (status === undefined) {
-			status = (await CardDefinitionsByType[item.cardType]?.loadData?.([item], {
+			status = (await BufoStatusCardDefinition.loadData?.([item], {
 				did,
 				handle
 			})) as BufoStatusData;

@@ -61,14 +61,14 @@
 	class={[
 		'relative mx-auto flex max-w-lg flex-col justify-between px-8',
 		profilePosition === 'side'
-			? '@5xl/wrapper:fixed @5xl/wrapper:h-screen @5xl/wrapper:w-1/4 @5xl/wrapper:max-w-none @5xl/wrapper:px-12'
+			? '@5xl/wrapper:fixed @5xl/wrapper:h-[calc(100vh-3.5rem)] @5xl/wrapper:w-1/4 @5xl/wrapper:max-w-none @5xl/wrapper:px-12'
 			: '@5xl/wrapper:max-w-4xl @5xl/wrapper:px-12'
 	]}
 >
 	<div
 		class={[
 			'flex flex-col gap-4 pt-10 pb-0',
-			profilePosition === 'side' && '@5xl/wrapper:h-screen @5xl/wrapper:pt-12'
+			profilePosition === 'side' && '@5xl/wrapper:h-[calc(100vh-3.5rem)] @5xl/wrapper:pt-12'
 		]}
 	>
 		<!-- Avatar with edit capability -->
@@ -189,7 +189,7 @@
 		</div>
 
 		{#if !hideBlento}
-			<MadeWithBlento class="hidden {profilePosition === 'side' && '@5xl/wrapper:block'}" />
+			<MadeWithBlento class="hidden pb-8 {profilePosition === 'side' && '@5xl/wrapper:block'}" />
 		{/if}
 	</div>
 </div>
