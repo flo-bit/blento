@@ -40,11 +40,20 @@ export type DerakkumaProfileValue = {
 
 export type DerakkumaScoreValue = {
 	chart?: StrongRef | Record<string, unknown>;
+	songName?: string;
+	chartSongName?: string;
+	chartSongId?: string;
+	chartDifficulty?: string;
+	chartLevel?: string;
+	chartType?: string;
 	achievement?: string | number;
 	scoreRank?: string;
 	fcStatus?: string;
 	syncStatus?: string;
+	dxScore?: DerakkumaDxScoreValue;
+	dxStar?: number;
 	playedAt?: string;
+	lastPlayed?: string;
 	createdAt?: string;
 	updatedAt?: string;
 	playCount?: number;
@@ -67,17 +76,31 @@ export type DerakkumaCircleValue = {
 };
 
 type DerakkumaSongValue = {
+	songId?: string;
 	title?: string;
 	artist?: string;
+	category?: string;
+	bpm?: number;
+	imageName?: string;
 	coverArt?: BlobRef;
+	charts?: string[];
 };
 
 type DerakkumaChartValue = {
 	song?: StrongRef | Record<string, unknown>;
 	songId?: string;
 	songName?: string;
+	type?: string;
 	difficulty?: string;
 	level?: string;
+	levelValue?: string;
+	internalLevel?: string | null;
+	internalLevelValue?: string | null;
+};
+
+type DerakkumaDxScoreValue = {
+	achieved?: number;
+	total?: number;
 };
 
 export type EnrichedDerakkumaScore = RepoRecord<DerakkumaScoreValue> & {
@@ -192,14 +215,27 @@ export function scoreTitle(score: EnrichedDerakkumaScore): string {
 		score.song?.value.title ??
 		score.chart?.value.songName ??
 		score.chart?.value.songId ??
+		score.value.songName ??
+		score.value.chartSongName ??
+		score.value.chartSongId ??
+		strongRefUri(score.value.chart) ??
 		'Unknown song'
 	);
 }
 
 export function scoreSubtitle(score: EnrichedDerakkumaScore): string {
-	return [score.chart?.value.difficulty, score.chart?.value.level, score.value.achievement]
+	return [
+		score.chart?.value.difficulty ?? score.value.chartDifficulty,
+		score.chart?.value.level ?? score.value.chartLevel,
+		score.value.achievement
+	]
 		.filter(Boolean)
 		.join(' · ');
+}
+
+function dxScoreString(score?: DerakkumaDxScoreValue): string | undefined {
+	if (!score || (!score.achieved && !score.total)) return;
+	return `DX ${score.achieved ?? 0}/${score.total ?? 0}`;
 }
 
 export function scoreMeta(score: EnrichedDerakkumaScore): string {
@@ -207,7 +243,9 @@ export function scoreMeta(score: EnrichedDerakkumaScore): string {
 		score.song?.value.artist,
 		score.value.scoreRank?.toUpperCase(),
 		score.value.fcStatus?.toUpperCase(),
-		score.value.syncStatus?.toUpperCase()
+		score.value.syncStatus?.toUpperCase(),
+		dxScoreString(score.value.dxScore),
+		score.value.dxStar ? `DX ✦${score.value.dxStar}` : undefined
 	]
 		.filter(Boolean)
 		.join(' · ');

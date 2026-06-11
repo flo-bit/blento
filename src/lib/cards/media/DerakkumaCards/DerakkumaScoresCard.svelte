@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Item } from '$lib/types';
 	import { onMount } from 'svelte';
-	import { getAdditionalUserData, getDidContext, getHandleContext } from '$lib/website/context';
+	import { getAdditionalUserData, getDidContext, getHandleContext } from '$lib/website/data/context';
 	import { CardDefinitionsByType } from '../..';
 	import { RelativeTime } from '@foxui/time';
 	import { scoreMeta, scoreSubtitle, scoreTitle, type EnrichedDerakkumaScore } from './shared';
@@ -22,7 +22,8 @@
 	});
 
 	function dateFor(score: EnrichedDerakkumaScore): Date | undefined {
-		const value = score.value.playedAt ?? score.value.updatedAt ?? score.value.createdAt;
+		const value =
+			score.value.playedAt ?? score.value.lastPlayed ?? score.value.updatedAt ?? score.value.createdAt;
 		if (!value) return;
 		return new Date(value);
 	}
