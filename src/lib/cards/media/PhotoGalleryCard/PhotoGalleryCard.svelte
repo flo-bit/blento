@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Item } from '$lib/types';
 	import { onMount } from 'svelte';
-	import { getAdditionalUserData } from '$lib/website/context';
+	import { getAdditionalUserData } from '$lib/website/data/context';
 	import { getCDNImageBlobUrl, parseUri } from '$lib/atproto';
 	import { loadGrainGalleryData } from './helpers';
 

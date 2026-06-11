@@ -1,6 +1,7 @@
 import type { CardDefinition } from '../../types';
 import CreateSoundCloudCardModal from './CreateSoundCloudCardModal.svelte';
 import SoundCloudCard from './SoundCloudCard.svelte';
+import SourceSettings from '../../_settings/SourceSettings.svelte';
 
 const cardType = 'soundcloud-embed';
 
@@ -8,6 +9,12 @@ export const SoundCloudCardDefinition = {
 	type: cardType,
 	contentComponent: SoundCloudCard,
 	creationModalComponent: CreateSoundCloudCardModal,
+	settingsComponent: SourceSettings,
+	source: {
+		label: 'SoundCloud URL',
+		placeholder: 'soundcloud.com/…',
+		errorMessage: "That doesn't look like a SoundCloud link"
+	},
 	createNew: (item) => {
 		item.cardType = cardType;
 		item.cardData = {};

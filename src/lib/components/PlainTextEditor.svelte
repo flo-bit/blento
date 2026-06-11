@@ -36,6 +36,15 @@
 		onupdate?.(text);
 	};
 
+	// Keep the editor in sync when the bound value changes from outside (e.g. edited
+	// in the settings sidebar) without disrupting the user while they type here.
+	$effect(() => {
+		const incoming = contentDict[key] ?? defaultContent ?? '';
+		if (!editor || editor.isFocused) return;
+		if (editor.getText() === incoming) return;
+		editor.commands.setContent(incoming, { emitUpdate: false });
+	});
+
 	onMount(async () => {
 		if (!element || editor) return;
 

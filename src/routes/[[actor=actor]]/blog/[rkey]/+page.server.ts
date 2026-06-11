@@ -1,8 +1,8 @@
 import { error } from '@sveltejs/kit';
 import { getBlentoOrBskyProfile, getRecord, parseUri } from '$lib/atproto/methods.js';
-import { createCache, type CachedProfile } from '$lib/cache';
+import { createCache, type CachedProfile } from '$lib/helpers/cache';
 import type { Did } from '@atcute/lexicons';
-import { getActor } from '$lib/actor';
+import { getActor } from '$lib/helpers/actor';
 
 export async function load({ params, platform, request }) {
 	const { rkey } = params;

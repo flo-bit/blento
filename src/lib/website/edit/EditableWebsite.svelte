@@ -1,0 +1,824 @@
+<script lang="ts">
+	import { Button, Modal, toast, Toaster } from '@foxui/core';
+	import { checkAndUploadImage, getImage } from '$lib/helpers/images';
+	import { createEmptyCard, scrollToItem } from '$lib/helpers/items';
+	import { getHideProfileSection, getProfilePosition, getName } from '$lib/helpers/website';
+	import { savePage } from '$lib/helpers/save';
+	import { validateLink } from '$lib/helpers/links';
+	import { isTyping } from '$lib/helpers/utils';
+	import EditableProfile from './EditableProfile.svelte';
+	import type { Item, WebsiteData } from '../../types';
+	import { innerWidth } from 'svelte/reactivity/window';
+	import { AllCardDefinitions, CardDefinitionsByType } from '../../cards';
+	import { tick, type Component } from 'svelte';
+	import type { CardDefinition, CreationModalComponentProps } from '../../cards/types';
+	import { dev } from '$app/environment';
+	import { env } from '$env/dynamic/public';
+	import {
+		setIsCoarse,
+		setIsMobile,
+		setIsRealMobile,
+		setSelectedCardId,
+		setSelectCard,
+		setToggleCardSettings,
+		setOpenSectionSettings
+	} from '../data/context';
+	import ContextProvider from '../view/ContextProvider.svelte';
+	import Head from '../view/Head.svelte';
+	import SettingsOverlay from '../settings/SettingsOverlay.svelte';
+	import SettingsSidebar from './SettingsSidebar.svelte';
+	import InsertSectionButton from './InsertSectionButton.svelte';
+	import EditTopBar from './EditTopBar.svelte';
+	import MobileSelectionBar from './MobileSelectionBar.svelte';
+	// import PageSwitcherBar from './PageSwitcherBar.svelte';
+	import SaveModal from './SaveModal.svelte';
+	import { user } from '$lib/atproto';
+	import * as TID from '@atcute/tid';
+	import { launchConfetti } from '@foxui/visual';
+
+	import { createImageCard, createVideoCard } from '../data/file-processing';
+	import CardCommand from '$lib/components/card-command/CardCommand.svelte';
+	import ImageViewerProvider from '$lib/components/image-viewer/ImageViewerProvider.svelte';
+	import { SvelteMap } from 'svelte/reactivity';
+	import { shouldMirror, mirrorLayout } from '$lib/layout';
+	import { SectionDefinitionsByType } from '$lib/sections';
+	import { isSectionsEditingEnabled } from '$lib/sections/feature-flag';
+	import type { SectionRecord } from '$lib/types';
+	import MobileWarningModal from '$lib/components/modals/MobileWarningModal.svelte';
+
+	let {
+		data
+	}: {
+		data: WebsiteData;
+	} = $props();
+
+	// Check if floating login button will be visible (to hide MadeWithBlento)
+	const showLoginOnEditPage = $derived(!user.isLoggedIn);
+
+	const sectionsEditingEnabled = $derived(isSectionsEditingEnabled(data.did));
+
+	const ogImageUrl = $derived.by(() => {
+		const v = data.updatedAt ? `?v=${data.updatedAt}` : '';
+		return `${env.PUBLIC_DOMAIN}/${data.did}/og-new.png${v}`;
+	});
+
+	// Snapshot the original cards and sections so savePage can detect deletions.
+	// svelte-ignore state_referenced_locally
+	const originalCards: Item[] = structuredClone(data.cards);
+	// svelte-ignore state_referenced_locally
+	const originalSections: SectionRecord[] = structuredClone(data.sections);
+
+	// svelte-ignore state_referenced_locally
+	let items: Item[] = $state(data.cards);
+	// svelte-ignore state_referenced_locally
+	let sections: SectionRecord[] = $state(data.sections);
+
+	// svelte-ignore state_referenced_locally
+	let publication = $state(JSON.stringify(data.publication));
+
+	// svelte-ignore state_referenced_locally
+	let savedItemsSnapshot = JSON.stringify(data.cards);
+
+	// svelte-ignore state_referenced_locally
+	let savedPronouns = $state(JSON.stringify(data.pronounsRecord));
+
+	let hasUnsavedChanges = $state(false);
+
+	// Detect card content and publication changes (e.g. sidebar edits)
+	// The guard ensures JSON.stringify only runs while no changes are detected yet.
+	// Once hasUnsavedChanges is true, Svelte still fires this effect on item mutations
+	// but the early return makes it effectively free.
+	$effect(() => {
+		if (hasUnsavedChanges) return;
+		if (
+			JSON.stringify(items) !== savedItemsSnapshot ||
+			JSON.stringify(data.publication) !== publication ||
+			JSON.stringify(data.pronounsRecord) !== savedPronouns
+		) {
+			hasUnsavedChanges = true;
+		}
+	});
+
+	let gridRefs = new SvelteMap<string, HTMLDivElement>();
+
+	let showingMobileView = $state(false);
+	let isRealMobile = $derived((innerWidth.current ?? 1000) < 1024);
+	let isMobile = $derived(showingMobileView || isRealMobile);
+	let showMobileWarning = $state((innerWidth.current ?? 1000) < 1024);
+
+	setIsMobile(() => isMobile);
+	setIsRealMobile(() => isRealMobile);
+
+	// svelte-ignore state_referenced_locally
+	let editedOn = $state(data.publication.preferences?.editedOn ?? 0);
+
+	let layoutMode = $derived(data.publication.preferences?.layoutMode);
+
+	function onLayoutChanged() {
+		hasUnsavedChanges = true;
+		// Set the bit for the current layout: desktop=1, mobile=2
+		editedOn = editedOn | (isMobile ? 2 : 1);
+		if (shouldMirror(editedOn, layoutMode, isMobile)) {
+			mirrorLayout(items, isMobile);
+		}
+	}
+
+	const isCoarse = typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches;
+	setIsCoarse(() => isCoarse);
+
+	let selectedCardId: string | null = $state(null);
+	let selectedCard = $derived(
+		selectedCardId ? (items.find((i) => i.id === selectedCardId) ?? null) : null
+	);
+
+	let selectedSectionId: string | null = $state(null);
+	let selectedSection = $derived(
+		selectedSectionId ? (sections.find((s) => s.id === selectedSectionId) ?? null) : null
+	);
+
+	// svelte-ignore state_referenced_locally
+	let activeSectionId = $state(sections[0]?.id);
+
+	// The editor sidebar drills down: layout (all sections) → section → card.
+	let sidebarLevel: 'card' | 'section' | 'layout' = $derived(
+		selectedCardId ? 'card' : selectedSectionId ? 'section' : 'layout'
+	);
+
+	function selectSectionFor(cardId: string) {
+		if (!sectionsEditingEnabled) return;
+		const secId = items.find((i) => i.id === cardId)?.sectionId ?? null;
+		if (secId) {
+			selectedSectionId = secId;
+			activeSectionId = secId;
+		}
+	}
+
+	setSelectedCardId(() => selectedCardId);
+	setSelectCard((id: string | null) => {
+		selectedCardId = id;
+		if (id) selectSectionFor(id);
+	});
+
+	let cardSettingsOpen = $state(false);
+
+	// If the selected card is removed (e.g. deleted), drop the selection. With
+	// sections enabled this falls back to the section level; otherwise it closes
+	// the sidebar (matching the no-sections behaviour).
+	$effect(() => {
+		if (selectedCardId && !items.find((i) => i.id === selectedCardId)) {
+			selectedCardId = null;
+			if (!sectionsEditingEnabled) cardSettingsOpen = false;
+		}
+	});
+
+	setToggleCardSettings((id: string) => {
+		if (selectedCardId === id) {
+			cardSettingsOpen = !cardSettingsOpen;
+		} else {
+			selectedCardId = id;
+			selectSectionFor(id);
+			cardSettingsOpen = true;
+		}
+	});
+
+	setOpenSectionSettings((id: string) => openSection(id));
+
+	function openSection(id: string) {
+		selectedSectionId = id;
+		selectedCardId = null;
+		activeSectionId = id;
+		cardSettingsOpen = true;
+	}
+
+	// Layout toggle button: open the all-sections overview, or close if already there.
+	function toggleLayout() {
+		if (cardSettingsOpen && sidebarLevel === 'layout') {
+			cardSettingsOpen = false;
+		} else {
+			selectedCardId = null;
+			selectedSectionId = null;
+			cardSettingsOpen = true;
+		}
+	}
+
+	// Close the sidebar entirely and clear any selection.
+	function deselect() {
+		selectedCardId = null;
+		selectedSectionId = null;
+		cardSettingsOpen = false;
+	}
+
+	// Breadcrumb navigation: step up a level without closing the sidebar.
+	function goToLayout() {
+		selectedCardId = null;
+		selectedSectionId = null;
+	}
+
+	function goToSection() {
+		selectedCardId = null;
+	}
+
+	function resizeSelectedCard(w: number, h: number) {
+		if (!selectedCard) return;
+		const section = sections.find((s) => s.id === selectedCard!.sectionId);
+		const def = section ? SectionDefinitionsByType[section.sectionType] : undefined;
+		if (def?.resizeItem) {
+			def.resizeItem(selectedCard, items, w, h, isMobile);
+		}
+		onLayoutChanged();
+	}
+
+	let gridContainer = $derived(
+		activeSectionId ? gridRefs.get(activeSectionId) : gridRefs.values().next().value
+	);
+
+	let pendingExtraData: Record<string, any> | undefined = $state();
+
+	let activeSection = $derived(sections.find((s) => s.id === activeSectionId));
+	let activeSectionDef = $derived(
+		activeSection ? SectionDefinitionsByType[activeSection.sectionType] : undefined
+	);
+
+	function requestAddCard(extraData?: Record<string, any>) {
+		pendingExtraData = extraData;
+		showCardCommand = true;
+	}
+
+	function newCard(type: string = 'link', cardData?: any) {
+		selectedCardId = null;
+
+		let item = createEmptyCard(data.page, activeSectionId);
+		item.cardType = type;
+		item.cardData = cardData ?? {};
+
+		const cardDef = CardDefinitionsByType[type];
+		cardDef?.createNew?.(item);
+
+		newItem.item = item;
+
+		if (cardDef?.creationModalComponent) {
+			newItem.modal = cardDef.creationModalComponent;
+		} else {
+			saveNewItem();
+		}
+	}
+
+	function cleanupDialogArtifacts() {
+		// bits-ui's body scroll lock and portal may not clean up fully when the
+		// modal is unmounted instead of closed via the open prop.
+		const restore = () => {
+			document.body.style.removeProperty('overflow');
+			document.body.style.removeProperty('pointer-events');
+			document.body.style.removeProperty('padding-right');
+			document.body.style.removeProperty('margin-right');
+			// Remove any orphaned dialog overlay/content elements left by the portal
+			for (const el of document.querySelectorAll('[data-dialog-overlay], [data-dialog-content]')) {
+				el.remove();
+			}
+		};
+		// Run immediately and again after bits-ui's 24ms scheduled cleanup
+		restore();
+		setTimeout(restore, 50);
+	}
+
+	function addItem(item: Item, extraData?: Record<string, any>) {
+		const ref = item.sectionId ? gridRefs.get(item.sectionId) : gridContainer;
+
+		if (activeSectionDef?.addItem) {
+			items = activeSectionDef.addItem(item, items, { gridRef: ref, isMobile, extraData });
+		} else {
+			items = [...items, item];
+		}
+
+		onLayoutChanged();
+		return ref;
+	}
+
+	async function createFileCards(files: File[]): Promise<Item[]> {
+		const cards: Item[] = [];
+		for (const file of files) {
+			if (file.type.startsWith('video/')) {
+				cards.push(createVideoCard(file, data.page));
+			} else {
+				cards.push(await createImageCard(file, data.page));
+			}
+		}
+		return cards;
+	}
+
+	async function saveNewItem() {
+		if (!newItem.item) return;
+		const item = newItem.item;
+		const extraData = pendingExtraData;
+		pendingExtraData = undefined;
+
+		const ref = addItem(item, extraData);
+
+		newItem = {};
+
+		await tick();
+		cleanupDialogArtifacts();
+
+		scrollToItem(item, isMobile, ref);
+	}
+
+	let isSaving = $state(false);
+	let showSaveModal = $state(false);
+	let saveSuccess = $state(false);
+
+	let newItem: { modal?: Component<CreationModalComponentProps>; item?: Item } = $state({});
+
+	async function save() {
+		isSaving = true;
+		saveSuccess = false;
+		showSaveModal = true;
+
+		try {
+			// Upload profile icon if changed
+			if (data.publication?.icon) {
+				await checkAndUploadImage(data.publication, 'icon');
+			}
+
+			// Persist layout editing state
+			data.publication.preferences ??= {};
+			data.publication.preferences.editedOn = editedOn;
+
+			data.sections = sections;
+			await savePage(data, items, originalCards, publication, originalSections);
+
+			publication = JSON.stringify(data.publication);
+			savedPronouns = JSON.stringify(data.pronounsRecord);
+
+			savedItemsSnapshot = JSON.stringify(items);
+			hasUnsavedChanges = false;
+
+			saveSuccess = true;
+
+			launchConfetti();
+		} catch (error) {
+			console.error(error);
+			showSaveModal = false;
+			toast.error(error instanceof Error ? error.message : 'Error saving page!');
+		} finally {
+			isSaving = false;
+		}
+	}
+
+	function addSection(sectionType: string, afterIndex?: number) {
+		const sorted = sections.toSorted((a, b) => a.index - b.index);
+		let newIndex: number;
+		if (afterIndex !== undefined && afterIndex < sorted.length) {
+			const curr = sorted[afterIndex].index;
+			const next = afterIndex + 1 < sorted.length ? sorted[afterIndex + 1].index : curr + 200;
+			newIndex = Math.floor((curr + next) / 2);
+		} else {
+			newIndex = (sorted[sorted.length - 1]?.index ?? 0) + 100;
+		}
+
+		const def = SectionDefinitionsByType[sectionType];
+		const section: SectionRecord = {
+			id: TID.now(),
+			sectionType,
+			page: data.page,
+			index: newIndex,
+			sectionData: def?.defaultSectionData?.() ?? {},
+			version: 1
+		};
+		sections = [...sections, section];
+		hasUnsavedChanges = true;
+		// Drill straight into the new section's settings.
+		openSection(section.id);
+	}
+
+	function deleteSection(id: string) {
+		if (sections.length <= 1) return;
+		items = items.filter((i) => i.sectionId !== id);
+		sections = sections.filter((s) => s.id !== id);
+		if (activeSectionId === id) {
+			activeSectionId = sections[0]?.id;
+		}
+		// Drop back to the layout overview after removing a section.
+		if (selectedSectionId === id) {
+			selectedSectionId = null;
+			selectedCardId = null;
+		}
+		hasUnsavedChanges = true;
+	}
+
+	function moveSection(id: string, dir: -1 | 1) {
+		const sorted = sections.toSorted((a, b) => a.index - b.index);
+		const idx = sorted.findIndex((s) => s.id === id);
+		const swapIdx = idx + dir;
+		if (idx === -1 || swapIdx < 0 || swapIdx >= sorted.length) return;
+		const a = sorted[idx];
+		const b = sorted[swapIdx];
+		const tmp = a.index;
+		a.index = b.index;
+		b.index = tmp;
+		sections = [...sections];
+		hasUnsavedChanges = true;
+	}
+
+	// Double-click an empty area of a section to open its settings. Delegated from
+	// the sections container so we don't add a handler per section. Ignores clicks
+	// on cards and on interactive/editable elements (e.g. section text editors).
+	let sectionsContainer: HTMLDivElement | undefined = $state();
+	$effect(() => {
+		const el = sectionsContainer;
+		if (!el || !sectionsEditingEnabled) return;
+		const onDbl = (e: MouseEvent) => {
+			const t = e.target as HTMLElement;
+			if (t.closest('.card, button, a, input, textarea, select, [contenteditable="true"]')) return;
+			const secEl = t.closest('[data-section-id]') as HTMLElement | null;
+			const id = secEl?.dataset.sectionId;
+			if (id) openSection(id);
+		};
+		el.addEventListener('dblclick', onDbl);
+		return () => el.removeEventListener('dblclick', onDbl);
+	});
+
+	function addLink(url: string, specificCardDef?: CardDefinition) {
+		let link = validateLink(url);
+		if (!link) {
+			toast.error('invalid link');
+			return;
+		}
+		let item = createEmptyCard(data.page, activeSectionId);
+
+		if (specificCardDef?.onUrlHandler?.(link, item)) {
+			item.cardType = specificCardDef.type;
+			newItem.item = item;
+			saveNewItem();
+			toast(specificCardDef.name + ' added!');
+			return;
+		}
+
+		for (const cardDef of AllCardDefinitions.toSorted(
+			(a, b) => (b.urlHandlerPriority ?? 0) - (a.urlHandlerPriority ?? 0)
+		)) {
+			if (cardDef.onUrlHandler?.(link, item)) {
+				item.cardType = cardDef.type;
+
+				newItem.item = item;
+				saveNewItem();
+				toast(cardDef.name + ' added!');
+				break;
+			}
+		}
+	}
+
+	async function handleFileInputChange(event: Event) {
+		const target = event.target as HTMLInputElement;
+		if (!target.files || target.files.length < 1) return;
+
+		const extraData = pendingExtraData;
+		pendingExtraData = undefined;
+
+		const cards = await createFileCards(Array.from(target.files));
+		for (const card of cards) {
+			card.sectionId = activeSectionId;
+			addItem(card, extraData);
+		}
+
+		target.value = '';
+	}
+
+	let showCardCommand = $state(false);
+</script>
+
+<svelte:window
+	onbeforeunload={(e) => {
+		if (hasUnsavedChanges) {
+			e.preventDefault();
+			return '';
+		}
+	}}
+/>
+
+<svelte:body
+	onkeydown={(e) => {
+		if (e.key === 'Escape' && selectedCardId) {
+			selectedCardId = null;
+		}
+	}}
+	onpaste={(event) => {
+		if (isTyping()) return;
+
+		const text = event.clipboardData?.getData('text/plain');
+		const link = validateLink(text, false);
+		if (!link) return;
+
+		addLink(link);
+	}}
+/>
+
+<Head
+	favicon={getImage(data.publication, data.did, 'icon') || data.profile.avatar}
+	title={getName(data)}
+	image={ogImageUrl}
+	accentColor={data.publication?.preferences?.accentColor}
+	baseColor={data.publication?.preferences?.baseColor}
+/>
+
+<EditTopBar {data} bind:showingMobileView bind:isSaving {hasUnsavedChanges} {save} />
+
+<!-- <PageSwitcherBar {data} /> -->
+
+{#if sectionsEditingEnabled && !selectedCard}
+	<button
+		type="button"
+		class={[
+			'fixed bottom-3 left-3 z-20 flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium shadow-md transition-colors',
+			cardSettingsOpen && sidebarLevel === 'layout'
+				? 'bg-accent-500 border-accent-500 text-white'
+				: 'bg-base-100 dark:bg-base-950 border-base-200 dark:border-base-800 text-base-600 dark:text-base-400 hover:text-base-800 dark:hover:text-base-200'
+		]}
+		onclick={toggleLayout}
+	>
+		<svg
+			xmlns="http://www.w3.org/2000/svg"
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			stroke-width="2"
+			stroke-linecap="round"
+			stroke-linejoin="round"
+			class="size-4"
+		>
+			<rect x="3" y="3" width="18" height="18" rx="2" />
+			<path d="M3 9h18" />
+			<path d="M3 15h18" />
+		</svg>
+		Layout
+	</button>
+{/if}
+
+<SettingsOverlay bind:data publicationUrl={data.publication?.url} />
+
+<ContextProvider {data} isEditing={true}>
+	<ImageViewerProvider />
+	<CardCommand
+		bind:open={showCardCommand}
+		filter={activeSectionDef?.cardFilter}
+		onselect={(cardDef: CardDefinition) => {
+			if (cardDef.type === 'image' || cardDef.type === 'video') {
+				const input = document.getElementById('file-input') as HTMLInputElement;
+				if (input) {
+					input.click();
+					return;
+				}
+			}
+			newCard(cardDef.type);
+		}}
+		onlink={(url, cardDef) => {
+			addLink(url, cardDef);
+		}}
+	/>
+
+	{#if showingMobileView}
+		<div
+			class="bg-base-200 dark:bg-base-950 pointer-events-none fixed inset-0 -z-10 h-full w-full"
+		></div>
+	{/if}
+
+	{#if newItem.modal && newItem.item}
+		<newItem.modal
+			oncreate={() => {
+				saveNewItem();
+			}}
+			bind:item={newItem.item}
+			oncancel={async () => {
+				newItem = {};
+				await tick();
+				cleanupDialogArtifacts();
+			}}
+		/>
+	{/if}
+
+	<SaveModal
+		bind:open={showSaveModal}
+		success={saveSuccess}
+		handle={data.profile?.handle ?? data.handle}
+		did={data.did}
+		page={data.page}
+	/>
+
+	<SettingsSidebar
+		open={cardSettingsOpen}
+		level={sidebarLevel}
+		sectionsEnabled={sectionsEditingEnabled}
+		item={selectedCard}
+		section={selectedSection}
+		{sections}
+		bind:items
+		bind:data
+		{isMobile}
+		canDeleteSection={sections.length > 1}
+		onResize={resizeSelectedCard}
+		onlayoutchange={onLayoutChanged}
+		onselectsection={openSection}
+		onselectcard={(id) => (selectedCardId = id)}
+		onaddsection={addSection}
+		ondeletesection={deleteSection}
+		onmovesection={moveSection}
+		ongotolayout={goToLayout}
+		ongotosection={goToSection}
+		onclose={deselect}
+	/>
+
+	<MobileSelectionBar
+		{data}
+		visible={isRealMobile && selectedCard !== null && !cardSettingsOpen}
+		onopensettings={() => (cardSettingsOpen = true)}
+		ondeselect={deselect}
+	/>
+
+	<MobileWarningModal bind:showMobileWarning />
+
+	<div
+		class={[
+			'group/wrapper @container/wrapper relative w-full overflow-x-hidden pt-14',
+			showingMobileView
+				? 'bg-base-50 dark:bg-base-900 my-4 min-h-[calc(100dvh-2em)] overflow-hidden rounded-2xl lg:mx-auto lg:w-90'
+				: ''
+		]}
+	>
+		{#if !getHideProfileSection(data)}
+			<EditableProfile bind:data />
+		{:else}
+			{@const profilePos = getProfilePosition(data)}
+			<!-- Top reveal: shown on small screens, or when profile position is "top" -->
+			<button
+				type="button"
+				aria-label="Show profile"
+				title="Show profile"
+				onclick={() => {
+					data.publication.preferences ??= {};
+					data.publication.preferences.hideProfileSection = false;
+					data = { ...data };
+				}}
+				class={[
+					'group absolute left-1/2 z-30 -translate-x-1/2 cursor-pointer',
+					showingMobileView ? 'top-8' : 'top-12',
+					'bg-base-200/90 dark:bg-base-800/90 border-base-300 dark:border-base-700 backdrop-blur',
+					'text-base-600 dark:text-base-300 hover:text-base-900 dark:hover:text-base-50',
+					'flex items-center gap-1.5 rounded-b-xl border border-t-0 px-3 py-1.5 shadow-sm',
+					'pointer-coarse:gap-2 pointer-coarse:px-5 pointer-coarse:py-2.5',
+					'transition-transform duration-200',
+					'pointer-fine:-translate-y-1/3 pointer-fine:hover:translate-y-0',
+					profilePos === 'side' ? '@5xl/wrapper:hidden' : ''
+				]}
+			>
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					fill="none"
+					viewBox="0 0 24 24"
+					stroke-width="2"
+					stroke="currentColor"
+					class="size-4 pointer-coarse:size-5"
+				>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"
+					/>
+				</svg>
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					fill="none"
+					viewBox="0 0 24 24"
+					stroke-width="2.5"
+					stroke="currentColor"
+					class="size-3.5 pointer-coarse:size-4"
+				>
+					<path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+				</svg>
+			</button>
+
+			{#if profilePos === 'side'}
+				<!-- Side reveal: only on large screens with side profile -->
+				<button
+					type="button"
+					aria-label="Show profile"
+					title="Show profile"
+					onclick={() => {
+						data.publication.preferences ??= {};
+						data.publication.preferences.hideProfileSection = false;
+						data = { ...data };
+					}}
+					class={[
+						'group fixed top-32 left-0 z-30 hidden cursor-pointer',
+						'bg-base-200/90 dark:bg-base-800/90 border-base-300 dark:border-base-700 backdrop-blur',
+						'text-base-600 dark:text-base-300 hover:text-base-900 dark:hover:text-base-50',
+						'flex-col items-center gap-1.5 rounded-r-xl border border-l-0 px-1.5 py-3 shadow-sm',
+						'transition-transform duration-200 @5xl/wrapper:flex',
+						'pointer-fine:-translate-x-1/3 pointer-fine:hover:translate-x-0'
+					]}
+				>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						fill="none"
+						viewBox="0 0 24 24"
+						stroke-width="2"
+						stroke="currentColor"
+						class="size-4"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"
+						/>
+					</svg>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						fill="none"
+						viewBox="0 0 24 24"
+						stroke-width="2.5"
+						stroke="currentColor"
+						class="size-3.5"
+					>
+						<path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+					</svg>
+				</button>
+			{/if}
+		{/if}
+
+		<div
+			class={[
+				'pointer-events-none relative mx-auto max-w-lg',
+				(!getHideProfileSection(data) && getProfilePosition(data) === 'side') || cardSettingsOpen
+					? '@5xl/wrapper:grid @5xl/wrapper:max-w-7xl @5xl/wrapper:grid-cols-4'
+					: '@5xl/wrapper:max-w-4xl'
+			]}
+		>
+			<div class="pointer-events-none"></div>
+			<div bind:this={sectionsContainer} class="@5xl/wrapper:col-start-2 @5xl/wrapper:-col-end-1">
+				{#each sections.toSorted((a, b) => a.index - b.index) as section, i (section.id)}
+					{@const def = SectionDefinitionsByType[section.sectionType]}
+					{#if def}
+						<div class="contents" data-section-id={section.id}>
+							<def.editingContentComponent
+								{section}
+								bind:items
+								{isMobile}
+								{selectedCardId}
+								{isCoarse}
+								isActive={activeSectionId === section.id}
+								onrefchange={(el) => {
+									if (el) gridRefs.set(section.id, el);
+									else gridRefs.delete(section.id);
+								}}
+								onlayoutchange={onLayoutChanged}
+								ondeselect={deselect}
+								onrequestaddcard={(extraData) => {
+									activeSectionId = section.id;
+									requestAddCard(extraData);
+								}}
+								oncreatefilecards={createFileCards}
+								onactivate={() => {
+									activeSectionId = section.id;
+								}}
+							/>
+						</div>
+					{/if}
+					{#if sectionsEditingEnabled}
+						<InsertSectionButton onadd={(type) => addSection(type, i)} />
+					{/if}
+				{/each}
+				<div class="h-20"></div>
+			</div>
+		</div>
+	</div>
+
+	<input
+		type="file"
+		accept="image/*,video/*"
+		onchange={handleFileInputChange}
+		class="hidden"
+		id="file-input"
+		multiple
+	/>
+
+	{#if dev || (user.isLoggedIn && user.profile?.did === data.did)}
+		<button
+			type="button"
+			onclick={() => requestAddCard()}
+			class="bg-accent-500 hover:bg-accent-600 focus-visible:outline-accent-500 fixed right-4 bottom-4 z-40 flex cursor-pointer items-center gap-2 rounded-full px-5 py-3 text-sm font-semibold text-white shadow-lg focus-visible:outline-2 focus-visible:outline-offset-2"
+			aria-label="Add card"
+		>
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				fill="none"
+				viewBox="0 0 24 24"
+				stroke-width="2.5"
+				stroke="currentColor"
+				class="size-5"
+			>
+				<path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+			</svg>
+			Add Card
+		</button>
+	{/if}
+
+	<Toaster />
+</ContextProvider>

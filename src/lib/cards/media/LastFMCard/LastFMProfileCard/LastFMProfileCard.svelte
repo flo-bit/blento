@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { siLastdotfm } from 'simple-icons';
-	import { getAdditionalUserData } from '$lib/website/context';
+	import { getAdditionalUserData } from '$lib/website/data/context';
 	import type { ContentComponentProps } from '../../../types';
 	import { qrOverlay } from '$lib/components/qr/qrOverlay.svelte';
 	import { fetchLastFM } from '../api.remote';

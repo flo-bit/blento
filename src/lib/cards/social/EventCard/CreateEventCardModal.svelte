@@ -7,7 +7,7 @@
 	import type { Did } from '@atcute/lexicons';
 	import type { EventData } from '.';
 	import { onMount } from 'svelte';
-	import { getAdditionalUserData } from '$lib/website/context';
+	import { getAdditionalUserData } from '$lib/website/data/context';
 
 	const EVENT_COLLECTION = 'community.lexicon.calendar.event';
 

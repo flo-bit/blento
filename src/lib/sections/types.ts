@@ -26,10 +26,25 @@ export type AddItemOptions = {
 	extraData?: Record<string, any>;
 };
 
+/**
+ * Props for a section's settings panel, rendered in the editor sidebar at the
+ * "section" level. Mirrors cards' SettingsComponentProps but operates on a
+ * section's `sectionData` (and `items` for sections that manage their own cards,
+ * e.g. Hero slots).
+ */
+export type SectionSettingsProps = {
+	section: SectionRecord;
+	items: Item[];
+	onlayoutchange: () => void;
+	onclose: () => void;
+};
+
 export type SectionDefinition = {
 	type: string;
 	contentComponent: Component<SectionContentProps>;
 	editingContentComponent: Component<EditingSectionContentProps>;
+	/** Optional settings panel shown in the editor sidebar's section level. */
+	settingsComponent?: Component<SectionSettingsProps>;
 	defaultSectionData?: () => Record<string, any>;
 	cardFilter?: (cardDef: CardDefinition) => boolean;
 	allowRotate?: boolean;

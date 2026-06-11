@@ -2,7 +2,7 @@
 	import type { SectionContentProps } from '../types';
 	import GridBaseCard from '$lib/cards/_base/BaseCard/GridBaseCard.svelte';
 	import Card from '$lib/cards/_base/Card/Card.svelte';
-	import { sortItems } from '$lib/helper';
+	import { sortItems } from '$lib/helpers/items';
 
 	let { section, items, isMobile }: SectionContentProps = $props();
 

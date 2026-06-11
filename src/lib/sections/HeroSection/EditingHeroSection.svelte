@@ -1,17 +1,6 @@
 <script lang="ts">
-	import {
-		Badge,
-		Button,
-		Checkbox,
-		cn,
-		Input,
-		Label,
-		Popover,
-		ToggleGroup,
-		ToggleGroupItem
-	} from '@foxui/core';
+	import { Badge, cn } from '@foxui/core';
 	import PlainTextEditor from '$lib/components/PlainTextEditor.svelte';
-	import { CardDefinitionsByType } from '$lib/cards';
 	import type { EditingSectionContentProps } from '../types';
 	import {
 		DEFAULT_DECORATION_SLOTS,
@@ -44,7 +33,6 @@
 
 	let containerRef: HTMLDivElement | undefined = $state();
 	let hovered = $state(false);
-	let settingsOpen = $state(false);
 
 	$effect(() => {
 		onrefchange(containerRef);
@@ -119,185 +107,19 @@
 		delete next[slotId];
 		update('slotAssignments', next);
 	}
-
-	const toggleClasses = 'size-8 min-w-8 [&_svg]:size-3 cursor-pointer';
-
-	function confirmUrl() {
-		let href = (d.buttonHref as string)?.trim() || '';
-		if (href && !/^https?:\/\//i.test(href) && !href.startsWith('#')) {
-			href = 'https://' + href;
-		}
-		update('buttonHref', href);
-	}
-
-	let filledSlots = $derived(
-		DEFAULT_DECORATION_SLOTS.filter((slot) => assignments[slot.id])
-			.map((slot) => ({
-				slot,
-				item: getSlotItem(slot, assignments, sectionItems)
-			}))
-			.filter((s) => s.item)
-	);
 </script>
 
 <div
 	bind:this={containerRef}
 	class="@container/grid pointer-events-auto relative col-span-3 flex min-h-[calc(100dvh-4rem)] flex-col overflow-visible px-2 py-10 lg:px-8"
 >
-	<SectionChrome {isActive} {hovered} name={section.name || 'Hero'} icon={heroIcon} />
-
-	{#if hovered || isActive}
-		<div class="pointer-events-auto absolute -top-3 right-4 z-40">
-			<Popover bind:open={settingsOpen}>
-				{#snippet child({ props })}
-					<button
-						{...props}
-						class="bg-base-100/80 dark:bg-base-900/80 hover:bg-base-200/80 dark:hover:bg-base-800/80 cursor-pointer rounded-full p-1 px-2 text-xs backdrop-blur-sm"
-					>
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							viewBox="0 0 24 24"
-							fill="none"
-							stroke="currentColor"
-							stroke-width="2"
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							class="size-3.5"
-						>
-							<path
-								d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"
-							/>
-							<circle cx="12" cy="12" r="3" />
-						</svg>
-					</button>
-				{/snippet}
-				<div class="flex w-72 flex-col gap-3">
-					<div class="flex flex-col gap-2">
-						<Label class="text-sm">Show</Label>
-						<div class="flex items-center space-x-2">
-							<Checkbox
-								bind:checked={() => d.showBadge !== false, (val) => update('showBadge', val)}
-								id="hero-show-badge"
-								variant="secondary"
-							/>
-							<Label for="hero-show-badge" class="text-sm leading-none">Badge</Label>
-						</div>
-						<div class="flex items-center space-x-2">
-							<Checkbox
-								bind:checked={() => d.showSubtitle !== false, (val) => update('showSubtitle', val)}
-								id="hero-show-subtitle"
-								variant="secondary"
-							/>
-							<Label for="hero-show-subtitle" class="text-sm leading-none">Subtitle</Label>
-						</div>
-						<div class="flex items-center space-x-2">
-							<Checkbox
-								bind:checked={() => d.showButton !== false, (val) => update('showButton', val)}
-								id="hero-show-button"
-								variant="secondary"
-							/>
-							<Label for="hero-show-button" class="text-sm leading-none">Button</Label>
-						</div>
-					</div>
-
-					<div class="flex flex-col gap-1">
-						<Label for="hero-button-href" class="text-sm">Button link</Label>
-						<Input
-							id="hero-button-href"
-							value={d.buttonHref ?? ''}
-							oninput={(e) => update('buttonHref', (e.target as HTMLInputElement).value)}
-							placeholder="example.com"
-							class="text-sm"
-							onkeydown={(event) => {
-								if (event.code === 'Enter') {
-									event.preventDefault();
-									confirmUrl();
-								}
-							}}
-						/>
-					</div>
-
-					<div class="flex flex-col gap-1">
-						<Label class="text-sm">Alignment</Label>
-						<ToggleGroup
-							type="single"
-							bind:value={
-								() => d.textAlign ?? 'center',
-								(value) => {
-									if (value) update('textAlign', value);
-								}
-							}
-						>
-							<ToggleGroupItem size="sm" value="left" class={toggleClasses}>
-								<svg
-									xmlns="http://www.w3.org/2000/svg"
-									viewBox="0 0 24 24"
-									fill="none"
-									stroke="currentColor"
-									stroke-width="3"
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									><path d="M21 5H3" /><path d="M15 12H3" /><path d="M17 19H3" /></svg
-								>
-							</ToggleGroupItem>
-							<ToggleGroupItem size="sm" value="center" class={toggleClasses}>
-								<svg
-									xmlns="http://www.w3.org/2000/svg"
-									viewBox="0 0 24 24"
-									fill="none"
-									stroke="currentColor"
-									stroke-width="3"
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									><path d="M21 5H3" /><path d="M17 12H7" /><path d="M19 19H5" /></svg
-								>
-							</ToggleGroupItem>
-							<ToggleGroupItem size="sm" value="right" class={toggleClasses}>
-								<svg
-									xmlns="http://www.w3.org/2000/svg"
-									viewBox="0 0 24 24"
-									fill="none"
-									stroke="currentColor"
-									stroke-width="3"
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									><path d="M21 5H3" /><path d="M21 12H9" /><path d="M21 19H7" /></svg
-								>
-							</ToggleGroupItem>
-						</ToggleGroup>
-					</div>
-
-					{#if filledSlots.length > 0}
-						<div class="border-base-200 dark:border-base-800 flex flex-col gap-2 border-t pt-3">
-							<Label class="text-sm">Slot cards</Label>
-							{#each filledSlots as { slot, item: slotItem } (slot.id)}
-								<div
-									class="border-base-200 dark:border-base-800 flex items-center gap-2 rounded-xl border p-2"
-								>
-									<span class="text-base-500 text-xs">
-										{slot.side === 'left' ? 'L' : 'R'}{DEFAULT_DECORATION_SLOTS.filter(
-											(s) => s.side === slot.side
-										).indexOf(slot) + 1}
-									</span>
-									<span class="flex-1 truncate text-xs">
-										{CardDefinitionsByType[slotItem?.cardType ?? '']?.name ?? slotItem?.cardType}
-									</span>
-									<Button
-										size="sm"
-										variant="ghost"
-										onclick={() => clearSlot(slot.id)}
-										class="text-xs text-rose-500"
-									>
-										Remove
-									</Button>
-								</div>
-							{/each}
-						</div>
-					{/if}
-				</div>
-			</Popover>
-		</div>
-	{/if}
+	<SectionChrome
+		sectionId={section.id}
+		{isActive}
+		{hovered}
+		name={section.name || 'Hero'}
+		icon={heroIcon}
+	/>
 
 	<div class="group/hero relative flex flex-1 flex-col">
 		{#each DEFAULT_DECORATION_SLOTS as slot (slot.id)}

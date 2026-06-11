@@ -2,7 +2,7 @@
 	import { getCDNImageBlobUrl } from '$lib/atproto';
 	import { Avatar as FoxAvatar } from '@foxui/core';
 	import { marked } from 'marked';
-	import { sanitize } from '$lib/sanitize';
+	import { sanitize } from '$lib/helpers/sanitize';
 	import { all, createLowlight } from 'lowlight';
 
 	const lowlight = createLowlight(all);

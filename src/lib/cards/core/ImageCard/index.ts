@@ -1,4 +1,4 @@
-import { checkAndUploadImage } from '$lib/helper';
+import { checkAndUploadImage } from '$lib/helpers/images';
 import type { CardDefinition } from '../../types';
 import ImageCard from './ImageCard.svelte';
 import ImageCardSettings from './ImageCardSettings.svelte';

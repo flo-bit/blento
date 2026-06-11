@@ -1,5 +1,5 @@
 <script lang="ts">
-	import MadeWithBlento from '$lib/website/MadeWithBlento.svelte';
+	import MadeWithBlento from '$lib/website/view/MadeWithBlento.svelte';
 
 	let { children } = $props();
 </script>

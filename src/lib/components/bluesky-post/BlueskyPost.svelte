@@ -44,7 +44,7 @@
 		repostHref={postData?.href}
 		likeHref={postData?.href}
 		showBookmark={false}
-		logo={showLogo ? logo : undefined}
+		logo={(showLogo ? logo : undefined) as Snippet | undefined}
 		{showAvatar}
 		{compact}
 		{...restProps}

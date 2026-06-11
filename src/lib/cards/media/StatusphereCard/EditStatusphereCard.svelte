@@ -1,7 +1,11 @@
 <script lang="ts">
 	import type { Item } from '$lib/types';
 	import { onMount } from 'svelte';
-	import { getAdditionalUserData, getDidContext, getHandleContext } from '$lib/website/context';
+	import {
+		getAdditionalUserData,
+		getDidContext,
+		getHandleContext
+	} from '$lib/website/data/context';
 	import { CardDefinitionsByType } from '../..';
 	import { PopoverEmojiPicker } from '@foxui/social';
 	import { emojiToNotoAnimatedWebp } from '.';

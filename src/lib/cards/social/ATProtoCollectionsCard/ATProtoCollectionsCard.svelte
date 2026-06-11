@@ -2,7 +2,11 @@
 	import { onMount } from 'svelte';
 	import type { ContentComponentProps } from '../../types';
 	import { CardDefinitionsByType } from '../..';
-	import { getAdditionalUserData, getDidContext, getHandleContext } from '$lib/website/context';
+	import {
+		getAdditionalUserData,
+		getDidContext,
+		getHandleContext
+	} from '$lib/website/data/context';
 	import { Badge, Button } from '@foxui/core';
 
 	let { item }: ContentComponentProps = $props();

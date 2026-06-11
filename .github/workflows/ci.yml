@@ -19,7 +19,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      # Use the pnpm pinned in package.json "packageManager" (pnpm@11.2.2) via corepack.
+      # Enable corepack BEFORE setup-node so its `cache: pnpm` can find pnpm. corepack
+      # enable only creates the shim (fine under the runner's Node 20); pnpm itself only
+      # runs once Node 24 is on PATH, satisfying pnpm 11's engines.node >=22.13.
+      # We don't use pnpm/action-setup: its self-installer runs under Node 20 and pnpm 11
+      # rejects it. corepack@latest is installed first for up-to-date signing keys.
+      - name: Enable pnpm (corepack)
+        run: |
+          npm install --global corepack@latest --force
+          corepack enable
       - uses: actions/setup-node@v4
         with:
           node-version: 24

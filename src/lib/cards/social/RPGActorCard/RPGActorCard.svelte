@@ -1,6 +1,10 @@
 <script lang="ts">
 	import type { ContentComponentProps } from '../../types';
-	import { getAdditionalUserData, getDidContext, getHandleContext } from '$lib/website/context';
+	import {
+		getAdditionalUserData,
+		getDidContext,
+		getHandleContext
+	} from '$lib/website/data/context';
 	import { CardDefinitionsByType } from '../..';
 	import { onMount } from 'svelte';
 	import type { RpgActorData } from '.';

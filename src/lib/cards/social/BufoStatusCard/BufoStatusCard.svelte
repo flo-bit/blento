@@ -1,9 +1,12 @@
 <script lang="ts">
 	import type { ContentComponentProps } from '../../types';
-	import { getAdditionalUserData, getDidContext, getHandleContext } from '$lib/website/context';
+	import {
+		getAdditionalUserData,
+		getDidContext,
+		getHandleContext
+	} from '$lib/website/data/context';
 	import { onMount } from 'svelte';
-	import { CardDefinitionsByType } from '../..';
-	import type { BufoStatusData } from '.';
+	import { BufoStatusCardDefinition, type BufoStatusData } from '.';
 
 	let { item }: ContentComponentProps = $props();
 
@@ -18,7 +21,7 @@
 
 	onMount(async () => {
 		if (status === undefined) {
-			status = (await CardDefinitionsByType[item.cardType]?.loadData?.([item], {
+			status = (await BufoStatusCardDefinition.loadData?.([item], {
 				did,
 				handle
 			})) as BufoStatusData;

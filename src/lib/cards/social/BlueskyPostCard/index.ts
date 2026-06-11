@@ -1,6 +1,7 @@
 import type { CardDefinition } from '../../types';
 import BlueskyPostCard from './BlueskyPostCard.svelte';
 import CreateBlueskyPostCardModal from './CreateBlueskyPostCardModal.svelte';
+import SourceSettings from '../../_settings/SourceSettings.svelte';
 import { getPosts } from '$lib/atproto/methods';
 import type { PostView } from '@atcute/bluesky/types/app/feed/defs';
 import { parseBlueskyPostUrl, resolveUri } from './utils';
@@ -9,6 +10,12 @@ export const BlueskyPostCardDefinition = {
 	type: 'blueskyPost',
 	contentComponent: BlueskyPostCard,
 	creationModalComponent: CreateBlueskyPostCardModal,
+	settingsComponent: SourceSettings,
+	source: {
+		label: 'Post URL',
+		placeholder: 'bsky.app/profile/…/post/…',
+		errorMessage: "That doesn't look like a Bluesky post link"
+	},
 	createNew: (card) => {
 		card.cardType = 'blueskyPost';
 		card.w = 4;

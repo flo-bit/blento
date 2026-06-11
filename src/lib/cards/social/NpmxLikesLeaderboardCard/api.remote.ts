@@ -1,5 +1,5 @@
 import { query, getRequestEvent } from '$app/server';
-import { createCache } from '$lib/cache';
+import { createCache } from '$lib/helpers/cache';
 
 const LEADERBOARD_API_URL =
 	'https://npmx-likes-leaderboard-api-production.up.railway.app/api/leaderboard/likes?limit=20';

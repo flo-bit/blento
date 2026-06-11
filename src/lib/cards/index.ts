@@ -44,6 +44,7 @@ import { CountdownCardDefinition } from './utilities/CountdownCard';
 import { SpotifyCardDefinition } from './media/SpotifyCard';
 import { AppleMusicCardDefinition } from './media/AppleMusicCard';
 import { SoundCloudCardDefinition } from './media/SoundCloudCard';
+import { BandcampCardDefinition } from './media/BandcampCard';
 import { ButtonCardDefinition } from './utilities/ButtonCard';
 import { GuestbookCardDefinition } from './social/GuestbookCard';
 import { FriendsCardDefinition } from './social/FriendsCard';
@@ -70,13 +71,17 @@ import { KichRecipeCollectionCardDefinition } from './social/KichRecipeCollectio
 import { KichCookingLogCardDefinition } from './social/KichCookingLogCard';
 import { SecretImageCardDefinition } from './media/SecretImageCard';
 import { RPGActorCardDefinition } from './social/RPGActorCard';
+import { ButtondownCardDefinition } from './social/ButtondownCard';
 import { BufoStatusCardDefinition } from './social/BufoStatusCard';
+import { VideoCardDefinition } from './media/VideoCard';
+import { SkyboardCardDefinition } from './social/SkyboardCard';
 // import { Model3DCardDefinition } from './visual/Model3DCard';
 
 export const AllCardDefinitions = [
 	GuestbookCardDefinition,
 	ButtonCardDefinition,
 	ImageCardDefinition,
+	VideoCardDefinition,
 	TextCardDefinition,
 	LinkCardDefinition,
 	BigSocialCardDefinition,
@@ -119,6 +124,7 @@ export const AllCardDefinitions = [
 	SpotifyCardDefinition,
 	AppleMusicCardDefinition,
 	SoundCloudCardDefinition,
+	BandcampCardDefinition,
 	// Model3DCardDefinition
 	FriendsCardDefinition,
 	GitHubContributorsCardDefinition,
@@ -145,7 +151,9 @@ export const AllCardDefinitions = [
 	KichCookingLogCardDefinition,
 	SecretImageCardDefinition,
 	RPGActorCardDefinition,
-	BufoStatusCardDefinition
+	ButtondownCardDefinition,
+	BufoStatusCardDefinition,
+	SkyboardCardDefinition
 ] as const;
 
 export const CardDefinitionsByType = AllCardDefinitions.reduce(

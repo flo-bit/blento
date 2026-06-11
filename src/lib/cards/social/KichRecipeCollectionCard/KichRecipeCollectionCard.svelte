@@ -3,7 +3,7 @@
 	import { parseUri } from '$lib/atproto';
 	import type { Did } from '@atcute/lexicons';
 	import { CardDefinitionsByType } from '../..';
-	import { getAdditionalUserData } from '$lib/website/context';
+	import { getAdditionalUserData } from '$lib/website/data/context';
 	import type { ContentComponentProps } from '../../types';
 	import type { KichRecipeCollectionCardData } from '.';
 

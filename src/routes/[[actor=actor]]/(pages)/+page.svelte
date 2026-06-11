@@ -1,13 +1,7 @@
 <script lang="ts">
-	import { refreshData } from '$lib/helper.js';
-	import Website from '$lib/website/Website.svelte';
-	import { onMount } from 'svelte';
+	import Website from '$lib/website/view/Website.svelte';
 
 	let { data } = $props();
-
-	onMount(() => {
-		refreshData(data);
-	});
 </script>
 
 <Website {data} />

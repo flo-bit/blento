@@ -1,10 +1,10 @@
-import { loadData } from '$lib/website/load';
+import { loadData } from '$lib/website/data/load';
 import { env } from '$env/dynamic/private';
 import { env as publicEnv } from '$env/dynamic/public';
 import { error, redirect } from '@sveltejs/kit';
-import { createCache } from '$lib/cache';
-import { getActor } from '$lib/actor.js';
-import { logPageview } from '$lib/analytics';
+import { createCache } from '$lib/helpers/cache';
+import { getActor } from '$lib/helpers/actor.js';
+import { logPageview } from '$lib/helpers/analytics';
 
 export async function load({ params, platform, request, locals, route, setHeaders }) {
 	if (env.PUBLIC_IS_SELFHOSTED) error(404);

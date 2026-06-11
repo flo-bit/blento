@@ -1,34 +1,46 @@
 <script lang="ts">
-	import type { Item } from '$lib/types';
 	import type { SettingsComponentProps } from '../../types';
-	import { Input, Label } from '@foxui/core';
+	import { Input } from '@foxui/core';
+	import { SettingsSection, SettingsField } from '../../_settings';
 
-	let { item = $bindable<Item>(), onclose }: SettingsComponentProps = $props();
+	let { item = $bindable() }: SettingsComponentProps = $props();
 
-	function confirmUrl() {
+	function normalizeUrl() {
 		let href = item.cardData.href?.trim() || '';
-		if (href && !/^https?:\/\//i.test(href) && !href.startsWith('#')) {
+		if (
+			href &&
+			!/^https?:\/\//i.test(href) &&
+			!href.startsWith('#') &&
+			!href.startsWith('mailto:')
+		) {
 			href = 'https://' + href;
 		}
 		item.cardData.href = href;
-		onclose();
 	}
 </script>
 
-<div class="flex flex-col gap-3">
-	<div class="flex flex-col gap-1">
-		<Label for="button-href" class="text-sm">Link</Label>
-		<Input
-			id="button-href"
-			bind:value={item.cardData.href}
-			placeholder="youtube.com"
-			class="mt-2 text-sm"
-			onkeydown={(event) => {
-				if (event.code === 'Enter') {
-					event.preventDefault();
-					confirmUrl();
-				}
-			}}
-		/>
-	</div>
+<div class="flex flex-col gap-6">
+	<SettingsSection title="Content">
+		<SettingsField label="Button text">
+			<Input bind:value={item.cardData.text} placeholder="Click me" />
+		</SettingsField>
+	</SettingsSection>
+
+	<SettingsSection title="Link">
+		<SettingsField label="URL">
+			<Input
+				type="url"
+				spellcheck={false}
+				bind:value={item.cardData.href}
+				placeholder="example.com"
+				onblur={normalizeUrl}
+				onkeydown={(event) => {
+					if (event.code === 'Enter') {
+						event.preventDefault();
+						normalizeUrl();
+					}
+				}}
+			/>
+		</SettingsField>
+	</SettingsSection>
 </div>

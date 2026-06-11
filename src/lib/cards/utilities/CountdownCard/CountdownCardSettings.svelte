@@ -1,44 +1,37 @@
 <script lang="ts">
-	import type { Item } from '$lib/types';
-	import { Input, Label } from '@foxui/core';
+	import type { SettingsComponentProps } from '../../types';
+	import { Input } from '@foxui/core';
 	import type { CountdownCardData } from './index';
+	import { SettingsSection, SettingsField } from '../../_settings';
 
-	let { item }: { item: Item; onclose: () => void } = $props();
+	let { item = $bindable() }: SettingsComponentProps = $props();
 
 	let cardData = $derived(item.cardData as CountdownCardData);
 
-	let targetDateValue = $derived.by(() => {
+	const pad = (n: number) => String(n).padStart(2, '0');
+
+	let datetimeValue = $derived.by(() => {
 		if (!cardData.targetDate) return '';
-		return new Date(cardData.targetDate).toISOString().split('T')[0];
+		const d = new Date(cardData.targetDate);
+		return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 	});
 
-	let targetTimeValue = $derived.by(() => {
-		if (!cardData.targetDate) return '12:00';
-		return new Date(cardData.targetDate).toTimeString().slice(0, 5);
-	});
-
-	function updateTargetDate(dateStr: string, timeStr: string) {
-		if (!dateStr) return;
-		item.cardData.targetDate = new Date(`${dateStr}T${timeStr}`).toISOString();
+	function updateTargetDate(value: string) {
+		if (!value) {
+			item.cardData.targetDate = undefined;
+			return;
+		}
+		item.cardData.targetDate = new Date(value).toISOString();
 	}
 </script>
 
-<div class="flex flex-col gap-4">
-	<div class="flex flex-col gap-2">
-		<Label>Target Date & Time</Label>
-		<div class="flex gap-2">
-			<Input
-				type="date"
-				value={targetDateValue}
-				onchange={(e) => updateTargetDate(e.currentTarget.value, targetTimeValue)}
-				class="flex-1"
-			/>
-			<Input
-				type="time"
-				value={targetTimeValue}
-				onchange={(e) => updateTargetDate(targetDateValue, e.currentTarget.value)}
-				class="w-28"
-			/>
-		</div>
-	</div>
-</div>
+<SettingsSection title="Target">
+	<SettingsField label="Date & time">
+		<Input
+			type="datetime-local"
+			class="w-full"
+			value={datetimeValue}
+			onchange={(e) => updateTargetDate(e.currentTarget.value)}
+		/>
+	</SettingsField>
+</SettingsSection>

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import type { ContentComponentProps } from '../../types';
-	import { getAdditionalUserData, getCanEdit } from '$lib/website/context';
+	import { getAdditionalUserData, getCanEdit } from '$lib/website/data/context';
 	import { getBlentoOrBskyProfile } from '$lib/atproto/methods';
 	import type { FriendsProfile } from '.';
 	import type { Did } from '@atcute/lexicons';

@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { getImage } from '$lib/helper';
-	import { getDidContext } from '$lib/website/context';
+	import { getImage } from '$lib/helpers/images';
+	import { getDidContext } from '$lib/website/data/context';
 	import type { ContentComponentProps } from '../../types';
 	import { qrOverlay } from '$lib/components/qr/qrOverlay.svelte';
 

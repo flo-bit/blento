@@ -47,6 +47,28 @@
 		onupdate?.(markdown);
 	};
 
+	// Keep the editor in sync when the bound markdown changes from outside (e.g. edited
+	// in the settings sidebar) without disrupting the user while they type here.
+	// `lastIncoming` guards against a re-sync loop from markdown round-trip differences.
+	let lastIncoming: string | undefined;
+	$effect(() => {
+		const incoming = (contentDict[key] ?? defaultContent ?? '') as string;
+		if (!editor || editor.isFocused || incoming === lastIncoming) return;
+
+		const turndownService = new TurndownService({
+			headingStyle: 'atx',
+			bulletListMarker: '-'
+		});
+		const currentMarkdown = turndownService.turndown(editor.getHTML());
+		lastIncoming = incoming;
+		if (currentMarkdown === incoming) return;
+
+		Promise.resolve(marked.parse(incoming)).then((html) => {
+			if (!editor || editor.isFocused) return;
+			editor.commands.setContent(html, { emitUpdate: false });
+		});
+	});
+
 	onMount(async () => {
 		if (!element || editor) return;
 

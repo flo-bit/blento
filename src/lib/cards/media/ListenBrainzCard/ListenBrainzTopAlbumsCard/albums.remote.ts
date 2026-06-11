@@ -1,7 +1,7 @@
 import { listenBrainzFetch, usernameSchema } from '../shared.server';
 import { query, getRequestEvent } from '$app/server';
 import type { ReleaseGroup } from '../types';
-import { createCache } from '$lib/cache';
+import { createCache } from '$lib/helpers/cache';
 import { error } from '@sveltejs/kit';
 
 interface ResponseData {

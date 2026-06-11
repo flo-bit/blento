@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getHexCSSVar } from '$lib/cards/helper';
+	import { getHexCSSVar } from '$lib/cards/colors';
 	import { onMount } from 'svelte';
 
 	let {

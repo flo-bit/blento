@@ -1,6 +1,7 @@
 import type { CardDefinition } from '../../types';
 import PhotoGalleryCard from './PhotoGalleryCard.svelte';
 import CreateGrainGalleryCardModal from './CreateGrainGalleryCardModal.svelte';
+import SourceSettings from '../../_settings/SourceSettings.svelte';
 import { parseGrainGalleryUrl, loadGrainGalleryData } from './helpers';
 
 export { parseGrainGalleryUrl, loadGrainGalleryData };
@@ -11,6 +12,12 @@ export const PhotoGalleryCardDefinition = {
 	type: cardType,
 	contentComponent: PhotoGalleryCard,
 	creationModalComponent: CreateGrainGalleryCardModal,
+	settingsComponent: SourceSettings,
+	source: {
+		label: 'Gallery URL',
+		placeholder: 'grain.social/…',
+		errorMessage: "That doesn't look like a Grain gallery link"
+	},
 	createNew: (card) => {
 		card.cardData = {};
 		card.w = 4;

@@ -1,0 +1,118 @@
+<script lang="ts">
+	import GridBaseCard from '$lib/cards/_base/BaseCard/GridBaseCard.svelte';
+	import Card from '$lib/cards/_base/Card/Card.svelte';
+	import type { Item, WebsiteData } from '$lib/types';
+
+	let { data }: { data: WebsiteData } = $props();
+
+	let cards = $derived.by((): Item[] => {
+		const items: Item[] = [];
+
+		// Name + "No blento yet" card
+		items.push({
+			id: 'empty-main',
+			x: 0,
+			y: 0,
+			w: 6,
+			h: 2,
+			mobileX: 0,
+			mobileY: 0,
+			mobileW: 8,
+			mobileH: 3,
+			cardType: 'text',
+			color: 'cyan',
+			cardData: {
+				text: `## No blento yet!`,
+				textAlign: 'center',
+				verticalAlign: 'center'
+			}
+		});
+
+		// Bluesky social icon
+		items.push({
+			id: 'empty-bluesky',
+			x: 6,
+			y: 0,
+			w: 2,
+			h: 2,
+			mobileX: 0,
+			mobileY: 3,
+			mobileW: 3,
+			mobileH: 3,
+			cardType: 'bigsocial',
+			cardData: {
+				platform: 'bluesky',
+				href: `https://bsky.app/profile/${data.handle}`,
+				color: '0285FF'
+			}
+		});
+
+		items.push({
+			id: 'empty-instruction',
+			x: 0,
+			y: 3,
+			w: 8,
+			h: 1,
+			mobileX: 0,
+			mobileY: 6,
+			mobileW: 8,
+			mobileH: 2,
+			cardType: 'text',
+			color: 'transparent',
+			cardData: {
+				text: `Is this your account? Login to start creating your blento!`,
+				textAlign: 'center',
+				verticalAlign: 'bottom'
+			}
+		});
+
+		items.push({
+			id: 'empty-login-button',
+			x: 0,
+			y: 4,
+			w: 8,
+			h: 1,
+			mobileX: 0,
+			mobileY: 8,
+			mobileW: 8,
+			mobileH: 2,
+			cardType: 'button',
+			color: 'transparent',
+			cardData: {
+				href: '#login',
+				text: `Login`
+			}
+		});
+
+		return items;
+	});
+
+	let desktopMaxHeight = $derived(cards.reduce((max, item) => Math.max(max, item.y + item.h), 0));
+	let mobileMaxHeight = $derived(
+		cards.reduce((max, item) => Math.max(max, item.mobileY + item.mobileH), 0)
+	);
+</script>
+
+{#each cards as item (item.id)}
+	<GridBaseCard {item}>
+		<Card {item} />
+	</GridBaseCard>
+{/each}
+
+<!-- Spacer for grid height (matches GridBaseCard's mobile/desktop breakpoint) -->
+<div
+	class="grid-spacer"
+	style="--mh: {(mobileMaxHeight / 8) * 100}; --dh: {(desktopMaxHeight / 8) * 100};"
+></div>
+
+<style>
+	.grid-spacer {
+		height: calc(var(--mh) * 1cqw);
+	}
+
+	@container grid (width >= 42rem) {
+		.grid-spacer {
+			height: calc(var(--dh) * 1cqw);
+		}
+	}
+</style>

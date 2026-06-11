@@ -85,6 +85,7 @@
 	onfiledrop={handleFileDrop}
 >
 	<SectionChrome
+		sectionId={section.id}
 		{isActive}
 		{hovered}
 		name={section.name || GRID_SECTION_NAME}

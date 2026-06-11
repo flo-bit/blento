@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Item } from '$lib/types';
-	import { textAlignClasses, textSizeClasses, verticalAlignClasses } from '.';
+	import { textAlignClasses, textSizeClasses, verticalAlignClasses } from './styles';
 	import type { ContentComponentProps } from '../../types';
 	import PlainTextEditor from '$lib/components/PlainTextEditor.svelte';
 

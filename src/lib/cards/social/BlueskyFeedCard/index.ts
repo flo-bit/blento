@@ -1,5 +1,6 @@
 import type { CardDefinition } from '../../types';
 import BlueskyFeedCard from './BlueskyFeedCard.svelte';
+import SourceSettings from '../../_settings/SourceSettings.svelte';
 import { getAuthorFeed, resolveHandle } from '$lib/atproto/methods';
 import type { Did, Handle } from '@atcute/lexicons';
 import { isDid } from '@atcute/lexicons/syntax';
@@ -7,6 +8,16 @@ import { isDid } from '@atcute/lexicons/syntax';
 export const BlueskyFeedCardDefinition = {
 	type: 'blueskyFeed',
 	contentComponent: BlueskyFeedCard,
+	settingsComponent: SourceSettings,
+	source: {
+		label: 'Profile URL',
+		placeholder: 'bsky.app/profile/handle',
+		errorMessage: "That doesn't look like a Bluesky profile link",
+		currentUrl: (item) => {
+			const actor = item.cardData.did || item.cardData.handle;
+			return actor ? `https://bsky.app/profile/${actor}` : '';
+		}
+	},
 	createNew: (card) => {
 		card.cardType = 'blueskyFeed';
 		card.w = 4;

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { WebsiteData } from '$lib/types';
-	import { getHideProfileSection, getProfilePosition } from '$lib/helper';
+	import { getHideProfileSection, getProfilePosition } from '$lib/helpers/website';
 	import SelectTheme from '$lib/components/select-theme/SelectTheme.svelte';
 	import { Checkbox, Label } from '@foxui/core';
 

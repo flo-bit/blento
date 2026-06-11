@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { marked } from 'marked';
-	import { sanitize } from '$lib/sanitize';
+	import { sanitize } from '$lib/helpers/sanitize';
 	import { cn } from '@foxui/core';
 	import type { SectionContentProps } from '../types';
 	import { textAlignClasses, textSizeClasses } from './shared';

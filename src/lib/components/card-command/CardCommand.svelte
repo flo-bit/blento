@@ -2,7 +2,7 @@
 	import { AllCardDefinitions } from '$lib/cards';
 	import type { CardDefinition } from '$lib/cards/types';
 	import { Command, Dialog } from 'bits-ui';
-	import { isTyping } from '$lib/helper';
+	import { isTyping } from '$lib/helpers/utils';
 	import { describeRepo, user } from '$lib/atproto';
 
 	let {

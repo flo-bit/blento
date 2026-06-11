@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { cn, Toggle, toggleVariants, Tooltip } from '@foxui/core';
+	import { cn, Toggle, toggleVariants } from '@foxui/core';
 	import type { Editor } from '@tiptap/core';
 	import Select from './Select.svelte';
 	import type { RichTextTypes } from '.';

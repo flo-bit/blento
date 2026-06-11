@@ -2,7 +2,7 @@
 	import { Button, Input, Subheading } from '@foxui/core';
 	import Modal from '$lib/components/modal/Modal.svelte';
 	import type { CreationModalComponentProps } from '../../types';
-	import { validateLink } from '$lib/helper';
+	import { validateLink } from '$lib/helpers/links';
 
 	let { item = $bindable(), oncreate, oncancel }: CreationModalComponentProps = $props();
 

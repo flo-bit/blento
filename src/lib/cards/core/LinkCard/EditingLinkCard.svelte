@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
-	import { getImage, compressImage } from '$lib/helper';
-	import { getDidContext } from '$lib/website/context';
+	import { getImage, compressImage } from '$lib/helpers/images';
+	import { getDidContext } from '$lib/website/data/context';
 	import type { ContentComponentProps } from '../../types';
 	import PlainTextEditor from '$lib/components/PlainTextEditor.svelte';
 

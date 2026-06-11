@@ -1,6 +1,7 @@
 import type { CardDefinition } from '../../types';
 import CreateSpotifyCardModal from './CreateSpotifyCardModal.svelte';
 import SpotifyCard from './SpotifyCard.svelte';
+import SourceSettings from '../../_settings/SourceSettings.svelte';
 
 const cardType = 'spotify-list-embed';
 
@@ -8,6 +9,12 @@ export const SpotifyCardDefinition = {
 	type: cardType,
 	contentComponent: SpotifyCard,
 	creationModalComponent: CreateSpotifyCardModal,
+	settingsComponent: SourceSettings,
+	source: {
+		label: 'Spotify URL',
+		placeholder: 'open.spotify.com/album/…',
+		errorMessage: "That doesn't look like a Spotify album or playlist link"
+	},
 	createNew: (item) => {
 		item.cardType = cardType;
 		item.cardData = {};

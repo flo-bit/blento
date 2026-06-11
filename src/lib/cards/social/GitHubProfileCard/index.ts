@@ -1,6 +1,7 @@
 import type { CardDefinition } from '../../types';
 import CreateGitHubProfileCardModal from './CreateGitHubProfileCardModal.svelte';
 import GitHubProfileCard from './GitHubProfileCard.svelte';
+import SourceSettings from '../../_settings/SourceSettings.svelte';
 import type { GitHubContributionsData } from './types';
 import { fetchGitHubContributions } from './api.remote';
 
@@ -10,6 +11,12 @@ export const GithubProfileCardDefitition = {
 	type: 'githubProfile',
 	contentComponent: GitHubProfileCard,
 	creationModalComponent: CreateGitHubProfileCardModal,
+	settingsComponent: SourceSettings,
+	source: {
+		label: 'Profile URL',
+		placeholder: 'github.com/username',
+		errorMessage: "That doesn't look like a GitHub profile link"
+	},
 
 	loadData: async (items) => {
 		const githubData: Record<string, GitHubContributionsData> = {};

@@ -2,7 +2,7 @@
 	import type { Item } from '$lib/types';
 	import { onMount } from 'svelte';
 	import { BlueskyPost } from '$lib/components/bluesky-post';
-	import { getAdditionalUserData, getDidContext } from '$lib/website/context';
+	import { getAdditionalUserData, getDidContext } from '$lib/website/data/context';
 	import { resolveHandle, getAuthorFeed } from '$lib/atproto/methods';
 	import type { Did, Handle } from '@atcute/lexicons';
 

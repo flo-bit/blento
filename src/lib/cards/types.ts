@@ -1,6 +1,6 @@
 import type { Component } from 'svelte';
 import type { Item } from '$lib/types';
-import type { CacheService } from '$lib/cache';
+import type { CacheService } from '$lib/helpers/cache';
 import type { Did } from '@atcute/lexicons';
 
 export type CreationModalComponentProps = {
@@ -93,6 +93,18 @@ export type CardDefinition = {
 
 	canChange?: (item: Item) => boolean;
 	change?: (item: Item) => Item;
+
+	// Config for the shared `SourceSettings` sidebar panel (edit the card's source URL).
+	// Set `settingsComponent: SourceSettings` on the card to use it.
+	source?: {
+		label?: string;
+		placeholder?: string;
+		errorMessage?: string;
+		// Current URL to pre-fill (default: item.cardData.href).
+		currentUrl?: (item: Item) => string;
+		// Apply a new URL; return false if invalid. Default: wraps `onUrlHandler`.
+		apply?: (url: string, item: Item) => boolean;
+	};
 
 	name?: string;
 

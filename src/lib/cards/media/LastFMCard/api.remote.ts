@@ -1,6 +1,6 @@
 import { query, getRequestEvent } from '$app/server';
 import { env } from '$env/dynamic/private';
-import { createCache } from '$lib/cache';
+import { createCache } from '$lib/helpers/cache';
 
 const LASTFM_API_URL = 'https://ws.audioscrobbler.com/2.0/';
 

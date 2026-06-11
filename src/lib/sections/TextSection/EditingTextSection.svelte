@@ -45,7 +45,7 @@
 	bind:this={containerRef}
 	class="@container/grid pointer-events-auto relative col-span-3 px-4 py-10"
 >
-	<SectionChrome {isActive} {hovered} name={section.name || 'Text'} {icon} />
+	<SectionChrome sectionId={section.id} {isActive} {hovered} name={section.name || 'Text'} {icon} />
 
 	<div
 		class={cn(

@@ -11,15 +11,14 @@
 		getCanEdit,
 		getIsCoarse,
 		getIsMobile,
+		getIsRealMobile,
 		getSelectedCardId,
-		getSelectCard
-	} from '$lib/website/context';
+		getSelectCard,
+		getToggleCardSettings
+	} from '$lib/website/data/context';
 	import PlainTextEditor from '$lib/components/PlainTextEditor.svelte';
 
-	let colorsChoices = [
-		{ class: 'text-base-500', label: 'base' },
-		{ class: 'text-accent-500', label: 'accent' },
-		{ class: 'text-base-300 dark:text-base-700', label: 'transparent' },
+	const customColorChoices = [
 		{ class: 'text-red-500', label: 'red' },
 		{ class: 'text-orange-500', label: 'orange' },
 		{ class: 'text-amber-500', label: 'amber' },
@@ -39,6 +38,12 @@
 		{ class: 'text-rose-500', label: 'rose' }
 	];
 
+	const specialColors = ['base', 'accent', 'transparent'] as const;
+	const colorModes = ['base', 'accent', 'transparent', 'custom'] as const;
+	type ColorMode = (typeof colorModes)[number];
+
+	let lastCustomColor = $state('rose');
+
 	export type BaseEditingCardProps = {
 		item: Item;
 		ondelete: () => void;
@@ -56,17 +61,40 @@
 		...rest
 	}: BaseEditingCardProps = $props();
 
-	let selectedColor = $derived(colorsChoices.find((c) => getColor(item) === c.label));
+	const currentColor = $derived(getColor(item));
+	const colorMode = $derived<ColorMode>(
+		(specialColors as readonly string[]).includes(currentColor)
+			? (currentColor as ColorMode)
+			: 'custom'
+	);
+	const selectedCustomColor = $derived(
+		colorMode === 'custom' ? customColorChoices.find((c) => c.label === currentColor) : undefined
+	);
+
+	function setColorMode(mode: ColorMode) {
+		if (mode === 'custom') {
+			item.color = lastCustomColor;
+			return;
+		}
+		if (colorMode === 'custom') lastCustomColor = currentColor;
+		item.color = mode;
+	}
+
+	function pickCustomColor(label: string) {
+		item.color = label;
+		lastCustomColor = label;
+	}
 
 	let canEdit = getCanEdit();
 	let isMobile = getIsMobile();
+	let isRealMobile = getIsRealMobile();
 	let isCoarse = getIsCoarse();
 
 	let selectedCardId = getSelectedCardId();
 	let selectCard = getSelectCard();
+	let toggleCardSettings = getToggleCardSettings();
 	let isSelected = $derived(selectedCardId?.() === item.id);
 
-	// Track pointer down position so we only select on click, not on drag
 	let overlayDownX = 0;
 	let overlayDownY = 0;
 	function handleOverlayPointerDown(e: PointerEvent) {
@@ -76,9 +104,11 @@
 	function handleOverlayPointerUp(e: PointerEvent) {
 		const dx = Math.abs(e.clientX - overlayDownX);
 		const dy = Math.abs(e.clientY - overlayDownY);
-		if (dx < 5 && dy < 5) {
-			selectCard?.(item.id);
-		}
+		if (dx >= 5 || dy >= 5) return;
+		// Defer to next frame so the synthetic click from this tap fires while
+		// the overlay is still mounted — otherwise the click falls through to
+		// whatever inner button is now exposed (file picker, popover trigger, …).
+		requestAnimationFrame(() => selectCard?.(item.id));
 	}
 
 	let colorPopoverOpen = $state(false);
@@ -177,7 +207,6 @@
 		onsetsize?.(w, h);
 	}
 
-	let settingsPopoverOpen = $state(false);
 	let changePopoverOpen = $state(false);
 
 	const changeOptions = $derived(AllCardDefinitions.filter((def) => def.canChange?.(item)));
@@ -203,7 +232,7 @@
 	showOutline={isResizing || isSelected}
 	class={[
 		'scale-100 starting:scale-0 starting:opacity-0',
-		isSelected ? 'outline-accent-500 z-10' : ''
+		isSelected ? 'outline-accent-500 z-10 touch-none' : ''
 	]}
 	{...rest}
 >
@@ -212,13 +241,16 @@
 			 select text / trigger inner content. Click (no drag) selects the card. -->
 		<div
 			role="button"
+			aria-label="Select card"
 			tabindex="-1"
-			class="absolute inset-0 z-20 cursor-pointer focus:outline-none"
+			class="absolute inset-0 z-30 cursor-pointer focus:outline-none"
 			onpointerdown={handleOverlayPointerDown}
 			onpointerup={handleOverlayPointerUp}
 		></div>
 	{/if}
-	{@render children?.()}
+	<div class={isSelected ? 'contents' : 'inert-content'}>
+		{@render children?.()}
+	</div>
 
 	{#if cardDef.canHaveLabel}
 		<div
@@ -286,11 +318,11 @@
 
 			<Button
 				size="icon"
-				variant="rose"
+				variant="secondary"
 				onclick={() => {
 					ondelete();
 				}}
-				class="absolute -top-3 -left-3 hidden lg:group-focus-within:inline-flex lg:group-hover/card:inline-flex"
+				class="absolute -top-3 -left-3 hidden border-rose-500/30 bg-rose-500/15 text-rose-700 hover:bg-rose-500/25 lg:group-focus-within:inline-flex lg:group-hover/card:inline-flex dark:border-rose-500/30 dark:bg-rose-500/15 dark:text-rose-300"
 			>
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
@@ -311,12 +343,12 @@
 
 			<div
 				class={[
-					'translate absolute -bottom-13 w-full items-center justify-center pt-2.5 text-xs lg:group-focus-within:inline-flex lg:group-hover/card:inline-flex',
-					colorPopoverOpen || settingsPopoverOpen || isSelected ? 'inline-flex' : 'hidden'
+					'translate absolute -bottom-7 w-full items-center justify-center pt-1.5 text-xs lg:group-focus-within:inline-flex lg:group-hover/card:inline-flex',
+					isRealMobile() ? 'hidden' : colorPopoverOpen || isSelected ? 'inline-flex' : 'hidden'
 				]}
 			>
 				<div
-					class="bg-base-100 border-base-200 dark:bg-base-800 dark:border-base-700 z-100 inline-flex items-center gap-0.5 rounded-2xl border p-1 px-2 shadow-lg"
+					class="bg-base-100 border-base-200 dark:bg-base-800 dark:border-base-700 z-100 inline-flex items-center gap-0.5 rounded-xl border p-0.5 px-1.5 shadow-md"
 				>
 					{#if cardDef.allowSetColor !== false}
 						<Popover bind:open={colorPopoverOpen}>
@@ -324,7 +356,7 @@
 								<button
 									{...props}
 									class={[
-										'm-2 size-4 cursor-pointer rounded-full',
+										'm-1.5 size-3 cursor-pointer rounded-full',
 										!item.color || item.color === 'base' || item.color === 'transparent'
 											? 'text-base-800 dark:text-base-200'
 											: 'text-accent-500'
@@ -332,30 +364,83 @@
 								>
 									<svg
 										xmlns="http://www.w3.org/2000/svg"
+										fill="none"
 										viewBox="0 0 24 24"
-										fill="currentColor"
-										class="size-4"
+										stroke-width="2.25"
+										stroke="currentColor"
+										class="size-3"
 									>
 										<path
-											fill-rule="evenodd"
-											d="M20.599 1.5c-.376 0-.743.111-1.055.32l-5.08 3.385a18.747 18.747 0 0 0-3.471 2.987 10.04 10.04 0 0 1 4.815 4.815 18.748 18.748 0 0 0 2.987-3.472l3.386-5.079A1.902 1.902 0 0 0 20.599 1.5Zm-8.3 14.025a18.76 18.76 0 0 0 1.896-1.207 8.026 8.026 0 0 0-4.513-4.513A18.75 18.75 0 0 0 8.475 11.7l-.278.5a5.26 5.26 0 0 1 3.601 3.602l.502-.278ZM6.75 13.5A3.75 3.75 0 0 0 3 17.25a1.5 1.5 0 0 1-1.601 1.497.75.75 0 0 0-.7 1.123 5.25 5.25 0 0 0 9.8-2.62 3.75 3.75 0 0 0-3.75-3.75Z"
-											clip-rule="evenodd"
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											d="M9.53 16.122a3 3 0 0 0-5.78 1.128 2.25 2.25 0 0 1-2.4 2.245 4.5 4.5 0 0 0 8.4-2.245c0-.399-.078-.78-.22-1.128Zm0 0a15.998 15.998 0 0 0 3.388-1.62m-5.043-.025a15.994 15.994 0 0 1 1.622-3.395m3.42 3.42a15.995 15.995 0 0 0 4.764-4.648l3.876-5.814a1.151 1.151 0 0 0-1.597-1.597L14.146 6.32a15.996 15.996 0 0 0-4.649 4.763m3.42 3.42a6.776 6.776 0 0 0-3.42-3.42"
 										/>
 									</svg>
 								</button>
 							{/snippet}
-							<ColorSelect
-								selected={selectedColor}
-								colors={colorsChoices}
-								onselected={(color, previous) => {
-									if (typeof previous === 'string' || typeof color === 'string') {
-										return;
-									}
-
-									item.color = color.label;
-								}}
-								class="w-64"
-							/>
+							<div class="flex flex-col gap-2 p-1">
+								<div class="grid grid-cols-4 gap-1.5">
+									{#each colorModes as mode (mode)}
+										<button
+											type="button"
+											class={[
+												'group flex cursor-pointer flex-col items-center gap-1 rounded-lg border p-1.5 transition-colors',
+												colorMode === mode
+													? 'border-accent-500 bg-accent-500/10'
+													: 'border-base-200 dark:border-base-700 hover:bg-base-100 dark:hover:bg-base-800'
+											]}
+											onclick={() => setColorMode(mode)}
+											aria-pressed={colorMode === mode}
+										>
+											<span
+												class={[
+													'block size-5 overflow-hidden rounded-full ring-1 transition-colors',
+													colorMode === mode
+														? 'ring-accent-500'
+														: 'ring-base-300 dark:ring-base-700'
+												]}
+												style={mode === 'transparent'
+													? 'background-image: linear-gradient(45deg, #cbd5e1 25%, transparent 25%, transparent 75%, #cbd5e1 75%), linear-gradient(45deg, #cbd5e1 25%, transparent 25%, transparent 75%, #cbd5e1 75%); background-size: 6px 6px; background-position: 0 0, 3px 3px;'
+													: undefined}
+											>
+												{#if mode === 'base'}
+													<span class="bg-base-300 dark:bg-base-700 block size-full"></span>
+												{:else if mode === 'accent'}
+													<span class="bg-accent-500 block size-full"></span>
+												{:else if mode === 'custom'}
+													{@const swatchColor =
+														colorMode === 'custom' ? currentColor : lastCustomColor}
+													<span
+														class="block size-full"
+														style={`background-color: var(--color-${swatchColor}-500)`}
+													></span>
+												{/if}
+											</span>
+											<span
+												class={[
+													'text-[10px] capitalize',
+													colorMode === mode
+														? 'text-accent-600 dark:text-accent-400 font-medium'
+														: 'text-base-600 dark:text-base-400'
+												]}
+											>
+												{mode}
+											</span>
+										</button>
+									{/each}
+								</div>
+								{#if colorMode === 'custom'}
+									<ColorSelect
+										selected={selectedCustomColor}
+										colors={customColorChoices}
+										onselected={(color) => {
+											if (typeof color === 'string') return;
+											pickCustomColor(color.label);
+										}}
+										class="w-64"
+									/>
+								{/if}
+							</div>
 						</Popover>
 					{/if}
 
@@ -364,9 +449,9 @@
 							onclick={() => {
 								setSize(2, 2);
 							}}
-							class="hover:bg-accent-500/10 cursor-pointer rounded-xl p-2"
+							class="hover:bg-accent-500/10 cursor-pointer rounded-lg p-1.5"
 						>
-							<div class="border-base-900 dark:border-base-50 size-3 rounded-sm border-2"></div>
+							<div class="border-base-900 dark:border-base-50 size-2 rounded-xs border"></div>
 
 							<span class="sr-only">set size to 1x1</span>
 						</button>
@@ -377,9 +462,9 @@
 							onclick={() => {
 								setSize(4, 2);
 							}}
-							class="hover:bg-accent-500/10 cursor-pointer rounded-xl p-2"
+							class="hover:bg-accent-500/10 cursor-pointer rounded-lg p-1.5"
 						>
-							<div class="border-base-900 dark:border-base-50 h-3 w-5 rounded-sm border-2"></div>
+							<div class="border-base-900 dark:border-base-50 h-2 w-3.5 rounded-xs border"></div>
 							<span class="sr-only">set size to 2x1</span>
 						</button>
 					{/if}
@@ -388,9 +473,9 @@
 							onclick={() => {
 								setSize(2, 4);
 							}}
-							class="hover:bg-accent-500/10 cursor-pointer rounded-xl p-2"
+							class="hover:bg-accent-500/10 cursor-pointer rounded-lg p-1.5"
 						>
-							<div class="border-base-900 dark:border-base-50 h-5 w-3 rounded-sm border-2"></div>
+							<div class="border-base-900 dark:border-base-50 h-3.5 w-2 rounded-xs border"></div>
 
 							<span class="sr-only">set size to 1x2</span>
 						</button>
@@ -400,47 +485,39 @@
 							onclick={() => {
 								setSize(4, 4);
 							}}
-							class="hover:bg-accent-500/10 cursor-pointer rounded-xl p-2"
+							class="hover:bg-accent-500/10 cursor-pointer rounded-lg p-1.5"
 						>
-							<div class="border-base-900 dark:border-base-50 h-5 w-5 rounded-sm border-2"></div>
+							<div class="border-base-900 dark:border-base-50 size-3.5 rounded-xs border"></div>
 
 							<span class="sr-only">set size to 2x2</span>
 						</button>
 					{/if}
 
-					{#if cardDef.settingsComponent}
-						<Popover bind:open={settingsPopoverOpen} class="bg-base-50 dark:bg-base-900">
-							{#snippet child({ props })}
-								<button {...props} class="hover:bg-accent-500/10 cursor-pointer rounded-xl p-2">
-									<svg
-										xmlns="http://www.w3.org/2000/svg"
-										fill="none"
-										viewBox="0 0 24 24"
-										stroke-width="2"
-										stroke="currentColor"
-										class="size-5"
-									>
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z"
-										/>
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
-										/>
-									</svg>
-								</button>
-							{/snippet}
-							<cardDef.settingsComponent
-								bind:item
-								onclose={() => {
-									settingsPopoverOpen = false;
-								}}
+					<button
+						onclick={() => toggleCardSettings?.(item.id)}
+						class="hover:bg-accent-500/10 cursor-pointer rounded-lg p-1.5"
+					>
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							fill="none"
+							viewBox="0 0 24 24"
+							stroke-width="2"
+							stroke="currentColor"
+							class="size-3.5"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z"
 							/>
-						</Popover>
-					{/if}
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+							/>
+						</svg>
+						<span class="sr-only">Card settings</span>
+					</button>
 				</div>
 			</div>
 
@@ -474,3 +551,12 @@
 		{/if}
 	{/snippet}
 </BaseCard>
+
+<style>
+	.inert-content {
+		display: contents;
+	}
+	.inert-content :global(*) {
+		pointer-events: none !important;
+	}
+</style>

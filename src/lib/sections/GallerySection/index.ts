@@ -1,6 +1,7 @@
 import type { SectionDefinition } from '../types';
 import EditingGallerySection from './EditingGallerySection.svelte';
 import GallerySection from './GallerySection.svelte';
+import GallerySectionSettings from './GallerySectionSettings.svelte';
 
 export function defaultGallerySectionData(): Record<string, any> {
 	return {
@@ -13,6 +14,7 @@ export const GallerySectionDefinition: SectionDefinition = {
 	type: 'gallery',
 	contentComponent: GallerySection,
 	editingContentComponent: EditingGallerySection,
+	settingsComponent: GallerySectionSettings,
 	defaultSectionData: defaultGallerySectionData,
 	cardFilter: (def) => def.type === 'image' || def.type === 'gif',
 	addItem: (item, allItems) => {

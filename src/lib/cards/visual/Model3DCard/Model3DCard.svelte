@@ -3,7 +3,7 @@
 	import { CineonToneMapping } from 'three';
 	import type { ContentComponentProps } from '../../types';
 	import Model3DScene from './Model3DScene.svelte';
-	import { getDidContext } from '$lib/website/context';
+	import { getDidContext } from '$lib/website/data/context';
 	import { getBlobURL } from '$lib/atproto';
 	import type { Did } from '@atcute/lexicons';
 	import { onMount } from 'svelte';

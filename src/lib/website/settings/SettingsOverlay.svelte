@@ -13,6 +13,7 @@
 	import LayoutSection from './sections/LayoutSection.svelte';
 	import CustomDomainSection from './sections/CustomDomainSection.svelte';
 	import AccountSection from './sections/AccountSection.svelte';
+	import AnalyticsSection from './sections/AnalyticsSection.svelte';
 
 	let { data = $bindable(), publicationUrl }: { data: WebsiteData; publicationUrl?: string } =
 		$props();
@@ -30,12 +31,13 @@
 		{ id: 'page', label: 'Page' },
 		{ id: 'layout', label: 'Layout' },
 		{ id: 'domain', label: 'Custom Domain' },
+		{ id: 'analytics', label: 'Analytics' },
 		{ id: 'account', label: 'Account' }
 	] as const;
 </script>
 
 {#if settingsOverlayState.visible}
-	<div class="bg-base-50 dark:bg-base-950 fixed inset-0 z-[100] flex flex-col overflow-hidden">
+	<div class="bg-base-50 dark:bg-base-950 fixed inset-0 z-100 flex flex-col overflow-hidden">
 		<!-- Header with tabs and close button -->
 		<div class="border-base-200 dark:border-base-800 border-b px-6 pt-4">
 			<div class="flex items-center justify-between">
@@ -84,6 +86,8 @@
 					<LayoutSection bind:data />
 				{:else if settingsOverlayState.activeSection === 'domain'}
 					<CustomDomainSection {publicationUrl} />
+				{:else if settingsOverlayState.activeSection === 'analytics'}
+					<AnalyticsSection />
 				{:else if settingsOverlayState.activeSection === 'account'}
 					<AccountSection />
 				{/if}

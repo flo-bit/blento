@@ -1,5 +1,5 @@
 <script lang="ts">
-	import ThemeScript from '$lib/website/ThemeScript.svelte';
+	import ThemeScript from '$lib/website/view/ThemeScript.svelte';
 
 	let { data, children } = $props();
 </script>

@@ -2,7 +2,11 @@
 	import type { Item } from '$lib/types';
 	import { onMount } from 'svelte';
 	import { BlueskyPost } from '$lib/components/bluesky-post';
-	import { getAdditionalUserData, getDidContext, getHandleContext } from '$lib/website/context';
+	import {
+		getAdditionalUserData,
+		getDidContext,
+		getHandleContext
+	} from '$lib/website/data/context';
 	import { CardDefinitionsByType } from '../..';
 
 	let { item }: { item: Item } = $props();

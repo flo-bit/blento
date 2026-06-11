@@ -1,7 +1,11 @@
 <script lang="ts">
 	import type { Item } from '$lib/types';
 	import { onMount } from 'svelte';
-	import { getAdditionalUserData, getDidContext, getHandleContext } from '$lib/website/context';
+	import {
+		getAdditionalUserData,
+		getDidContext,
+		getHandleContext
+	} from '$lib/website/data/context';
 	import { NpmxLikesCardDefinition } from '.';
 	import { RelativeTime } from '@foxui/time';
 

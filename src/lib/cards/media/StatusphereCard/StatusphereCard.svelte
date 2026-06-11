@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Item } from '$lib/types';
-	import { getAdditionalUserData } from '$lib/website/context';
+	import { getAdditionalUserData } from '$lib/website/data/context';
 	import { emojiToNotoAnimatedWebp } from '.';
 
 	let { item }: { item: Item } = $props();

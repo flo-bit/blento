@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Embed from './embeds/Embed.svelte';
-	import { sanitize } from '$lib/sanitize';
+	import { sanitize } from '$lib/helpers/sanitize';
 	import { cn, Prose } from '@foxui/core';
 	import type { WithChildren, WithElementRef } from 'bits-ui';
 	import type { HTMLAttributes } from 'svelte/elements';

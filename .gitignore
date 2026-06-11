@@ -29,3 +29,5 @@ sveltekit-cloudflare-workers
 inlay
 
 scripts/backups
+
+theming/

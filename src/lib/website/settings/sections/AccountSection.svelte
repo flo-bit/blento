@@ -93,7 +93,12 @@
 			<Button variant="ghost" onclick={() => (deleteConfirm = false)} disabled={isDeleting}>
 				Cancel
 			</Button>
-			<Button onclick={deleteAllData} disabled={isDeleting} variant="red">
+			<Button
+				onclick={deleteAllData}
+				disabled={isDeleting}
+				variant="secondary"
+				class="border-red-500/30 bg-red-500/15 text-red-700 hover:bg-red-500/25 dark:border-red-500/30 dark:bg-red-500/15 dark:text-red-300"
+			>
 				{isDeleting ? 'Deleting...' : 'Yes, delete everything'}
 			</Button>
 		</div>

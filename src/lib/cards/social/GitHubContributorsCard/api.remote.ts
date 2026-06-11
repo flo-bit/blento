@@ -1,5 +1,5 @@
 import { query, getRequestEvent } from '$app/server';
-import { createCache } from '$lib/cache';
+import { createCache } from '$lib/helpers/cache';
 
 const GITHUB_CONTRIBUTORS_API_URL =
 	'https://edge-function-github-contribution.vercel.app/api/github-contributors';

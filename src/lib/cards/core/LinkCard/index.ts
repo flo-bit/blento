@@ -1,4 +1,5 @@
-import { checkAndUploadImage, validateLink } from '$lib/helper';
+import { checkAndUploadImage } from '$lib/helpers/images';
+import { validateLink } from '$lib/helpers/links';
 import type { CardDefinition } from '../../types';
 import CreateLinkCardModal from './CreateLinkCardModal.svelte';
 import EditingLinkCard from './EditingLinkCard.svelte';

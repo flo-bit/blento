@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { getAdditionalUserData } from '$lib/website/context';
+	import { getAdditionalUserData } from '$lib/website/data/context';
 	import type { ContentComponentProps } from '../../../types';
 	import LastFMAlbumArt from '../LastFMAlbumArt.svelte';
 	import { fetchLastFM } from '../api.remote';

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { ContentComponentProps } from '$lib/cards/types';
-	import { getAdditionalUserData } from '$lib/website/context';
+	import { getAdditionalUserData } from '$lib/website/data/context';
 	import type { AppBskyActorDefs } from '@atcute/bluesky';
 	import { Avatar } from '@foxui/core';
 

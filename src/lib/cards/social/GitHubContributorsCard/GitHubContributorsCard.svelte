@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import type { ContentComponentProps } from '../../types';
-	import { getAdditionalUserData, getCanEdit } from '$lib/website/context';
+	import { getAdditionalUserData, getCanEdit } from '$lib/website/data/context';
 	import type { GitHubContributor, GitHubContributorsLoadedData } from '.';
 	import ImageGrid from '$lib/components/ImageGrid.svelte';
 	import { fetchGitHubContributors } from './api.remote';

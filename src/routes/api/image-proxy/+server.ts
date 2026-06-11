@@ -1,5 +1,5 @@
 import { error } from '@sveltejs/kit';
-import { parseSafeUrl } from '$lib/ssrf';
+import { parseSafeUrl } from '$lib/helpers/ssrf';
 
 export async function GET({ url, locals }) {
 	if (!locals.did) {

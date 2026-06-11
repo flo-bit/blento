@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { getDidContext } from '$lib/website/context';
+	import { getDidContext } from '$lib/website/data/context';
 	import type { ContentComponentProps } from '../../types';
 	import { qrOverlay } from '$lib/components/qr/qrOverlay.svelte';
-	import { getImage } from '$lib/helper';
+	import { getImage } from '$lib/helpers/images';
 	import { openImageViewer } from '$lib/components/image-viewer/imageViewer.svelte';
 
 	let { item = $bindable(), isEditing }: ContentComponentProps = $props();

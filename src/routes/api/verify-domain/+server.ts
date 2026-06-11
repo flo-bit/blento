@@ -1,5 +1,5 @@
 import { json } from '@sveltejs/kit';
-import { verifyDomainDns } from '$lib/dns';
+import { verifyDomainDns } from '$lib/helpers/dns';
 
 const EXPECTED_TARGET = 'blento-proxy.fly.dev';
 

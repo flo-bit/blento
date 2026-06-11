@@ -1,10 +1,11 @@
 <script lang="ts">
-	import type { Item } from '$lib/types';
-	import { Button, Label } from '@foxui/core';
+	import type { SettingsComponentProps } from '../../types';
+	import { Button } from '@foxui/core';
 	import type { ClockCardData } from './index';
 	import { onMount } from 'svelte';
+	import { SettingsSection, SettingsField } from '../../_settings';
 
-	let { item }: { item: Item; onclose: () => void } = $props();
+	let { item = $bindable() }: SettingsComponentProps = $props();
 
 	let cardData = $derived(item.cardData as ClockCardData);
 
@@ -38,37 +39,34 @@
 
 	onMount(() => {
 		if (!cardData.timezone) {
-			try {
-				item.cardData.timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-			} catch {
-				item.cardData.timezone = 'UTC';
-			}
+			item.cardData.timezone = localTimezone();
 		}
 	});
 
-	function useLocalTimezone() {
+	function localTimezone() {
 		try {
-			item.cardData.timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+			return Intl.DateTimeFormat().resolvedOptions().timeZone;
 		} catch {
-			item.cardData.timezone = 'UTC';
+			return 'UTC';
 		}
 	}
 </script>
 
-<div class="flex flex-col gap-4">
-	<div class="flex flex-col gap-2">
-		<Label>Timezone</Label>
+<SettingsSection title="Timezone">
+	<SettingsField label="Show time for">
 		<div class="flex gap-2">
 			<select
 				value={cardData.timezone || 'UTC'}
 				onchange={(e) => (item.cardData.timezone = e.currentTarget.value)}
-				class="bg-base-100 dark:bg-base-800 border-base-300 dark:border-base-700 text-base-900 dark:text-base-100 flex-1 rounded-xl border px-3 py-2"
+				class="bg-base-100/50 dark:bg-base-900/50 ring-base-200 dark:ring-base-800 focus:ring-accent-500 rounded-ui text-base-900 dark:text-base-50 w-full min-w-0 flex-1 px-3 py-1.5 text-sm font-medium ring-1 transition-all outline-none ring-inset focus:ring-2"
 			>
 				{#each timezoneOptions as tz (tz.value)}
 					<option value={tz.value}>{tz.label}</option>
 				{/each}
 			</select>
-			<Button size="sm" variant="ghost" onclick={useLocalTimezone}>Local</Button>
+			<Button size="sm" variant="ghost" onclick={() => (item.cardData.timezone = localTimezone())}>
+				Local
+			</Button>
 		</div>
-	</div>
-</div>
+	</SettingsField>
+</SettingsSection>

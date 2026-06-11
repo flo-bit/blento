@@ -1,9 +1,9 @@
-import { loadData } from '$lib/website/load';
-import { createCache } from '$lib/cache';
+import { loadData } from '$lib/website/data/load';
+import { createCache } from '$lib/helpers/cache';
 import { env } from '$env/dynamic/private';
 import { error } from '@sveltejs/kit';
 import { text } from '@sveltejs/kit';
-import { getActor } from '$lib/actor.js';
+import { getActor } from '$lib/helpers/actor.js';
 
 export async function GET({ params, platform, request }) {
 	const cache = createCache(platform);

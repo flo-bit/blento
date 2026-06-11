@@ -1,6 +1,6 @@
 import { json } from '@sveltejs/kit';
 import { getLinkPreview } from 'link-preview-js';
-import { parseSafeUrl } from '$lib/ssrf';
+import { parseSafeUrl } from '$lib/helpers/ssrf';
 
 export async function GET({ url, locals }) {
 	if (!locals.did) {

@@ -1,7 +1,11 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { Badge } from '@foxui/core';
-	import { getAdditionalUserData, getDidContext, getHandleContext } from '$lib/website/context';
+	import {
+		getAdditionalUserData,
+		getDidContext,
+		getHandleContext
+	} from '$lib/website/data/context';
 	import type { ContentComponentProps } from '../../types';
 	import { UpcomingEventsCardDefinition } from '.';
 	import type { EventData } from '../EventCard';

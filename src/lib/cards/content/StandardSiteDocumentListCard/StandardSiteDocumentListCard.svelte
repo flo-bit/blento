@@ -4,7 +4,7 @@
 		getCanEdit,
 		getDidContext,
 		getHandleContext
-	} from '$lib/website/context';
+	} from '$lib/website/data/context';
 	import { onMount } from 'svelte';
 	import { CardDefinitionsByType } from '../..';
 	import type { ContentComponentProps } from '../../types';

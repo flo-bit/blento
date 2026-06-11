@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { colorToHue, getHexCSSVar, getHexOfCardColor } from '../../helper';
+	import { colorToHue, getHexCSSVar, getHexOfCardColor } from '../../colors';
 	import type { ContentComponentProps } from '../../types';
 	import { onMount, onDestroy, tick } from 'svelte';
 	let { item }: ContentComponentProps = $props();

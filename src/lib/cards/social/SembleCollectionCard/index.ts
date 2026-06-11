@@ -2,6 +2,7 @@ import type { CardDefinition } from '../../types';
 import { listRecords, getRecord, resolveHandle } from '$lib/atproto';
 import SembleCollectionCard from './SembleCollectionCard.svelte';
 import CreateSembleCollectionCardModal from './CreateSembleCollectionCardModal.svelte';
+import SourceSettings from '../../_settings/SourceSettings.svelte';
 
 export type SembleCard = {
 	uri: string;
@@ -90,6 +91,12 @@ export const SembleCollectionCardDefinition = {
 	type: 'sembleCollection',
 	contentComponent: SembleCollectionCard,
 	creationModalComponent: CreateSembleCollectionCardModal,
+	settingsComponent: SourceSettings,
+	source: {
+		label: 'Collection URL',
+		placeholder: 'Paste a Semble collection link',
+		errorMessage: "That doesn't look like a Semble collection link"
+	},
 	createNew: (card) => {
 		card.w = 4;
 		card.mobileW = 8;

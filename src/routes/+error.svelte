@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import MadeWithBlento from '$lib/website/MadeWithBlento.svelte';
+	import MadeWithBlento from '$lib/website/view/MadeWithBlento.svelte';
 </script>
 
 <div

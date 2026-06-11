@@ -1,6 +1,7 @@
 import type { CardDefinition } from '../../types';
 import CreateAppleMusicCardModal from './CreateAppleMusicCardModal.svelte';
 import AppleMusicCard from './AppleMusicCard.svelte';
+import SourceSettings from '../../_settings/SourceSettings.svelte';
 
 const cardType = 'apple-music-embed';
 
@@ -8,6 +9,12 @@ export const AppleMusicCardDefinition = {
 	type: cardType,
 	contentComponent: AppleMusicCard,
 	creationModalComponent: CreateAppleMusicCardModal,
+	settingsComponent: SourceSettings,
+	source: {
+		label: 'Apple Music URL',
+		placeholder: 'music.apple.com/…',
+		errorMessage: "That doesn't look like an Apple Music link"
+	},
 	createNew: (item) => {
 		item.cardType = cardType;
 		item.cardData = {};

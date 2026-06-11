@@ -137,6 +137,8 @@
 <div class={['absolute inset-0', isLocked ? 'touch-none' : '']}>
 	<svg
 		bind:this={svgElement}
+		role="img"
+		aria-label="Drawing canvas"
 		class={[
 			'absolute inset-0 h-full w-full',
 			isLocked ? 'pointer-events-auto cursor-crosshair' : 'pointer-events-none'

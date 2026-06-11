@@ -1,5 +1,5 @@
 import { COLUMNS, margin, mobileMargin } from '$lib';
-import { clamp } from '$lib/helper';
+import { clamp } from '$lib/helpers/utils';
 import type { Item } from '$lib/types';
 
 export type GridPosition = {

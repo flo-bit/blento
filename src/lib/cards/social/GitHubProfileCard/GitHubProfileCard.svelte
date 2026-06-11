@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { siGithub } from 'simple-icons';
-	import { getAdditionalUserData } from '$lib/website/context';
+	import { getAdditionalUserData } from '$lib/website/data/context';
 	import type { ContentComponentProps } from '../../types';
 	import type { GithubProfileLoadedData } from '.';
 	import GithubContributionsGraph from './GithubContributionsGraph.svelte';

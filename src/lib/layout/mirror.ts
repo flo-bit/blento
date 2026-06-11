@@ -1,6 +1,6 @@
 import { COLUMNS } from '$lib';
 import { CardDefinitionsByType } from '$lib/cards';
-import { clamp } from '$lib/helper';
+import { clamp } from '$lib/helpers/utils';
 import { findValidPosition } from './algorithms';
 import type { Item } from '$lib/types';
 

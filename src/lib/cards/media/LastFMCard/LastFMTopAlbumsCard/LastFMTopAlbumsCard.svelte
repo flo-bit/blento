@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import type { ContentComponentProps } from '../../../types';
-	import { getAdditionalUserData } from '$lib/website/context';
+	import { getAdditionalUserData } from '$lib/website/data/context';
 	import ImageGrid from '$lib/components/ImageGrid.svelte';
 	import { fetchLastFM } from '../api.remote';
 

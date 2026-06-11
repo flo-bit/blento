@@ -1,5 +1,5 @@
 import { getBlentoOrBskyProfile, getRecord, listRecords, parseUri } from '$lib/atproto/methods';
-import type { CacheService, CachedProfile } from '$lib/cache';
+import type { CacheService, CachedProfile } from '$lib/helpers/cache';
 import type { EventData } from '$lib/cards/social/EventCard';
 import type { Did } from '@atcute/lexicons';
 

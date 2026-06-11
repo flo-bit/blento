@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getCanEdit } from '$lib/website/context';
+	import { getCanEdit } from '$lib/website/data/context';
 	import type { ContentComponentProps } from '../../types';
 
 	let { item }: ContentComponentProps = $props();

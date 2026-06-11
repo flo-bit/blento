@@ -1,6 +1,7 @@
 import type { SectionDefinition } from '../types';
 import EditingTextSection from './EditingTextSection.svelte';
 import TextSection from './TextSection.svelte';
+import TextSectionSettings from './TextSectionSettings.svelte';
 import { defaultTextSectionData } from './shared';
 
 export * from './shared';
@@ -9,6 +10,7 @@ export const TextSectionDefinition: SectionDefinition = {
 	type: 'text',
 	contentComponent: TextSection,
 	editingContentComponent: EditingTextSection,
+	settingsComponent: TextSectionSettings,
 	defaultSectionData: defaultTextSectionData,
 	addItem: (_item, allItems) => allItems,
 	deleteItem: (_itemId, allItems) => allItems,

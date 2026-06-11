@@ -1,0 +1,7 @@
+allowBuilds:
+  core-js: true
+  esbuild: true
+  sharp: true
+  workerd: true
+minimumReleaseAgeExclude:
+  - '@atmo-dev/events-ui@0.1.0'

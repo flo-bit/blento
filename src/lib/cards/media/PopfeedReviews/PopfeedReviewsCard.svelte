@@ -6,7 +6,7 @@
 		getCanEdit,
 		getDidContext,
 		getHandleContext
-	} from '$lib/website/context';
+	} from '$lib/website/data/context';
 	import { CardDefinitionsByType } from '../..';
 	import Rating from './Rating.svelte';
 	import { Button } from '@foxui/core';

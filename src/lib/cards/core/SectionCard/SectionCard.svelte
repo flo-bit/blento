@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { marked } from 'marked';
 	import type { ContentComponentProps } from '../../types';
-	import { textAlignClasses, textSizeClasses, verticalAlignClasses } from '.';
+	import { textAlignClasses, textSizeClasses, verticalAlignClasses } from './styles';
 
 	let { item }: ContentComponentProps = $props();
 

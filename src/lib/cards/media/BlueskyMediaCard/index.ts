@@ -1,14 +1,14 @@
 import type { CardDefinition } from '../../types';
 import BlueskyMediaCard from './BlueskyMediaCard.svelte';
 import CreateBlueskyMediaCardModal from './CreateBlueskyMediaCardModal.svelte';
-import ImageCardSettings from '../../core/ImageCard/ImageCardSettings.svelte';
+import BlueskyMediaCardSettings from './BlueskyMediaCardSettings.svelte';
 
 export const BlueskyMediaCardDefinition = {
 	type: 'blueskyMedia',
 	contentComponent: BlueskyMediaCard,
 	createNew: () => {},
 	creationModalComponent: CreateBlueskyMediaCardModal,
-	settingsComponent: ImageCardSettings,
+	settingsComponent: BlueskyMediaCardSettings,
 	canHaveLabel: true,
 
 	keywords: ['bsky', 'atproto', 'media', 'feed'],

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { ImageMasonry } from '@foxui/visual';
-	import { getDidContext } from '$lib/website/context';
-	import { getImage } from '$lib/helper';
+	import { getDidContext } from '$lib/website/data/context';
+	import { getImage } from '$lib/helpers/images';
 	import { openImageViewer } from '$lib/components/image-viewer/imageViewer.svelte';
 	import type { SectionContentProps } from '../types';
 

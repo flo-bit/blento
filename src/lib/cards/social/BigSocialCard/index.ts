@@ -1,11 +1,18 @@
 import type { CardDefinition } from '../../types';
 import BigSocialCard from './BigSocialCard.svelte';
 import CreateBigSocialCardModal from './CreateBigSocialCardModal.svelte';
+import SourceSettings from '../../_settings/SourceSettings.svelte';
 
 export const BigSocialCardDefinition = {
 	type: 'bigsocial',
 	contentComponent: BigSocialCard,
 	creationModalComponent: CreateBigSocialCardModal,
+	settingsComponent: SourceSettings,
+	source: {
+		label: 'Profile URL',
+		placeholder: 'instagram.com/you',
+		errorMessage: "Couldn't detect that platform"
+	},
 
 	createNew: (card) => {
 		card.cardType = 'bigsocial';
@@ -118,7 +125,7 @@ export const platformPatterns: Record<string, RegExp> = {
 	tiktok: /(?:tiktok\.com)/i,
 	linkedin: /(?:linkedin\.com)/i,
 	bluesky: /(?:bsky\.app|bsky\.social)/i,
-	threads: /(?:threads\.net)/i,
+	threads: /(?:threads\.com|threads\.net)/i,
 	snapchat: /(?:snapchat\.com)/i,
 	pinterest: /(?:pinterest\.com|pin\.it)/i,
 	twitch: /(?:twitch\.tv)/i,

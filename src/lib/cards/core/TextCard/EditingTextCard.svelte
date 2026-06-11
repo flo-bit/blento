@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Item } from '$lib/types';
 	import type { Editor } from '@tiptap/core';
-	import { textAlignClasses, textSizeClasses, verticalAlignClasses } from '.';
+	import { textAlignClasses, textSizeClasses, verticalAlignClasses } from './styles';
 	import type { ContentComponentProps } from '../../types';
 	import MarkdownTextEditor from '$lib/components/MarkdownTextEditor.svelte';
 	import { cn } from '@foxui/core';

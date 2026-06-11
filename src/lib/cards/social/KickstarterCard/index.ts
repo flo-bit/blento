@@ -1,6 +1,7 @@
 import type { CardDefinition } from '../../types';
 import CreateKickstarterCardModal from './CreateKickstarterCardModal.svelte';
 import KickstarterCard from './KickstarterCard.svelte';
+import SourceSettings from '../../_settings/SourceSettings.svelte';
 
 const cardType = 'kickstarter';
 
@@ -8,6 +9,12 @@ export const KickstarterCardDefinition = {
 	type: cardType,
 	contentComponent: KickstarterCard,
 	creationModalComponent: CreateKickstarterCardModal,
+	settingsComponent: SourceSettings,
+	source: {
+		label: 'Kickstarter URL',
+		placeholder: 'kickstarter.com/projects/…',
+		errorMessage: "That doesn't look like a Kickstarter project link"
+	},
 	createNew: (item) => {
 		item.cardType = cardType;
 		item.cardData = { widgetType: 'card' };

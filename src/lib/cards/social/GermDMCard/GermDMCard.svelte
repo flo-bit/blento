@@ -1,6 +1,10 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { getAdditionalUserData, getDidContext, getHandleContext } from '$lib/website/context';
+	import {
+		getAdditionalUserData,
+		getDidContext,
+		getHandleContext
+	} from '$lib/website/data/context';
 	import type { ContentComponentProps } from '../../types';
 	import { CardDefinitionsByType } from '../..';
 	import { user } from '$lib/atproto/auth.svelte';

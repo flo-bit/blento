@@ -8,7 +8,7 @@ import {
 } from 'react-grid-layout/core';
 import type { Item } from '../types';
 import { COLUMNS } from '$lib';
-import { clamp } from '../helper';
+import { clamp } from '../helpers/utils';
 
 function toLayoutItem(item: Item, mobile: boolean): LayoutItem {
 	if (mobile) {

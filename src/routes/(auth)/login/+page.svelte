@@ -2,7 +2,7 @@
 	import { AtprotoLogin } from '@foxui/social';
 	import { login, signup } from '$lib/atproto';
 	import type { ActorIdentifier } from '@atcute/lexicons';
-	import MadeWithBlento from '$lib/website/MadeWithBlento.svelte';
+	import MadeWithBlento from '$lib/website/view/MadeWithBlento.svelte';
 </script>
 
 <svelte:head>

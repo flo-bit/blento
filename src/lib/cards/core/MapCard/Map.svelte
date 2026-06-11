@@ -5,9 +5,19 @@
 
 	let { item = $bindable(), isEditing = false }: { item: Item; isEditing?: boolean } = $props();
 
-	const center = { lng: parseFloat(item.cardData.lon), lat: parseFloat(item.cardData.lat) };
+	const center = $derived({
+		lng: parseFloat(item.cardData.lon),
+		lat: parseFloat(item.cardData.lat)
+	});
 	let showAttribution = $state(false);
 	let map: maplibregl.Map | undefined = $state();
+
+	// Move the map when the location/zoom changes (e.g. edited in the settings sidebar).
+	$effect(() => {
+		if (!map) return;
+		const zoom = item.cardData.zoom;
+		map.jumpTo(zoom != null ? { center, zoom } : { center });
+	});
 
 	function handleZoom() {
 		if (map) {

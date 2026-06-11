@@ -2,6 +2,7 @@ import type { Item } from '$lib/types';
 import type { SectionDefinition } from '../types';
 import EditingHeroSection from './EditingHeroSection.svelte';
 import HeroSection from './HeroSection.svelte';
+import HeroSectionSettings from './HeroSectionSettings.svelte';
 import { DEFAULT_DECORATION_SLOTS, canFitInSlot, defaultHeroSectionData } from './shared';
 
 export * from './shared';
@@ -10,6 +11,7 @@ export const HeroSectionDefinition: SectionDefinition = {
 	type: 'hero',
 	contentComponent: HeroSection,
 	editingContentComponent: EditingHeroSection,
+	settingsComponent: HeroSectionSettings,
 	defaultSectionData: defaultHeroSectionData,
 	cardFilter: canFitInSlot,
 	allowRotate: true,

@@ -1,7 +1,7 @@
 import { json } from '@sveltejs/kit';
 import { isDid } from '@atcute/lexicons/syntax';
 import { getRecord } from '$lib/atproto/methods';
-import { verifyDomainDns } from '$lib/dns';
+import { verifyDomainDns } from '$lib/helpers/dns';
 import type { Did } from '@atcute/lexicons';
 
 const EXPECTED_TARGET = 'blento-proxy.fly.dev';

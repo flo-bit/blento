@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { ImageMasonry } from '@foxui/visual';
 	import { Button } from '@foxui/core';
-	import { getDidContext, getSelectCard } from '$lib/website/context';
-	import { getImage } from '$lib/helper';
+	import { getDidContext, getSelectCard } from '$lib/website/data/context';
+	import { getImage } from '$lib/helpers/images';
 	import type { EditingSectionContentProps } from '../types';
 	import SectionChrome from '../SectionChrome.svelte';
 
@@ -107,7 +107,13 @@
 	bind:this={containerRef}
 	class="@container/grid pointer-events-auto relative col-span-3 px-2 py-8"
 >
-	<SectionChrome {isActive} {hovered} name={section.name || 'Gallery'} {icon} />
+	<SectionChrome
+		sectionId={section.id}
+		{isActive}
+		{hovered}
+		name={section.name || 'Gallery'}
+		{icon}
+	/>
 
 	{#if sectionItems.length > 0}
 		<div class="gallery-compact">

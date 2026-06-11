@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { getDidContext } from '$lib/website/context';
+	import { getDidContext } from '$lib/website/data/context';
 	import { getBlobURL } from '$lib/atproto';
 	import { decryptBlob } from './crypto';
 	import type { ContentComponentProps } from '../../types';

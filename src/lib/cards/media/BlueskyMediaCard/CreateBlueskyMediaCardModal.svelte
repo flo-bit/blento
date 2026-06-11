@@ -3,7 +3,7 @@
 	import Modal from '$lib/components/modal/Modal.svelte';
 	import type { CreationModalComponentProps } from '../../types';
 	import { onMount } from 'svelte';
-	import { getDidContext } from '$lib/website/context';
+	import { getDidContext } from '$lib/website/data/context';
 	import { getAuthorFeed } from '$lib/atproto/methods';
 
 	let { item = $bindable(), oncreate, oncancel }: CreationModalComponentProps = $props();

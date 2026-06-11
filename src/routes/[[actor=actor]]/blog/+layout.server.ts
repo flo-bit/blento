@@ -1,6 +1,6 @@
 import { getRecord } from '$lib/atproto/methods.js';
 import type { Did } from '@atcute/lexicons';
-import { getActor } from '$lib/actor.js';
+import { getActor } from '$lib/helpers/actor.js';
 
 export async function load({ params, platform, request }) {
 	const did = await getActor({ request, paramActor: params.actor, platform });

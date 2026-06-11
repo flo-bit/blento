@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { QuotedPostData } from '..';
-	import { sanitize } from '$lib/sanitize';
+	import { sanitize } from '$lib/helpers/sanitize';
 	import Images from './Images.svelte';
 	import External from './External.svelte';
 	import Video from './Video.svelte';

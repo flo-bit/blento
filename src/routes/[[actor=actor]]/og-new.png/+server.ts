@@ -1,8 +1,8 @@
 import { env } from '$env/dynamic/private';
 import { env as publicEnv } from '$env/dynamic/public';
 import { error, json } from '@sveltejs/kit';
-import { getActor } from '$lib/actor';
-import { createCache } from '$lib/cache';
+import { getActor } from '$lib/helpers/actor';
+import { createCache } from '$lib/helpers/cache';
 
 export async function GET({ params, platform, request }) {
 	const actor = await getActor({

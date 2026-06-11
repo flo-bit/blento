@@ -5,7 +5,7 @@
 	import EditingCard from '$lib/cards/_base/Card/EditingCard.svelte';
 	import BaseCard from '$lib/cards/_base/BaseCard/BaseCard.svelte';
 	import BaseEditingCard from '$lib/cards/_base/BaseCard/BaseEditingCard.svelte';
-	import { getSelectedCardId } from '$lib/website/context';
+	import { getSelectedCardId } from '$lib/website/data/context';
 
 	let {
 		slot,
