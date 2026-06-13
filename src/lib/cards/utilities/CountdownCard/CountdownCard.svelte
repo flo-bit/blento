@@ -3,6 +3,7 @@
 	import type { ContentComponentProps } from '../../types';
 	import type { CountdownCardData } from './index';
 	import { onMount } from 'svelte';
+	import { browser } from '$app/environment';
 
 	let { item }: ContentComponentProps = $props();
 
@@ -66,120 +67,122 @@
 	);
 </script>
 
-<div class="@container flex h-full w-full flex-col items-center justify-center p-4">
-	{#if isEventPast && elapsedDiff !== null}
-		<!-- Elapsed time since past event -->
-		<NumberFlowGroup>
-			<div
-				class="text-base-900 dark:text-base-100 accent:text-base-900 flex items-baseline gap-4 text-center @sm:gap-6 @md:gap-8"
-				style="font-variant-numeric: tabular-nums;"
-			>
-				{#if elapsedYears > 0}
+{#if browser}
+	<div class="@container flex h-full w-full flex-col items-center justify-center p-4">
+		{#if isEventPast && elapsedDiff !== null}
+			<!-- Elapsed time since past event -->
+			<NumberFlowGroup>
+				<div
+					class="text-base-900 dark:text-base-100 accent:text-base-900 flex items-baseline gap-4 text-center @sm:gap-6 @md:gap-8"
+					style="font-variant-numeric: tabular-nums;"
+				>
+					{#if elapsedYears > 0}
+						<div class="flex flex-col items-center">
+							<NumberFlow
+								value={elapsedYears}
+								trend={1}
+								class="text-3xl font-bold @xs:text-4xl @sm:text-5xl @md:text-6xl @lg:text-7xl"
+							/>
+							<span class="text-base-500 dark:text-base-400 accent:text-accent-950 text-xs"
+								>{elapsedYears === 1 ? 'year' : 'years'}</span
+							>
+						</div>
+					{/if}
+					{#if elapsedYears > 0 || elapsedDays > 0}
+						<div class="flex flex-col items-center">
+							<NumberFlow
+								value={elapsedDays}
+								trend={1}
+								class="text-3xl font-bold @xs:text-4xl @sm:text-5xl @md:text-6xl @lg:text-7xl"
+							/>
+							<span class="text-base-500 dark:text-base-400 accent:text-accent-950 text-xs"
+								>{elapsedDays === 1 ? 'day' : 'days'}</span
+							>
+						</div>
+					{/if}
 					<div class="flex flex-col items-center">
 						<NumberFlow
-							value={elapsedYears}
+							value={elapsedHours}
 							trend={1}
+							format={{ minimumIntegerDigits: 2 }}
 							class="text-3xl font-bold @xs:text-4xl @sm:text-5xl @md:text-6xl @lg:text-7xl"
 						/>
-						<span class="text-base-500 dark:text-base-400 accent:text-accent-950 text-xs"
-							>{elapsedYears === 1 ? 'year' : 'years'}</span
-						>
+						<span class="text-base-500 dark:text-base-400 accent:text-accent-950 text-xs">hrs</span>
 					</div>
-				{/if}
-				{#if elapsedYears > 0 || elapsedDays > 0}
 					<div class="flex flex-col items-center">
 						<NumberFlow
-							value={elapsedDays}
+							value={elapsedMinutes}
 							trend={1}
+							format={{ minimumIntegerDigits: 2 }}
+							digits={{ 1: { max: 5 } }}
 							class="text-3xl font-bold @xs:text-4xl @sm:text-5xl @md:text-6xl @lg:text-7xl"
 						/>
-						<span class="text-base-500 dark:text-base-400 accent:text-accent-950 text-xs"
-							>{elapsedDays === 1 ? 'day' : 'days'}</span
-						>
+						<span class="text-base-500 dark:text-base-400 accent:text-accent-950 text-xs">min</span>
 					</div>
-				{/if}
-				<div class="flex flex-col items-center">
-					<NumberFlow
-						value={elapsedHours}
-						trend={1}
-						format={{ minimumIntegerDigits: 2 }}
-						class="text-3xl font-bold @xs:text-4xl @sm:text-5xl @md:text-6xl @lg:text-7xl"
-					/>
-					<span class="text-base-500 dark:text-base-400 accent:text-accent-950 text-xs">hrs</span>
-				</div>
-				<div class="flex flex-col items-center">
-					<NumberFlow
-						value={elapsedMinutes}
-						trend={1}
-						format={{ minimumIntegerDigits: 2 }}
-						digits={{ 1: { max: 5 } }}
-						class="text-3xl font-bold @xs:text-4xl @sm:text-5xl @md:text-6xl @lg:text-7xl"
-					/>
-					<span class="text-base-500 dark:text-base-400 accent:text-accent-950 text-xs">min</span>
-				</div>
-				<div class="flex flex-col items-center">
-					<NumberFlow
-						value={elapsedSeconds}
-						trend={1}
-						format={{ minimumIntegerDigits: 2 }}
-						digits={{ 1: { max: 5 } }}
-						class="text-3xl font-bold @xs:text-4xl @sm:text-5xl @md:text-6xl @lg:text-7xl"
-					/>
-					<span class="text-base-500 dark:text-base-400 accent:text-accent-950 text-xs">sec</span>
-				</div>
-			</div>
-		</NumberFlowGroup>
-	{:else if eventDiff !== null}
-		<!-- Countdown to future event -->
-		<NumberFlowGroup>
-			<div
-				class="text-base-900 dark:text-base-100 accent:text-base-900 flex items-baseline gap-4 text-center @sm:gap-6 @md:gap-8"
-				style="font-variant-numeric: tabular-nums;"
-			>
-				{#if eventDays > 0}
 					<div class="flex flex-col items-center">
 						<NumberFlow
-							value={eventDays}
+							value={elapsedSeconds}
+							trend={1}
+							format={{ minimumIntegerDigits: 2 }}
+							digits={{ 1: { max: 5 } }}
+							class="text-3xl font-bold @xs:text-4xl @sm:text-5xl @md:text-6xl @lg:text-7xl"
+						/>
+						<span class="text-base-500 dark:text-base-400 accent:text-accent-950 text-xs">sec</span>
+					</div>
+				</div>
+			</NumberFlowGroup>
+		{:else if eventDiff !== null}
+			<!-- Countdown to future event -->
+			<NumberFlowGroup>
+				<div
+					class="text-base-900 dark:text-base-100 accent:text-base-900 flex items-baseline gap-4 text-center @sm:gap-6 @md:gap-8"
+					style="font-variant-numeric: tabular-nums;"
+				>
+					{#if eventDays > 0}
+						<div class="flex flex-col items-center">
+							<NumberFlow
+								value={eventDays}
+								trend={-1}
+								class="text-3xl font-bold @xs:text-4xl @sm:text-5xl @md:text-6xl @lg:text-7xl"
+							/>
+							<span class="text-base-500 dark:text-base-400 accent:text-accent-950 text-xs"
+								>{eventDays === 1 ? 'day' : 'days'}</span
+							>
+						</div>
+					{/if}
+					<div class="flex flex-col items-center">
+						<NumberFlow
+							value={eventHours}
 							trend={-1}
+							format={{ minimumIntegerDigits: 2 }}
 							class="text-3xl font-bold @xs:text-4xl @sm:text-5xl @md:text-6xl @lg:text-7xl"
 						/>
-						<span class="text-base-500 dark:text-base-400 accent:text-accent-950 text-xs"
-							>{eventDays === 1 ? 'day' : 'days'}</span
-						>
+						<span class="text-base-500 dark:text-base-400 accent:text-accent-950 text-xs">hrs</span>
 					</div>
-				{/if}
-				<div class="flex flex-col items-center">
-					<NumberFlow
-						value={eventHours}
-						trend={-1}
-						format={{ minimumIntegerDigits: 2 }}
-						class="text-3xl font-bold @xs:text-4xl @sm:text-5xl @md:text-6xl @lg:text-7xl"
-					/>
-					<span class="text-base-500 dark:text-base-400 accent:text-accent-950 text-xs">hrs</span>
+					<div class="flex flex-col items-center">
+						<NumberFlow
+							value={eventMinutes}
+							trend={-1}
+							format={{ minimumIntegerDigits: 2 }}
+							digits={{ 1: { max: 5 } }}
+							class="text-3xl font-bold @xs:text-4xl @sm:text-5xl @md:text-6xl @lg:text-7xl"
+						/>
+						<span class="text-base-500 dark:text-base-400 accent:text-accent-950 text-xs">min</span>
+					</div>
+					<div class="flex flex-col items-center">
+						<NumberFlow
+							value={eventSeconds}
+							trend={-1}
+							format={{ minimumIntegerDigits: 2 }}
+							digits={{ 1: { max: 5 } }}
+							class="text-3xl font-bold @xs:text-4xl @sm:text-5xl @md:text-6xl @lg:text-7xl"
+						/>
+						<span class="text-base-500 dark:text-base-400 accent:text-accent-950 text-xs">sec</span>
+					</div>
 				</div>
-				<div class="flex flex-col items-center">
-					<NumberFlow
-						value={eventMinutes}
-						trend={-1}
-						format={{ minimumIntegerDigits: 2 }}
-						digits={{ 1: { max: 5 } }}
-						class="text-3xl font-bold @xs:text-4xl @sm:text-5xl @md:text-6xl @lg:text-7xl"
-					/>
-					<span class="text-base-500 dark:text-base-400 accent:text-accent-950 text-xs">min</span>
-				</div>
-				<div class="flex flex-col items-center">
-					<NumberFlow
-						value={eventSeconds}
-						trend={-1}
-						format={{ minimumIntegerDigits: 2 }}
-						digits={{ 1: { max: 5 } }}
-						class="text-3xl font-bold @xs:text-4xl @sm:text-5xl @md:text-6xl @lg:text-7xl"
-					/>
-					<span class="text-base-500 dark:text-base-400 accent:text-accent-950 text-xs">sec</span>
-				</div>
-			</div>
-		</NumberFlowGroup>
-	{:else}
-		<div class="text-base-500 text-sm">Set a target date in settings</div>
-	{/if}
-</div>
+			</NumberFlowGroup>
+		{:else}
+			<div class="text-base-500 text-sm">Set a target date in settings</div>
+		{/if}
+	</div>
+{/if}
