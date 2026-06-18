@@ -1,13 +1,16 @@
 <script lang="ts">
 	import { CardDefinitionsByType } from '../..';
 	import { type BaseCardProps } from '../BaseCard/BaseCard.svelte';
+	import { recoverFromHydrationError } from './recoverFromHydrationError';
 
 	let { item, ref = $bindable(null), ...rest }: BaseCardProps = $props();
+
+	const onerror = recoverFromHydrationError();
 </script>
 
 {#if CardDefinitionsByType[item.cardType]}
 	{@const cardDef = CardDefinitionsByType[item.cardType]}
-	<svelte:boundary>
+	<svelte:boundary {onerror}>
 		<cardDef.contentComponent isEditing={false} {item} {...rest} />
 		{#snippet failed(error)}
 			<div class="text-base-600 dark:text-base-400 m-4 text-xs">
