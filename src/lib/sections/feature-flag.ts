@@ -7,7 +7,9 @@ import { env } from '$env/dynamic/public';
  */
 const ALLOWED_DIDS: readonly string[] = [
 	// flo-bit.dev
-	'did:plc:257wekqxg4hyapkq6k47igmp'
+	'did:plc:257wekqxg4hyapkq6k47igmp',
+
+	'did:plc:4fujedm756z5akpjavmv5xek'
 ];
 
 /**
