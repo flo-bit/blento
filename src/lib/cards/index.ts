@@ -26,6 +26,7 @@ import { TealFMPlaysCardDefinition } from './media/TealFMPlaysCard';
 import { RockskyPlaysCardDefinition } from './media/RockskyPlaysCard';
 import { PhotoGalleryCardDefinition } from './media/PhotoGalleryCard';
 import { StandardSiteDocumentListCardDefinition } from './content/StandardSiteDocumentListCard';
+import { RSSFeedCardDefinition } from './content/RSSFeedCard';
 import { StatusphereCardDefinition } from './media/StatusphereCard';
 import { EventCardDefinition } from './social/EventCard';
 import { UpcomingEventsCardDefinition } from './social/UpcomingEventsCard';
@@ -102,6 +103,7 @@ export const AllCardDefinitions = [
 	RockskyPlaysCardDefinition,
 	PhotoGalleryCardDefinition,
 	StandardSiteDocumentListCardDefinition,
+	RSSFeedCardDefinition,
 	StatusphereCardDefinition,
 	EventCardDefinition,
 	UpcomingEventsCardDefinition,

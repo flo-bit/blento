@@ -9,6 +9,7 @@ const NAMESPACE_TTL = {
 	lastfm: 60 * 60, // 1 hour (default, overridable per-put)
 	listenbrainz: 60 * 60, // 1 hour (default, overridable per-put)
 	npmx: 60 * 60 * 12, // 12 hours
+	rss: 60 * 15, // 15 minutes
 	skyboard: 60 * 5, // 5 minutes (collaborative boards change often)
 	og: 60 * 60 * 24 * 30, // 30 days
 	profile: 60 * 60 * 24, // 24 hours
