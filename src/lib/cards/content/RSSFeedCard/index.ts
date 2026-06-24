@@ -7,7 +7,6 @@ import type { RssFeedItem } from './types';
 
 const cardType = 'rssFeed';
 
-
 export const RSSFeedCardDefinition = {
 	type: cardType,
 	contentComponent: RSSFeedCard,
@@ -45,9 +44,10 @@ export const RSSFeedCardDefinition = {
 		if (!feedUrl) return null;
 
 		const parsed = new URL(feedUrl);
-		const looksLikeFeed = /(?:^|\/)(?:feed|feeds|rss|atom)(?:[/?#]|$)|\.(?:rss|xml|atom)(?:[?#]|$)/i.test(
-			`${parsed.pathname}${parsed.search}${parsed.hash}`
-		);
+		const looksLikeFeed =
+			/(?:^|\/)(?:feed|feeds|rss|atom)(?:[/?#]|$)|\.(?:rss|xml|atom)(?:[?#]|$)/i.test(
+				`${parsed.pathname}${parsed.search}${parsed.hash}`
+			);
 		if (!looksLikeFeed) return null;
 
 		item.cardData.href = feedUrl;

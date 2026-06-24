@@ -27,7 +27,10 @@ function firstString(...values: unknown[]): string | undefined {
 
 function stripHtml(value: string | undefined): string | undefined {
 	if (!value) return undefined;
-	const stripped = value.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+	const stripped = value
+		.replace(/<[^>]*>/g, ' ')
+		.replace(/\s+/g, ' ')
+		.trim();
 	return stripped || undefined;
 }
 
