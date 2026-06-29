@@ -4,7 +4,7 @@ import { CardDefinitionsByType } from '$lib/cards';
 import type { CacheService } from '$lib/helpers/cache';
 import { createEmptyCard } from '$lib/helpers/items';
 import type { Item, PronounsRecord, SectionRecord, WebsiteData } from '$lib/types';
-import { ensureSections } from '$lib/sections/migrate';
+import { buildGraph, nodesToItems } from '@blento/schema';
 import { error } from '@sveltejs/kit';
 import type { ActorIdentifier, Did } from '@atcute/lexicons';
 
@@ -154,7 +154,9 @@ function loadFromContrail(actor: ActorIdentifier, db: D1Database, page: string) 
 
 		if (!cardRes.ok) return null;
 
-		const cards = cardRes.data.records.map((r) => ({ ...(r.value as object) }) as Item);
+		const cards = cardRes.data.records.map(
+			(r) => ({ ...(r.value as object), id: parseUri(r.uri)?.rkey }) as Item
+		);
 
 		const pages = pageRes.ok
 			? pageRes.data.records
@@ -279,7 +281,7 @@ export async function loadData(
 			getPronounsFromPDS(did)
 		]);
 
-		cards = cardRecords.map((v) => ({ ...v.value }) as Item);
+		cards = cardRecords.map((v) => ({ ...v.value, id: parseUri(v.uri)?.rkey }) as Item);
 		sectionRecords = sectionRecs
 			.filter((v) => (v.value as any)?.page === fullPage)
 			.map((v) => ({ ...(v.value as object), id: parseUri(v.uri)?.rkey }) as SectionRecord);
@@ -297,7 +299,10 @@ export async function loadData(
 
 	publication ??= defaultPublication(profile);
 
-	const migrated = ensureSections(sectionRecords, cards, fullPage);
+	// Storage now flows through the node graph: build nodes (no coord ladder — these records are
+	// already normalized), then project back to the v1-shaped sections/cards the render consumes.
+	// buildGraph subsumes ensureSections (synthesizes a grid container, adopts orphan cards).
+	const migrated = nodesToItems(buildGraph(sectionRecords, cards, fullPage, { order: 'input' }));
 
 	const additionalData = await loadAdditionalData(
 		migrated.cards,
@@ -305,7 +310,7 @@ export async function loadData(
 		env
 	);
 
-	return checkData({
+	const result = checkData({
 		page: fullPage,
 		handle,
 		did,
@@ -319,6 +324,9 @@ export async function loadData(
 		updatedAt: Date.now(),
 		version: 1
 	});
+	// Attach the canonical node graph (from the post-collision-fix state) for downstream consumers.
+	result.nodes = buildGraph(result.sections, result.cards, fullPage, { order: 'input' });
+	return result;
 }
 
 export async function loadCardData(

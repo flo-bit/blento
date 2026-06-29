@@ -57,6 +57,12 @@ export interface V1Publication {
 export interface MigrateOptions {
 	/** Id generator for synthesized containers. Defaults to a TID; tests can inject a stable one. */
 	genId?: () => string;
+	/**
+	 * Leaf ordering within a container.
+	 *  - 'document' (default): sort by (y, x, id) — canonical order for a fresh migration / write.
+	 *  - 'input': preserve the caller's array order — used on the read path so DOM order matches prod.
+	 */
+	order?: 'document' | 'input';
 }
 
 /** Apply v1's own card migration ladder so we ingest normalized coordinates. */
@@ -80,7 +86,12 @@ function normalizeV1Card(input: V1Card): V1Card {
 	return c;
 }
 
-export function migrateV1(
+/**
+ * Structural transform: v1 sections + cards -> node graph. Does NOT run the coordinate ladder, so
+ * coordinates pass through verbatim — callers reading already-normalized records (the live load
+ * path) get the same geometry as prod. `migrateV1` layers the ladder on top for raw ingestion.
+ */
+export function buildGraph(
 	sections: V1Section[],
 	cards: V1Card[],
 	page: string,
@@ -115,8 +126,7 @@ export function migrateV1(
 
 	// 2. Cards -> leaf nodes, grouped by parent container.
 	const byParent = new Map<string, V1Card[]>();
-	for (const raw of cards) {
-		const c = normalizeV1Card(raw);
+	for (const c of cards) {
 		const parent = c.sectionId && sectionIds.has(c.sectionId) ? c.sectionId : defaultContainerId;
 		let group = byParent.get(parent);
 		if (!group) {
@@ -127,8 +137,10 @@ export function migrateV1(
 	}
 
 	for (const [parent, group] of byParent) {
-		// Deterministic document order within a grid: by (y, x), then id as a tiebreaker.
-		group.sort((a, b) => a.y - b.y || a.x - b.x || a.id.localeCompare(b.id));
+		if ((opts.order ?? 'document') === 'document') {
+			// Deterministic document order within a grid: by (y, x), then id as a tiebreaker.
+			group.sort((a, b) => a.y - b.y || a.x - b.x || a.id.localeCompare(b.id));
+		}
 		const ranks = generateNKeysBetween(null, null, group.length);
 		group.forEach((c, i) => {
 			const node: Node = {
@@ -158,6 +170,75 @@ export function migrateV1(
 	}
 
 	return nodes;
+}
+
+/**
+ * Full v1 -> node migration for INGESTING raw records (one-time / migrate-on-save): runs v1's
+ * coordinate ladder, then builds the graph in canonical document order.
+ */
+export function migrateV1(
+	sections: V1Section[],
+	cards: V1Card[],
+	page: string,
+	opts: MigrateOptions = {}
+): Node[] {
+	return buildGraph(sections, cards.map(normalizeV1Card), page, opts);
+}
+
+/** A v1-shaped container (section), reconstructed from a node for the existing render/editor. */
+export interface LegacySection extends V1Section {
+	name?: string;
+	version?: number;
+}
+
+const byRank = (a: Node, b: Node) => (a.rank < b.rank ? -1 : a.rank > b.rank ? 1 : 0);
+
+/**
+ * Inverse of `buildGraph`: node graph -> v1-shaped { sections, cards } so v1's existing render and
+ * editor keep working while storage moves to nodes. Containers -> sections (rank order -> index),
+ * leaves -> cards (layout -> coords, style.color -> color, parent -> sectionId).
+ */
+export function nodesToItems(nodes: Node[]): { sections: LegacySection[]; cards: V1Card[] } {
+	const sections: LegacySection[] = nodes
+		.filter((n) => n.kind === 'container')
+		.sort(byRank)
+		.map((c, i) => ({
+			id: c.id,
+			sectionType: c.type,
+			page: c.page,
+			index: i,
+			sectionData: (c.data ?? {}) as Record<string, unknown>,
+			version: c.version
+		}));
+
+	const cards: V1Card[] = nodes
+		.filter((n) => n.kind === 'leaf')
+		.sort(byRank)
+		.map((n) => {
+			const l = (n.layout ?? {}) as Record<string, number>;
+			const card: V1Card = {
+				id: n.id,
+				cardType: n.type,
+				cardData: n.data,
+				x: l.x ?? 0,
+				y: l.y ?? 0,
+				w: l.w ?? 0,
+				h: l.h ?? 0,
+				mobileX: l.mobileX ?? 0,
+				mobileY: l.mobileY ?? 0,
+				mobileW: l.mobileW ?? 0,
+				mobileH: l.mobileH ?? 0,
+				sectionId: n.parent ?? undefined,
+				page: n.page,
+				version: n.version
+			};
+			if (l.rotation) card.rotation = l.rotation;
+			const style = n.style as { color?: string } | undefined;
+			if (style?.color) card.color = style.color;
+			return card;
+		});
+
+	return { sections, cards };
 }
 
 /**

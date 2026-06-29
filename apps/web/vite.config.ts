@@ -12,6 +12,10 @@ export default defineConfig({
 	resolve: {
 		dedupe: ['bits-ui', '@internationalized/date', 'svelte']
 	},
+	// Workspace packages export raw .ts; force Vite to transform them for SSR + the CF build.
+	ssr: {
+		noExternal: [/^@blento\//]
+	},
 	server: {
 		host: '127.0.0.1',
 		port: 5179

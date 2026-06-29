@@ -1,5 +1,6 @@
 import type { Blob } from '@atcute/lexicons';
 import type { AppBskyActorDefs } from '@atcute/bluesky';
+import type { Node } from '@blento/schema';
 
 export type Item = {
 	id: string;
@@ -96,6 +97,9 @@ export type WebsiteData = {
 	pronounsRecord?: PronounsRecord;
 
 	sections: SectionRecord[];
+
+	/** The node graph (migrate-on-read). Source of truth going forward; render still uses cards/sections. */
+	nodes?: Node[];
 
 	additionalData: Record<string, unknown>;
 	updatedAt: number;

@@ -62,6 +62,9 @@ importers:
       '@atmo-dev/events-ui':
         specifier: ^0.1.0
         version: 0.1.0(72359c36614541bbedb30259ef448b88)
+      '@blento/schema':
+        specifier: workspace:*
+        version: link:../../packages/schema
       '@cloudflare/workers-types':
         specifier: ^4.20260313.1
         version: 4.20260313.1
