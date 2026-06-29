@@ -24,6 +24,12 @@ import { GifCardDefinition } from './media/GIFCard';
 import { PopfeedReviewsCardDefinition } from './media/PopfeedReviews';
 import { TealFMPlaysCardDefinition } from './media/TealFMPlaysCard';
 import { RockskyPlaysCardDefinition } from './media/RockskyPlaysCard';
+import {
+	DerakkumaBestsCardDefinition,
+	DerakkumaCircleCardDefinition,
+	DerakkumaProfileCardDefinition,
+	DerakkumaRecentPlaysCardDefinition
+} from './media/DerakkumaCards';
 import { PhotoGalleryCardDefinition } from './media/PhotoGalleryCard';
 import { StandardSiteDocumentListCardDefinition } from './content/StandardSiteDocumentListCard';
 import { StatusphereCardDefinition } from './media/StatusphereCard';
@@ -103,6 +109,10 @@ export const AllCardDefinitions = [
 	PopfeedReviewsCardDefinition,
 	TealFMPlaysCardDefinition,
 	RockskyPlaysCardDefinition,
+	DerakkumaProfileCardDefinition,
+	DerakkumaCircleCardDefinition,
+	DerakkumaRecentPlaysCardDefinition,
+	DerakkumaBestsCardDefinition,
 	PhotoGalleryCardDefinition,
 	StandardSiteDocumentListCardDefinition,
 	StatusphereCardDefinition,
