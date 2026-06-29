@@ -4,7 +4,7 @@ import { CardDefinitionsByType } from '$lib/cards';
 import type { CacheService } from '$lib/helpers/cache';
 import { createEmptyCard } from '$lib/helpers/items';
 import type { Item, PronounsRecord, SectionRecord, WebsiteData } from '$lib/types';
-import { buildGraph, nodesToItems } from '@blento/schema';
+import { buildGraph, nodesToItems, recordToNode, type Node, type NodeRecord } from '@blento/schema';
 import { error } from '@sveltejs/kit';
 import type { ActorIdentifier, Did } from '@atcute/lexicons';
 
@@ -232,6 +232,10 @@ export async function loadData(
 	let profile: WebsiteData['profile'];
 	let publication: WebsiteData['publication'] | undefined;
 	let pronounsRecord: PronounsRecord | undefined;
+	// New format. Empty = this page hasn't been migrated yet → fall back to card/section on read.
+	// (PDS path only for now; the contrail path keeps migrating card/section until contrail indexes
+	// app.blento.node — see Phase 1c notes.)
+	let nodesFromRecords: Node[] = [];
 
 	if (contrailData) {
 		cards = contrailData.cards;
@@ -265,26 +269,33 @@ export async function loadData(
 		}
 	} else {
 		// Fallback: no D1 available (e.g. vite dev) — use PDS directly
-		const [cardRecords, pageRecs, sectionRecs, mainPub, prof, pronouns] = await Promise.all([
-			listRecords({ did, collection: 'app.blento.card', limit: 0 }).catch((e) => {
-				console.error('error getting records for collection app.blento.card', e);
-				return [] as Awaited<ReturnType<typeof listRecords>>;
-			}),
-			listRecords({ did, collection: 'app.blento.page' }).catch(
-				() => [] as Awaited<ReturnType<typeof listRecords>>
-			),
-			listRecords({ did, collection: 'app.blento.section' }).catch(
-				() => [] as Awaited<ReturnType<typeof listRecords>>
-			),
-			getSelfPublicationFromPDS(did),
-			getDetailedProfile({ did }),
-			getPronounsFromPDS(did)
-		]);
+		const [cardRecords, pageRecs, sectionRecs, nodeRecs, mainPub, prof, pronouns] =
+			await Promise.all([
+				listRecords({ did, collection: 'app.blento.card', limit: 0 }).catch((e) => {
+					console.error('error getting records for collection app.blento.card', e);
+					return [] as Awaited<ReturnType<typeof listRecords>>;
+				}),
+				listRecords({ did, collection: 'app.blento.page' }).catch(
+					() => [] as Awaited<ReturnType<typeof listRecords>>
+				),
+				listRecords({ did, collection: 'app.blento.section' }).catch(
+					() => [] as Awaited<ReturnType<typeof listRecords>>
+				),
+				listRecords({ did, collection: 'app.blento.node', limit: 0 }).catch(
+					() => [] as Awaited<ReturnType<typeof listRecords>>
+				),
+				getSelfPublicationFromPDS(did),
+				getDetailedProfile({ did }),
+				getPronounsFromPDS(did)
+			]);
 
 		cards = cardRecords.map((v) => ({ ...v.value, id: parseUri(v.uri)?.rkey }) as Item);
 		sectionRecords = sectionRecs
 			.filter((v) => (v.value as any)?.page === fullPage)
 			.map((v) => ({ ...(v.value as object), id: parseUri(v.uri)?.rkey }) as SectionRecord);
+		nodesFromRecords = nodeRecs
+			.filter((v) => (v.value as unknown as NodeRecord)?.page === fullPage)
+			.map((v) => recordToNode(parseUri(v.uri)?.rkey ?? '', v.value as unknown as NodeRecord));
 		pageRecords = pageRecs;
 		profile = prof;
 		publication = mainPub?.value as WebsiteData['publication'] | undefined;
@@ -299,10 +310,14 @@ export async function loadData(
 
 	publication ??= defaultPublication(profile);
 
-	// Storage now flows through the node graph: build nodes (no coord ladder — these records are
-	// already normalized), then project back to the v1-shaped sections/cards the render consumes.
-	// buildGraph subsumes ensureSections (synthesizes a grid container, adopts orphan cards).
-	const migrated = nodesToItems(buildGraph(sectionRecords, cards, fullPage, { order: 'input' }));
+	// Storage flows through the node graph. Dual-format read: prefer app.blento.node records; for
+	// not-yet-migrated pages, build the graph from card/section on read (no coord ladder — these
+	// records are already normalized). buildGraph subsumes ensureSections (synthesizes a grid
+	// container, adopts orphan cards). Either way, project back to v1-shaped sections/cards for render.
+	const graph = nodesFromRecords.length
+		? nodesFromRecords
+		: buildGraph(sectionRecords, cards, fullPage, { order: 'input' });
+	const migrated = nodesToItems(graph);
 
 	const additionalData = await loadAdditionalData(
 		migrated.cards,
@@ -324,8 +339,11 @@ export async function loadData(
 		updatedAt: Date.now(),
 		version: 1
 	});
-	// Attach the canonical node graph (from the post-collision-fix state) for downstream consumers.
-	result.nodes = buildGraph(result.sections, result.cards, fullPage, { order: 'input' });
+	// Attach the canonical node graph for downstream consumers: the stored records when present,
+	// else the migrate-on-read graph rebuilt from the post-collision-fix state.
+	result.nodes = nodesFromRecords.length
+		? nodesFromRecords
+		: buildGraph(result.sections, result.cards, fullPage, { order: 'input' });
 	return result;
 }
 
