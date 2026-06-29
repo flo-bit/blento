@@ -140,7 +140,7 @@ function loadCardFromContrail(did: Did, rkey: string, db: D1Database) {
 function loadFromContrail(actor: ActorIdentifier, db: D1Database, page: string) {
 	return tryContrail('cards+pages+sections query', async () => {
 		const client = getServerClient(db);
-		const [cardRes, pageRes, sectionRes] = await Promise.all([
+		const [cardRes, pageRes, sectionRes, nodeRes] = await Promise.all([
 			client.get('app.blento.card.listRecords', {
 				params: { actor, limit: 200, profiles: true, page }
 			}),
@@ -149,7 +149,14 @@ function loadFromContrail(actor: ActorIdentifier, db: D1Database, page: string) 
 			}),
 			client.get('app.blento.section.listRecords' as any, {
 				params: { actor, limit: 200, page }
-			}) as Promise<any>
+			}) as Promise<any>,
+			// Supplementary + tolerant: ok if contrail hasn't indexed app.blento.node yet (returns
+			// null) — then nodesFromRecords stays empty and we migrate-on-read from card/section.
+			(
+				client.get('app.blento.node.listRecords' as any, {
+					params: { actor, limit: 200, profiles: true, page }
+				}) as Promise<any>
+			).catch(() => null)
 		]);
 
 		if (!cardRes.ok) return null;
@@ -157,6 +164,13 @@ function loadFromContrail(actor: ActorIdentifier, db: D1Database, page: string) 
 		const cards = cardRes.data.records.map(
 			(r) => ({ ...(r.value as object), id: parseUri(r.uri)?.rkey }) as Item
 		);
+
+		const nodes =
+			nodeRes?.ok && nodeRes.data?.records
+				? (nodeRes.data.records as any[]).map((r: any) =>
+						recordToNode(parseUri(r.uri)?.rkey ?? '', r.value as unknown as NodeRecord)
+					)
+				: [];
 
 		const pages = pageRes.ok
 			? pageRes.data.records
@@ -177,9 +191,13 @@ function loadFromContrail(actor: ActorIdentifier, db: D1Database, page: string) 
 
 		return {
 			cards,
+			nodes,
 			pages,
 			sections,
-			profiles: (cardRes.data.profiles ?? []) as ContrailProfile[]
+			// A fully migrated page has no card records → take profiles from the node query instead.
+			profiles: ((cardRes.data.profiles?.length
+				? cardRes.data.profiles
+				: nodeRes?.data?.profiles) ?? []) as ContrailProfile[]
 		};
 	});
 }
@@ -241,6 +259,7 @@ export async function loadData(
 		cards = contrailData.cards;
 		sectionRecords = contrailData.sections;
 		pageRecords = contrailData.pages;
+		nodesFromRecords = contrailData.nodes ?? [];
 
 		const hasBskyProfile = contrailData.profiles.some(
 			(p) => p.did === did && p.collection === 'app.bsky.actor.profile'
