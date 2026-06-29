@@ -45,6 +45,7 @@ import { FriendsCardDefinition } from './social/FriendsCard';
 import { GitHubContributorsCardDefinition } from './social/GitHubContributorsCard';
 import { ProductHuntCardDefinition } from './social/ProductHuntCard';
 import { KickstarterCardDefinition } from './social/KickstarterCard';
+import { BaserowFormCardDefinition } from './social/BaserowFormCard';
 import { NpmxLikesCardDefinition } from './social/NpmxLikesCard';
 import { NpmxLikesLeaderboardCardDefinition } from './social/NpmxLikesLeaderboardCard';
 import { LastFMRecentTracksCardDefinition } from './media/LastFMCard/LastFMRecentTracksCard';
@@ -88,6 +89,7 @@ export const AllCardDefinitions = [
 	LivestreamCardDefitition,
 	LivestreamEmbedCardDefitition,
 	// EmbedCardDefinition,
+	BaserowFormCardDefinition,
 	MapCardDefinition,
 	ATProtoCollectionsCardDefinition,
 	SectionCardDefinition,
