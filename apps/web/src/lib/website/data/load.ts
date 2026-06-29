@@ -289,7 +289,12 @@ export async function loadData(
 				getPronounsFromPDS(did)
 			]);
 
-		cards = cardRecords.map((v) => ({ ...v.value, id: parseUri(v.uri)?.rkey }) as Item);
+		// Scope to this page BEFORE building the graph: buildGraph adopts orphans into the current
+		// page and stamps node.page, so feeding it other pages' cards would both render them here and
+		// (via originalCards) delete their records on save. The contrail path filters server-side.
+		cards = cardRecords
+			.filter((v) => (v.value as Item | undefined)?.page === fullPage)
+			.map((v) => ({ ...v.value, id: parseUri(v.uri)?.rkey }) as Item);
 		sectionRecords = sectionRecs
 			.filter((v) => (v.value as any)?.page === fullPage)
 			.map((v) => ({ ...(v.value as object), id: parseUri(v.uri)?.rkey }) as SectionRecord);
