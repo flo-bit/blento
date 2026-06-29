@@ -69,6 +69,7 @@ import { ButtondownCardDefinition } from './social/ButtondownCard';
 import { BufoStatusCardDefinition } from './social/BufoStatusCard';
 import { VideoCardDefinition } from './media/VideoCard';
 import { SkyboardCardDefinition } from './social/SkyboardCard';
+import { RoomyChatCardDefinition } from './social/RoomyChatCard';
 // import { Model3DCardDefinition } from './visual/Model3DCard';
 
 export const AllCardDefinitions = [
@@ -143,7 +144,8 @@ export const AllCardDefinitions = [
 	RPGActorCardDefinition,
 	ButtondownCardDefinition,
 	BufoStatusCardDefinition,
-	SkyboardCardDefinition
+	SkyboardCardDefinition,
+	RoomyChatCardDefinition
 ] as const;
 
 export const CardDefinitionsByType = AllCardDefinitions.reduce(
