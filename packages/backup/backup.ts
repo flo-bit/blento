@@ -12,8 +12,9 @@
  * legacy (card) and migrated (node) users. Per-repo records come straight from each repo's PDS.
  *
  * Env:
- *   BLENTO_RELAY        relay host for discovery (default https://relay1.us-west.bsky.network)
- *   BLENTO_BACKUP_LIMIT cap the number of repos (for a quick test run); default = all
+ *   BLENTO_RELAY              relay host for discovery (default https://relay1.us-west.bsky.network)
+ *   BLENTO_BACKUP_LIMIT       cap the number of repos (for a quick test run); default = all
+ *   BLENTO_BACKUP_CONCURRENCY repos fetched in parallel (default 12)
  */
 import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
@@ -21,6 +22,7 @@ import { join } from 'node:path';
 const RELAY = process.env.BLENTO_RELAY ?? 'https://relay1.us-west.bsky.network';
 const OUT_ROOT = process.argv[2] ?? './backups';
 const LIMIT = process.env.BLENTO_BACKUP_LIMIT ? Number(process.env.BLENTO_BACKUP_LIMIT) : Infinity;
+const CONCURRENCY = Number(process.env.BLENTO_BACKUP_CONCURRENCY ?? 12);
 
 /** blento-owned records we preserve (content + legacy/new roots + pronouns). */
 const COLLECTIONS = [
@@ -194,18 +196,31 @@ let okRepos = 0;
 let failRepos = 0;
 let totalRecords = 0;
 let totalBlobs = 0;
-for (const [i, did] of dids.entries()) {
-	try {
-		const { records, blobs } = await backupRepo(did, root);
-		totalRecords += records;
-		totalBlobs += blobs;
-		okRepos++;
-		console.log(`[${i + 1}/${dids.length}] ${did} — ${records} records, ${blobs} blobs`);
-	} catch (e) {
-		failRepos++;
-		console.warn(`[${i + 1}/${dids.length}] ${did} — FAILED: ${(e as Error).message}`);
+let nextIndex = 0;
+let completed = 0;
+
+// Repos run in parallel (almost all time is network wait); each repo's own collections + blobs stay
+// sequential to be gentle on a single PDS. Workers pull from a shared cursor until the list is drained.
+async function worker(): Promise<void> {
+	for (;;) {
+		const i = nextIndex++;
+		if (i >= dids.length) return;
+		const did = dids[i];
+		try {
+			const { records, blobs } = await backupRepo(did, root);
+			totalRecords += records;
+			totalBlobs += blobs;
+			okRepos++;
+			console.log(`[${++completed}/${dids.length}] ${did} — ${records} records, ${blobs} blobs`);
+		} catch (e) {
+			failRepos++;
+			console.warn(`[${++completed}/${dids.length}] ${did} — FAILED: ${(e as Error).message}`);
+		}
 	}
 }
+
+console.log(`Backing up with concurrency ${CONCURRENCY} ...`);
+await Promise.all(Array.from({ length: Math.min(CONCURRENCY, dids.length) }, () => worker()));
 
 console.log(
 	`\nDone: ${okRepos} repos ok, ${failRepos} failed, ${totalRecords} records, ${totalBlobs} blobs`
