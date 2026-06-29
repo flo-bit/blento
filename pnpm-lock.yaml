@@ -7,6 +7,18 @@ settings:
 importers:
 
   .:
+    devDependencies:
+      prettier:
+        specifier: ^3.8.1
+        version: 3.8.1
+      prettier-plugin-svelte:
+        specifier: ^3.5.1
+        version: 3.5.1(prettier@3.8.1)(svelte@5.53.11)
+      turbo:
+        specifier: ^2.5.0
+        version: 2.10.0
+
+  apps/web:
     dependencies:
       '@atcute/atproto':
         specifier: ^3.1.10
@@ -172,7 +184,7 @@ importers:
         version: 5.20.0
       marked:
         specifier: ^17.0.4
-        version: 17.0.4
+        version: 17.0.6
       perfect-freehand:
         specifier: ^1.2.3
         version: 1.2.3
@@ -266,13 +278,13 @@ importers:
         version: 17.4.0
       prettier:
         specifier: ^3.8.1
-        version: 3.8.1
+        version: 3.8.3
       prettier-plugin-svelte:
         specifier: ^3.5.1
-        version: 3.5.1(prettier@3.8.1)(svelte@5.53.11)
+        version: 3.5.1(prettier@3.8.3)(svelte@5.53.11)
       prettier-plugin-tailwindcss:
         specifier: ^0.7.2
-        version: 0.7.2(prettier-plugin-svelte@3.5.1(prettier@3.8.1)(svelte@5.53.11))(prettier@3.8.1)
+        version: 0.7.2(prettier-plugin-svelte@3.5.1(prettier@3.8.3)(svelte@5.53.11))(prettier@3.8.3)
       svelte:
         specifier: ^5.53.11
         version: 5.53.11
@@ -300,6 +312,34 @@ importers:
       vite:
         specifier: ^8.0.0
         version: 8.0.0(@types/node@25.9.1)(esbuild@0.27.3)(jiti@2.6.1)(tsx@4.21.0)
+      vitest:
+        specifier: ^4.1.4
+        version: 4.1.4(@types/node@25.9.1)(vite@8.0.0(@types/node@25.9.1)(esbuild@0.27.3)(jiti@2.6.1)(tsx@4.21.0))
+
+  packages/diff-harness:
+    dependencies:
+      node-html-parser:
+        specifier: ^7.0.1
+        version: 7.1.0
+      pixelmatch:
+        specifier: ^6.0.0
+        version: 6.0.0
+      playwright:
+        specifier: ^1.50.0
+        version: 1.61.1
+      pngjs:
+        specifier: ^7.0.0
+        version: 7.0.0
+    devDependencies:
+      '@types/pngjs':
+        specifier: ^6.0.5
+        version: 6.0.5
+      tsx:
+        specifier: ^4.21.0
+        version: 4.21.0
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
       vitest:
         specifier: ^4.1.4
         version: 4.1.4(@types/node@25.9.1)(vite@8.0.0(@types/node@25.9.1)(esbuild@0.27.3)(jiti@2.6.1)(tsx@4.21.0))
@@ -338,9 +378,6 @@ packages:
     peerDependencies:
       '@atcute/identity': ^1.0.0
 
-  '@atcute/identity@1.1.3':
-    resolution: {integrity: sha512-oIqPoI8TwWeQxvcLmFEZLdN2XdWcaLVtlm8pNk0E72As9HNzzD9pwKPrLr3rmTLRIoULPPFmq9iFNsTeCIU9ng==}
-
   '@atcute/identity@1.1.4':
     resolution: {integrity: sha512-RCw1IqflfuSYCxK5m0lZCm0UnvIzcUnuhngiBhJEJb9a9Mc2SEf1xP3H8N5r8pvEH1LoAYd6/zrvCNU+uy9esw==}
 
@@ -365,9 +402,6 @@ packages:
 
   '@atcute/mst@1.0.0':
     resolution: {integrity: sha512-pMce2efib+dmKtnGnIvJZitVncJkpr3AmhyfgfYllni8KzsaDGsJmuGavSVpuojAhQe+6jYwHFtpm/beiiH4uw==}
-
-  '@atcute/multibase@1.1.8':
-    resolution: {integrity: sha512-pJgtImMZKCjqwRbu+2GzB+4xQjKBXDwdZOzeqe0u97zYKRGftpGYGvYv3+pMe2xXe+msDyu7Nv8iJp+U14otTA==}
 
   '@atcute/multibase@1.2.0':
     resolution: {integrity: sha512-ZK2GRra+qIYq9nNuQB52m2ul0hOmCQEtPobGfTSUxm7pF0OGEkWGkWHugFhNEDVzHzTwPxHp6VGotdZFue4lYQ==}
@@ -404,9 +438,6 @@ packages:
 
   '@atcute/util-fetch@1.0.5':
     resolution: {integrity: sha512-qjHj01BGxjSjIFdPiAjSARnodJIIyKxnCMMEcXMESo9TAyND6XZQqrie5fia+LlYWVXdpsTds8uFQwc9jdKTig==}
-
-  '@atcute/util-text@1.2.0':
-    resolution: {integrity: sha512-b8WSh+Z7K601eUFFmTFj8QPKDO8Ic0VDDj63sdKzpkm+ySQKsYT5nXekViGqFVKbyKj1V5FyvZvgXad6/aI4QQ==}
 
   '@atcute/util-text@1.3.1':
     resolution: {integrity: sha512-MRgJXkx67znuBXuoAYCJkBZyd3OApL7zZlNf5kXhuoCXcdiu1nblRDycYTADSkym4epBSQWxh26kmI9sewaq6A==}
@@ -1606,6 +1637,36 @@ packages:
       '@tiptap/core': ^3.20.1
       '@tiptap/pm': ^3.20.1
 
+  '@turbo/darwin-64@2.10.0':
+    resolution: {integrity: sha512-EwvHThXzpY0KGd1/NAmuewI5D+aVa3Rl/OlxE36yfjUKb/+ySrfJrSlEFt8aD1OXwnnaHnQnPKHFndor0Zxlsg==}
+    cpu: [x64]
+    os: [darwin]
+
+  '@turbo/darwin-arm64@2.10.0':
+    resolution: {integrity: sha512-9d2fTyyG0lf5Wq1bwJA9qUaeecViMkLcdctWaMMmCkxZ/JqypmqOwK3W6vmejeKVgkr06gSoiX8bD+xN5Jpxcg==}
+    cpu: [arm64]
+    os: [darwin]
+
+  '@turbo/linux-64@2.10.0':
+    resolution: {integrity: sha512-sZBtjMuufitanjzi6UssoUpJMnnPlLMcdcJj3m3ptNsSq31Xh7MnjhwA5nWvLDTfEFg8GPcbYFXMo8vSdKRfqQ==}
+    cpu: [x64]
+    os: [linux]
+
+  '@turbo/linux-arm64@2.10.0':
+    resolution: {integrity: sha512-vkq/Z8R+1DQ+kifWFa810IjRy2NNBVvha3cg9sWA3nFh6nnGrHSMnnJKrzH7c/No9kq4Jb55Ru44YKsCSBgrKg==}
+    cpu: [arm64]
+    os: [linux]
+
+  '@turbo/windows-64@2.10.0':
+    resolution: {integrity: sha512-CRUEguLWxFQHptYZS7HjPhNhAFawfea07iR+xAQ5e4klgLrPCMdexBkXwSCwOxqTFknJ7RZFN3gOaADsw+Gttg==}
+    cpu: [x64]
+    os: [win32]
+
+  '@turbo/windows-arm64@2.10.0':
+    resolution: {integrity: sha512-dVHGaf9F8twzgibcBqKoADT/LLqf9++jDb+hq/LPWWaOmRpp4M+/pVOm7vy4z9D++xg8eaxWLT0+wQxFwhYu9A==}
+    cpu: [arm64]
+    os: [win32]
+
   '@tweenjs/tween.js@23.1.3':
     resolution: {integrity: sha512-vJmvvwFxYuGnF2axRtPYocag6Clbb5YS7kLL+SO/TeVFzHqDIWrNKYtcsPMibjDx9O+bu+psAy9NKfWklassUA==}
 
@@ -1647,6 +1708,9 @@ packages:
 
   '@types/node@25.9.1':
     resolution: {integrity: sha512-xfrlY7UD5rMJk3ZVJP8BNzS28J36YJg+xp+LPXV1TdWxr8uMH5A860QNxYDGQe/ylDSgjxE52Q9VnO7p75tJxg==}
+
+  '@types/pngjs@6.0.5':
+    resolution: {integrity: sha512-0k5eKfrA83JOZPppLtS2C7OUtyNAl2wKNxfyYl9Q5g9lPkgBl/9hNyAu6HuEH2J4XmIv2znEpkDd0SaZVxW6iQ==}
 
   '@types/stats.js@0.17.4':
     resolution: {integrity: sha512-jIBvWWShCvlBqBNIZt0KAshWpvSjhkwkEu4ZUcASoAvhmrgAUI2t1dXrjSL4xXVLB4FznPrIsX3nKXFl/Dt4vA==}
@@ -2158,6 +2222,11 @@ packages:
   flatted@3.4.1:
     resolution: {integrity: sha512-IxfVbRFVlV8V/yRaGzk0UVIcsKKHMSfYw66T/u4nTwlWteQePsxe//LjudR1AMX4tZW3WFCh3Zqa/sjlqpbURQ==}
 
+  fsevents@2.3.2:
+    resolution: {integrity: sha512-xiqMQR4xAeHTuB9uWm+fFRcIOgKBMiOBP+eXiyT7jsgVCq1bkVygt00oASowB7EdtpOHaaPgKt812P9ab+DDKA==}
+    engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
+    os: [darwin]
+
   fsevents@2.3.3:
     resolution: {integrity: sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==}
     engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
@@ -2186,6 +2255,10 @@ packages:
 
   gsap@3.14.2:
     resolution: {integrity: sha512-P8/mMxVLU7o4+55+1TCnQrPmgjPKnwkzkXOK1asnR9Jg2lna4tEY5qBJjMmAaOBDDZWtlRjBXjLa0w53G/uBLA==}
+
+  he@1.2.0:
+    resolution: {integrity: sha512-F/1DnUGPopORZi0ni+CvrCgHQ5FyEAHRLSApuYWMmrbSwoN2Mn/7k+Gl38gJnR7yyDZk6WLXwiGod1JOWNDKGw==}
+    hasBin: true
 
   hex-rgb@4.3.0:
     resolution: {integrity: sha512-Ox1pJVrDCyGHMG9CFg1tmrRUMRPRsAWYc/PinY0XzJU4K7y7vjNoLKIQ7BR5UJMCxNN8EM1MNDmHWA/B3aZUuw==}
@@ -2495,11 +2568,6 @@ packages:
     resolution: {integrity: sha512-BuU2qnTti9YKgK5N+IeMubp14ZUKUUw7yeJbkjtosvHiP0AZ5c8IAgEMk79D0eC8F23r4Ac/q8cAIFdm2FtyoA==}
     hasBin: true
 
-  marked@17.0.4:
-    resolution: {integrity: sha512-NOmVMM+KAokHMvjWmC5N/ZOvgmSWuqJB8FoYI019j4ogb/PeRMKoKIjReZ2w3376kkA8dSJIP8uD993Kxc0iRQ==}
-    engines: {node: '>= 20'}
-    hasBin: true
-
   marked@17.0.6:
     resolution: {integrity: sha512-gB0gkNafnonOw0obSTEGZTT86IuhILt2Wfx0mWH/1Au83kybTayroZ/V6nS25mN7u8ASy+5fMhgB3XPNrOZdmA==}
     engines: {node: '>= 20'}
@@ -2562,13 +2630,11 @@ packages:
     engines: {node: ^18 || >=20}
     hasBin: true
 
-  nanoid@5.1.6:
-    resolution: {integrity: sha512-c7+7RQ+dMB5dPwwCp4ee1/iV/q2P6aK1mTZcfr1BTuVlyW9hJYiMPybJCcnBlQtuSmTIWNeazm/zqNoZSSElBg==}
-    engines: {node: ^18 || >=20}
-    hasBin: true
-
   natural-compare@1.4.0:
     resolution: {integrity: sha512-OWND8ei3VtNC9h7V60qff3SVobHr996CTwgxubgyQYEpg290h9J0buyECNNJexkFm5sOajh5G116RYA1c8ZMSw==}
+
+  node-html-parser@7.1.0:
+    resolution: {integrity: sha512-iJo8b2uYGT40Y8BTyy5ufL6IVbN8rbm/1QK2xffXU/1a/v3AAa0d1YAoqBNYqaS4R/HajkWIpIfdE6KcyFh1AQ==}
 
   nth-check@2.1.1:
     resolution: {integrity: sha512-lqjrjmaOoAnWfMmBPL+XNnynZh2+swxiX3WUE0s4yEHI6m+AwrK2UZOimIRl3X/4QctVqS8AiZjFqyOGrMXb/w==}
@@ -2653,14 +2719,32 @@ packages:
     resolution: {integrity: sha512-5gTmgEY/sqK6gFXLIsQNH19lWb4ebPDLA4SdLP7dsWkIXHWlG66oPuVvXSGFPppYZz8ZDZq0dYYrbHfBCVUb1Q==}
     engines: {node: '>=12'}
 
+  pixelmatch@6.0.0:
+    resolution: {integrity: sha512-FYpL4XiIWakTnIqLqvt3uN4L9B3TsuHIvhLILzTiJZMJUsGvmKNeL4H3b6I99LRyerK9W4IuOXw+N28AtRgK2g==}
+    hasBin: true
+
   pkg-types@1.3.1:
     resolution: {integrity: sha512-/Jm5M4RvtBFVkKWRu2BLUTNP8/M2a+UwuAX+ae4770q1qVGtfjG+WTCupoZixokjmHiry8uI+dlY8KXYV5HVVQ==}
 
   pkg-types@2.3.0:
     resolution: {integrity: sha512-SIqCzDRg0s9npO5XQ3tNZioRY1uK06lA41ynBC1YmFTmnY6FjUjVt6s4LoADmwoig1qqD0oK8h1p/8mlMx8Oig==}
 
+  playwright-core@1.61.1:
+    resolution: {integrity: sha512-h7Qlt6m4REp25qvIdvbDtVmD4LqVXfpRxhORv9L0jzETM05p4fuPJ3dKyuSXQxDSbXnmS79HAgi9589lGSpLkg==}
+    engines: {node: '>=18'}
+    hasBin: true
+
+  playwright@1.61.1:
+    resolution: {integrity: sha512-DWnY5o3YbLWK4GovuAVwpqL+1VwGNdUGrRr++8j8PtQQzvAVZUIMjKQ90fY689sEJZJBbZVw1rXaOKSTitkzPQ==}
+    engines: {node: '>=18'}
+    hasBin: true
+
   plyr@3.8.4:
     resolution: {integrity: sha512-DrzLbK9Wol3zeiuZCleD9aUOl0KAaBHR9H6WVVVYPZ4Ya+LYxUFTgSF1jooHcMQCv96Ws96wCaZzIoP3bES8pQ==}
+
+  pngjs@7.0.0:
+    resolution: {integrity: sha512-LKWqWJRhstyYo9pGvgor/ivk2w94eSjE3RGVuzLGlr3NmD8bf7RcYGze1mNdEHRP6TRP6rMuDHk5t44hnTRyow==}
+    engines: {node: '>=14.19.0'}
 
   postcss-load-config@3.1.4:
     resolution: {integrity: sha512-6DiM4E7v4coTE4uzA8U//WhtPwyhiim3eyjEMFCnUpzbrkK9wJHgKDT2mR+HbtSrd/NubVaYTOpSpjUl8NQeRg==}
@@ -3204,6 +3288,10 @@ packages:
     engines: {node: '>=18.0.0'}
     hasBin: true
 
+  turbo@2.10.0:
+    resolution: {integrity: sha512-o016H9PPtuH2deb3mh3Vci3Avfi9UYgM/RONQisY7HnloupP0IFSbFS3gFYJgFJP8nwBrByHWFQIDa8T2zIXPw==}
+    hasBin: true
+
   turndown@7.2.2:
     resolution: {integrity: sha512-1F7db8BiExOKxjSMU2b7if62D/XOyQyZbPKq/nUwopfgnHlqXHqQ0lvfUTeUIr1lZJzOPFn43dODyMSIfvWRKQ==}
 
@@ -3506,12 +3594,12 @@ snapshots:
 
   '@atcute/cid@2.4.1':
     dependencies:
-      '@atcute/multibase': 1.1.8
+      '@atcute/multibase': 1.2.0
       '@atcute/uint8array': 1.1.1
 
   '@atcute/client@4.2.1':
     dependencies:
-      '@atcute/identity': 1.1.3
+      '@atcute/identity': 1.1.4
       '@atcute/lexicons': 1.3.0
 
   '@atcute/crypto@2.4.1':
@@ -3520,23 +3608,11 @@ snapshots:
       '@atcute/uint8array': 1.1.1
       '@noble/secp256k1': 3.1.0
 
-  '@atcute/identity-resolver@1.2.2(@atcute/identity@1.1.3)':
-    dependencies:
-      '@atcute/identity': 1.1.3
-      '@atcute/lexicons': 1.3.0
-      '@atcute/util-fetch': 1.0.5
-      '@badrap/valita': 0.4.6
-
   '@atcute/identity-resolver@1.2.2(@atcute/identity@1.1.4)':
     dependencies:
       '@atcute/identity': 1.1.4
       '@atcute/lexicons': 1.3.0
       '@atcute/util-fetch': 1.0.5
-      '@badrap/valita': 0.4.6
-
-  '@atcute/identity@1.1.3':
-    dependencies:
-      '@atcute/lexicons': 1.3.0
       '@badrap/valita': 0.4.6
 
   '@atcute/identity@1.1.4':
@@ -3574,7 +3650,7 @@ snapshots:
       '@atcute/identity': 1.1.4
       '@atcute/lexicons': 1.3.0
       '@atcute/uint8array': 1.1.1
-      '@atcute/util-text': 1.2.0
+      '@atcute/util-text': 1.3.1
       '@badrap/valita': 0.4.6
 
   '@atcute/lexicon-resolver@0.1.6(@atcute/identity-resolver@1.2.2(@atcute/identity@1.1.4))(@atcute/identity@1.1.4)':
@@ -3601,10 +3677,6 @@ snapshots:
       '@atcute/cid': 2.4.1
       '@atcute/uint8array': 1.1.1
 
-  '@atcute/multibase@1.1.8':
-    dependencies:
-      '@atcute/uint8array': 1.1.1
-
   '@atcute/multibase@1.2.0':
     dependencies:
       '@atcute/uint8array': 1.1.1
@@ -3614,19 +3686,19 @@ snapshots:
       '@atcute/client': 4.2.1
       '@atcute/identity-resolver': 1.2.2(@atcute/identity@1.1.4)
       '@atcute/lexicons': 1.3.0
-      '@atcute/multibase': 1.1.8
+      '@atcute/multibase': 1.2.0
       '@atcute/oauth-crypto': 0.1.0
       '@atcute/oauth-types': 0.1.1
-      nanoid: 5.1.6
+      nanoid: 5.1.11
     transitivePeerDependencies:
       - '@atcute/identity'
 
   '@atcute/oauth-crypto@0.1.0':
     dependencies:
-      '@atcute/multibase': 1.1.8
+      '@atcute/multibase': 1.2.0
       '@atcute/uint8array': 1.1.1
       '@badrap/valita': 0.4.6
-      nanoid: 5.1.6
+      nanoid: 5.1.11
 
   '@atcute/oauth-keyset@0.1.0':
     dependencies:
@@ -3635,19 +3707,19 @@ snapshots:
   '@atcute/oauth-node-client@1.1.0':
     dependencies:
       '@atcute/client': 4.2.1
-      '@atcute/identity': 1.1.3
-      '@atcute/identity-resolver': 1.2.2(@atcute/identity@1.1.3)
+      '@atcute/identity': 1.1.4
+      '@atcute/identity-resolver': 1.2.2(@atcute/identity@1.1.4)
       '@atcute/lexicons': 1.3.0
       '@atcute/oauth-crypto': 0.1.0
       '@atcute/oauth-keyset': 0.1.0
       '@atcute/oauth-types': 0.1.1
       '@atcute/util-fetch': 1.0.5
       '@badrap/valita': 0.4.6
-      nanoid: 5.1.6
+      nanoid: 5.1.11
 
   '@atcute/oauth-types@0.1.1':
     dependencies:
-      '@atcute/identity': 1.1.3
+      '@atcute/identity': 1.1.4
       '@atcute/lexicons': 1.3.0
       '@atcute/oauth-keyset': 0.1.0
       '@badrap/valita': 0.4.6
@@ -3678,10 +3750,6 @@ snapshots:
   '@atcute/util-fetch@1.0.5':
     dependencies:
       '@badrap/valita': 0.4.6
-
-  '@atcute/util-text@1.2.0':
-    dependencies:
-      unicode-segmenter: 0.14.5
 
   '@atcute/util-text@1.3.1':
     dependencies:
@@ -4755,7 +4823,7 @@ snapshots:
     dependencies:
       '@tiptap/core': 3.20.1(@tiptap/pm@3.20.1)
       '@tiptap/pm': 3.20.1
-      marked: 17.0.4
+      marked: 17.0.6
 
   '@tiptap/pm@3.20.1':
     dependencies:
@@ -4810,6 +4878,24 @@ snapshots:
       '@tiptap/core': 3.20.1(@tiptap/pm@3.20.1)
       '@tiptap/pm': 3.20.1
 
+  '@turbo/darwin-64@2.10.0':
+    optional: true
+
+  '@turbo/darwin-arm64@2.10.0':
+    optional: true
+
+  '@turbo/linux-64@2.10.0':
+    optional: true
+
+  '@turbo/linux-arm64@2.10.0':
+    optional: true
+
+  '@turbo/windows-64@2.10.0':
+    optional: true
+
+  '@turbo/windows-arm64@2.10.0':
+    optional: true
+
   '@tweenjs/tween.js@23.1.3': {}
 
   '@tybys/wasm-util@0.10.1':
@@ -4850,6 +4936,10 @@ snapshots:
   '@types/node@25.9.1':
     dependencies:
       undici-types: 7.24.6
+
+  '@types/pngjs@6.0.5':
+    dependencies:
+      '@types/node': 25.9.1
 
   '@types/stats.js@0.17.4': {}
 
@@ -5434,6 +5524,9 @@ snapshots:
 
   flatted@3.4.1: {}
 
+  fsevents@2.3.2:
+    optional: true
+
   fsevents@2.3.3:
     optional: true
 
@@ -5454,6 +5547,8 @@ snapshots:
   graceful-fs@4.2.11: {}
 
   gsap@3.14.2: {}
+
+  he@1.2.0: {}
 
   hex-rgb@4.3.0: {}
 
@@ -5713,8 +5808,6 @@ snapshots:
       punycode.js: 2.3.1
       uc.micro: 2.1.0
 
-  marked@17.0.4: {}
-
   marked@17.0.6: {}
 
   mdurl@2.0.0: {}
@@ -5768,9 +5861,12 @@ snapshots:
 
   nanoid@5.1.11: {}
 
-  nanoid@5.1.6: {}
-
   natural-compare@1.4.0: {}
+
+  node-html-parser@7.1.0:
+    dependencies:
+      css-select: 5.2.2
+      he: 1.2.0
 
   nth-check@2.1.1:
     dependencies:
@@ -5849,6 +5945,10 @@ snapshots:
 
   picomatch@4.0.3: {}
 
+  pixelmatch@6.0.0:
+    dependencies:
+      pngjs: 7.0.0
+
   pkg-types@1.3.1:
     dependencies:
       confbox: 0.1.8
@@ -5861,6 +5961,14 @@ snapshots:
       exsolve: 1.0.8
       pathe: 2.0.3
 
+  playwright-core@1.61.1: {}
+
+  playwright@1.61.1:
+    dependencies:
+      playwright-core: 1.61.1
+    optionalDependencies:
+      fsevents: 2.3.2
+
   plyr@3.8.4:
     dependencies:
       core-js: 3.48.0
@@ -5868,6 +5976,8 @@ snapshots:
       loadjs: 4.3.0
       rangetouch: 2.0.1
       url-polyfill: 1.1.14
+
+  pngjs@7.0.0: {}
 
   postcss-load-config@3.1.4(postcss@8.5.8):
     dependencies:
@@ -5911,11 +6021,16 @@ snapshots:
       prettier: 3.8.1
       svelte: 5.53.11
 
-  prettier-plugin-tailwindcss@0.7.2(prettier-plugin-svelte@3.5.1(prettier@3.8.1)(svelte@5.53.11))(prettier@3.8.1):
+  prettier-plugin-svelte@3.5.1(prettier@3.8.3)(svelte@5.53.11):
     dependencies:
-      prettier: 3.8.1
+      prettier: 3.8.3
+      svelte: 5.53.11
+
+  prettier-plugin-tailwindcss@0.7.2(prettier-plugin-svelte@3.5.1(prettier@3.8.3)(svelte@5.53.11))(prettier@3.8.3):
+    dependencies:
+      prettier: 3.8.3
     optionalDependencies:
-      prettier-plugin-svelte: 3.5.1(prettier@3.8.1)(svelte@5.53.11)
+      prettier-plugin-svelte: 3.5.1(prettier@3.8.3)(svelte@5.53.11)
 
   prettier@3.8.1: {}
 
@@ -6410,6 +6525,15 @@ snapshots:
       get-tsconfig: 4.14.0
     optionalDependencies:
       fsevents: 2.3.3
+
+  turbo@2.10.0:
+    optionalDependencies:
+      '@turbo/darwin-64': 2.10.0
+      '@turbo/darwin-arm64': 2.10.0
+      '@turbo/linux-64': 2.10.0
+      '@turbo/linux-arm64': 2.10.0
+      '@turbo/windows-64': 2.10.0
+      '@turbo/windows-arm64': 2.10.0
 
   turndown@7.2.2:
     dependencies:

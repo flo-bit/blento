@@ -1,0 +1,31 @@
+{
+  "name": "@blento/diff-harness",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "check": "tsc --noEmit",
+    "sites": "tsx sites.ts",
+    "snapshot": "tsx snapshot.ts",
+    "compare": "tsx compare.ts",
+    "report": "tsx report.ts",
+    "content": "tsx content.ts",
+    "frequency": "tsx frequency.ts",
+    "screenshot": "tsx screenshot.ts",
+    "pixel": "tsx pixel.ts",
+    "measure": "tsx measure.ts"
+  },
+  "dependencies": {
+    "node-html-parser": "^7.0.1",
+    "pixelmatch": "^6.0.0",
+    "playwright": "^1.50.0",
+    "pngjs": "^7.0.0"
+  },
+  "devDependencies": {
+    "@types/pngjs": "^6.0.5",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.4"
+  }
+}

@@ -47,7 +47,7 @@
 		isLoading = true;
 		try {
 			const url = new URL('https://api.giphy.com/v1/gifs/trending');
-			url.searchParams.set('api_key', env.PUBLIC_GIPHY_API_TOKEN);
+			url.searchParams.set('api_key', env.PUBLIC_GIPHY_API_TOKEN ?? '');
 			url.searchParams.set('limit', '24');
 			url.searchParams.set('rating', 'g');
 
@@ -72,7 +72,7 @@
 		isLoading = true;
 		try {
 			const url = new URL('https://api.giphy.com/v1/gifs/search');
-			url.searchParams.set('api_key', env.PUBLIC_GIPHY_API_TOKEN);
+			url.searchParams.set('api_key', env.PUBLIC_GIPHY_API_TOKEN ?? '');
 			url.searchParams.set('q', query);
 			url.searchParams.set('limit', '24');
 			url.searchParams.set('rating', 'g');
