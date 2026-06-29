@@ -9,6 +9,7 @@ node_modules
 build
 .turbo
 /diff-snapshots*/
+backups/
 
 # OS
 .DS_Store
