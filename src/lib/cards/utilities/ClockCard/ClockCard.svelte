@@ -3,6 +3,7 @@
 	import type { ContentComponentProps } from '../../types';
 	import type { ClockCardData } from './index';
 	import { onMount } from 'svelte';
+	import { browser } from '$app/environment';
 
 	let { item }: ContentComponentProps = $props();
 
@@ -56,32 +57,34 @@
 	});
 </script>
 
-<div class="@container flex h-full w-full flex-col items-center justify-center p-4">
-	<NumberFlowGroup>
-		<div
-			class="text-base-900 dark:text-base-100 accent:text-base-900 flex items-center text-3xl font-bold @xs:text-4xl @sm:text-5xl @md:text-6xl @lg:text-7xl"
-			style="font-variant-numeric: tabular-nums;"
-		>
-			<NumberFlow value={clockHours} format={{ minimumIntegerDigits: 2 }} />
-			<span class="text-base-400 dark:text-base-500 accent:text-accent-950 mx-0.5">:</span>
-			<NumberFlow
-				value={clockMinutes}
-				format={{ minimumIntegerDigits: 2 }}
-				digits={{ 1: { max: 5 } }}
-				trend={1}
-			/>
-			<span class="text-base-400 dark:text-base-500 accent:text-accent-950 mx-0.5">:</span>
-			<NumberFlow
-				value={clockSeconds}
-				format={{ minimumIntegerDigits: 2 }}
-				digits={{ 1: { max: 5 } }}
-				trend={1}
-			/>
-		</div>
-	</NumberFlowGroup>
-	{#if timezoneDisplay}
-		<div class="text-base-500 dark:text-base-400 accent:text-base-600 mt-1 text-xs @sm:text-sm">
-			{timezoneDisplay}
-		</div>
-	{/if}
-</div>
+{#if browser}
+	<div class="@container flex h-full w-full flex-col items-center justify-center p-4">
+		<NumberFlowGroup>
+			<div
+				class="text-base-900 dark:text-base-100 accent:text-base-900 flex items-center text-3xl font-bold @xs:text-4xl @sm:text-5xl @md:text-6xl @lg:text-7xl"
+				style="font-variant-numeric: tabular-nums;"
+			>
+				<NumberFlow value={clockHours} format={{ minimumIntegerDigits: 2 }} />
+				<span class="text-base-400 dark:text-base-500 accent:text-accent-950 mx-0.5">:</span>
+				<NumberFlow
+					value={clockMinutes}
+					format={{ minimumIntegerDigits: 2 }}
+					digits={{ 1: { max: 5 } }}
+					trend={1}
+				/>
+				<span class="text-base-400 dark:text-base-500 accent:text-accent-950 mx-0.5">:</span>
+				<NumberFlow
+					value={clockSeconds}
+					format={{ minimumIntegerDigits: 2 }}
+					digits={{ 1: { max: 5 } }}
+					trend={1}
+				/>
+			</div>
+		</NumberFlowGroup>
+		{#if timezoneDisplay}
+			<div class="text-base-500 dark:text-base-400 accent:text-base-600 mt-1 text-xs @sm:text-sm">
+				{timezoneDisplay}
+			</div>
+		{/if}
+	</div>
+{/if}
