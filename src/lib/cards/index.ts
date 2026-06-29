@@ -32,6 +32,7 @@ import {
 } from './media/DerakkumaCards';
 import { PhotoGalleryCardDefinition } from './media/PhotoGalleryCard';
 import { StandardSiteDocumentListCardDefinition } from './content/StandardSiteDocumentListCard';
+import { RSSFeedCardDefinition } from './content/RSSFeedCard';
 import { StatusphereCardDefinition } from './media/StatusphereCard';
 import { EventCardDefinition } from './social/EventCard';
 import { UpcomingEventsCardDefinition } from './social/UpcomingEventsCard';
@@ -115,6 +116,7 @@ export const AllCardDefinitions = [
 	DerakkumaBestsCardDefinition,
 	PhotoGalleryCardDefinition,
 	StandardSiteDocumentListCardDefinition,
+	RSSFeedCardDefinition,
 	StatusphereCardDefinition,
 	EventCardDefinition,
 	UpcomingEventsCardDefinition,
