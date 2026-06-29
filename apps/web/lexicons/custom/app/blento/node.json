@@ -1,0 +1,28 @@
+{
+	"$type": "com.atproto.lexicon.schema",
+	"lexicon": 1,
+	"id": "app.blento.node",
+	"defs": {
+		"main": {
+			"type": "record",
+			"key": "tid",
+			"record": {
+				"type": "object",
+				"required": ["type", "kind", "rank", "page", "version"],
+				"properties": {
+					"type": { "type": "string" },
+					"kind": { "type": "string", "knownValues": ["document", "container", "leaf"] },
+					"parent": { "type": "string" },
+					"rank": { "type": "string" },
+					"page": { "type": "string" },
+					"data": { "type": "unknown" },
+					"source": { "type": "unknown" },
+					"layout": { "type": "unknown" },
+					"style": { "type": "unknown" },
+					"updatedAt": { "type": "string", "format": "datetime" },
+					"version": { "type": "integer" }
+				}
+			}
+		}
+	}
+}

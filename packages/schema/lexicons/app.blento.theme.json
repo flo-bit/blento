@@ -1,0 +1,29 @@
+{
+  "lexicon": 1,
+  "id": "app.blento.theme",
+  "defs": {
+    "main": {
+      "type": "record",
+      "key": "tid",
+      "description": "A portable, forkable theme: a semantic token set plus an optional renderer-provider DID. Referenceable cross-repo by AT-URI.",
+      "record": {
+        "type": "object",
+        "required": ["name", "tokens", "version"],
+        "properties": {
+          "name": { "type": "string", "maxLength": 200 },
+          "tokens": {
+            "type": "unknown",
+            "description": "Semantic design tokens (color roles, radius, spacing, type scale)."
+          },
+          "provider": {
+            "type": "string",
+            "format": "did",
+            "description": "Optional DID publishing custom renderer implementations (pinned/reviewed when hosted)."
+          },
+          "updatedAt": { "type": "string", "format": "datetime" },
+          "version": { "type": "integer" }
+        }
+      }
+    }
+  }
+}
