@@ -7,6 +7,7 @@ export const collections = [
 	'app.blento.card',
 	'app.blento.page',
 	'app.blento.section',
+	'app.blento.node',
 	'app.blento.settings',
 	'app.blento.comment',
 	'app.blento.guestbook.entry',

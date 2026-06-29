@@ -101,6 +101,10 @@ export type WebsiteData = {
 	/** The node graph (migrate-on-read). Source of truth going forward; render still uses cards/sections. */
 	nodes?: Node[];
 
+	/** True when `nodes` came from stored app.blento.node records (page already migrated), vs rebuilt
+	 * on read from legacy card/section. Save uses this to know whether to retire the legacy records. */
+	migratedStorage?: boolean;
+
 	additionalData: Record<string, unknown>;
 	updatedAt: number;
 	version?: number;

@@ -6,8 +6,9 @@
  * the structural invariants (no orphan leaves, integer-only layout, unique sibling ranks, clean
  * record round-trip). Network-dependent, so it's a script, not part of the unit suite.
  */
-import { migrateV1, type V1Card, type V1Section } from './src/migrate.js';
+import { migrateV1, buildGraph, nodesToItems, type V1Card, type V1Section } from './src/migrate.js';
 import { nodeToRecord, recordToNode } from './src/serialize.js';
+import { planPageWrite } from './src/write.js';
 
 const did = process.argv[2] ?? 'did:plc:s42iw2fbfmgsgh7hdtvvoaao';
 
@@ -81,6 +82,26 @@ const roundTripFail = nodes.filter(
 	(n) => normJson(recordToNode(n.id, nodeToRecord(n))) !== normJson(n)
 );
 
+// Simulate the full migrate-on-save -> dual-format-read cycle per page: the render projection from
+// the written node records must match the legacy (read-from-card/section) projection exactly.
+let saveReadFail = 0;
+for (const page of pageKeys) {
+	const ps = sections.filter((s) => s.page === page);
+	const pc = cards.filter((c) => (c.page ?? 'blento.self') === page);
+	const legacyView = nodesToItems(buildGraph(ps, pc, page, { order: 'input' }));
+	const plan = planPageWrite({
+		sections: ps,
+		cards: pc,
+		page,
+		updatedAt: 't',
+		storedNodeIds: [],
+		legacyCardIds: pc.map((c) => c.id),
+		legacySectionIds: ps.map((s) => s.id)
+	});
+	const savedView = nodesToItems(plan.nodePuts.map((p) => recordToNode(p.rkey, p.record)));
+	if (JSON.stringify(savedView) !== JSON.stringify(legacyView)) saveReadFail++;
+}
+
 console.log(
 	JSON.stringify(
 		{
@@ -94,14 +115,15 @@ console.log(
 			orphans: orphans.length,
 			floats: floats.length,
 			rankDupes: rankDupes.length,
-			roundTripFail: roundTripFail.length
+			roundTripFail: roundTripFail.length,
+			saveReadFail
 		},
 		null,
 		2
 	)
 );
 
-if (orphans.length || floats.length || rankDupes.length || roundTripFail.length) {
+if (orphans.length || floats.length || rankDupes.length || roundTripFail.length || saveReadFail) {
 	console.error('INVARIANT FAIL');
 	process.exit(1);
 }

@@ -344,6 +344,7 @@ export async function loadData(
 	result.nodes = nodesFromRecords.length
 		? nodesFromRecords
 		: buildGraph(result.sections, result.cards, fullPage, { order: 'input' });
+	result.migratedStorage = nodesFromRecords.length > 0;
 	return result;
 }
 
