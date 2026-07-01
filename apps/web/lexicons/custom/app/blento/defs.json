@@ -1,0 +1,40 @@
+{
+	"$type": "com.atproto.lexicon.schema",
+	"lexicon": 1,
+	"id": "app.blento.defs",
+	"description": "Shared content/layout shapes referenced by app.blento.node's open blobs. Typed cards (#link, #image, …) are added additively; #card / #container are the generic fallbacks.",
+	"defs": {
+		"card": {
+			"type": "object",
+			"description": "Generic leaf content fallback. cardType discriminates; remaining fields are the card's opaque data.",
+			"required": ["cardType"],
+			"properties": {
+				"cardType": { "type": "string" }
+			}
+		},
+		"container": {
+			"type": "object",
+			"description": "Generic container content fallback. containerType discriminates; remaining fields are the container config.",
+			"required": ["containerType"],
+			"properties": {
+				"containerType": { "type": "string" }
+			}
+		},
+		"gridCell": {
+			"type": "object",
+			"description": "Position within a grid container. Integers only.",
+			"required": ["x", "y", "w", "h"],
+			"properties": {
+				"x": { "type": "integer" },
+				"y": { "type": "integer" },
+				"w": { "type": "integer" },
+				"h": { "type": "integer" },
+				"mobileX": { "type": "integer" },
+				"mobileY": { "type": "integer" },
+				"mobileW": { "type": "integer" },
+				"mobileH": { "type": "integer" },
+				"rotation": { "type": "integer" }
+			}
+		}
+	}
+}

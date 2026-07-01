@@ -1,12 +1,15 @@
 node_modules
 
-# Output
+# Output (match anywhere — monorepo)
 .output
 .vercel
 .netlify
 .wrangler
-/.svelte-kit
-/build
+.svelte-kit
+build
+.turbo
+/diff-snapshots*/
+backups/
 
 # OS
 .DS_Store
@@ -28,6 +31,6 @@ sveltekit-cloudflare-workers
 
 inlay
 
-scripts/backups
+**/scripts/backups
 
 theming/

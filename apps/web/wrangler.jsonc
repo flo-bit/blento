@@ -1,0 +1,116 @@
+/**
+ * For more details on how to configure Wrangler, refer to:
+ * https://developers.cloudflare.com/workers/wrangler/configuration/
+ */
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "blento",
+	"main": ".svelte-kit/cloudflare/_worker.js",
+	"compatibility_date": "2025-12-25",
+	"compatibility_flags": ["nodejs_als", "nodejs_compat"],
+	"assets": {
+		"binding": "ASSETS",
+		"directory": ".svelte-kit/cloudflare"
+	},
+	"observability": {
+		"enabled": true
+	},
+	/**
+	 * Smart Placement
+	 * https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
+	 */
+	// "placement": {  "mode": "smart" }
+	/**
+	 * Bindings
+	 * Bindings allow your Worker to interact with resources on the Cloudflare Developer Platform, including
+	 * databases, object storage, AI inference, real-time communication and more.
+	 * https://developers.cloudflare.com/workers/runtime-apis/bindings/
+	 */
+	/**
+	 * Environment Variables
+	 * https://developers.cloudflare.com/workers/wrangler/configuration/#environment-variables
+	 * Note: Use secrets to store sensitive data.
+	 * https://developers.cloudflare.com/workers/configuration/secrets/
+	 */
+	"vars": {
+		"PUBLIC_HANDLE": "blento.app",
+		"PUBLIC_IS_SELFHOSTED": "",
+		"PUBLIC_DOMAIN": "https://blento.app",
+		"PUBLIC_GIPHY_API_TOKEN": "ltXijv1bkNPrEgnpJ0tIdLWXjnAeE7bL"
+	},
+	"kv_namespaces": [
+		{
+			"binding": "USER_DATA_CACHE",
+			"id": "d6ff203259de48538d332b0a5df258a7"
+		},
+		{
+			"binding": "CUSTOM_DOMAINS",
+			"id": "f449b3b5c8a349478405e2c04ed265f0"
+		},
+		{
+			"binding": "OAUTH_SESSIONS",
+			"id": "4d872b4630a042d69ecd63f87d6b2094"
+		},
+		{
+			"binding": "OAUTH_STATES",
+			"id": "c644b498d4af4c5892b3106d52c7760a"
+		}
+	],
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "blento-v3",
+			"database_id": "83e7be08-8503-4b54-9f73-0bac105761b5",
+			"remote": false
+		}
+	],
+	"analytics_engine_datasets": [
+		{
+			"binding": "ANALYTICS",
+			"dataset": "blento_pageviews"
+		}
+	],
+	"triggers": {
+		"crons": ["*/5 * * * *"]
+	},
+
+	/**
+	 * Staging env for the `migration` branch — the diff-harness target.
+	 *   deploy: pnpm --filter @blento/web exec wrangler deploy --env staging
+	 *
+	 * It reuses prod's READ bindings (cache / custom-domains / contrail D1) so the harness diffs the
+	 * SAME data through the new code. No cron, and a separate analytics dataset so harness snapshots
+	 * don't pollute prod. CAVEAT: it shares prod KV/D1 — staging must not receive edit/write traffic
+	 * (writes would hit prod). For full isolation, point these at separate staging namespaces + a D1
+	 * copy. Adjust the domain/ids to your setup.
+	 */
+	"env": {
+		"staging": {
+			"name": "blento-staging",
+			"vars": {
+				"PUBLIC_HANDLE": "blento.app",
+				"PUBLIC_IS_SELFHOSTED": "",
+				"PUBLIC_DOMAIN": "https://staging.blento.app",
+				"PUBLIC_GIPHY_API_TOKEN": "ltXijv1bkNPrEgnpJ0tIdLWXjnAeE7bL"
+			},
+			"routes": [{ "pattern": "staging.blento.app", "custom_domain": true }],
+			"kv_namespaces": [
+				{ "binding": "USER_DATA_CACHE", "id": "d6ff203259de48538d332b0a5df258a7" },
+				{ "binding": "CUSTOM_DOMAINS", "id": "f449b3b5c8a349478405e2c04ed265f0" },
+				{ "binding": "OAUTH_SESSIONS", "id": "4d872b4630a042d69ecd63f87d6b2094" },
+				{ "binding": "OAUTH_STATES", "id": "c644b498d4af4c5892b3106d52c7760a" }
+			],
+			"d1_databases": [
+				{
+					"binding": "DB",
+					"database_name": "blento-v3",
+					"database_id": "83e7be08-8503-4b54-9f73-0bac105761b5",
+					"remote": false
+				}
+			],
+			"analytics_engine_datasets": [
+				{ "binding": "ANALYTICS", "dataset": "blento_staging_pageviews" }
+			]
+		}
+	}
+}

@@ -1,0 +1,54 @@
+{
+  "lexicon": 1,
+  "id": "app.blento.node",
+  "defs": {
+    "main": {
+      "type": "record",
+      "key": "tid",
+      "description": "A single node in a Blento page graph — a container (layout) or a leaf (content unit). The frozen envelope; new types extend the open blobs only.",
+      "record": {
+        "type": "object",
+        "required": ["type", "kind", "rank", "page", "version"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Semantic interface key (NSID-style), e.g. 'grid', 'link', 'bluesky'."
+          },
+          "kind": {
+            "type": "string",
+            "knownValues": ["document", "container", "leaf"]
+          },
+          "parent": {
+            "type": "string",
+            "description": "rkey of the containing node. Omit for a page/document root."
+          },
+          "rank": {
+            "type": "string",
+            "description": "Fractional order key among siblings (string, never a float)."
+          },
+          "page": {
+            "type": "string",
+            "description": "Denormalized root document id this node belongs to (query/partition key)."
+          },
+          "data": {
+            "type": "unknown",
+            "description": "Content blob. Pure JSON, never markup."
+          },
+          "source": {
+            "type": "unknown",
+            "description": "Optional declared read capability (atproto-collection | http | subscribe)."
+          },
+          "layout": {
+            "type": "unknown",
+            "description": "Position within parent, interpreted by the parent container type. Integers only."
+          },
+          "style": {
+            "type": "unknown",
+            "description": "Appearance intent (color role, variant). Never concrete CSS."
+          },
+          "version": { "type": "integer" }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "lexicon": 1,
+  "id": "app.blento.page",
+  "defs": {
+    "main": {
+      "type": "record",
+      "key": "any",
+      "description": "A page / document root. Holds page-level config plus the renderer-override stack and token overrides (site -> page -> node cascade).",
+      "record": {
+        "type": "object",
+        "required": ["version"],
+        "properties": {
+          "name": { "type": "string", "maxLength": 300 },
+          "description": { "type": "string", "maxLength": 2000 },
+          "overrides": {
+            "type": "array",
+            "description": "Ordered renderer-override provider DIDs; first with an impl for a type wins.",
+            "items": { "type": "string", "format": "did" }
+          },
+          "style": {
+            "type": "unknown",
+            "description": "Page-level semantic token overrides."
+          },
+          "updatedAt": { "type": "string", "format": "datetime" },
+          "version": { "type": "integer" }
+        }
+      }
+    }
+  }
+}
