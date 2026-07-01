@@ -3,6 +3,7 @@
 	import type { Snippet } from 'svelte';
 	import {
 		setAdditionalUserData,
+		setLoadedData,
 		setCanEdit,
 		setDidContext,
 		setHandleContext
@@ -23,6 +24,8 @@
 
 	// svelte-ignore state_referenced_locally
 	setAdditionalUserData(data.additionalData);
+	// svelte-ignore state_referenced_locally
+	setLoadedData(data.loaded ?? {});
 
 	setCanEdit(
 		() =>

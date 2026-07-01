@@ -8,6 +8,9 @@ export const [getIsRealMobile, setIsRealMobile] = createContext<() => boolean>()
 export const [getCanEdit, setCanEdit] = createContext<() => boolean>();
 export const [getAdditionalUserData, setAdditionalUserData] =
 	createContext<Record<string, unknown>>();
+/** Resolved `node.source` data keyed by node id (== card id). Runtime-only. See `@blento/sources`. */
+export const [getLoadedData, setLoadedData] =
+	createContext<Record<string, { data: unknown; nextCursor?: string } | null>>();
 export const [getIsCoarse, setIsCoarse] = createContext<() => boolean>();
 export const [getSelectedCardId, setSelectedCardId] = createContext<() => string | null>();
 export const [getSelectCard, setSelectCard] = createContext<(id: string | null) => void>();

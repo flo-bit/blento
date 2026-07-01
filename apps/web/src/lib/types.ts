@@ -1,6 +1,7 @@
 import type { Blob } from '@atcute/lexicons';
 import type { AppBskyActorDefs } from '@atcute/bluesky';
 import type { Node } from '@blento/schema';
+import type { ResolveResult } from '@blento/sources';
 
 export type Item = {
 	id: string;
@@ -106,6 +107,11 @@ export type WebsiteData = {
 	migratedStorage?: boolean;
 
 	additionalData: Record<string, unknown>;
+
+	/** Resolved `node.source` data, keyed by node id (== card id). Runtime-only, never persisted;
+	 * renderers read their node's loaded data here. See `@blento/sources`. */
+	loaded?: Record<string, ResolveResult | null>;
+
 	updatedAt: number;
 	version?: number;
 

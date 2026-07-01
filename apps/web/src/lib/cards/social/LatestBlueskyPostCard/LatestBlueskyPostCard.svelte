@@ -4,6 +4,7 @@
 	import { BlueskyPost } from '$lib/components/bluesky-post';
 	import {
 		getAdditionalUserData,
+		getLoadedData,
 		getDidContext,
 		getHandleContext
 	} from '$lib/website/data/context';
@@ -12,8 +13,11 @@
 	let { item }: { item: Item } = $props();
 
 	const data = getAdditionalUserData();
+	const loaded = getLoadedData();
+	// Prefer this node's resolved source data (loaded[nodeId] via @blento/sources); fall back to the
+	// legacy cardType-keyed additionalData for entry points that don't resolve the node graph.
 	// svelte-ignore state_referenced_locally
-	let feed = $state((data[item.cardType] as any)?.feed);
+	let feed = $state((loaded?.[item.id]?.data as any)?.feed ?? (data[item.cardType] as any)?.feed);
 
 	let did = getDidContext();
 	let handle = getHandleContext();
