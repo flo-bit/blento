@@ -1,25 +1,26 @@
 {
-  "name": "blento",
-  "private": true,
-  "version": "0.2.0",
-  "type": "module",
-  "packageManager": "pnpm@11.2.2",
-  "engines": {
-    "node": ">=22"
-  },
-  "scripts": {
-    "dev": "turbo run dev",
-    "build": "turbo run build",
-    "check": "turbo run check",
-    "lint": "turbo run lint",
-    "format": "prettier --write .",
-    "test": "turbo run test",
-    "deploy": "pnpm --filter @blento/web deploy"
-  },
-  "devDependencies": {
-    "prettier": "^3.8.1",
-    "prettier-plugin-svelte": "^3.5.1",
-    "prettier-plugin-tailwindcss": "^0.7.2",
-    "turbo": "^2.5.0"
-  }
+	"name": "blento",
+	"private": true,
+	"version": "0.2.0",
+	"type": "module",
+	"packageManager": "pnpm@11.2.2",
+	"engines": {
+		"node": ">=22"
+	},
+	"scripts": {
+		"dev": "turbo run dev",
+		"web": "pnpm --filter @blento/web dev",
+		"build": "turbo run build",
+		"check": "turbo run check",
+		"lint": "turbo run lint",
+		"format": "prettier --write .",
+		"test": "turbo run test",
+		"deploy": "pnpm --filter @blento/web deploy"
+	},
+	"devDependencies": {
+		"prettier": "^3.8.1",
+		"prettier-plugin-svelte": "^3.5.1",
+		"prettier-plugin-tailwindcss": "^0.7.2",
+		"turbo": "^2.5.0"
+	}
 }
