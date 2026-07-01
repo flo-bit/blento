@@ -9,6 +9,14 @@
 @source '../node_modules/@atmo-dev/events-ui/dist';
 @import '@foxui/core/theme.css';
 
+/* Blento semantic design tokens. Each Tailwind theme value reads an overridable `--blento-*` CSS
+   variable with a default that matches today's look, so components use normal utilities (e.g.
+   `rounded-card`) that resolve through page-overridable tokens (set on <html> by ThemeScript from
+   page.style). Colors stay on the @foxui accent/base mechanism above. */
+@theme inline {
+	--radius-card: var(--blento-radius-card, 1.5rem);
+}
+
 @custom-variant dark (&:where(.dark, .dark *):not(:where(.light, .light *)));
 @custom-variant accent (&:where(.accent, .accent *));
 

@@ -7,7 +7,8 @@
 		image,
 		description,
 		accentColor,
-		baseColor
+		baseColor,
+		tokens
 	}: {
 		favicon: string | null;
 		title: string | null;
@@ -15,10 +16,11 @@
 		description?: string;
 		accentColor?: string;
 		baseColor?: string;
+		tokens?: Record<string, string>;
 	} = $props();
 </script>
 
-<ThemeScript {accentColor} {baseColor} />
+<ThemeScript {accentColor} {baseColor} {tokens} />
 
 <svelte:head>
 	{#if favicon}

@@ -39,7 +39,7 @@
 	bind:this={ref}
 	draggable={false}
 	class={[
-		'card group/card selection:bg-accent-600/50 @container/card relative isolate z-0 h-full w-full rounded-3xl outline-offset-2 transition-[outline] duration-200',
+		'card group/card selection:bg-accent-600/50 rounded-card @container/card relative isolate z-0 h-full w-full outline-offset-2 transition-[outline] duration-200',
 		isEditing ? 'transition-all' : '',
 		color ? (colors[color] ?? colors.accent) : colors.base,
 		color !== 'accent' && item.color !== 'base' && item.color !== 'transparent' ? color : '',
@@ -50,7 +50,7 @@
 >
 	<div
 		class={[
-			'text-base-900 dark:text-base-50 relative isolate h-full w-full rounded-3xl',
+			'text-base-900 dark:text-base-50 rounded-card relative isolate h-full w-full',
 			noOverflow ? 'overflow-visible' : 'overflow-hidden',
 			color !== 'base' && color != 'transparent' ? 'light' : ''
 		]}

@@ -5,7 +5,8 @@
 		getDescription,
 		getHideProfileSection,
 		getProfilePosition,
-		getName
+		getName,
+		getStyleTokens
 	} from '$lib/helpers/website';
 	import { innerWidth } from 'svelte/reactivity/window';
 	import { setDidContext, setHandleContext, setIsMobile } from '../data/context';
@@ -59,6 +60,7 @@
 	description={getDescription(data)}
 	accentColor={data.publication?.preferences?.accentColor}
 	baseColor={data.publication?.preferences?.baseColor}
+	tokens={getStyleTokens(data)}
 />
 
 <ContextProvider {data}>
