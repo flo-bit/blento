@@ -5,6 +5,7 @@ import type { CacheService } from '$lib/helpers/cache';
 import { createEmptyCard } from '$lib/helpers/items';
 import type { Item, PronounsRecord, SectionRecord, WebsiteData } from '$lib/types';
 import { buildGraph, nodesToItems, recordToNode, type Node, type NodeRecord } from '@blento/schema';
+import { resolve as resolveSource, type Source } from '@blento/sources';
 import { error } from '@sveltejs/kit';
 import type { ActorIdentifier, Did } from '@atcute/lexicons';
 
@@ -607,6 +608,22 @@ function hashCardData(items: Item[]): string {
 	return (hash >>> 0).toString(36);
 }
 
+/**
+ * Cards whose additional data loads through the declarative `@blento/sources` resolver instead of a
+ * bespoke `loadData`. Maps cardType → the `Source` to resolve (`$self` → the page owner did). The
+ * resolved `data` lands in `additionalData[cardType]`, byte-identical to the card's own loader, so
+ * the component renders unchanged. This is the end-to-end proof of the source path — extend as more
+ * cards migrate.
+ */
+const SOURCE_CARD_LOADERS: Record<string, () => Source> = {
+	// Mirrors LatestBlueskyPostCard.loadData: getAuthorFeed(filter: posts_no_replies, limit: 2).
+	latestPost: () => ({
+		$type: 'app.blento.source#atproto',
+		method: 'app.bsky.feed.getAuthorFeed',
+		params: { actor: '$self', filter: 'posts_no_replies', limit: 2 }
+	})
+};
+
 async function loadAdditionalData(
 	cards: Item[],
 	{
@@ -626,7 +643,22 @@ async function loadAdditionalData(
 		const items = cards.filter((v) => cardType === v.cardType);
 
 		try {
-			if (cardDef?.loadDataServer) {
+			const sourceBuilder = SOURCE_CARD_LOADERS[cardType];
+			if (sourceBuilder) {
+				// Declarative source path: resolve the Source and cache exactly like loadData would.
+				const loader = () => resolveSource(sourceBuilder(), { self: did }).then((r) => r.data);
+				if (cache && cardDef?.cacheLoadData) {
+					const opts = typeof cardDef.cacheLoadData === 'object' ? cardDef.cacheLoadData : {};
+					const key = `${cardType}:${did}:${hashCardData(items)}`;
+					additionDataPromises[cardType] = cache.swr('card-data', key, loader, {
+						ttl: opts.ttl,
+						staleWindow: opts.staleWindow,
+						waitUntil: platform?.context?.waitUntil?.bind(platform.context)
+					});
+				} else {
+					additionDataPromises[cardType] = loader();
+				}
+			} else if (cardDef?.loadDataServer) {
 				additionDataPromises[cardType] = cardDef.loadDataServer(items, {
 					did,
 					handle,

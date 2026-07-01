@@ -69,6 +69,7 @@
 		"@atmo-dev/contrail": "^0.5.0",
 		"@atmo-dev/events-ui": "^0.1.0",
 		"@blento/schema": "workspace:*",
+		"@blento/sources": "workspace:*",
 		"@cloudflare/workers-types": "^4.20260313.1",
 		"@ethercorps/sveltekit-og": "^4.2.1",
 		"@floating-ui/dom": "^1.7.6",
