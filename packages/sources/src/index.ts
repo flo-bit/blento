@@ -11,6 +11,6 @@ export type {
 	ResolveOptions,
 	ResolveResult
 } from './types.js';
-export { resolve, resolveGraph } from './resolve.js';
+export { resolve, resolveGraph, resolveNodes, type ResolvedNode } from './resolve.js';
 export { cacheKey, MemoryCacheAdapter } from './cache.js';
 export { DEFAULT_APPVIEW } from './atproto.js';

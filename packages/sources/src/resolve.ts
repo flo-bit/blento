@@ -138,3 +138,26 @@ export async function resolveGraph(
 
 	return out;
 }
+
+/**
+ * A node enriched with its resolved data. `loaded` is RUNTIME-ONLY: the schema's `nodeToRecord` is
+ * allowlist-based, so this field is never serialized back to the PDS — the stored record keeps only
+ * the declarative `source`. This is the object renderers receive: everything on one node.
+ */
+export type ResolvedNode<N extends { id: string } = Node> = N & {
+	loaded?: ResolveResult | null;
+};
+
+/**
+ * Resolve a graph and return each node enriched with its `loaded` data (source spec stays put).
+ * A thin wrapper over `resolveGraph` for the common "hand renderers a node that carries its data"
+ * shape. Nodes without a resolvable source get `loaded: undefined`.
+ */
+export async function resolveNodes<N extends Pick<Node, 'id' | 'source'>>(
+	nodes: N[],
+	ctx: SourceContext,
+	opts: ResolveOptions = {}
+): Promise<ResolvedNode<N>[]> {
+	const map = await resolveGraph(nodes, ctx, opts);
+	return nodes.map((n) => ({ ...n, loaded: map[n.id] ?? undefined }));
+}
