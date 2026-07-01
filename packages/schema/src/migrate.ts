@@ -10,7 +10,7 @@
  */
 import * as TID from '@atcute/tid';
 import { generateNKeysBetween } from 'fractional-indexing';
-import type { Node } from './node.js';
+import { CARD_CONTENT, CONTAINER_CONTENT, GRID_CELL_LAYOUT, type Node } from './node.js';
 import type { PageRecord, StyleTokens } from './records.js';
 
 export interface V1Card {
@@ -110,12 +110,12 @@ export function buildGraph(
 	sectionList.forEach((s, i) => {
 		nodes.push({
 			id: s.id,
-			type: s.sectionType,
 			kind: 'container',
 			parent: null,
 			rank: sectionRanks[i],
 			page,
-			data: s.sectionData ?? {},
+			// Generic container fallback: containerType discriminates; sectionData spread as fields.
+			content: { ...(s.sectionData ?? {}), $type: CONTAINER_CONTENT, containerType: s.sectionType },
 			version: 1
 		});
 	});
@@ -143,15 +143,18 @@ export function buildGraph(
 		}
 		const ranks = generateNKeysBetween(null, null, group.length);
 		group.forEach((c, i) => {
+			const cardData =
+				c.cardData && typeof c.cardData === 'object' ? (c.cardData as Record<string, unknown>) : {};
 			const node: Node = {
 				id: c.id,
-				type: c.cardType,
 				kind: 'leaf',
 				parent,
 				rank: ranks[i],
 				page,
-				data: c.cardData ?? {},
+				// Generic card fallback: cardType discriminates; cardData spread as fields.
+				content: { ...cardData, $type: CARD_CONTENT, cardType: c.cardType },
 				layout: {
+					$type: GRID_CELL_LAYOUT,
 					x: c.x,
 					y: c.y,
 					w: c.w,
@@ -164,7 +167,7 @@ export function buildGraph(
 				},
 				version: 1
 			};
-			if (c.color) node.style = { color: c.color };
+			if (c.color) node.style = { tokens: { color: c.color } };
 			nodes.push(node);
 		});
 	}
@@ -199,42 +202,54 @@ const byRank = (a: Node, b: Node) => (a.rank < b.rank ? -1 : a.rank > b.rank ? 1
  * leaves -> cards (layout -> coords, style.color -> color, parent -> sectionId).
  */
 export function nodesToItems(nodes: Node[]): { sections: LegacySection[]; cards: V1Card[] } {
+	const num = (v: unknown) => (typeof v === 'number' ? v : 0);
+
 	const sections: LegacySection[] = nodes
 		.filter((n) => n.kind === 'container')
 		.sort(byRank)
-		.map((c, i) => ({
-			id: c.id,
-			sectionType: c.type,
-			page: c.page,
-			index: i,
-			sectionData: (c.data ?? {}) as Record<string, unknown>,
-			version: c.version
-		}));
+		.map((c, i) => {
+			const sectionData = { ...c.content } as Record<string, unknown>;
+			const containerType = sectionData.containerType as string | undefined;
+			delete sectionData.$type;
+			delete sectionData.containerType;
+			return {
+				id: c.id,
+				sectionType: containerType ?? 'grid',
+				page: c.page,
+				index: i,
+				sectionData,
+				version: c.version
+			};
+		});
 
 	const cards: V1Card[] = nodes
 		.filter((n) => n.kind === 'leaf')
 		.sort(byRank)
 		.map((n) => {
-			const l = (n.layout ?? {}) as Record<string, number>;
+			const cardData = { ...n.content } as Record<string, unknown>;
+			const cardType = cardData.cardType as string | undefined;
+			delete cardData.$type;
+			delete cardData.cardType;
+			const l = (n.layout ?? {}) as Record<string, unknown>;
 			const card: V1Card = {
 				id: n.id,
-				cardType: n.type,
-				cardData: n.data,
-				x: l.x ?? 0,
-				y: l.y ?? 0,
-				w: l.w ?? 0,
-				h: l.h ?? 0,
-				mobileX: l.mobileX ?? 0,
-				mobileY: l.mobileY ?? 0,
-				mobileW: l.mobileW ?? 0,
-				mobileH: l.mobileH ?? 0,
+				cardType: cardType ?? 'text',
+				cardData,
+				x: num(l.x),
+				y: num(l.y),
+				w: num(l.w),
+				h: num(l.h),
+				mobileX: num(l.mobileX),
+				mobileY: num(l.mobileY),
+				mobileW: num(l.mobileW),
+				mobileH: num(l.mobileH),
 				sectionId: n.parent ?? undefined,
 				page: n.page,
 				version: n.version
 			};
-			if (l.rotation) card.rotation = l.rotation;
-			const style = n.style as { color?: string } | undefined;
-			if (style?.color) card.color = style.color;
+			if (typeof l.rotation === 'number') card.rotation = l.rotation;
+			const color = n.style?.tokens?.color;
+			if (color) card.color = color;
 			return card;
 		});
 

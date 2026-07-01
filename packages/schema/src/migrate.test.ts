@@ -46,15 +46,19 @@ describe('migrateV1', () => {
 
 		expect(nodes.find((n) => n.id === 's1')).toMatchObject({
 			kind: 'container',
-			type: 'grid',
+			content: { $type: 'app.blento.defs#container', containerType: 'grid' },
 			parent: null,
 			page: 'blento.self'
 		});
 
 		const a = nodes.find((n) => n.id === 'a')!;
-		expect(a).toMatchObject({ kind: 'leaf', type: 'link', parent: 's1' });
+		expect(a).toMatchObject({
+			kind: 'leaf',
+			content: { $type: 'app.blento.defs#card', cardType: 'link' },
+			parent: 's1'
+		});
 		expect(a.layout).toMatchObject({ x: 0, y: 2, w: 2, h: 2, mobileW: 4 });
-		expect(a.style).toEqual({ color: 'red' });
+		expect(a.style).toEqual({ tokens: { color: 'red' } });
 
 		// document order: b (y=0) ranks before a (y=2)
 		const b = nodes.find((n) => n.id === 'b')!;
@@ -65,7 +69,7 @@ describe('migrateV1', () => {
 	it('synthesizes a default grid container when there are no sections', () => {
 		const nodes = migrateV1([], [card({ id: 'x' })], 'blento.self', { genId: stableIds() });
 		const container = nodes.find((n) => n.kind === 'container')!;
-		expect(container.type).toBe('grid');
+		expect(container.content.containerType).toBe('grid');
 		expect(container.id).toBe('gen0');
 		expect(nodes.find((n) => n.id === 'x')!.parent).toBe('gen0');
 	});

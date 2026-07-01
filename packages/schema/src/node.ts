@@ -1,62 +1,84 @@
 /**
- * The Blento v2 node envelope — the frozen contract.
+ * The Blento node envelope — the stored record shape.
  *
- * New card / layout / theme types MUST NOT change this shape. They only put new shapes into the
- * open blobs (`data`, `layout`, `style`, `source`) and register a renderer. See blento-v2-plan.md §2.
+ * Two decoupled typed axes: `content.$type` is the DATA shape (an open union of `app.blento.defs`
+ * members — interop), while `style.renderer` is the RENDER type (defaults from `content.$type`,
+ * overridable). There is deliberately NO top-level `type` string. New card / layout / theme types
+ * only add members to the open blobs (`content`, `layout`, `style`, `source`) and register a
+ * renderer/def — the envelope never changes. See ../../../blento-schema-design.md.
  */
 
-/** Generic behavior class. Drives editor/runtime treatment, not the specific renderer. */
+/** Structural role. Drives editor/runtime treatment, not the specific renderer. */
 export type NodeKind = 'document' | 'container' | 'leaf';
 
+/** CONTENT — the data. `$type` = the data shape (open union of `app.blento.defs`). */
+export interface Content {
+	$type: string;
+	[k: string]: unknown;
+}
+
+/** POSITION within the parent, typed by the parent container's contract (e.g. `#gridCell`). */
+export interface Layout {
+	$type: string;
+	[k: string]: unknown;
+}
+
+/** PRESENTATION intent. Never concrete CSS. */
+export interface Style {
+	/** Renderer id/ref override; the default resolves from `content.$type`. */
+	renderer?: string;
+	/** Semantic design tokens (color roles, etc.). */
+	tokens?: Record<string, string>;
+	[k: string]: unknown;
+}
+
 /**
- * A declared read capability. Resolved by trusted first-party loaders; renderers only ever
- * receive already-fetched JSON. See plan §6.
+ * A declared read. Resolved by trusted first-party loaders; renderers only ever receive
+ * already-fetched JSON. `atproto` is any XRPC query (output typed by the method's lexicon or the
+ * explicit `outputs`); `ref` shares another node's loaded data. See the design doc §Source.
  */
 export type Source =
-	| { kind: 'atproto-collection'; actor: string; collection: string; limit?: number; prop?: string }
-	| { kind: 'http'; url: string }
-	| { kind: 'subscribe'; channel: string }; // deferred (app-grade realtime)
+	| {
+			$type: 'app.blento.source#atproto';
+			method: string;
+			params?: Record<string, unknown>;
+			service?: string;
+			outputs?: unknown;
+	  }
+	| { $type: 'app.blento.source#http'; url: string; outputs?: unknown }
+	| {
+			$type: 'app.blento.source#custom';
+			loader: string;
+			params?: Record<string, unknown>;
+			outputs?: unknown;
+	  }
+	| { $type: 'app.blento.source#ref'; node: string };
 
 export interface Node {
 	/** rkey (TID). */
 	id: string;
-	/** Semantic interface key (NSID-style): 'grid' | 'link' | 'bluesky' | 'event' | ... */
-	type: string;
-	/** Generic behavior class. */
+	/** Structural role. */
 	kind: NodeKind;
-	/** Structural edge: containing node id. null = page/document root. */
+	/** Containing node id. null = page/document root. */
 	parent: string | null;
 	/** Order among siblings — a STRING fractional key (never a float; atproto forbids floats). */
 	rank: string;
 	/** Denormalized partition/query key: the root document id this node belongs to. */
 	page: string;
-	/** CONTENT. Pure JSON, never markup. (v1's cardData.) */
-	data: unknown;
-	/** Optional declared read capability. First-class so it is inspectable without running renderers. */
+	/** The data. `content.$type` is the shape and the default renderer key. */
+	content: Content;
+	/** Position within the parent. Integers only. */
+	layout?: Layout;
+	/** Appearance intent (renderer override + tokens). */
+	style?: Style;
+	/** Declared read capability — inspectable without running renderers. */
 	source?: Source;
-	/** POSITION within the parent, interpreted by the parent container's type. Integers only. */
-	layout?: unknown;
-	/** APPEARANCE intent the active renderer interprets (color role, variant). Never concrete CSS. */
-	style?: unknown;
 	version: number;
 }
 
-/** Layout blob shapes, keyed by the parent container type that interprets them. */
-export interface GridLayout {
-	x: number;
-	y: number;
-	w: number;
-	h: number;
-}
-
-export interface FreeLayout {
-	x: number;
-	y: number;
-	z?: number;
-	rotation?: number;
-}
-
-/** Ordered containers (columns/rows/flow/document) carry no layout — order comes from `rank`. */
-export type OrderedLayout = undefined;
-
 export const SCHEMA_VERSION = 1;
+
+/** Def NSIDs. The migration uses the generic fallbacks; typed defs (#link, #image, …) are additive. */
+export const CARD_CONTENT = 'app.blento.defs#card';
+export const CONTAINER_CONTENT = 'app.blento.defs#container';
+export const GRID_CELL_LAYOUT = 'app.blento.defs#gridCell';

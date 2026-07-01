@@ -8,17 +8,16 @@
 			"key": "tid",
 			"record": {
 				"type": "object",
-				"required": ["type", "kind", "rank", "page", "version"],
+				"required": ["kind", "rank", "page", "content", "version"],
 				"properties": {
-					"type": { "type": "string" },
 					"kind": { "type": "string", "knownValues": ["document", "container", "leaf"] },
 					"parent": { "type": "string" },
 					"rank": { "type": "string" },
 					"page": { "type": "string" },
-					"data": { "type": "unknown" },
-					"source": { "type": "unknown" },
+					"content": { "type": "unknown" },
 					"layout": { "type": "unknown" },
 					"style": { "type": "unknown" },
+					"source": { "type": "unknown" },
 					"updatedAt": { "type": "string", "format": "datetime" },
 					"version": { "type": "integer" }
 				}
