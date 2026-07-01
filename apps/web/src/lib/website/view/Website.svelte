@@ -22,6 +22,8 @@
 	import { user } from '$lib/atproto';
 	import { env } from '$env/dynamic/public';
 	import { page } from '$app/state';
+	import { dev } from '$app/environment';
+	import DevThemeSwitcher from './DevThemeSwitcher.svelte';
 
 	let { data }: { data: WebsiteData } = $props();
 
@@ -102,4 +104,8 @@
 
 		<MadeWithBlento class="mx-auto block pb-8 text-center @5xl/wrapper:hidden" />
 	</div>
+
+	{#if dev}
+		<DevThemeSwitcher />
+	{/if}
 </ContextProvider>
