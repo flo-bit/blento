@@ -10,7 +10,8 @@ import {
 	type Source,
 	type SourceContext,
 	type CacheAdapter,
-	type ResolveResult
+	type ResolveResult,
+	type ResolvedNode
 } from '@blento/sources';
 import { error } from '@sveltejs/kit';
 import type { ActorIdentifier, Did } from '@atcute/lexicons';
@@ -350,8 +351,9 @@ export async function loadData(
 		: buildGraph(sectionRecords, cards, fullPage, { order: 'input' });
 
 	// Declarative-source path: stamp/keep node.source, then resolve the graph by node id via
-	// @blento/sources. Loaded data travels with the node (result.loaded[nodeId]); its cards skip the
-	// bespoke loadAdditionalData below. Only the source spec is persisted — loaded is runtime-only.
+	// @blento/sources. Loaded data is attached onto the nodes themselves (node.loaded); sourced cards
+	// skip the bespoke loadAdditionalData below. Only the source spec is persisted — loaded is
+	// runtime-only (schema's allowlist serialize drops it).
 	stampNodeSources(graph);
 	const sourcedIds = new Set(graph.filter((n) => n.source).map((n) => n.id));
 	const loadedPromise = loadNodeSources(graph, { did, cache });
@@ -383,11 +385,15 @@ export async function loadData(
 	});
 	// Attach the canonical node graph for downstream consumers: the stored records when present,
 	// else the migrate-on-read graph rebuilt from the post-collision-fix state.
-	result.nodes = nodesFromRecords.length
+	const nodes: ResolvedNode[] = nodesFromRecords.length
 		? nodesFromRecords
 		: buildGraph(result.sections, result.cards, fullPage, { order: 'input' });
+	// Hang the resolved data on each node (keyed by id) — renderers get source + loaded on one node.
+	for (const node of nodes) {
+		if (node.id in loaded) node.loaded = loaded[node.id];
+	}
+	result.nodes = nodes;
 	result.migratedStorage = nodesFromRecords.length > 0;
-	result.loaded = loaded;
 	return result;
 }
 

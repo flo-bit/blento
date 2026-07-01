@@ -1,7 +1,6 @@
 import type { Blob } from '@atcute/lexicons';
 import type { AppBskyActorDefs } from '@atcute/bluesky';
-import type { Node } from '@blento/schema';
-import type { ResolveResult } from '@blento/sources';
+import type { ResolvedNode } from '@blento/sources';
 
 export type Item = {
 	id: string;
@@ -99,18 +98,15 @@ export type WebsiteData = {
 
 	sections: SectionRecord[];
 
-	/** The node graph (migrate-on-read). Source of truth going forward; render still uses cards/sections. */
-	nodes?: Node[];
+	/** The node graph (migrate-on-read). Source of truth going forward; render still uses cards/sections.
+	 * Each node carries its resolved `source` data on `node.loaded` (runtime-only, never persisted). */
+	nodes?: ResolvedNode[];
 
 	/** True when `nodes` came from stored app.blento.node records (page already migrated), vs rebuilt
 	 * on read from legacy card/section. Save uses this to know whether to retire the legacy records. */
 	migratedStorage?: boolean;
 
 	additionalData: Record<string, unknown>;
-
-	/** Resolved `node.source` data, keyed by node id (== card id). Runtime-only, never persisted;
-	 * renderers read their node's loaded data here. See `@blento/sources`. */
-	loaded?: Record<string, ResolveResult | null>;
 
 	updatedAt: number;
 	version?: number;

@@ -24,8 +24,14 @@
 
 	// svelte-ignore state_referenced_locally
 	setAdditionalUserData(data.additionalData);
+	// Loaded data lives on each node (node.loaded); expose an id→loaded lookup for the Item-based
+	// render path.
 	// svelte-ignore state_referenced_locally
-	setLoadedData(data.loaded ?? {});
+	setLoadedData(
+		Object.fromEntries(
+			(data.nodes ?? []).filter((n) => n.loaded != null).map((n) => [n.id, n.loaded!])
+		)
+	);
 
 	setCanEdit(
 		() =>
