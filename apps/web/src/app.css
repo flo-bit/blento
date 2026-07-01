@@ -17,6 +17,11 @@
 	--radius-card: var(--blento-radius-card, 1.5rem);
 }
 
+/* Body font token — defaults to `inherit` (the current stack), overridden per page/theme. */
+body {
+	font-family: var(--blento-font-body, inherit);
+}
+
 @custom-variant dark (&:where(.dark, .dark *):not(:where(.light, .light *)));
 @custom-variant accent (&:where(.accent, .accent *));
 

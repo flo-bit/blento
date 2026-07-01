@@ -14,11 +14,44 @@
 
 	const presets: Preset[] = [
 		{ name: 'Default', accent: 'pink', base: 'stone', tokens: { 'radius-card': '1.5rem' } },
-		{ name: 'Ocean', accent: 'sky', base: 'slate', tokens: { 'radius-card': '0.5rem' } },
-		{ name: 'Sunset', accent: 'orange', base: 'neutral', tokens: { 'radius-card': '2rem' } },
-		{ name: 'Forest', accent: 'emerald', base: 'stone', tokens: { 'radius-card': '1rem' } },
-		{ name: 'Grape', accent: 'violet', base: 'zinc', tokens: { 'radius-card': '0.25rem' } },
-		{ name: 'Rose', accent: 'rose', base: 'gray', tokens: { 'radius-card': '9999px' } }
+		{
+			name: 'Ocean',
+			accent: 'sky',
+			base: 'slate',
+			tokens: { 'radius-card': '0.5rem', 'shadow-card': '0 8px 30px -8px rgb(2 20 40 / 0.25)' }
+		},
+		{
+			name: 'Sunset',
+			accent: 'orange',
+			base: 'neutral',
+			tokens: {
+				'radius-card': '2rem',
+				'shadow-card': '0 10px 40px -12px rgb(120 40 0 / 0.3)',
+				'font-body': "Georgia, 'Times New Roman', serif"
+			}
+		},
+		{
+			name: 'Forest',
+			accent: 'emerald',
+			base: 'stone',
+			tokens: { 'radius-card': '1rem', 'shadow-card': '0 4px 16px -6px rgb(0 40 20 / 0.25)' }
+		},
+		{
+			name: 'Grape',
+			accent: 'violet',
+			base: 'zinc',
+			tokens: {
+				'radius-card': '0.25rem',
+				'shadow-card': '0 2px 0 2px rgb(80 40 120 / 0.2)',
+				'font-body': "ui-monospace, 'SF Mono', 'Cascadia Code', monospace"
+			}
+		},
+		{
+			name: 'Rose',
+			accent: 'rose',
+			base: 'gray',
+			tokens: { 'radius-card': '9999px', 'shadow-card': '0 12px 32px -10px rgb(120 20 60 / 0.3)' }
+		}
 	];
 
 	const allAccent = [
@@ -41,7 +74,7 @@
 		'rose'
 	];
 	const allBase = ['gray', 'stone', 'zinc', 'neutral', 'slate'];
-	const tokenKeys = ['radius-card'];
+	const tokenKeys = ['radius-card', 'shadow-card', 'font-body'];
 
 	let current = $state(-1);
 

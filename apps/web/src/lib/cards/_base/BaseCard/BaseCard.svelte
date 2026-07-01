@@ -39,7 +39,7 @@
 	bind:this={ref}
 	draggable={false}
 	class={[
-		'card group/card selection:bg-accent-600/50 rounded-card @container/card relative isolate z-0 h-full w-full outline-offset-2 transition-[outline] duration-200',
+		'card group/card selection:bg-accent-600/50 rounded-card @container/card relative isolate z-0 h-full w-full [box-shadow:var(--blento-shadow-card,0_0_#0000)] outline-offset-2 transition-[outline] duration-200',
 		isEditing ? 'transition-all' : '',
 		color ? (colors[color] ?? colors.accent) : colors.base,
 		color !== 'accent' && item.color !== 'base' && item.color !== 'transparent' ? color : '',

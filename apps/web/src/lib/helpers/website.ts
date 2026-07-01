@@ -9,7 +9,7 @@ export function getStyleTokens(data: WebsiteData): Record<string, string> {
 	const style = data.publication?.style;
 	if (!style) return {};
 	const out: Record<string, string> = {};
-	for (const group of ['radius', 'space', 'font'] as const) {
+	for (const group of ['radius', 'shadow', 'space', 'font'] as const) {
 		const g = style[group];
 		if (!g) continue;
 		for (const [k, v] of Object.entries(g)) out[`${group}-${k}`] = String(v);
