@@ -1,10 +1,10 @@
 {
   "lexicon": 1,
-  "id": "app.blento.card.listRecords",
+  "id": "app.blento.node.listRecords",
   "defs": {
     "main": {
       "type": "query",
-      "description": "Query app.blento.card records with filters",
+      "description": "Query app.blento.node records with filters",
       "parameters": {
         "type": "params",
         "properties": {
@@ -30,15 +30,15 @@
             "type": "string",
             "description": "Filter by page"
           },
-          "cardType": {
+          "type": {
             "type": "string",
-            "description": "Filter by cardType"
+            "description": "Filter by type"
           },
           "sort": {
             "type": "string",
             "knownValues": [
               "page",
-              "cardType"
+              "type"
             ],
             "description": "Field to sort by (default: time_us)"
           },
@@ -103,7 +103,7 @@
         },
         "value": {
           "type": "ref",
-          "ref": "app.blento.card#main"
+          "ref": "app.blento.node#main"
         },
         "did": {
           "type": "string",
