@@ -94,7 +94,7 @@
 
 	{#if sectionItems.length === 0}
 		<div
-			class="border-base-300/50 dark:border-base-700/50 pointer-events-auto relative flex min-h-32 items-center justify-center rounded-3xl border-2 border-dashed"
+			class="border-base-300/50 dark:border-base-700/50 rounded-card pointer-events-auto relative flex min-h-32 items-center justify-center border-2 border-dashed"
 		>
 			<button
 				type="button"

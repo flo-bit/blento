@@ -23,7 +23,7 @@
 
 {#if enabled && (hovered || isActive)}
 	<div
-		class="pointer-events-none absolute inset-0 z-30 rounded-3xl border-2 border-dashed transition-colors duration-150 {isActive
+		class="rounded-card pointer-events-none absolute inset-0 z-30 border-2 border-dashed transition-colors duration-150 {isActive
 			? 'border-accent-500/50'
 			: 'border-base-400/30 dark:border-base-500/30'}"
 	>

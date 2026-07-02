@@ -54,10 +54,10 @@
 	</div>
 {:else if item}
 	<div
-		class="deco absolute z-0 block w-36 overflow-hidden rounded-3xl @[42rem]/grid:w-40"
+		class="deco rounded-card absolute z-0 block w-36 overflow-hidden @[42rem]/grid:w-40"
 		style="top: {(slot.top ?? 50) + '%'}; {sideStyle}"
 	>
-		<div class="aspect-square w-full overflow-hidden rounded-3xl">
+		<div class="rounded-card aspect-square w-full overflow-hidden">
 			<BaseCard {item}>
 				<Card {item} />
 			</BaseCard>
@@ -66,7 +66,7 @@
 {:else if isEditing}
 	<button
 		type="button"
-		class="deco border-base-400/60 dark:border-base-500/60 hover:border-accent-500 hover:bg-accent-500/10 text-base-500 dark:text-base-400 hover:text-accent-600 dark:hover:text-accent-400 pointer-events-auto absolute z-0 flex aspect-square w-36 cursor-pointer flex-col items-center justify-center gap-1 rounded-3xl border-2 border-dashed bg-white/40 opacity-40 backdrop-blur-sm transition-all duration-150 group-hover/hero:opacity-100 hover:scale-[1.03] hover:opacity-100 @[42rem]/grid:w-40 dark:bg-black/20"
+		class="deco border-base-400/60 dark:border-base-500/60 hover:border-accent-500 hover:bg-accent-500/10 text-base-500 dark:text-base-400 hover:text-accent-600 dark:hover:text-accent-400 rounded-card pointer-events-auto absolute z-0 flex aspect-square w-36 cursor-pointer flex-col items-center justify-center gap-1 border-2 border-dashed bg-white/40 opacity-40 backdrop-blur-sm transition-all duration-150 group-hover/hero:opacity-100 hover:scale-[1.03] hover:opacity-100 @[42rem]/grid:w-40 dark:bg-black/20"
 		style="top: {(slot.top ?? 50) + '%'}; {sideStyle}"
 		{onclick}
 		aria-label="Add card"
