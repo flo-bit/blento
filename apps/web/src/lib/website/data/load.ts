@@ -5,6 +5,14 @@ import type { CacheService } from '$lib/helpers/cache';
 import { createEmptyCard } from '$lib/helpers/items';
 import type { Item, PronounsRecord, SectionRecord, WebsiteData } from '$lib/types';
 import { buildGraph, nodesToItems, recordToNode, type Node, type NodeRecord } from '@blento/schema';
+import {
+	resolveNodes,
+	type Source,
+	type SourceContext,
+	type CacheAdapter,
+	type ResolveResult,
+	type ResolvedNode
+} from '@blento/sources';
 import { error } from '@sveltejs/kit';
 import type { ActorIdentifier, Did } from '@atcute/lexicons';
 
@@ -341,13 +349,25 @@ export async function loadData(
 	const graph = nodesFromRecords.length
 		? nodesFromRecords
 		: buildGraph(sectionRecords, cards, fullPage, { order: 'input' });
+
+	// Declarative-source path: stamp/keep node.source, then resolve the graph by node id via
+	// @blento/sources. Loaded data is attached onto the nodes themselves (node.loaded); sourced cards
+	// skip the bespoke loadAdditionalData below. Only the source spec is persisted — loaded is
+	// runtime-only (schema's allowlist serialize drops it).
+	stampNodeSources(graph);
+	const sourcedIds = new Set(graph.filter((n) => n.source).map((n) => n.id));
+	const loadedPromise = loadNodeSources(graph, { did, cache });
+
 	const migrated = nodesToItems(graph);
 
-	const additionalData = await loadAdditionalData(
-		migrated.cards,
-		{ did, handle, cache, platform },
-		env
-	);
+	const [additionalData, loaded] = await Promise.all([
+		loadAdditionalData(
+			migrated.cards.filter((c) => !sourcedIds.has(c.id)),
+			{ did, handle, cache, platform },
+			env
+		),
+		loadedPromise
+	]);
 
 	const result = checkData({
 		page: fullPage,
@@ -365,9 +385,14 @@ export async function loadData(
 	});
 	// Attach the canonical node graph for downstream consumers: the stored records when present,
 	// else the migrate-on-read graph rebuilt from the post-collision-fix state.
-	result.nodes = nodesFromRecords.length
+	const nodes: ResolvedNode[] = nodesFromRecords.length
 		? nodesFromRecords
 		: buildGraph(result.sections, result.cards, fullPage, { order: 'input' });
+	// Hang the resolved data on each node (keyed by id) — renderers get source + loaded on one node.
+	for (const node of nodes) {
+		if (node.id in loaded) node.loaded = loaded[node.id];
+	}
+	result.nodes = nodes;
 	result.migratedStorage = nodesFromRecords.length > 0;
 	return result;
 }
@@ -605,6 +630,60 @@ function hashCardData(items: Item[]): string {
 		hash = Math.imul(hash, 0x01000193);
 	}
 	return (hash >>> 0).toString(36);
+}
+
+/**
+ * Migrate-on-read map: cardType → the declarative `Source` a legacy card implies. Stored nodes that
+ * already carry `node.source` keep theirs; this only synthesizes a source for not-yet-migrated cards
+ * (same spirit as the rest of buildGraph). `$self` → the page owner did. Extend as cards migrate.
+ */
+const NODE_SOURCES: Record<string, () => Source> = {
+	// Mirrors LatestBlueskyPostCard.loadData: getAuthorFeed(filter: posts_no_replies, limit: 2).
+	latestPost: () => ({
+		$type: 'app.blento.source#atproto',
+		method: 'app.bsky.feed.getAuthorFeed',
+		params: { actor: '$self', filter: 'posts_no_replies', limit: 2 }
+	})
+};
+
+/** Bridge the app's KV-backed CacheService to the package's tiny injectable CacheAdapter. */
+function cacheServiceAdapter(cache: CacheService): CacheAdapter {
+	return {
+		get: (key) => cache.get('card-data', key),
+		set: (key, value, ttl) => cache.put('card-data', key, value, ttl)
+	};
+}
+
+/**
+ * Resolve every node's declarative `source` through `@blento/sources`, keyed by node id. The loaded
+ * data travels WITH the node (attached to `ResolvedNode.loaded`); we return a node-id map for the
+ * current Item-based render path. Only the `source` spec is ever persisted — `loaded` is runtime-only.
+ */
+async function loadNodeSources(
+	nodes: Node[],
+	{ did, cache }: { did: Did; cache?: CacheService }
+): Promise<Record<string, ResolveResult | null>> {
+	const sourced = nodes.filter((n) => n.source);
+	if (!sourced.length) return {};
+
+	const ctx: SourceContext = { self: did };
+	const resolved = await resolveNodes(sourced, ctx, {
+		cache: cache ? cacheServiceAdapter(cache) : undefined
+	});
+
+	const map: Record<string, ResolveResult | null> = {};
+	for (const node of resolved) map[node.id] = node.loaded ?? null;
+	return map;
+}
+
+/** Stamp a synthesized source onto nodes that lack one but whose cardType implies a known read. */
+function stampNodeSources(nodes: Node[]): void {
+	for (const node of nodes) {
+		if (node.source) continue;
+		const cardType = (node.content as { cardType?: string })?.cardType;
+		const build = cardType ? NODE_SOURCES[cardType] : undefined;
+		if (build) node.source = build();
+	}
 }
 
 async function loadAdditionalData(

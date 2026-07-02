@@ -1,0 +1,21 @@
+{
+	"name": "@blento/sources",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"exports": {
+		".": "./src/index.ts"
+	},
+	"scripts": {
+		"check": "tsc --noEmit",
+		"test": "vitest run"
+	},
+	"dependencies": {
+		"@blento/schema": "workspace:*"
+	},
+	"devDependencies": {
+		"tsx": "^4.21.0",
+		"typescript": "^5.9.3",
+		"vitest": "^4.1.4"
+	}
+}
