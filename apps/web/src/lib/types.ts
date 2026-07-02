@@ -1,6 +1,6 @@
 import type { Blob } from '@atcute/lexicons';
 import type { AppBskyActorDefs } from '@atcute/bluesky';
-import type { Node } from '@blento/schema';
+import type { Node, StyleTokens } from '@blento/schema';
 
 export type Item = {
 	id: string;
@@ -91,6 +91,9 @@ export type WebsiteData = {
 			// explicit layout sync mode (overrides editedOn when set)
 			layoutMode?: 'desktop-leads' | 'mobile-leads' | 'independent';
 		};
+
+		/** Semantic design tokens (radius/space/font) applied as --blento-* CSS vars by ThemeScript. */
+		style?: StyleTokens;
 	};
 	profile: AppBskyActorDefs.ProfileViewDetailed;
 	pronouns?: string;

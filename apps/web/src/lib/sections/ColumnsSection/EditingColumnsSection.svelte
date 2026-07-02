@@ -84,7 +84,7 @@
 
 			<button
 				type="button"
-				class="border-base-400/60 dark:border-base-500/60 hover:border-accent-500 hover:bg-accent-500/10 text-base-500 dark:text-base-400 hover:text-accent-600 dark:hover:text-accent-400 flex aspect-square w-40 flex-shrink-0 cursor-pointer flex-col items-center justify-center gap-1 rounded-3xl border-2 border-dashed transition-all duration-150 hover:scale-[1.02] sm:w-48"
+				class="border-base-400/60 dark:border-base-500/60 hover:border-accent-500 hover:bg-accent-500/10 text-base-500 dark:text-base-400 hover:text-accent-600 dark:hover:text-accent-400 rounded-card flex aspect-square w-40 flex-shrink-0 cursor-pointer flex-col items-center justify-center gap-1 border-2 border-dashed transition-all duration-150 hover:scale-[1.02] sm:w-48"
 				onclick={() => onrequestaddcard()}
 				aria-label="Add card"
 			>

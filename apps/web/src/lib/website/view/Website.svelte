@@ -5,7 +5,8 @@
 		getDescription,
 		getHideProfileSection,
 		getProfilePosition,
-		getName
+		getName,
+		getStyleTokens
 	} from '$lib/helpers/website';
 	import { innerWidth } from 'svelte/reactivity/window';
 	import { setDidContext, setHandleContext, setIsMobile } from '../data/context';
@@ -21,6 +22,8 @@
 	import { user } from '$lib/atproto';
 	import { env } from '$env/dynamic/public';
 	import { page } from '$app/state';
+	import { dev } from '$app/environment';
+	import DevThemeSwitcher from './DevThemeSwitcher.svelte';
 
 	let { data }: { data: WebsiteData } = $props();
 
@@ -59,6 +62,7 @@
 	description={getDescription(data)}
 	accentColor={data.publication?.preferences?.accentColor}
 	baseColor={data.publication?.preferences?.baseColor}
+	tokens={getStyleTokens(data)}
 />
 
 <ContextProvider {data}>
@@ -100,4 +104,8 @@
 
 		<MadeWithBlento class="mx-auto block pb-8 text-center @5xl/wrapper:hidden" />
 	</div>
+
+	{#if dev}
+		<DevThemeSwitcher />
+	{/if}
 </ContextProvider>
