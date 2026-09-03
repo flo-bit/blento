@@ -1,10 +1,11 @@
 <script lang="ts">
 	import type { SettingsComponentProps } from '../../types';
 	import { Input } from '@foxui/core';
+	import SourceSettings from '../../_settings/SourceSettings.svelte';
 	import SettingsSection from '../../_settings/SettingsSection.svelte';
 	import SettingsField from '../../_settings/SettingsField.svelte';
 
-	let { item = $bindable() }: SettingsComponentProps = $props();
+	let { item = $bindable(), onclose }: SettingsComponentProps = $props();
 
 	// Ensure defaults
 	item.cardData = item.cardData ?? {};
@@ -14,6 +15,8 @@
 </script>
 
 <div class="flex flex-col gap-6">
+	<SourceSettings bind:item {onclose} />
+
 	<SettingsSection title="Display">
 		<SettingsField label="Title" description="Optional title shown above the feed.">
 			<Input bind:value={item.cardData.title} placeholder="My blog" />
