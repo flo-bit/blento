@@ -183,8 +183,8 @@ importers:
         specifier: ^1.9.4
         version: 1.9.4
       link-preview-js:
-        specifier: ^4.0.0
-        version: 4.0.0
+        specifier: ^4.0.4
+        version: 4.0.4
       lowlight:
         specifier: ^3.3.0
         version: 3.3.0
@@ -2574,8 +2574,8 @@ packages:
   linebreak@1.1.0:
     resolution: {integrity: sha512-MHp03UImeVhB7XZtjd0E4n6+3xr5Dq/9xI/5FptGk5FrbDR3zagPa2DS6U8ks/3HjbKWG9Q1M2ufOzxV2qLYSQ==}
 
-  link-preview-js@4.0.0:
-    resolution: {integrity: sha512-KYYiMVOAguIFNdoVGVjd+6cgknv5XHbr1IuRdj3T5EkN7JNaqUh4a1NSCi5FX6zyZzILI55OQA6+YxBAcPY2wA==}
+  link-preview-js@4.0.4:
+    resolution: {integrity: sha512-hJ2UlkFtwCihTtx8y5zBH6iuMYwz+W5v06GY7owDfFvTdAtMZMBfKzg7TjKegL+ehHw4CDIzZClJNKhwAD6Q0Q==}
     engines: {node: '>=18'}
 
   linkify-it@5.0.0:
@@ -5795,7 +5795,7 @@ snapshots:
       base64-js: 0.0.8
       unicode-trie: 2.0.0
 
-  link-preview-js@4.0.0:
+  link-preview-js@4.0.4:
     dependencies:
       cheerio: 1.0.0-rc.11
 

@@ -108,7 +108,7 @@
 		"gsap": "^3.14.2",
 		"hls.js": "^1.6.15",
 		"leaflet": "^1.9.4",
-		"link-preview-js": "^4.0.0",
+		"link-preview-js": "^4.0.4",
 		"lowlight": "^3.3.0",
 		"maplibre-gl": "^5.20.0",
 		"marked": "^17.0.4",
