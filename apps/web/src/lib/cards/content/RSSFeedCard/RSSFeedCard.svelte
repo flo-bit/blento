@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { getAdditionalUserData, getCanEdit } from '$lib/website/data/context';
 	import type { ContentComponentProps } from '../../types';
 	import DateTime from '../StandardSiteDocumentListCard/DateTime.svelte';
@@ -10,30 +9,35 @@
 	let { item }: ContentComponentProps = $props();
 
 	const data = getAdditionalUserData();
+	// `undefined` => still initializing (show loading); `''` => no feed configured
 	let feedUrl = $state<string | undefined>(undefined);
 	let feed = $state<RssFeedItem[] | undefined>();
 	const canEdit = getCanEdit();
 
-	onMount(async () => {
-		feedUrl = normalizeFeedUrl((item.cardData.href as string | undefined) ?? '') ?? '';
-		// feedUrl === undefined => still initializing (show loading)
-		if (feedUrl === '') return;
+	$effect(() => {
+		const current = normalizeFeedUrl((item.cardData.href as string | undefined) ?? '') ?? '';
+		if (current === feedUrl) return;
+		feedUrl = current;
+		feed = undefined;
+		if (current === '') return;
 
-		const preloaded = (data[item.cardType] as Record<string, RssFeedItem[]> | undefined)?.[feedUrl];
+		const preloaded = (data[item.cardType] as Record<string, RssFeedItem[]> | undefined)?.[current];
 		if (preloaded) {
 			feed = preloaded;
 			return;
 		}
 
-		try {
-			feed = await fetchRssFeed(feedUrl);
-			data[item.cardType] = {
-				...((data[item.cardType] as Record<string, RssFeedItem[]> | undefined) ?? {}),
-				[feedUrl]: feed
-			};
-		} catch {
-			feed = [];
-		}
+		fetchRssFeed(current)
+			.then((items) => {
+				feed = items;
+				data[item.cardType] = {
+					...((data[item.cardType] as Record<string, RssFeedItem[]> | undefined) ?? {}),
+					[current]: items
+				};
+			})
+			.catch(() => {
+				feed = [];
+			});
 	});
 </script>
 
