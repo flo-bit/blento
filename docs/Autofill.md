@@ -12,6 +12,6 @@
   - social.grain.gallery
   - xyz.statusphere.status
   - site.standard.publication
-  - fm.teal.alpha.feed.play
+  - fm.teal.feed.play
   - dev.npmx.feed.like
 - add bluesky profile card
