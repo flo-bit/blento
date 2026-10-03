@@ -57,12 +57,13 @@ export const AppleMusicCardDefinition = {
 // Examples:
 // https://music.apple.com/us/album/midnights/1649434004
 // https://music.apple.com/us/playlist/todays-hits/pl.f4d106fed2bd41149aaacabb233eb5eb
+// https://music.apple.com/us/playlist/my-mix/pl.u-8aAVZkzXsjA2r (user playlist ids contain - and _)
 function matchAppleMusicUrl(
 	url: string | undefined
 ): { type: 'album' | 'playlist'; id: string; storefront: string } | null {
 	if (!url) return null;
 
-	const pattern = /music\.apple\.com\/([a-z]{2})\/(album|playlist)\/[^/]+\/([a-zA-Z0-9.]+)/;
+	const pattern = /music\.apple\.com\/([a-z]{2})\/(album|playlist)\/[^/]+\/([a-zA-Z0-9._-]+)/;
 	const match = url.match(pattern);
 
 	if (match) {

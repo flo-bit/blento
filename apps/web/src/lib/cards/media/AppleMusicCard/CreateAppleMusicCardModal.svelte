@@ -10,7 +10,8 @@
 	function checkUrl() {
 		errorMessage = '';
 
-		const pattern = /music\.apple\.com\/([a-z]{2})\/(album|playlist)\/[^/]+\/([a-zA-Z0-9.]+)/;
+		// user playlist ids contain - and _ (e.g. pl.u-8aAVZkzXsjA2r)
+		const pattern = /music\.apple\.com\/([a-z]{2})\/(album|playlist)\/[^/]+\/([a-zA-Z0-9._-]+)/;
 		const match = item.cardData.href?.match(pattern);
 
 		if (!match) {
