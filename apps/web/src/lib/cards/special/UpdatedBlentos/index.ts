@@ -48,7 +48,11 @@ function extractProfiles(
 			}
 		}
 
-		if (p.collection === 'site.standard.publication' && value) {
+		if (
+			(p.collection === 'app.blento.page' || p.collection === 'site.standard.publication') &&
+			value &&
+			(p.collection === 'app.blento.page' || !existing.hasBlento)
+		) {
 			existing.hasBlento = true;
 			existing.displayName = (value.name as string) ?? existing.displayName;
 			existing.url = value.url as string | undefined;

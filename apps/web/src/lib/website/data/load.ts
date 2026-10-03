@@ -75,7 +75,10 @@ function extractProfileData(
 		if (p.collection === 'app.bsky.actor.profile' && value) {
 			bskyRecord = value;
 		}
-		if (p.collection === 'site.standard.publication' && value) {
+		if (p.collection === 'site.standard.publication' && value && !pubRecord) {
+			pubRecord = value;
+		}
+		if (p.collection === 'app.blento.page' && p.rkey === 'blento.self' && value) {
 			pubRecord = value;
 		}
 		if (p.collection === 'app.nearhorizon.actor.pronouns' && value) {
@@ -227,12 +230,18 @@ function getPronounsFromPDS(did: Did) {
 	}).catch(() => undefined) as Promise<PronounsRecord | undefined>;
 }
 
-function getSelfPublicationFromPDS(did: Did) {
-	return getRecord({
-		did,
-		collection: 'site.standard.publication',
-		rkey: 'blento.self'
-	}).catch(() => undefined);
+async function getSelfPublicationFromPDS(did: Did) {
+	const page = await getRecord({ did, collection: 'app.blento.page', rkey: 'blento.self' }).catch(
+		() => undefined
+	);
+	return (
+		page ??
+		(await getRecord({
+			did,
+			collection: 'site.standard.publication',
+			rkey: 'blento.self'
+		}).catch(() => undefined))
+	);
 }
 
 export async function loadData(
@@ -334,11 +343,9 @@ export async function loadData(
 		pronounsRecord = pronouns;
 	}
 
-	// If no publication found from contrail profiles, check page records
-	if (!publication) {
-		const pubFromPages = pageRecords.find((v) => parseUri(v.uri)?.rkey === 'blento.' + page);
-		publication = pubFromPages?.value as WebsiteData['publication'] | undefined;
-	}
+	// Page records take precedence over the legacy publication profile, including on the home page.
+	const pubFromPages = pageRecords.find((v) => parseUri(v.uri)?.rkey === fullPage);
+	if (pubFromPages?.value) publication = pubFromPages.value as WebsiteData['publication'];
 
 	publication ??= defaultPublication(profile);
 
@@ -472,15 +479,12 @@ export async function loadCardData(
 	const card = migrateCard(structuredClone(cardValue));
 	const page = card.page ?? 'blento.self';
 
-	// For non-self pages, publication comes from app.blento.page (not in contrail profiles).
-	if (!publication || page !== 'blento.self') {
-		const pubRecord = await getRecord({
-			did,
-			collection: page === 'blento.self' ? 'site.standard.publication' : 'app.blento.page',
-			rkey: page
-		}).catch(() => undefined);
-		if (pubRecord?.value) publication = pubRecord.value as WebsiteData['publication'];
-	}
+	// Page metadata lives in app.blento.page; retain a fallback for old home pages.
+	const pubRecord =
+		page === 'blento.self'
+			? await getSelfPublicationFromPDS(did)
+			: await getRecord({ did, collection: 'app.blento.page', rkey: page }).catch(() => undefined);
+	if (pubRecord?.value) publication = pubRecord.value as WebsiteData['publication'];
 
 	const cards = [card];
 	const resolvedHandle = profile?.handle || (isHandle(handle) ? handle : did);

@@ -10,9 +10,16 @@ export async function load({ params, platform, request }) {
 	try {
 		const publication = await getRecord({
 			did: did as Did,
-			collection: 'site.standard.publication',
+			collection: 'app.blento.page',
 			rkey: 'blento.self'
-		});
+		}).catch(() =>
+			// Home pages that have not been re-saved still use the legacy collection.
+			getRecord({
+				did: did as Did,
+				collection: 'site.standard.publication',
+				rkey: 'blento.self'
+			})
+		);
 
 		const preferences = publication?.value?.preferences as
 			| { accentColor?: string; baseColor?: string }

@@ -48,7 +48,8 @@ export const putRecord = command(
 				status: response.status,
 				data: response.data
 			});
-			error(500, 'Failed to put record');
+			const message = (response.data as { message?: string } | undefined)?.message;
+			error(response.status >= 400 ? response.status : 500, message || 'Failed to put record');
 		}
 
 		// Immediately index in contrail

@@ -553,7 +553,7 @@
 	</button>
 {/if}
 
-<SettingsOverlay bind:data publicationUrl={data.publication?.url} />
+<SettingsOverlay bind:data />
 
 <ContextProvider {data} isEditing={true}>
 	<ImageViewerProvider />

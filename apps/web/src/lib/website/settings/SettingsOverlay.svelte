@@ -15,8 +15,7 @@
 	import AccountSection from './sections/AccountSection.svelte';
 	import AnalyticsSection from './sections/AnalyticsSection.svelte';
 
-	let { data = $bindable(), publicationUrl }: { data: WebsiteData; publicationUrl?: string } =
-		$props();
+	let { data = $bindable() }: { data: WebsiteData } = $props();
 
 	$effect(() => {
 		if (settingsOverlayState.visible) {
@@ -85,7 +84,7 @@
 				{:else if settingsOverlayState.activeSection === 'layout'}
 					<LayoutSection bind:data />
 				{:else if settingsOverlayState.activeSection === 'domain'}
-					<CustomDomainSection {publicationUrl} />
+					<CustomDomainSection bind:data />
 				{:else if settingsOverlayState.activeSection === 'analytics'}
 					<AnalyticsSection />
 				{:else if settingsOverlayState.activeSection === 'account'}
