@@ -137,20 +137,11 @@
 					publicationCopy.url += '/' + targetPage.replace('blento.', '');
 				}
 
-				// Save to appropriate collection based on destination page type
-				if (targetPage === 'blento.self') {
-					await putRecord({
-						collection: 'site.standard.publication',
-						rkey: targetPage,
-						record: publicationCopy
-					});
-				} else {
-					await putRecord({
-						collection: 'app.blento.page',
-						rkey: targetPage,
-						record: publicationCopy
-					});
-				}
+				await putRecord({
+					collection: 'app.blento.page',
+					rkey: targetPage,
+					record: publicationCopy
+				});
 			}
 
 			success = true;

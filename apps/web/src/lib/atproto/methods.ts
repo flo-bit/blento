@@ -103,13 +103,22 @@ export async function getBlentoOrBskyProfile(data: { did: Did; client?: Client }
 	let blentoProfile;
 	try {
 		blentoProfile = await getRecord({
-			collection: 'site.standard.publication',
-			did: data?.did,
+			collection: 'app.blento.page',
+			did: data.did,
 			rkey: 'blento.self',
-			client: data?.client
+			client: data.client
 		});
 	} catch {
-		// User doesn't have a blento publication — expected for most users
+		try {
+			blentoProfile = await getRecord({
+				collection: 'site.standard.publication',
+				did: data.did,
+				rkey: 'blento.self',
+				client: data.client
+			});
+		} catch {
+			// No Blento page yet.
+		}
 	}
 
 	let response;

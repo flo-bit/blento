@@ -1,48 +1,116 @@
 <script lang="ts">
-	import { putRecord, getRecord } from '$lib/atproto/methods';
+	import { getClient, putRecord } from '$lib/atproto/methods';
 	import { user } from '$lib/atproto';
+	import type { WebsiteData } from '$lib/types';
 	import { Button, Input } from '@foxui/core';
 	import { launchConfetti } from '@foxui/visual';
+	import { untrack } from 'svelte';
 	import { settingsOverlayState } from '../SettingsOverlay.svelte';
 
-	let { publicationUrl }: { publicationUrl?: string } = $props();
+	let { data = $bindable() }: { data: WebsiteData } = $props();
 
-	let currentDomain = $derived(
-		publicationUrl?.startsWith('https://') && !publicationUrl.includes('blento.app')
-			? publicationUrl.replace('https://', '')
-			: ''
-	);
+	// The domain always belongs to the home page, even when this is opened from a sub-page editor.
+	let homeUrl: string | undefined = $state();
+	let currentDomain = $derived(domainOf(homeUrl));
+	// The domain bound when the section was opened, released once it is replaced.
+	let previousDomain = '';
 
-	let step: 'current' | 'input' | 'instructions' | 'verifying' | 'removing' | 'success' | 'error' =
-		$state('input');
+	let step:
+		| 'loading'
+		| 'current'
+		| 'input'
+		| 'instructions'
+		| 'verifying'
+		| 'removing'
+		| 'success'
+		| 'error' = $state('input');
 	let rawDomain = $state('');
 	let domain = $derived(rawDomain.replace(/^https?:\/\//, '').replace(/\/+$/, ''));
 	let errorMessage = $state('');
 	let errorHint = $state('');
+	let failedAction: 'load' | 'verify' | 'remove' = $state('verify');
 
 	$effect(() => {
 		if (settingsOverlayState.visible && settingsOverlayState.activeSection === 'domain') {
-			step = currentDomain ? 'current' : 'input';
+			untrack(loadCurrentDomain);
 		}
 	});
 
+	function domainOf(url: string | undefined) {
+		try {
+			const { protocol, hostname } = new URL(url ?? '');
+			return protocol === 'https:' && hostname !== 'blento.app' ? hostname : '';
+		} catch {
+			return '';
+		}
+	}
+
+	async function loadCurrentDomain() {
+		if (data.page === 'blento.self') {
+			homeUrl = data.publication?.url;
+		} else {
+			failedAction = 'load';
+			step = 'loading';
+			try {
+				homeUrl = (await getHomePageRecord()).url as string | undefined;
+			} catch (err: unknown) {
+				errorMessage = err instanceof Error ? err.message : String(err);
+				errorHint = '';
+				step = 'error';
+				return;
+			}
+		}
+		previousDomain = currentDomain;
+		step = currentDomain ? 'current' : 'input';
+	}
+
+	// Read the stored home record rather than the editor state, so unsaved edits (and un-uploaded
+	// icons) are not written along with the url. Home pages not re-saved since the move to
+	// app.blento.page still only have the legacy record.
+	async function getHomePageRecord(): Promise<Record<string, unknown>> {
+		const did = user.did!;
+		const client = await getClient({ did });
+		for (const collection of ['app.blento.page', 'site.standard.publication'] as const) {
+			const res = await client.get('com.atproto.repo.getRecord', {
+				params: { repo: did, collection, rkey: 'blento.self' }
+			});
+			if (res.ok) return { ...(res.data.value as Record<string, unknown>) };
+			// Only a missing record means "try the next one": on any other failure, writing
+			// { url } on top of an empty record would wipe the home page's metadata.
+			if (res.data.error !== 'RecordNotFound') {
+				throw new Error(res.data.message ?? 'Failed to load your home page record.');
+			}
+		}
+		return {};
+	}
+
+	async function setHomeUrl(url: string) {
+		const record = await getHomePageRecord();
+		await putRecord({
+			collection: 'app.blento.page',
+			rkey: 'blento.self',
+			record: { ...record, url }
+		});
+		homeUrl = url;
+		if (data.page === 'blento.self' && data.publication) data.publication.url = url;
+	}
+
+	async function unbindDomain(domain: string) {
+		const res = await fetch('/api/activate-domain', {
+			method: 'DELETE',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ domain })
+		});
+		if (!res.ok) throw new Error((await res.json()).error || 'Failed to remove domain');
+	}
+
 	async function removeDomain() {
+		failedAction = 'remove';
 		step = 'removing';
 		try {
-			const existing = await getRecord({
-				collection: 'site.standard.publication',
-				rkey: 'blento.self'
-			});
-
-			if (existing?.value) {
-				const { url: _url, ...rest } = existing.value as Record<string, unknown>;
-				await putRecord({
-					collection: 'site.standard.publication',
-					rkey: 'blento.self',
-					record: rest
-				});
-			}
-
+			await unbindDomain(currentDomain);
+			await setHomeUrl(`https://blento.app/${data.handle}`);
+			previousDomain = '';
 			step = 'input';
 		} catch (err: unknown) {
 			errorMessage = err instanceof Error ? err.message : String(err);
@@ -56,6 +124,7 @@
 	}
 
 	async function verify() {
+		failedAction = 'verify';
 		step = 'verifying';
 		try {
 			const dnsRes = await fetch('/api/verify-domain', {
@@ -73,19 +142,7 @@
 				return;
 			}
 
-			const existing = await getRecord({
-				collection: 'site.standard.publication',
-				rkey: 'blento.self'
-			});
-
-			await putRecord({
-				collection: 'site.standard.publication',
-				rkey: 'blento.self',
-				record: {
-					...(existing?.value || {}),
-					url: 'https://' + domain
-				}
-			});
+			await setHomeUrl('https://' + domain);
 
 			const activateRes = await fetch('/api/activate-domain', {
 				method: 'POST',
@@ -101,6 +158,12 @@
 				step = 'error';
 				return;
 			}
+
+			// Changing domains: release the old one so it stops serving this site.
+			if (previousDomain && previousDomain !== domain.toLowerCase()) {
+				await unbindDomain(previousDomain).catch(() => {});
+			}
+			previousDomain = domain.toLowerCase();
 
 			launchConfetti();
 			step = 'success';
@@ -201,6 +264,26 @@
 		</svg>
 		<span class="text-base-600 dark:text-base-400 text-sm">Verifying...</span>
 	</div>
+{:else if step === 'loading'}
+	<h3 class="text-base-900 dark:text-base-100 text-lg font-semibold">Custom Domain</h3>
+
+	<div class="mt-4 flex items-center gap-2">
+		<svg
+			class="text-base-500 size-5 animate-spin"
+			xmlns="http://www.w3.org/2000/svg"
+			fill="none"
+			viewBox="0 0 24 24"
+		>
+			<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"
+			></circle>
+			<path
+				class="opacity-75"
+				fill="currentColor"
+				d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+			></path>
+		</svg>
+		<span class="text-base-600 dark:text-base-400 text-sm">Loading...</span>
+	</div>
 {:else if step === 'removing'}
 	<h3 class="text-base-900 dark:text-base-100 text-lg font-semibold">Removing...</h3>
 
@@ -245,6 +328,12 @@
 
 	<div class="mt-4 flex gap-2">
 		<Button variant="ghost" onclick={() => settingsOverlayState.hide()}>Close</Button>
-		<Button onclick={verify}>Retry</Button>
+		<Button
+			onclick={failedAction === 'load'
+				? loadCurrentDomain
+				: failedAction === 'remove'
+					? removeDomain
+					: verify}>Retry</Button
+		>
 	</div>
 {/if}

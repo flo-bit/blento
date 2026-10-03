@@ -106,14 +106,13 @@ export async function savePage(
 		data.publication.preferences.hideProfileSection = data.publication?.preferences?.hideProfile;
 	}
 
-	// With nodes on, the root record moves to app.blento.page for all pages and the legacy
-	// site.standard.publication store is retired on first migration. Legacy path keeps v1's split
-	// (app.blento.page for sub-pages, site.standard.publication for the main page).
-	const needsRootMigration = useNodes && data.page === 'blento.self' && !data.migratedStorage;
+	// The home page belongs in app.blento.page, too. site.standard.publication requires a
+	// TID rkey, so blento.self cannot be written there (even when using legacy cards/sections).
+	// Always write the page record on save to migrate older home pages as well.
 	if (
 		!originalPublication ||
 		originalPublication !== JSON.stringify(data.publication) ||
-		needsRootMigration
+		data.page === 'blento.self'
 	) {
 		data.publication ??= {
 			name: getName(data),
@@ -131,22 +130,22 @@ export async function savePage(
 			}
 		}
 
-		if (useNodes || data.page !== 'blento.self') {
+		const pagePut = putRecord({
+			collection: 'app.blento.page',
+			rkey: data.page,
+			record: data.publication
+		});
+		promises.push(pagePut);
+
+		// Retire the legacy home record once its replacement is written. Only Blento's own
+		// blento.self rkey: other apps keep their site.standard.publication records.
+		if (data.page === 'blento.self') {
 			promises.push(
-				putRecord({ collection: 'app.blento.page', rkey: data.page, record: data.publication })
-			);
-		} else {
-			promises.push(
-				putRecord({
-					collection: 'site.standard.publication',
-					rkey: data.page,
-					record: data.publication
-				})
-			);
-		}
-		if (needsRootMigration) {
-			promises.push(
-				deleteRecord({ collection: 'site.standard.publication', rkey: data.page }).catch(() => {})
+				pagePut.then(() =>
+					deleteRecord({ collection: 'site.standard.publication', rkey: 'blento.self' }).catch(
+						() => {}
+					)
+				)
 			);
 		}
 

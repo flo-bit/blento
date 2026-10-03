@@ -6,6 +6,38 @@ import type { Did } from '@atcute/lexicons';
 
 const EXPECTED_TARGET = 'blento-proxy.fly.dev';
 
+export async function DELETE({ request, platform, locals }) {
+	if (!locals.did) return json({ error: 'Not authenticated' }, { status: 401 });
+
+	let domain: string;
+	try {
+		({ domain } = await request.json());
+	} catch {
+		return json({ error: 'Invalid JSON body' }, { status: 400 });
+	}
+	if (
+		!domain ||
+		!/^[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?)+$/.test(
+			domain
+		)
+	) {
+		return json({ error: 'Invalid domain format' }, { status: 400 });
+	}
+	const kv = platform?.env?.CUSTOM_DOMAINS;
+	if (!kv) return json({ error: 'KV storage not available.' }, { status: 500 });
+
+	const key = domain.toLowerCase();
+	try {
+		// Idempotent: a domain not bound to this account (never activated, or activation failed
+		// because another account holds it) counts as removed, so the user can clear their url.
+		const owner = await kv.get(key);
+		if (owner === locals.did) await kv.delete(key);
+		return json({ success: true });
+	} catch {
+		return json({ error: 'Failed to remove domain.' }, { status: 500 });
+	}
+}
+
 export async function POST({ request, platform, locals }) {
 	if (!locals.did) {
 		return json({ error: 'Not authenticated' }, { status: 401 });
@@ -42,11 +74,11 @@ export async function POST({ request, platform, locals }) {
 
 	const normalizedDomain = domain.toLowerCase();
 
-	// Verify the user's ATProto profile has this domain set
+	// Verify the user's Blento home page has this domain set
 	try {
 		const record = await getRecord({
 			did: did as Did,
-			collection: 'site.standard.publication',
+			collection: 'app.blento.page',
 			rkey: 'blento.self'
 		});
 
