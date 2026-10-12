@@ -14,7 +14,7 @@ export const TealFMPlaysCardDefinition = {
 	loadData: async (items, { did }) => {
 		const data = await listRecords({
 			did,
-			collection: 'fm.teal.alpha.feed.play',
+			collection: 'fm.teal.feed.play',
 			limit: 99
 		});
 
@@ -23,7 +23,7 @@ export const TealFMPlaysCardDefinition = {
 	cacheLoadData: true,
 	minW: 4,
 	canHaveLabel: true,
-	canAdd: ({ collections }) => collections.includes('fm.teal.alpha.feed.play'),
+	canAdd: ({ collections }) => collections.includes('fm.teal.feed.play'),
 
 	keywords: ['music', 'scrobble', 'listening', 'songs'],
 	name: 'Teal.fm Plays',
