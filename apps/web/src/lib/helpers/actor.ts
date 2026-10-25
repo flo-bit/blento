@@ -1,9 +1,32 @@
-import type { ActorIdentifier, Did } from '@atcute/lexicons';
+import type { ActorIdentifier, Did, Handle } from '@atcute/lexicons';
+import { DidNotFoundError } from '@atcute/identity-resolver';
+import { SingleFlight } from './single-flight';
 import type { CacheService } from './cache';
 import { env as publicEnv } from '$env/dynamic/public';
 import { resolveHandle } from '../atproto';
 import { isHandle } from '@atcute/lexicons/syntax';
 import { isDidBlocked } from './moderation';
+
+const handles = new Map<string, { did: Did | undefined; expires: number }>();
+const handleFlight = new SingleFlight();
+
+async function resolveCachedHandle(handle: Handle): Promise<Did | undefined> {
+	const key = handle.toLowerCase();
+	const cached = handles.get(key);
+	if (cached && cached.expires > Date.now()) return cached.did;
+	return handleFlight.run(key, async () => {
+		let did: Did | undefined;
+		try {
+			did = await resolveHandle({ handle });
+		} catch (err) {
+			// Do not turn transient upstream failures into cached "not found" results.
+			if (!(err instanceof DidNotFoundError)) throw err;
+		}
+		if (handles.size >= 512) handles.delete(handles.keys().next().value!);
+		handles.set(key, { did, expires: Date.now() + (did ? 300_000 : 60_000) });
+		return did;
+	});
+}
 
 export async function getActor({
 	request,
@@ -37,7 +60,7 @@ export async function getActor({
 		actor = undefined;
 	}
 
-	const did = isHandle(actor) ? await resolveHandle({ handle: actor }) : actor;
+	const did = isHandle(actor) ? await resolveCachedHandle(actor) : actor;
 
 	return isDidBlocked(did) ? undefined : did;
 }

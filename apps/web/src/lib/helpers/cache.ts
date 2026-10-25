@@ -1,6 +1,10 @@
 import type { Did } from '@atcute/lexicons';
 import type { KVNamespace } from '@cloudflare/workers-types';
 import { getBlentoOrBskyProfile } from '$lib/atproto/methods';
+import { SingleFlight } from './single-flight';
+
+// CacheService instances are request-local; coalescing must be shared per KV binding.
+const flights = new WeakMap<KVNamespace, SingleFlight>();
 
 /** TTL in seconds for each cache namespace */
 const NAMESPACE_TTL = {
@@ -24,7 +28,16 @@ const NAMESPACE_TTL = {
 export type CacheNamespace = keyof typeof NAMESPACE_TTL;
 
 export class CacheService {
-	constructor(private kv: KVNamespace) {}
+	private flight: SingleFlight;
+
+	constructor(private kv: KVNamespace) {
+		let flight = flights.get(kv);
+		if (!flight) {
+			flight = new SingleFlight();
+			flights.set(kv, flight);
+		}
+		this.flight = flight;
+	}
 
 	// === Generic namespaced operations ===
 
@@ -114,32 +127,24 @@ export class CacheService {
 		const now = Date.now();
 		const entry = await this.getJSON<SwrEntry<T>>(namespace, key);
 
-		const refresh = async (): Promise<T> => {
-			const value = await loader();
-			const entry: SwrEntry<T> = { staleAt: Date.now() + ttl * 1000, value };
-			await this.putJSON(namespace, key, entry, ttl + staleWindow);
-			return value;
-		};
+		const refresh = () =>
+			this.flight.run(`${namespace}:${key}`, async (): Promise<T> => {
+				// A different request may have populated KV while this request was reading.
+				const latest = await this.getJSON<SwrEntry<T>>(namespace, key);
+				if (latest && latest.staleAt > Date.now()) return latest.value;
+				const value = await loader();
+				const updated: SwrEntry<T> = { staleAt: Date.now() + ttl * 1000, value };
+				await this.putJSON(namespace, key, updated, ttl + staleWindow);
+				return value;
+			});
 
 		if (entry) {
 			if (entry.staleAt > now) return entry.value;
-			const staleFor = Math.round((now - entry.staleAt) / 1000);
-			console.log(`[swr] background refresh ${namespace}:${key} (stale ${staleFor}s)`);
-			const started = Date.now();
-			waitUntil(
-				refresh().then(
-					() => console.log(`[swr] refreshed ${namespace}:${key} in ${Date.now() - started}ms`),
-					(err) =>
-						console.error(
-							`[swr] refresh failed ${namespace}:${key} after ${Date.now() - started}ms`,
-							err
-						)
-				)
-			);
+			waitUntil(refresh().catch((err) => console.error(`[swr] refresh failed ${namespace}`, err)));
 			return entry.value;
 		}
 
-		return await refresh();
+		return refresh();
 	}
 
 	// === Profile cache (did → profile data) ===

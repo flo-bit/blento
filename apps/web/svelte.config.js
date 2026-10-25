@@ -1,5 +1,8 @@
 import adapter from '@sveltejs/adapter-cloudflare';
 import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
+import { disableAdapterCache } from './scripts/disable-adapter-cache.mjs';
+
+const cloudflare = adapter();
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
@@ -8,7 +11,13 @@ const config = {
 	preprocess: vitePreprocess(),
 
 	kit: {
-		adapter: adapter(),
+		adapter: {
+			...cloudflare,
+			async adapt(builder) {
+				await cloudflare.adapt(builder);
+				await disableAdapterCache('.svelte-kit/cloudflare/_worker.js');
+			}
+		},
 		paths: {
 			base: ''
 		},

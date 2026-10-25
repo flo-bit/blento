@@ -5,11 +5,11 @@ import svelte from 'eslint-plugin-svelte';
 import globals from 'globals';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript-eslint';
-const gitignorePath = fileURLToPath(new URL('./.gitignore', import.meta.url));
+const gitignorePath = fileURLToPath(new URL('../../.gitignore', import.meta.url));
 
 export default [
 	includeIgnoreFile(gitignorePath),
-	{ ignores: ['src/lexicon-types/**', 'lexicons-generated/**'] },
+	{ ignores: ['src/lexicon-types/**', 'lexicons/generated/**', '.svelte-kit/**'] },
 	js.configs.recommended,
 	...ts.configs.recommended,
 	...svelte.configs['flat/recommended'],
