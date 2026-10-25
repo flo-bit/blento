@@ -45,6 +45,7 @@ describe('savePage metadata', () => {
 		expect(putRecord).not.toHaveBeenCalledWith(
 			expect.objectContaining({ collection: 'site.standard.publication' })
 		);
+		expect(fetch).toHaveBeenCalledWith('/did:plc:example/og-new.png', { method: 'POST' });
 	});
 
 	it('deletes only the legacy blento.self publication record after writing the home page', async () => {
@@ -72,6 +73,7 @@ describe('savePage metadata', () => {
 		const data = page('blento.about');
 		await savePage(data, [], [], '');
 		expect(deleteRecord).not.toHaveBeenCalled();
+		expect(fetch).not.toHaveBeenCalled();
 	});
 
 	it('writes changed sub-page metadata to app.blento.page', async () => {

@@ -5,16 +5,26 @@
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
 	"name": "blento",
+	"account_id": "242f122ad08028a25d5429e2b81dbe18",
 	"main": ".svelte-kit/cloudflare/_worker.js",
 	"compatibility_date": "2025-12-25",
 	"compatibility_flags": ["nodejs_als", "nodejs_compat"],
+	"workers_dev": false,
+	"preview_urls": false,
+	"limits": { "cpu_ms": 5000 },
+	"version_metadata": { "binding": "WORKER_VERSION" },
 	"assets": {
 		"binding": "ASSETS",
-		"directory": ".svelte-kit/cloudflare"
+		"directory": ".svelte-kit/cloudflare",
+		"run_worker_first": false
 	},
 	"observability": {
-		"enabled": true
+		"enabled": true,
+		"head_sampling_rate": 0.1,
+		"logs": { "enabled": true, "head_sampling_rate": 0.1, "invocation_logs": true },
+		"traces": { "enabled": false }
 	},
+	"r2_buckets": [{ "binding": "OG_IMAGES", "bucket_name": "blento-og-images" }],
 	/**
 	 * Smart Placement
 	 * https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement

@@ -176,7 +176,9 @@ export async function savePage(
 
 	await Promise.all(promises);
 
-	// Invalidate cached OG image so the next scrape regenerates it.
-	// Fire-and-forget; server checks auth against the signed-cookie session.
-	fetch(`/${data.did}/og-new.png`, { method: 'DELETE' }).catch(() => {});
+	// Only the owner can request bounded regeneration. Anonymous scrapes never generate images.
+	// Preserve the previous preview when the budget is exhausted or rendering is unavailable.
+	if (data.page === 'blento.self') {
+		fetch(`/${data.did}/og-new.png`, { method: 'POST' }).catch(() => {});
+	}
 }

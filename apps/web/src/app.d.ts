@@ -3,7 +3,8 @@ import type {
 	D1Database,
 	ExecutionContext,
 	CacheStorage,
-	AnalyticsEngineDataset
+	AnalyticsEngineDataset,
+	R2Bucket
 } from '@cloudflare/workers-types';
 import type { OAuthSession } from '@atcute/oauth-node-client';
 import type { Client } from '@atcute/client';
@@ -24,6 +25,8 @@ declare global {
 		interface Platform {
 			env: {
 				USER_DATA_CACHE: KVNamespace;
+				OG_IMAGES?: R2Bucket;
+				WORKER_VERSION?: { id: string };
 				CUSTOM_DOMAINS: KVNamespace;
 				OAUTH_SESSIONS: KVNamespace;
 				OAUTH_STATES: KVNamespace;
