@@ -72,6 +72,7 @@
 		"@blento/schema": "workspace:*",
 		"@blento/sources": "workspace:*",
 		"@cloudflare/workers-types": "^4.20260313.1",
+		"@dasl/tile-loader": "^3.2.0",
 		"@ethercorps/sveltekit-og": "^4.2.1",
 		"@floating-ui/dom": "^1.7.6",
 		"@foxui/3d": "^0.8.5",

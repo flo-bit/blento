@@ -75,6 +75,7 @@ import { SecretImageCardDefinition } from './media/SecretImageCard';
 import { RPGActorCardDefinition } from './social/RPGActorCard';
 import { ButtondownCardDefinition } from './social/ButtondownCard';
 import { BufoStatusCardDefinition } from './social/BufoStatusCard';
+import { AtmochiCardDefinition } from './games/AtmochiCard';
 import { VideoCardDefinition } from './media/VideoCard';
 import { SkyboardCardDefinition } from './social/SkyboardCard';
 import { RoomyChatCardDefinition } from './social/RoomyChatCard';
@@ -159,7 +160,8 @@ export const AllCardDefinitions = [
 	ButtondownCardDefinition,
 	BufoStatusCardDefinition,
 	SkyboardCardDefinition,
-	RoomyChatCardDefinition
+	RoomyChatCardDefinition,
+	AtmochiCardDefinition
 ] as const;
 
 export const CardDefinitionsByType = AllCardDefinitions.reduce(
